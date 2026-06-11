@@ -776,15 +776,18 @@ function showQuestion() {
   document.getElementById('answeredDisplay').textContent = answered;
 
   // Auto-read question if voice is on → 読み上げ完了後に自動マイクON
+  // iOSは cancel() 直後の speak() を無視するため 350ms 待つ
   if (voiceEnabled) {
     document.getElementById('btnSpeakQ').classList.add('speaking');
-    speak(qa.q, () => {
-      document.getElementById('btnSpeakQ').classList.remove('speaking');
-      // ハンズフリーモードONなら自動でマイク開始
-      if (handsFreeMode && recognition) {
-        setTimeout(() => startMic(), 400);
-      }
-    });
+    setTimeout(() => {
+      speak(qa.q, () => {
+        document.getElementById('btnSpeakQ').classList.remove('speaking');
+        // ハンズフリーモードONなら自動でマイク開始
+        if (handsFreeMode && recognition) {
+          setTimeout(() => startMic(), 400);
+        }
+      });
+    }, 350);
   } else if (handsFreeMode && recognition) {
     // 音声OFFでもハンズフリーならマイクON
     setTimeout(() => startMic(), 400);

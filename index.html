@@ -957,8 +957,7 @@ function startExam() {
     // カテゴリ絞り込みがある場合はその中のチェック問題、なければ全チェック問題
     pool = checkedIndices.filter(i => pool.includes(i));
     if (pool.length === 0) {
-      alert('チェックした問題がありません。
-問題画面の ☆ ボタンでチェックできます。');
+      alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
       return;
     }
   } else if (mode === 'wrong') {

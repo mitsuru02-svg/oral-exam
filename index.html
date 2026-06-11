@@ -44,6 +44,7 @@ body {
   display: flex; align-items: center; line-height: 1;
 }
 .voice-toggle.on { background: #0d2044; border-color: #3b82f6; color: #93c5fd; }
+.voice-toggle.hf-on { background: #0a2e1a; border-color: #1a7f37; color: #3fb950; }
 
 .container { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
 
@@ -226,7 +227,7 @@ body {
   <div class="header-right">
     <div class="header-btns">
       <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊</button>
-      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚</button>
+      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚 HF</button>
       <div class="header-badge">181問</div>
     </div>
     <div id="networkBadge">確認中...</div>
@@ -361,8 +362,8 @@ function toggleHandsFree() {
   handsFreeMode = !handsFreeMode;
   const btn = document.getElementById('handsFreeBtn');
   if (handsFreeMode) {
-    btn.textContent = '🤚'; btn.title = 'ハンズフリーON';
-    btn.classList.add('on');
+    btn.textContent = '🤚 ON'; btn.title = 'ハンズフリーON';
+    btn.classList.remove('on'); btn.classList.add('hf-on');
     document.getElementById('micHint').textContent = '🟢 ハンズフリー: 問題後に自動録音、「採点して」で採点、「次へ」で次の問題';
   } else {
     btn.textContent = '🤚'; btn.title = 'ハンズフリーOFF';

@@ -307,6 +307,15 @@ body {
           </div>
         </div>
       </div>
+      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
+        <div class="mode-inner">
+          <div class="mode-icon">⭐</div>
+          <div class="mode-text">
+            <div class="mode-name">チェック</div>
+            <div class="mode-desc" id="checkedModeDesc">チェック問題</div>
+          </div>
+        </div>
+      </div>
       <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
         <div class="mode-inner">
           <div class="mode-icon">📋</div>
@@ -939,7 +948,10 @@ function confirmAbort() {
 function startExam() {
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
-  if (mode === 'wrong') {
+  if (mode === 'checked') {
+    pool = checkedIndices.filter(i => pool.includes(i));
+    if (pool.length === 0) { alert('チェックした問題がありません。'); return; }
+  } else if (mode === 'wrong') {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
     if (wrongInCat.length > 0) pool = wrongInCat;
     else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }

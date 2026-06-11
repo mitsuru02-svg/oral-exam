@@ -226,6 +226,7 @@ body {
     <div style="display:flex;gap:6px;align-items:center">
       <div class="header-badge">181問</div>
       <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊 音声ON</button>
+      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚 HF OFF</button>
       <button class="voice-toggle" onclick="alert('全音声:\n'+speechSynthesis.getVoices().filter(v=>v.lang.startsWith('ja')).map(v=>v.name).join('\n'))" style="font-size:10px">🎤 声確認</button>
     </div>
     <div id="networkBadge">確認中...</div>
@@ -353,6 +354,23 @@ body {
 <script src="./qa_data.js"></script>
 <script>
 'use strict';
+
+// ── ハンズフリーモード ────────────────────────────────────────
+let handsFreeMode = false;
+function toggleHandsFree() {
+  handsFreeMode = !handsFreeMode;
+  const btn = document.getElementById('handsFreeBtn');
+  if (handsFreeMode) {
+    btn.textContent = '🤚 HF ON';
+    btn.classList.add('on');
+    document.getElementById('micHint').textContent = '🟢 ハンズフリー: 問題後に自動録音、「採点して」で採点、「次へ」で次の問題';
+  } else {
+    btn.textContent = '🤚 HF OFF';
+    btn.classList.remove('on');
+    document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
+    stopMic();
+  }
+}
 
 // ── 設定 ────────────────────────────────────────────────────
 // Cloudflare WorkerのURLをデプロイ後にここへ貼る
@@ -631,7 +649,32 @@ function initRecognition() {
         interim = e.results[i][0].transcript;
       }
     }
-    document.getElementById('userAnswer').value = accumulatedText + interim;
+
+    const fullText = accumulatedText + interim;
+
+    // ── 音声コマンド検出 ──────────────────────────────────────
+    // 「採点して」「採点」→ 採点実行
+    if (/採点(して)?/.test(fullText)) {
+      accumulatedText = fullText.replace(/採点(して)?/g, '').trim();
+      document.getElementById('userAnswer').value = accumulatedText;
+      stopMic();
+      setTimeout(() => submitAnswer(), 300);
+      return;
+    }
+    // 「次」「次へ」「Next」「ネクスト」→ 次の問題へ
+    if (/^(次(の問題)?(へ)?|[Nn]ext|ネクスト)$/.test(fullText.trim())) {
+      accumulatedText = '';
+      document.getElementById('userAnswer').value = '';
+      stopMic();
+      const nextBtn = document.querySelector('#nextRow .btn-primary');
+      if (nextBtn && !document.getElementById('nextRow').classList.contains('hidden')) {
+        setTimeout(() => nextQuestion(), 300);
+      }
+      return;
+    }
+    // ────────────────────────────────────────────────────────
+
+    document.getElementById('userAnswer').value = fullText;
   };
 
   recognition.onend = () => {
@@ -659,7 +702,7 @@ function startMic() {
   accumulatedText = document.getElementById('userAnswer').value;
   isRecording = true;
   document.getElementById('micBtn').classList.add('recording');
-  document.getElementById('micHint').textContent = '🔴 録音中… もう一度ボタンを押すと停止';
+  document.getElementById('micHint').textContent = handsFreeMode ? '🔴 録音中…「採点して」で採点、「次へ」で次の問題' : '🔴 録音中… もう一度ボタンを押すと停止';
   try { recognition.start(); } catch(e) { stopMic(); }
 }
 
@@ -731,10 +774,19 @@ function showQuestion() {
   document.getElementById('scoreDisplay').textContent   = correctCount + partialCount;
   document.getElementById('answeredDisplay').textContent = answered;
 
-  // Auto-read question if voice is on
+  // Auto-read question if voice is on → 読み上げ完了後に自動マイクON
   if (voiceEnabled) {
     document.getElementById('btnSpeakQ').classList.add('speaking');
-    speak(qa.q, () => document.getElementById('btnSpeakQ').classList.remove('speaking'));
+    speak(qa.q, () => {
+      document.getElementById('btnSpeakQ').classList.remove('speaking');
+      // ハンズフリーモードONなら自動でマイク開始
+      if (handsFreeMode && recognition) {
+        setTimeout(() => startMic(), 400);
+      }
+    });
+  } else if (handsFreeMode && recognition) {
+    // 音声OFFでもハンズフリーならマイクON
+    setTimeout(() => startMic(), 400);
   }
 }
 

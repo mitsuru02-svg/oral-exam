@@ -20,27 +20,28 @@ body {
 }
 .header {
   background: #161b22; border-bottom: 1px solid #21262d;
-  padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
   position: sticky; top: 0; z-index: 100;
 }
 .header-icon {
-  width: 34px; height: 34px;
+  width: 30px; height: 30px;
   background: linear-gradient(135deg, #3b82f6, #1e40af);
-  border-radius: 8px; display: flex; align-items: center;
-  justify-content: center; font-size: 17px; flex-shrink: 0;
+  border-radius: 7px; display: flex; align-items: center;
+  justify-content: center; font-size: 15px; flex-shrink: 0;
 }
 .header-titles { flex: 1; min-width: 0; }
-.header-titles h1 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.header-titles .sub { font-size: 11px; color: #8b949e; margin-top: 1px; }
+.header-titles h1 { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-titles .sub { font-size: 10px; color: #8b949e; margin-top: 1px; }
 .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-.header-badge { background: #21262d; border: 1px solid #30363d; border-radius: 20px; padding: 3px 10px; font-size: 11px; color: #8b949e; }
+.header-btns { display: flex; gap: 5px; align-items: center; }
+.header-badge { background: #21262d; border: 1px solid #30363d; border-radius: 20px; padding: 2px 8px; font-size: 10px; color: #8b949e; }
 #networkBadge { font-size: 10px; color: #8b949e; }
 
 /* voice toggle in header */
 .voice-toggle {
   background: #21262d; border: 1px solid #30363d; border-radius: 6px;
-  padding: 4px 10px; font-size: 11px; color: #8b949e; cursor: pointer;
-  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+  padding: 5px 8px; font-size: 14px; color: #8b949e; cursor: pointer;
+  display: flex; align-items: center; line-height: 1;
 }
 .voice-toggle.on { background: #0d2044; border-color: #3b82f6; color: #93c5fd; }
 
@@ -223,11 +224,10 @@ body {
     <div class="sub">自家用操縦士（滑空機）</div>
   </div>
   <div class="header-right">
-    <div style="display:flex;gap:6px;align-items:center">
+    <div class="header-btns">
+      <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊</button>
+      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚</button>
       <div class="header-badge">181問</div>
-      <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊 音声ON</button>
-      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚 HF OFF</button>
-      <button class="voice-toggle" onclick="alert('全音声:\n'+speechSynthesis.getVoices().filter(v=>v.lang.startsWith('ja')).map(v=>v.name).join('\n'))" style="font-size:10px">🎤 声確認</button>
     </div>
     <div id="networkBadge">確認中...</div>
   </div>
@@ -361,11 +361,11 @@ function toggleHandsFree() {
   handsFreeMode = !handsFreeMode;
   const btn = document.getElementById('handsFreeBtn');
   if (handsFreeMode) {
-    btn.textContent = '🤚 HF ON';
+    btn.textContent = '🤚'; btn.title = 'ハンズフリーON';
     btn.classList.add('on');
     document.getElementById('micHint').textContent = '🟢 ハンズフリー: 問題後に自動録音、「採点して」で採点、「次へ」で次の問題';
   } else {
-    btn.textContent = '🤚 HF OFF';
+    btn.textContent = '🤚'; btn.title = 'ハンズフリーOFF';
     btn.classList.remove('on');
     document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
     stopMic();
@@ -598,8 +598,8 @@ function stopSpeaking() {
 function toggleVoice() {
   voiceEnabled = !voiceEnabled;
   const btn = document.getElementById('voiceToggle');
-  if (voiceEnabled) { btn.textContent = '🔊 音声ON'; btn.classList.add('on'); }
-  else              { btn.textContent = '🔇 音声OFF'; btn.classList.remove('on'); stopSpeaking(); }
+  if (voiceEnabled) { btn.textContent = '🔊'; btn.classList.add('on'); btn.title = '音声ON'; }
+  else              { btn.textContent = '🔇'; btn.classList.remove('on'); btn.title = '音声OFF'; stopSpeaking(); }
 }
 
 // Speak the current question

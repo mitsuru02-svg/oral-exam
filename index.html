@@ -294,7 +294,6 @@ body {
           <div class="mode-icon">🔀</div>
           <div class="mode-text">
             <div class="mode-name">ランダム</div>
-            <div class="mode-desc">全問ランダム</div>
           </div>
         </div>
       </div>
@@ -303,7 +302,14 @@ body {
           <div class="mode-icon">🎯</div>
           <div class="mode-text">
             <div class="mode-name">苦手問題</div>
-            <div class="mode-desc">間違を重点練習</div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
+        <div class="mode-inner">
+          <div class="mode-icon">⭐</div>
+          <div class="mode-text">
+            <div class="mode-name">チェック</div>
           </div>
         </div>
       </div>
@@ -312,7 +318,6 @@ body {
           <div class="mode-icon">📋</div>
           <div class="mode-text">
             <div class="mode-name">順番通り</div>
-            <div class="mode-desc">問題集の順</div>
           </div>
         </div>
       </div>
@@ -840,9 +845,14 @@ document.getElementById('savedCorrect').textContent = sessionCorrect;
 document.getElementById('savedTotal').textContent   = sessionTotal;
 
 function selectMode(m) {
+  if (m === 'checked' && checkedIndices.length === 0) {
+    alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
+    return;
+  }
   mode = m;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('mode' + m[0].toUpperCase() + m.slice(1)).classList.add('selected');
+  const el = document.getElementById('mode' + m[0].toUpperCase() + m.slice(1));
+  if (el) el.classList.add('selected');
 }
 
 function initCatCards() {
@@ -931,7 +941,10 @@ function confirmAbort() {
 function startExam() {
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
-  if (mode === 'wrong') {
+  if (mode === 'checked') {
+    pool = checkedIndices.filter(i => pool.includes(i));
+    if (pool.length === 0) { alert('チェックした問題がありません。'); return; }
+  } else if (mode === 'wrong') {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
     if (wrongInCat.length > 0) pool = wrongInCat;
     else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }

@@ -307,6 +307,15 @@ body {
           </div>
         </div>
       </div>
+      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
+        <div class="mode-inner">
+          <div class="mode-icon">⭐</div>
+          <div class="mode-text">
+            <div class="mode-name">チェック</div>
+            <div class="mode-desc" id="checkedModeDesc">チェックした問題</div>
+          </div>
+        </div>
+      </div>
       <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
         <div class="mode-inner">
           <div class="mode-icon">📋</div>
@@ -840,9 +849,15 @@ document.getElementById('savedCorrect').textContent = sessionCorrect;
 document.getElementById('savedTotal').textContent   = sessionTotal;
 
 function selectMode(m) {
+  if (m === 'checked' && checkedIndices.length === 0) {
+    alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
+    return;
+  }
   mode = m;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('mode' + m[0].toUpperCase() + m.slice(1)).classList.add('selected');
+  const id = 'mode' + m[0].toUpperCase() + m.slice(1);
+  const el = document.getElementById(id);
+  if (el) el.classList.add('selected');
 }
 
 function initCatCards() {
@@ -862,14 +877,6 @@ function initCatCards() {
     btn.onclick = () => selectCategory(cat.id);
     container.appendChild(btn);
   });
-  // チェック問題カード
-  const checkBtn = document.createElement('div');
-  checkBtn.className = 'cat-card';
-  checkBtn.id = 'cat-checked';
-  const checkCount = checkedIndices.length;
-  checkBtn.innerHTML = `<span class="cat-icon">⭐</span><span>チェック</span><span class="cat-count" id="checkCatCount">${checkCount}</span>`;
-  checkBtn.onclick = () => selectCategory('checked');
-  container.appendChild(checkBtn);
 }
 
 function selectCategory(catId) {
@@ -878,11 +885,7 @@ function selectCategory(catId) {
   const target = catId ? document.getElementById('cat-' + catId) : document.getElementById('cat-all');
   if (target) target.classList.add('selected');
   const pool = getCategoryPool();
-  if (catId === 'checked' && pool.length === 0) {
-    alert('チェックした問題がありません。問題画面の ☆ ボタンでチェックできます。');
-    selectCategory(null);
-    return;
-  }
+
   const sel = document.getElementById('countSelect');
   sel.options[3].value = pool.length;
   sel.options[3].text = `全問 (${pool.length}問)`;
@@ -939,7 +942,10 @@ function confirmAbort() {
 function startExam() {
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
-  if (mode === 'wrong') {
+  if (mode === 'checked') {
+    pool = checkedIndices.filter(i => pool.includes(i));
+    if (pool.length === 0) { alert('チェックした問題がありません。'); return; }
+  } else if (mode === 'wrong') {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
     if (wrongInCat.length > 0) pool = wrongInCat;
     else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
@@ -1191,6 +1197,11 @@ function showStart() {
   document.getElementById('savedCorrect').textContent = sessionCorrect;
   document.getElementById('savedTotal').textContent   = sessionTotal;
   updateNetworkBadge();
+  // チェック件数を更新
+  const descEl = document.getElementById('checkedModeDesc');
+  if (descEl) descEl.textContent = checkedIndices.length > 0
+    ? `${checkedIndices.length}問チェック済み`
+    : 'チェックした問題';
 }
 
 // ── PWA install prompt ─────────────────────────────────────────

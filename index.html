@@ -414,6 +414,7 @@ function scoreOffline(userAns, modelAns) {
 let voiceEnabled = true;
 let ttsVoice = null;
 let currentUtterance = null;
+let speakGeneration = 0;  // 世代番号：新しい speak() が呼ばれたら古い onend を無視
 
 function initVoices() {
   const load = () => {
@@ -577,23 +578,54 @@ function ttsClean(text) {
 
 function speak(text, onEnd) {
   if (!voiceEnabled || !('speechSynthesis' in window)) { if (onEnd) onEnd(); return; }
-  stopSpeaking();
+
+  // 世代番号を進めて古い発話のコールバックを無効化
+  speakGeneration++;
+  const myGen = speakGeneration;
+
+  // iOSでは cancel() を呼ばず、paused状態だけ解除する
+  if (speechSynthesis.paused) speechSynthesis.resume();
+
   const clean = ttsClean(text).replace(/（/g,'(').replace(/）/g,')');
-  const utt = new SpeechSynthesisUtterance(clean);
-  utt.lang  = 'ja-JP';
-  utt.rate  = 0.88;   // 少しゆっくり（0.8〜1.0が聞きやすい）
-  utt.pitch = 1.05;  // 若干高め（明瞭度アップ）
-  utt.volume = 1.0;
-  // if (ttsVoice) utt.voice = ttsVoice;
-  utt.onend   = () => { currentUtterance = null; if (onEnd) onEnd(); };
-  utt.onerror = () => { currentUtterance = null; if (onEnd) onEnd(); };
-  currentUtterance = utt;
-  speechSynthesis.speak(utt);
+
+  function doSpeak() {
+    if (myGen !== speakGeneration) return; // 既に新しい発話が来ていたら中止
+    const utt = new SpeechSynthesisUtterance(clean);
+    utt.lang   = 'ja-JP';
+    utt.rate   = 0.88;
+    utt.pitch  = 1.05;
+    utt.volume = 1.0;
+
+    utt.onend = () => {
+      if (myGen !== speakGeneration) return; // 古い世代は無視
+      currentUtterance = null;
+      if (onEnd) onEnd();
+    };
+    utt.onerror = (e) => {
+      if (myGen !== speakGeneration) return;
+      if (e.error === 'interrupted') return; // cancel()によるものは無視
+      currentUtterance = null;
+      if (onEnd) onEnd();
+    };
+    currentUtterance = utt;
+    speechSynthesis.speak(utt);
+  }
+
+  // 現在再生中なら cancel() してから少し待って発話
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    setTimeout(doSpeak, 400);
+  } else {
+    doSpeak();
+  }
 }
 
 function stopSpeaking() {
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  speakGeneration++; // 古い世代のコールバックを無効化
   currentUtterance = null;
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
 }
 
 function toggleVoice() {

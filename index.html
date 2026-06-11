@@ -565,7 +565,7 @@ function speak(text, onEnd) {
   utt.rate  = 0.88;   // 少しゆっくり（0.8〜1.0が聞きやすい）
   utt.pitch = 1.05;  // 若干高め（明瞭度アップ）
   utt.volume = 1.0;
-  if (ttsVoice) utt.voice = ttsVoice;
+  // if (ttsVoice) utt.voice = ttsVoice;
   utt.onend   = () => { currentUtterance = null; if (onEnd) onEnd(); };
   utt.onerror = () => { currentUtterance = null; if (onEnd) onEnd(); };
   currentUtterance = utt;

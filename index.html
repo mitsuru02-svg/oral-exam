@@ -287,6 +287,7 @@ body {
       <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
       <div class="stat-box"><div class="num" id="savedCorrect">0</div><div class="label">正解数</div></div>
       <div class="stat-box"><div class="num" id="savedTotal">0</div><div class="label">解答数</div></div>
+      <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
     </div>
     <div class="mode-cards">
       <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
@@ -892,8 +893,8 @@ function selectCategory(catId) {
 }
 
 function getCategoryPool() {
+  // カテゴリ絞り込みのみ（checkedモードはstartExamで処理）
   if (!selectedCategory) return [...Array(QA_DATA.length).keys()];
-  if (selectedCategory === 'checked') return [...checkedIndices];
   const cat = CATEGORIES.find(c => c.id === selectedCategory);
   return cat ? [...cat.indices] : [...Array(QA_DATA.length).keys()];
 }
@@ -912,12 +913,23 @@ function toggleCheck() {
     btn.classList.add('checked');
   }
   localStorage.setItem('checkedIndices', JSON.stringify(checkedIndices));
-  // チェックカテゴリの件数を更新
-  const countEl = document.getElementById('checkCatCount');
-  if (countEl) countEl.textContent = checkedIndices.length;
+  // チェック数を各所に反映
+  updateCheckedCount();
 }
 
 // チェック状態を反映
+function updateCheckedCount() {
+  const n = checkedIndices.length;
+  const el = document.getElementById('checkedCount');
+  if (el) el.textContent = n;
+  // モードカードの表示も更新
+  const modeEl = document.getElementById('modeChecked');
+  if (modeEl) {
+    const nameEl = modeEl.querySelector('.mode-name');
+    if (nameEl) nameEl.textContent = n > 0 ? `チェック(${n})` : 'チェック';
+  }
+}
+
 function updateCheckBtn() {
   const qIdx = examQuestions[currentIdx];
   const btn = document.getElementById('btnCheck');
@@ -942,8 +954,13 @@ function startExam() {
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
   if (mode === 'checked') {
+    // カテゴリ絞り込みがある場合はその中のチェック問題、なければ全チェック問題
     pool = checkedIndices.filter(i => pool.includes(i));
-    if (pool.length === 0) { alert('チェックした問題がありません。'); return; }
+    if (pool.length === 0) {
+      alert('チェックした問題がありません。
+問題画面の ☆ ボタンでチェックできます。');
+      return;
+    }
   } else if (mode === 'wrong') {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
     if (wrongInCat.length > 0) pool = wrongInCat;
@@ -1196,6 +1213,7 @@ function showStart() {
   document.getElementById('savedCorrect').textContent = sessionCorrect;
   document.getElementById('savedTotal').textContent   = sessionTotal;
   updateNetworkBadge();
+  updateCheckedCount();
 }
 
 // ── PWA install prompt ─────────────────────────────────────────
@@ -1217,6 +1235,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initCatCards();
   const el = document.getElementById('totalQCount');
   if (el) el.textContent = QA_DATA.length;
+  updateCheckedCount();
 });
 </script>
 </body>

@@ -307,15 +307,6 @@ body {
           </div>
         </div>
       </div>
-      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
-        <div class="mode-inner">
-          <div class="mode-icon">⭐</div>
-          <div class="mode-text">
-            <div class="mode-name">チェック</div>
-            <div class="mode-desc" id="checkedModeDesc">チェック問題</div>
-          </div>
-        </div>
-      </div>
       <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
         <div class="mode-inner">
           <div class="mode-icon">📋</div>
@@ -871,14 +862,6 @@ function initCatCards() {
     btn.onclick = () => selectCategory(cat.id);
     container.appendChild(btn);
   });
-  // チェック問題カード
-  const checkBtn = document.createElement('div');
-  checkBtn.className = 'cat-card';
-  checkBtn.id = 'cat-checked';
-  const checkCount = checkedIndices.length;
-  checkBtn.innerHTML = `<span class="cat-icon">⭐</span><span>チェック</span><span class="cat-count" id="checkCatCount">${checkCount}</span>`;
-  checkBtn.onclick = () => selectCategory('checked');
-  container.appendChild(checkBtn);
 }
 
 function selectCategory(catId) {
@@ -948,10 +931,7 @@ function confirmAbort() {
 function startExam() {
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
-  if (mode === 'checked') {
-    pool = checkedIndices.filter(i => pool.includes(i));
-    if (pool.length === 0) { alert('チェックした問題がありません。'); return; }
-  } else if (mode === 'wrong') {
+  if (mode === 'wrong') {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
     if (wrongInCat.length > 0) pool = wrongInCat;
     else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }

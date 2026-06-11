@@ -218,6 +218,21 @@ body {
 }
 .install-banner.visible { display: flex; }
 .install-banner button { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+
+/* カテゴリ選択 */
+.cat-section { margin-bottom: 20px; }
+.cat-section-title { font-size: 12px; color: #8b949e; margin-bottom: 8px; letter-spacing: 0.05em; text-align:left; }
+.cat-cards { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.cat-card {
+  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
+  padding: 8px 12px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px; font-size: 13px;
+}
+.cat-card:hover { border-color: #3b82f6; }
+.cat-card.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
+.cat-card .cat-icon { font-size: 16px; }
+.cat-card .cat-count { font-size: 10px; color: #8b949e; margin-left: 2px; }
+.cat-card.selected .cat-count { color: #60a5fa; }
 </style>
 </head>
 <body>
@@ -281,13 +296,19 @@ body {
         </div>
       </div>
     </div>
+    <!-- カテゴリ選択 -->
+    <div class="cat-section">
+      <div class="cat-section-title">📂 カテゴリ（タップで絞り込み）</div>
+      <div class="cat-cards" id="catCards"></div>
+    </div>
+
     <div style="margin-bottom:20px">
       <label style="font-size:13px;color:#8b949e;margin-right:8px">出題数：</label>
       <select id="countSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
         <option value="5">5問</option>
         <option value="10" selected>10問</option>
         <option value="20">20問</option>
-        <option value="181">全問 (181問)</option>
+        <option value="187">全問 (187問)</option>
       </select>
     </div>
     <button class="btn-primary" onclick="startExam()">試験開始</button>
@@ -778,6 +799,7 @@ function stopMic() {
 // APP STATE
 // ══════════════════════════════════════════════════════════════
 let mode = 'random';
+let selectedCategory = null;
 let examQuestions = [];
 let currentIdx = 0;
 let correctCount = 0, partialCount = 0, wrongCount = 0, answered = 0;
@@ -795,12 +817,50 @@ function selectMode(m) {
   document.getElementById('mode' + m[0].toUpperCase() + m.slice(1)).classList.add('selected');
 }
 
+function initCatCards() {
+  const container = document.getElementById('catCards');
+  if (!container || container.children.length > 0) return;
+  const allBtn = document.createElement('div');
+  allBtn.className = 'cat-card selected';
+  allBtn.id = 'cat-all';
+  allBtn.innerHTML = `<span class="cat-icon">🔄</span><span>全問</span><span class="cat-count">${QA_DATA.length}</span>`;
+  allBtn.onclick = () => selectCategory(null);
+  container.appendChild(allBtn);
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('div');
+    btn.className = 'cat-card';
+    btn.id = 'cat-' + cat.id;
+    btn.innerHTML = `<span class="cat-icon">${cat.icon}</span><span>${cat.name}</span><span class="cat-count">${cat.indices.length}</span>`;
+    btn.onclick = () => selectCategory(cat.id);
+    container.appendChild(btn);
+  });
+}
+
+function selectCategory(catId) {
+  selectedCategory = catId;
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  const target = catId ? document.getElementById('cat-' + catId) : document.getElementById('cat-all');
+  if (target) target.classList.add('selected');
+  const pool = getCategoryPool();
+  const sel = document.getElementById('countSelect');
+  sel.options[3].value = pool.length;
+  sel.options[3].text = `全問 (${pool.length}問)`;
+  if (parseInt(sel.value) > pool.length) sel.value = Math.min(pool.length, 10);
+}
+
+function getCategoryPool() {
+  if (!selectedCategory) return [...Array(QA_DATA.length).keys()];
+  const cat = CATEGORIES.find(c => c.id === selectedCategory);
+  return cat ? [...cat.indices] : [...Array(QA_DATA.length).keys()];
+}
+
 function startExam() {
   const count = parseInt(document.getElementById('countSelect').value);
-  let pool = [...Array(QA_DATA.length).keys()];
+  let pool = getCategoryPool();
   if (mode === 'wrong') {
-    if (wrongIndices.length > 0) pool = wrongIndices;
-    else { alert('まだ間違えた問題がありません。ランダムで始めます。'); }
+    const wrongInCat = wrongIndices.filter(i => pool.includes(i));
+    if (wrongInCat.length > 0) pool = wrongInCat;
+    else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
   }
   if (mode !== 'order') pool = pool.sort(() => Math.random() - 0.5);
   examQuestions = pool.slice(0, Math.min(count, pool.length));
@@ -1064,7 +1124,7 @@ function installApp() {
 }
 
 // Init
-window.addEventListener('DOMContentLoaded', updateNetworkBadge);
+window.addEventListener('DOMContentLoaded', () => { updateNetworkBadge(); initCatCards(); });
 </script>
 </body>
 </html>

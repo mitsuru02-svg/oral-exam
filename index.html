@@ -233,6 +233,23 @@ body {
 .cat-card .cat-icon { font-size: 16px; }
 .cat-card .cat-count { font-size: 10px; color: #8b949e; margin-left: 2px; }
 .cat-card.selected .cat-count { color: #60a5fa; }
+
+/* 中断ボタン */
+.btn-abort {
+  background: transparent; border: 1px solid #30363d; border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; color: #8b949e; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-abort:hover { border-color: #f85149; color: #f85149; }
+
+/* チェックボタン */
+.btn-check {
+  background: transparent; border: 1px solid #30363d; border-radius: 6px;
+  padding: 4px 10px; font-size: 13px; color: #8b949e; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+}
+.btn-check:hover { border-color: #d29922; color: #d29922; }
+.btn-check.checked { border-color: #d29922; color: #d29922; background: #2d1d00; }
 </style>
 </head>
 <body>
@@ -327,17 +344,23 @@ body {
           <div class="progress-bar" id="progressBar" style="width:0%"></div>
         </div>
       </div>
-      <div class="score-display">
-        正解 <span id="scoreDisplay">0</span> / <span id="answeredDisplay">0</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="score-display">
+          正解 <span id="scoreDisplay">0</span> / <span id="answeredDisplay">0</span>
+        </div>
+        <button class="btn-abort" onclick="confirmAbort()">✕ 終了</button>
       </div>
     </div>
 
     <div class="question-card">
       <div class="q-label-row">
         <div class="q-label">問 <span id="qNumBadge">1</span></div>
-        <button class="btn-speak-q" id="btnSpeakQ" onclick="speakQuestion()">
-          <span>🔊</span><span>問題を聞く</span>
-        </button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn-check" id="btnCheck" onclick="toggleCheck()">☆</button>
+          <button class="btn-speak-q" id="btnSpeakQ" onclick="speakQuestion()">
+            <span>🔊</span><span>問題を聞く</span>
+          </button>
+        </div>
       </div>
       <div class="question-text" id="questionText"></div>
     </div>
@@ -804,6 +827,7 @@ function stopMic() {
 // ══════════════════════════════════════════════════════════════
 let mode = 'random';
 let selectedCategory = null;
+let checkedIndices = JSON.parse(localStorage.getItem('checkedIndices') || '[]');
 let examQuestions = [];
 let currentIdx = 0;
 let correctCount = 0, partialCount = 0, wrongCount = 0, answered = 0;
@@ -838,6 +862,14 @@ function initCatCards() {
     btn.onclick = () => selectCategory(cat.id);
     container.appendChild(btn);
   });
+  // チェック問題カード
+  const checkBtn = document.createElement('div');
+  checkBtn.className = 'cat-card';
+  checkBtn.id = 'cat-checked';
+  const checkCount = checkedIndices.length;
+  checkBtn.innerHTML = `<span class="cat-icon">⭐</span><span>チェック</span><span class="cat-count" id="checkCatCount">${checkCount}</span>`;
+  checkBtn.onclick = () => selectCategory('checked');
+  container.appendChild(checkBtn);
 }
 
 function selectCategory(catId) {
@@ -846,6 +878,11 @@ function selectCategory(catId) {
   const target = catId ? document.getElementById('cat-' + catId) : document.getElementById('cat-all');
   if (target) target.classList.add('selected');
   const pool = getCategoryPool();
+  if (catId === 'checked' && pool.length === 0) {
+    alert('チェックした問題がありません。問題画面の ☆ ボタンでチェックできます。');
+    selectCategory(null);
+    return;
+  }
   const sel = document.getElementById('countSelect');
   sel.options[3].value = pool.length;
   sel.options[3].text = `全問 (${pool.length}問)`;
@@ -854,8 +891,49 @@ function selectCategory(catId) {
 
 function getCategoryPool() {
   if (!selectedCategory) return [...Array(QA_DATA.length).keys()];
+  if (selectedCategory === 'checked') return [...checkedIndices];
   const cat = CATEGORIES.find(c => c.id === selectedCategory);
   return cat ? [...cat.indices] : [...Array(QA_DATA.length).keys()];
+}
+
+// チェックボタンのトグル
+function toggleCheck() {
+  const qIdx = examQuestions[currentIdx];
+  const btn = document.getElementById('btnCheck');
+  if (checkedIndices.includes(qIdx)) {
+    checkedIndices = checkedIndices.filter(i => i !== qIdx);
+    btn.textContent = '☆';
+    btn.classList.remove('checked');
+  } else {
+    checkedIndices.push(qIdx);
+    btn.textContent = '⭐';
+    btn.classList.add('checked');
+  }
+  localStorage.setItem('checkedIndices', JSON.stringify(checkedIndices));
+  // チェックカテゴリの件数を更新
+  const countEl = document.getElementById('checkCatCount');
+  if (countEl) countEl.textContent = checkedIndices.length;
+}
+
+// チェック状態を反映
+function updateCheckBtn() {
+  const qIdx = examQuestions[currentIdx];
+  const btn = document.getElementById('btnCheck');
+  if (!btn) return;
+  if (checkedIndices.includes(qIdx)) {
+    btn.textContent = '⭐'; btn.classList.add('checked');
+  } else {
+    btn.textContent = '☆'; btn.classList.remove('checked');
+  }
+}
+
+// 中断確認
+function confirmAbort() {
+  if (confirm('試験を終了して表紙に戻りますか？')) {
+    stopSpeaking(); stopMic();
+    document.getElementById('examScreen').classList.add('hidden');
+    showStart();
+  }
 }
 
 function startExam() {
@@ -891,6 +969,7 @@ function showQuestion() {
   document.getElementById('loadingBox').classList.add('hidden');
   document.getElementById('judgeBtn').disabled = false;
   document.getElementById('btnSpeakQ').classList.remove('speaking');
+  updateCheckBtn();
   document.getElementById('micBtn').classList.remove('recording');
   document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
 

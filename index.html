@@ -226,6 +226,7 @@ body {
     <div style="display:flex;gap:6px;align-items:center">
       <div class="header-badge">181問</div>
       <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊 音声ON</button>
+      <button class="voice-toggle" onclick="alert('使用中の声: '+(window._ttsVoice?window._ttsVoice.name:'デフォルト'))" style="font-size:10px">🎤 声確認</button>
     </div>
     <div id="networkBadge">確認中...</div>
   </div>
@@ -425,6 +426,7 @@ function initVoices() {
     }
 
     // デバッグ用：使用する音声をコンソールに表示
+    window._ttsVoice = ttsVoice;
     if (ttsVoice) console.log('TTS voice:', ttsVoice.name, ttsVoice.lang);
     else console.log('TTS voice: browser default');
   };

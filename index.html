@@ -398,11 +398,35 @@ let currentUtterance = null;
 function initVoices() {
   const load = () => {
     const voices = speechSynthesis.getVoices();
-    // Prefer Japanese voices
-    ttsVoice = voices.find(v => v.lang === 'ja-JP' && v.localService)
-            || voices.find(v => v.lang === 'ja-JP')
-            || voices.find(v => v.lang.startsWith('ja'))
-            || null;
+
+    // iOS/macOS で品質の高い日本語音声を優先順位順に探す
+    const preferred = [
+      'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
+      'O-ren',          // iOS 高品質
+      'Hattori',        // iOS 高品質
+      'Otoya',          // iOS/macOS 高品質（男性）
+      'お-れん',
+      'はっとり',
+    ];
+
+    // 名前で優先音声を探す
+    ttsVoice = null;
+    for (const name of preferred) {
+      const v = voices.find(v => v.name.includes(name));
+      if (v) { ttsVoice = v; break; }
+    }
+
+    // 見つからなければローカルの日本語音声 → ネットワーク音声の順
+    if (!ttsVoice) {
+      ttsVoice = voices.find(v => v.lang === 'ja-JP' && v.localService)
+              || voices.find(v => v.lang === 'ja-JP')
+              || voices.find(v => v.lang.startsWith('ja'))
+              || null;
+    }
+
+    // デバッグ用：使用する音声をコンソールに表示
+    if (ttsVoice) console.log('TTS voice:', ttsVoice.name, ttsVoice.lang);
+    else console.log('TTS voice: browser default');
   };
   load();
   speechSynthesis.onvoiceschanged = load;
@@ -535,8 +559,9 @@ function speak(text, onEnd) {
   const clean = ttsClean(text).replace(/（/g,'(').replace(/）/g,')');
   const utt = new SpeechSynthesisUtterance(clean);
   utt.lang  = 'ja-JP';
-  utt.rate  = 0.92;
-  utt.pitch = 1.0;
+  utt.rate  = 0.88;   // 少しゆっくり（0.8〜1.0が聞きやすい）
+  utt.pitch = 1.05;  // 若干高め（明瞭度アップ）
+  utt.volume = 1.0;
   if (ttsVoice) utt.voice = ttsVoice;
   utt.onend   = () => { currentUtterance = null; if (onEnd) onEnd(); };
   utt.onerror = () => { currentUtterance = null; if (onEnd) onEnd(); };

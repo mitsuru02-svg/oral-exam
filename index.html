@@ -50,8 +50,12 @@ body {
 
 /* ── START SCREEN ── */
 .start-screen { text-align: center; padding: 40px 12px; }
-.start-icon { font-size: 56px; margin-bottom: 16px; }
-.start-screen h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.start-icon { font-size: 56px; }
+.start-title-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+.start-screen h2 { font-size: 22px; font-weight: 700; }
+.mode-card .mode-inner { display: flex; align-items: center; gap: 10px; }
+.mode-card .mode-icon { font-size: 20px; margin-bottom: 0; flex-shrink: 0; }
+.mode-card .mode-text { text-align: left; }
 .start-screen p { color: #8b949e; font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
 .stats-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
 .stat-box { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 14px 20px; text-align: center; min-width: 100px; }
@@ -238,8 +242,10 @@ body {
 
   <!-- START SCREEN -->
   <div id="startScreen" class="start-screen">
-    <div class="start-icon">🛩</div>
-    <h2>口述模擬試験</h2>
+    <div class="start-title-row">
+      <div class="start-icon">🛩</div>
+      <h2>口述模擬試験</h2>
+    </div>
     <p>問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
     <div class="stats-row">
       <div class="stat-box"><div class="num">181</div><div class="label">総問題数</div></div>
@@ -248,19 +254,31 @@ body {
     </div>
     <div class="mode-cards">
       <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
-        <div class="mode-icon">🔀</div>
-        <div class="mode-name">ランダム</div>
-        <div class="mode-desc">全問からランダム出題</div>
+        <div class="mode-inner">
+          <div class="mode-icon">🔀</div>
+          <div class="mode-text">
+            <div class="mode-name">ランダム</div>
+            <div class="mode-desc">全問からランダム出題</div>
+          </div>
+        </div>
       </div>
       <div class="mode-card" onclick="selectMode('wrong')" id="modeWrong">
-        <div class="mode-icon">🎯</div>
-        <div class="mode-name">苦手問題</div>
-        <div class="mode-desc">間違えた問題を重点練習</div>
+        <div class="mode-inner">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-text">
+            <div class="mode-name">苦手問題</div>
+            <div class="mode-desc">間違えた問題を重点練習</div>
+          </div>
+        </div>
       </div>
       <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
-        <div class="mode-icon">📋</div>
-        <div class="mode-name">順番通り</div>
-        <div class="mode-desc">問題集の順で出題</div>
+        <div class="mode-inner">
+          <div class="mode-icon">📋</div>
+          <div class="mode-text">
+            <div class="mode-name">順番通り</div>
+            <div class="mode-desc">問題集の順で出題</div>
+          </div>
+        </div>
       </div>
     </div>
     <div style="margin-bottom:20px">

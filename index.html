@@ -662,7 +662,7 @@ function initRecognition() {
       return;
     }
     // 「次」「次へ」「Next」「ネクスト」→ 次の問題へ
-    if (/^(次(の問題)?(へ)?|[Nn]ext|ネクスト)$/.test(fullText.trim())) {
+    if (/(次(の問題)?(へ)?|[Nn]ext|ネクスト)/.test(fullText.trim()) && !document.getElementById("nextRow").classList.contains("hidden")) {
       accumulatedText = '';
       document.getElementById('userAnswer').value = '';
       stopMic();
@@ -892,8 +892,22 @@ function handleResult(result, qa, qIdx, userAns) {
   const showAnsBtn = document.getElementById('btnShowAns');
   showAnsBtn.style.display = isCorrect ? 'none' : '';
 
-  // Auto-speak result
-  speakResult(result.verdict, result.comment || '', isCorrect ? '' : qa.a);
+  // Auto-speak result → 読み上げ完了後にハンズフリーならマイク再開
+  if (handsFreeMode) {
+    const textToSpeak = (() => {
+      let msg = '';
+      if (result.verdict==='正解')         msg = '正解です。' + (result.comment||'');
+      else if (result.verdict==='部分正解') msg = '部分正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
+      else                                 msg = '不正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
+      return msg;
+    })();
+    speak(textToSpeak, () => {
+      // 読み上げ完了後にマイクON → 「次へ」コマンド待ち
+      if (handsFreeMode) setTimeout(() => startMic(), 400);
+    });
+  } else {
+    speakResult(result.verdict, result.comment || '', isCorrect ? '' : qa.a);
+  }
 }
 
 function speakModelAnswer() {

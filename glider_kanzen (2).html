@@ -35,7 +35,35 @@
   .st h2 small{display:block;font-size:10px;font-weight:400;color:var(--amber);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px}
   .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
   .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-  @media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.sidebar{display:none}}
+  @media(max-width:900px){
+    .g2,.g3{grid-template-columns:1fr}
+    .sidebar{
+      display:block;
+      position:fixed; top:0; left:0; height:100vh; z-index:200;
+      transform:translateX(-100%); transition:transform .25s ease;
+      box-shadow:4px 0 24px rgba(0,0,0,.4);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .menu-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150;}
+    .menu-overlay.open{display:block;}
+    .hamburger-btn{display:flex;}
+    .content{padding:24px 16px 80px;}
+  }
+  .hamburger-btn{
+    display:none; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:8px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    color:var(--white); font-size:20px; cursor:pointer; flex-shrink:0;
+    position:relative; z-index:201;
+  }
+  .sidebar-close{
+    display:none; align-items:center; justify-content:center;
+    width:32px; height:32px; border-radius:6px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    color:var(--muted); font-size:16px; cursor:pointer;
+    position:absolute; top:14px; right:14px;
+  }
+  @media(max-width:900px){.sidebar-close{display:flex;}}
   .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px}
   .card h3{font-size:13px;font-weight:700;color:var(--amber);margin-bottom:7px;display:flex;align-items:center;gap:6px}
   .card h3 .b{background:var(--amber);color:var(--navy);font-size:9px;font-weight:900;padding:1px 5px;border-radius:3px}
@@ -169,6 +197,7 @@
 <header>
   <div class="hg"></div>
   <div class="hi">
+    <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
     <svg width="100" height="65" viewBox="0 0 110 70" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
       <path d="M25 38 Q55 28 85 38" stroke="#E8A020" stroke-width="2.5" fill="none" stroke-linecap="round"/>
       <ellipse cx="55" cy="38" rx="24" ry="7" fill="#162435" stroke="#4FAADD" stroke-width="1.2"/>
@@ -189,7 +218,8 @@
   </div>
 </header>
 <div class="layout">
-<nav class="sidebar">
+<nav class="sidebar" id="sidebar">
+  <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
   <div class="slbl">学習セクション</div>
   <button class="nb active" onclick="show('s1')"><span class="ico">📋</span>機長の責任</button>
   <button class="nb" onclick="show('s2')"><span class="ico">📄</span>書類・重量・重心</button>
@@ -205,6 +235,7 @@
   <div class="slbl">まとめ</div>
   <button class="nb" onclick="show('sm')"><span class="ico">📌</span>直前暗唱まとめ</button>
 </nav>
+<div class="menu-overlay" id="menuOverlay" onclick="toggleSidebar()"></div>
 <main class="content">
 <!-- S1 機長の責任 -->
 <section class="section active" id="s1">
@@ -702,6 +733,19 @@ function show(id){
   document.getElementById(id).classList.add('active');
   event.currentTarget.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
+  // モバイルではセクション選択後に自動でメニューを閉じる
+  if (window.innerWidth <= 900) closeSidebar();
+}
+
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('menuOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('menuOverlay').classList.remove('open');
 }
 function tqa(btn){
   const item=btn.closest('.qi');

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自家用操縦士・上級滑空機｜口述試験対策参考書 完全版</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+  :root{--navy:#0D1B2A;--navy2:#162435;--navy3:#1E3050;--amber:#E8A020;--amber-dim:rgba(232,160,32,.13);--sky:#4FAADD;--sky-dim:rgba(79,170,221,.12);--white:#F4F8FC;--muted:#8BA5C2;--danger:#E05050;--success:#3CC87A}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--white);font-family:'Noto Sans JP',sans-serif;font-size:15px;line-height:1.75}
+  header{background:linear-gradient(160deg,#050D18 0%,#0D1B2A 60%,#091828 100%);border-bottom:2px solid var(--amber);position:relative;overflow:hidden}
+  .hg{position:absolute;inset:0;background-image:linear-gradient(rgba(232,160,32,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(232,160,32,.03) 1px,transparent 1px);background-size:40px 40px}
+  .hi{max-width:1200px;margin:0 auto;padding:40px 32px 32px;display:flex;align-items:center;gap:32px;position:relative;z-index:2}
+  .ht h1{font-size:11px;font-weight:500;color:var(--amber);letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
+  .ht h2{font-size:26px;font-weight:900;line-height:1.25;margin-bottom:8px}
+  .ht h2 span{color:var(--amber)}
+  .ht p{font-size:13px;color:var(--muted)}
+  .layout{max-width:1200px;margin:0 auto;display:flex;min-height:100vh}
+  .sidebar{width:215px;flex-shrink:0;background:var(--navy2);border-right:1px solid rgba(255,255,255,.07);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar::-webkit-scrollbar{width:4px}
+  .sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+  .slbl{font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;padding:0 16px 6px;margin-top:14px}
+  .slbl:first-child{margin-top:0}
+  .nb{display:flex;align-items:center;gap:9px;width:100%;border:none;background:none;padding:8px 16px;font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--muted);text-align:left;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+  .nb:hover{color:var(--white);background:rgba(255,255,255,.04)}
+  .nb.active{color:var(--amber);border-left-color:var(--amber);background:var(--amber-dim)}
+  .nb .ico{font-size:13px;flex-shrink:0}
+  .content{flex:1;min-width:0;padding:36px 36px 80px}
+  .section{display:none}
+  .section.active{display:block}
+  .st{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .sico{width:42px;height:42px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .st h2{font-size:19px;font-weight:700}
+  .st h2 small{display:block;font-size:10px;font-weight:400;color:var(--amber);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  @media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.sidebar{display:none}}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px}
+  .card h3{font-size:13px;font-weight:700;color:var(--amber);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+  .card h3 .b{background:var(--amber);color:var(--navy);font-size:9px;font-weight:900;padding:1px 5px;border-radius:3px}
+  .card p,.card li{font-size:13px;color:rgba(244,248,252,.87);line-height:1.65}
+  .card ul,.card ol{padding-left:15px}
+  .card li{margin-bottom:2px}
+  .al{border-radius:8px;padding:12px 16px;margin-bottom:14px}
+  .al h4{font-size:13px;font-weight:700;margin-bottom:4px}
+  .al p,.al li{font-size:13px;line-height:1.6}
+  .al ul{padding-left:15px}
+  .al.am{background:var(--amber-dim);border:1px solid var(--amber)}
+  .al.am h4{color:var(--amber)}
+  .al.dg{background:rgba(224,80,80,.1);border:1px solid var(--danger)}
+  .al.dg h4{color:var(--danger)}
+  .al.inf{background:var(--sky-dim);border:1px solid var(--sky)}
+  .al.inf h4{color:var(--sky)}
+  .al.gn{background:rgba(60,200,122,.08);border:1px solid var(--success)}
+  .al.gn h4{color:var(--success)}
+  .dm{background:rgba(5,13,24,.7);border:1px solid rgba(232,160,32,.3);border-radius:12px;padding:22px;margin-bottom:22px}
+  .dm h3{font-size:13px;font-weight:700;color:var(--amber);text-align:center;margin-bottom:16px;letter-spacing:.05em}
+  .dm svg{display:block;width:100%}
+  .fl{display:flex;flex-direction:column}
+  .fr{display:flex;gap:12px;align-items:flex-start}
+  .fc{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+  .fd{width:28px;height:28px;border-radius:50%;background:var(--amber);color:var(--navy);font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .fln{width:2px;flex:1;min-height:18px;background:linear-gradient(to bottom,var(--amber),rgba(232,160,32,.15));margin:3px 0}
+  .fb{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:10px 14px;margin-bottom:9px;flex:1}
+  .fb h4{font-size:13px;font-weight:700;margin-bottom:2px}
+  .fb p{font-size:12px;color:var(--muted)}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px}
+  .tbl th{background:rgba(232,160,32,.13);color:var(--amber);font-weight:700;padding:8px 11px;text-align:left;border-bottom:1px solid var(--amber);font-size:11px}
+  .tbl td{padding:7px 11px;border-bottom:1px solid rgba(255,255,255,.05)}
+  .tbl tr:hover td{background:rgba(255,255,255,.03)}
+  .red{color:var(--danger);font-weight:700}
+  .grn{color:var(--success);font-weight:700}
+  .ylw{color:var(--amber);font-weight:700}
+  .blu{color:var(--sky);font-weight:700}
+  .mn{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .mi{background:var(--navy3);border:1px solid rgba(232,160,32,.4);border-radius:8px;padding:10px 14px;text-align:center;min-width:80px}
+  .mi .L{font-size:24px;font-weight:900;color:var(--amber);line-height:1;display:block;margin-bottom:4px}
+  .mi .W{font-size:11px;font-weight:700;display:block}
+  .mi .D{font-size:9.5px;color:var(--muted);display:block;margin-top:1px}
+  .qac{margin-bottom:24px}
+  .qact{font-size:13px;font-weight:700;color:var(--amber);letter-spacing:.1em;padding:6px 0 8px;border-bottom:1px solid rgba(232,160,32,.3);margin-bottom:8px}
+  .ql2{display:flex;flex-direction:column;gap:5px}
+  .qi{border:1px solid rgba(255,255,255,.07);border-radius:8px;overflow:hidden}
+  .qq{width:100%;background:rgba(255,255,255,.04);border:none;padding:11px 14px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:500;color:var(--white);transition:background .15s}
+  .qq:hover{background:rgba(255,255,255,.07)}
+  .qq .qlb{font-size:9px;font-weight:700;color:var(--amber);border:1px solid var(--amber);padding:1px 4px;border-radius:3px;flex-shrink:0}
+  .qq .qa2{color:var(--muted);font-size:13px;transition:transform .2s;flex-shrink:0}
+  .qi.open .qa2{transform:rotate(180deg)}
+  .qa3{display:none;padding:11px 14px;background:rgba(5,13,24,.5);border-top:1px solid rgba(255,255,255,.05);font-size:13px;color:rgba(244,248,252,.88);line-height:1.75}
+  .qa3.show{display:block}
+  .qa3 strong{color:var(--amber)}
+  .mb{display:flex;flex-direction:column;gap:7px;margin:14px 0}
+  .mbt{background:rgba(232,160,32,.07);border-left:3px solid var(--amber);border-radius:0 7px 7px 0;padding:10px 14px;font-size:14px;font-weight:700}
+  .mbt span{color:var(--amber)}
+  .stgs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+  .stg{flex:1;min-width:110px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;text-align:center}
+  .stg.ds{border-color:var(--danger);background:rgba(224,80,80,.08)}
+  .stg .sl{font-size:9.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+  .stg .si{font-size:24px;margin-bottom:5px}
+  .stg .sn{font-size:11.5px;font-weight:700;margin-bottom:3px}
+  .stg .sd{font-size:10.5px;color:var(--muted);line-height:1.45}
+  .arr{display:flex;align-items:center;color:var(--amber);font-size:16px;padding-top:18px}
+  .aw{display:flex;flex-direction:column;gap:5px;margin:12px 0}
+  .ar{display:flex;align-items:stretch;gap:8px}
+  .albl{font-size:10px;font-weight:700;color:var(--amber);text-align:right;width:105px;flex-shrink:0;padding-top:7px}
+  .abar{flex:1;border-radius:6px;padding:7px 12px;font-size:12.5px}
+  .ck{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+  .ci{background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.35);border-radius:6px;padding:7px 11px;font-size:11.5px}
+  .qact{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .qactT{font-size:13px;font-weight:700;color:var(--amber);letter-spacing:.1em}
+  .chapPlay{
+    background:rgba(232,160,32,.12); border:1px solid rgba(232,160,32,.4); color:var(--amber);
+    font-size:11px; font-weight:700; padding:5px 12px; border-radius:14px; cursor:pointer;
+    font-family:'Noto Sans JP',sans-serif; white-space:nowrap; transition:background .15s;
+  }
+  .chapPlay:hover{background:rgba(232,160,32,.25)}
+  .chapPlay.playing{background:var(--amber); color:var(--navy); animation:pulse 1s ease-in-out infinite}
+  .qi.speaking-now{outline:2px solid var(--amber); border-radius:9px}
+
+  .ci .ct{font-weight:700;display:block}
+  .ci .cs{font-size:10px;color:var(--muted)}
+
+  /* ── TTS / SPEAK BUTTONS ── */
+  .qqrow{display:flex;align-items:stretch;gap:0}
+  .qqrow .qq{flex:1;border-radius:0}
+  .spk{
+    flex-shrink:0; border:none; cursor:pointer;
+    background:rgba(232,160,32,.12); color:var(--amber);
+    font-size:15px; width:42px;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s, color .15s;
+  }
+  .spk:hover{background:rgba(232,160,32,.25)}
+  .spk.speaking{background:var(--amber); color:var(--navy); animation:pulse 1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+  .spk.spkA{
+    width:100%; height:auto; border-radius:0; padding:8px 14px;
+    font-size:11.5px; font-weight:700; gap:6px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    background:rgba(232,160,32,.06);
+  }
+  .qa3{padding:0}
+  .qa3body{padding:11px 14px}
+
+  /* Global TTS control bar */
+  .tts-bar{
+    position:fixed; bottom:18px; right:18px; z-index:200;
+    display:flex; align-items:center; gap:8px;
+    background:var(--navy2); border:1px solid var(--amber);
+    border-radius:30px; padding:8px 14px;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+  }
+  .tts-bar button{
+    background:none; border:none; color:var(--white);
+    font-size:13px; cursor:pointer; display:flex; align-items:center; gap:5px;
+    padding:4px 8px; border-radius:16px;
+  }
+  .tts-bar button:hover{background:rgba(255,255,255,.08)}
+  .tts-bar select{
+    background:var(--navy3); color:var(--white); border:1px solid rgba(255,255,255,.15);
+    border-radius:14px; font-size:11px; padding:4px 8px; font-family:'Noto Sans JP',sans-serif;
+  }
+  .tts-bar .tts-stop{color:var(--danger)}
+  @media(max-width:680px){.tts-bar{left:12px;right:12px;justify-content:center;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hg"></div>
+  <div class="hi">
+    <svg width="100" height="65" viewBox="0 0 110 70" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+      <path d="M25 38 Q55 28 85 38" stroke="#E8A020" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="55" cy="38" rx="24" ry="7" fill="#162435" stroke="#4FAADD" stroke-width="1.2"/>
+      <path d="M38 38 L72 38" stroke="#F4F8FC" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M38 38 Q30 38 28 38" stroke="#F4F8FC" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M28 38 L22 32" stroke="#E8A020" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M22 37 L34 38 L24 39" stroke="#E8A020" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M72 38 Q80 38 82 40" stroke="#F4F8FC" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse cx="68" cy="36.5" rx="5" ry="3" fill="#0D1B2A" stroke="#4FAADD" stroke-width="1"/>
+      <path d="M87 33 L100 31" stroke="#E8A020" stroke-width="1" opacity=".5" stroke-dasharray="3 3"/>
+      <path d="M87 38 L104 37" stroke="#E8A020" stroke-width="1" opacity=".3" stroke-dasharray="3 3"/>
+    </svg>
+    <div class="ht">
+      <h1>✈ Oral Exam Complete Study Guide</h1>
+      <h2>自家用操縦士<span>・上級滑空機</span><br>口述試験対策参考書 ── 完全版 100問全収録</h2>
+      <p>飛行の原理・空域・失速・曳航・着陸・緊急時対応 ＋ 口述100問・模範回答全問掲載</p>
+    </div>
+  </div>
+</header>
+<div class="layout">
+<nav class="sidebar">
+  <div class="slbl">学習セクション</div>
+  <button class="nb active" onclick="show('s1')"><span class="ico">📋</span>機長の責任</button>
+  <button class="nb" onclick="show('s2')"><span class="ico">📄</span>書類・重量・重心</button>
+  <button class="nb" onclick="show('s3')"><span class="ico">✈</span>飛行の原理・三舵</button>
+  <button class="nb" onclick="show('s4')"><span class="ico">⚠</span>失速・運動包囲線図</button>
+  <button class="nb" onclick="show('s5')"><span class="ico">🗺</span>空域・管制・気象</button>
+  <button class="nb" onclick="show('s6')"><span class="ico">🔧</span>飛行前点検</button>
+  <button class="nb" onclick="show('s7')"><span class="ico">🚀</span>発航・曳航・着陸</button>
+  <button class="nb" onclick="show('s8')"><span class="ico">☁</span>ソアリング・性能</button>
+  <button class="nb" onclick="show('s9')"><span class="ico">🚨</span>異常・緊急時</button>
+  <div class="slbl">口述試験</div>
+  <button class="nb" onclick="show('qa')"><span class="ico">❓</span>100問 完全収録</button>
+  <div class="slbl">まとめ</div>
+  <button class="nb" onclick="show('sm')"><span class="ico">📌</span>直前暗唱まとめ</button>
+</nav>
+<main class="content">
+<!-- S1 機長の責任 -->
+<section class="section active" id="s1">
+<div class="st"><div class="sico">📋</div><h2><small>Section 1</small>試験概要・機長の責任</h2></div>
+<div class="al am"><h4>🎯 試験官が見ていること</h4><p>単なる知識ではなく、<strong>機長として安全に飛行を計画し、状況を認識し、危険を予測して判断できるか</strong>を見ています。規則の遵守・飛行前準備・発航判断・場周判断・異常時対応・着陸判断が重要です。</p></div>
+<div class="dm"><h3>機長の責任フロー（法73条の二、規164条の十五）</h3>
+<div class="fl">
+<div class="fr"><div class="fc"><div class="fd">1</div><div class="fln"></div></div><div class="fb"><h4>機体・書類の確認</h4><p>登録証明書・耐空証明書・運用限界指定書・航空日誌・飛行規程</p></div></div>
+<div class="fr"><div class="fc"><div class="fd">2</div><div class="fln"></div></div><div class="fb"><h4>気象・航空情報の確認</h4><p>NOTAM・天気図・風向風速・雲底・視程・乱気流・予報</p></div></div>
+<div class="fr"><div class="fc"><div class="fd">3</div><div class="fln"></div></div><div class="fb"><h4>重量・重心・搭載物の確認</h4><p>全備重量が許容範囲内か、重心位置が正常か、積載物固定確認</p></div></div>
+<div class="fr"><div class="fc"><div class="fd">4</div><div class="fln"></div></div><div class="fb"><h4>自己・曳航設備・運航体制</h4><p>体調・技量・曳航設備の状態・クルーのブリーフィング</p></div></div>
+<div class="fr"><div class="fc"><div class="fd">5</div></div><div class="fb"><h4>Go / No-Go 判断</h4><p>すべて確認後に総合判断。<strong>迷ったら飛ばない。</strong></p></div></div>
+</div></div>
+<div class="g2">
+<div class="card"><h3><span class="b">✓</span> 飛行を中止すべき場合</h3><ul><li>機体に不具合がある</li><li>気象が悪い・悪化傾向</li><li>横風・突風が技量を超える</li><li>NOTAMに空域制限あり</li><li>曳航設備に不安がある</li><li>自分の体調が悪い</li><li>運航体制に不備がある</li><li>迷ったとき（必ず中止）</li></ul></div>
+<div class="card"><h3><span class="b">!</span> 場周で常に確認する3つ</h3>
+<div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+<div style="flex:1;min-width:70px;text-align:center;background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.4);border-radius:8px;padding:12px 6px;"><div style="font-size:20px;font-weight:900;color:var(--amber);">📍</div><div style="font-size:12px;font-weight:700;margin-top:3px;">ポジション</div></div>
+<div style="flex:1;min-width:70px;text-align:center;background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.4);border-radius:8px;padding:12px 6px;"><div style="font-size:20px;font-weight:900;color:var(--amber);">📊</div><div style="font-size:12px;font-weight:700;margin-top:3px;">高　度</div></div>
+<div style="flex:1;min-width:70px;text-align:center;background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.4);border-radius:8px;padding:12px 6px;"><div style="font-size:20px;font-weight:900;color:var(--amber);">💨</div><div style="font-size:12px;font-weight:700;margin-top:3px;">速　度</div></div>
+</div></div>
+</div>
+</section>
+<!-- S2 書類・重量・重心 -->
+<section class="section" id="s2">
+<div class="st"><div class="sico">📄</div><h2><small>Section 2</small>書類・重量・重心位置</h2></div>
+<div class="dm"><h3>飛行前に確認する5つの書類</h3>
+<div class="g3" style="margin-bottom:0;">
+<div class="card"><h3><span class="b">1</span>航空機登録証明書</h3><p>機体が正式に登録されていることの証明。有効性を確認。</p></div>
+<div class="card"><h3><span class="b">2</span>耐空証明書</h3><p>耐空性の証明。<strong>有効期間と機体番号</strong>を確認。疑いがあれば飛行しない。</p></div>
+<div class="card"><h3><span class="b">3</span>運用限界等指定書</h3><p>速度・重量・重心・操縦制限・装備・運用条件。<strong>限界超過は絶対不可。</strong></p></div>
+<div class="card"><h3><span class="b">4</span>搭載用航空日誌</h3><p>整備状況・不具合・未処置事項・飛行時間。未処置があれば整備担当者に確認。</p></div>
+<div class="card"><h3><span class="b">5</span>飛行規程</h3><p>速度制限・重量重心・通常操作・非常操作・失速回復・進入速度。<strong>使用機の数値を答えられること。</strong></p></div>
+<div class="card"><h3><span class="b">+</span>航空図</h3><p>区分航空図（JAPA-501）またはソアリング地図。空域・障害物・経路確認。</p></div>
+</div></div>
+<div class="dm"><h3>重量の種類</h3>
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;padding:6px 0;">
+<div style="text-align:center;padding:14px 20px;background:rgba(79,170,221,.1);border:1px solid rgba(79,170,221,.4);border-radius:9px;"><div style="font-size:12px;color:var(--sky);font-weight:700;margin-bottom:4px;">空虚重量</div><div style="font-size:10.5px;color:var(--muted);">機体自体（装備品含む）</div></div>
+<div style="font-size:22px;color:var(--amber);font-weight:900;">＋</div>
+<div style="text-align:center;padding:14px 20px;background:rgba(79,170,221,.1);border:1px solid rgba(79,170,221,.4);border-radius:9px;"><div style="font-size:12px;color:var(--sky);font-weight:700;margin-bottom:4px;">搭載重量</div><div style="font-size:10.5px;color:var(--muted);">搭乗者・バラスト・荷物</div></div>
+<div style="font-size:22px;color:var(--amber);font-weight:900;">＝</div>
+<div style="text-align:center;padding:14px 20px;background:var(--amber-dim);border:1px solid var(--amber);border-radius:9px;"><div style="font-size:13px;color:var(--amber);font-weight:900;margin-bottom:4px;">全備重量</div><div style="font-size:10.5px;color:var(--muted);">飛行時の重量。許容範囲内か確認。</div></div>
+</div></div>
+<div class="g2">
+<div class="al inf"><h4>← 前方重心の影響</h4><ul><li>機首下げ傾向が強くなる</li><li>操縦桿が重くなる</li><li>着陸時の引き起こしが困難</li><li>接地が荒くなる可能性</li></ul></div>
+<div class="al dg"><h4>→ 後方重心の影響 ⚠ 特に危険！</h4><ul><li>ピッチ方向に不安定</li><li>失速・スピンに入りやすい</li><li>回復が困難になる</li></ul></div>
+</div>
+<div class="al am"><h4>重量が増えると…</h4><p>失速速度・最小沈下速度・旋回時の必要速度が<strong>増加</strong>します。着陸エネルギーが大きくなり接地距離も伸びます。飛行重量に応じた速度を必ず確認してください。</p></div>
+</section>
+<!-- S3 飛行の原理・三舵 -->
+<section class="section" id="s3">
+<div class="st"><div class="sico">✈</div><h2><small>Section 3</small>飛行の原理・三舵の働き</h2></div>
+<div class="dm"><h3>揚力の発生原理</h3>
+<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg">
+<path d="M85 85 Q195 50 320 75 Q400 93 470 85 Q400 103 320 95 Q195 115 85 85Z" fill="rgba(30,48,80,.9)" stroke="#4FAADD" stroke-width="2"/>
+<path d="M45 68 Q125 50 235 55 Q345 59 470 68" stroke="#E8A020" stroke-width="1.5" fill="none" opacity=".7"/>
+<path d="M45 58 Q115 38 235 44 Q352 48 470 57" stroke="#E8A020" stroke-width="1.5" fill="none" opacity=".45"/>
+<path d="M45 102 Q175 109 265 106 Q372 103 470 106" stroke="#4FAADD" stroke-width="1.5" fill="none" opacity=".7"/>
+<path d="M45 112 Q175 119 265 115 Q372 112 470 116" stroke="#4FAADD" stroke-width="1.5" fill="none" opacity=".4"/>
+<line x1="270" y1="79" x2="270" y2="24" stroke="#3CC87A" stroke-width="2.5"/>
+<polygon points="270,16 264,30 276,30" fill="#3CC87A"/>
+<text x="282" y="40" fill="#3CC87A" font-size="12" font-weight="bold" font-family="sans-serif">揚力↑</text>
+<line x1="450" y1="85" x2="510" y2="85" stroke="#E05050" stroke-width="2"/>
+<polygon points="516,85 501,80 501,90" fill="#E05050"/>
+<text x="516" y="100" fill="#E05050" font-size="11" font-family="sans-serif">抗力</text>
+<line x1="10" y1="85" x2="52" y2="85" stroke="#F4F8FC" stroke-width="2"/>
+<polygon points="58,85 43,80 43,90" fill="#F4F8FC"/>
+<text x="5" y="73" fill="#F4F8FC" font-size="11" font-family="sans-serif">気流</text>
+<text x="247" y="65" fill="#E8A020" font-size="10" text-anchor="middle" font-family="sans-serif">低圧（速い）</text>
+<text x="247" y="116" fill="#4FAADD" font-size="10" text-anchor="middle" font-family="sans-serif">高圧（遅い）</text>
+</svg>
+</div>
+<div class="g3">
+<div class="card"><h3>🟢 エルロン（補助翼）</h3><p><strong>ロール</strong>（左右傾き）を制御。左旋回→左エルロン上げ・右下げ。</p><div class="al dg" style="margin-top:9px;padding:9px 11px;"><h4>⚠ アドバース・ヨー</h4><p style="font-size:12px;">エルロン操作で機首が逆方向にずれる現象。ラダーを協調して修正。</p></div></div>
+<div class="card"><h3>🟡 エレベーター（昇降舵）</h3><p><strong>ピッチ</strong>（機首の上下）を制御。非常に敏感なため<strong>ごくわずか</strong>な操作にとどめる。</p><p style="margin-top:7px;font-size:12px;color:var(--muted);">機首上げ過ぎ→失速。通常滑空姿勢はごくわずかに機首下げ。</p></div>
+<div class="card"><h3>🟠 ラダー（方向舵）</h3><p><strong>ヨー</strong>（機首の左右）を制御。旋回時のバランス維持と偏流修正に使用。</p><p style="margin-top:7px;font-size:12px;color:var(--muted);">エルロンと協調させて釣り合いの取れた旋回を実現する。</p></div>
+</div>
+<div class="al am"><h4>偏流とは？</h4><p>風で機体が流されるため、機首方位と対地航跡は一致しない。風に応じて機首を修正し、意図したコースを飛ぶことが必要。</p></div>
+</section>
+<!-- S4 失速・運動包囲線図 -->
+<section class="section" id="s4">
+<div class="st"><div class="sico">⚠</div><h2><small>Section 4</small>失速・運動包囲線図</h2></div>
+<div class="dm"><h3>失速のメカニズム（迎角と気流剥離）</h3>
+<div class="stgs">
+<div class="stg"><div class="sl">段階A</div><div class="si">✅</div><div class="sn">正常飛行</div><div class="sd">気流が翼上面に沿って流れる。揚力正常。</div></div>
+<div class="arr">→</div>
+<div class="stg"><div class="sl">段階B</div><div class="si">⚡</div><div class="sn">バフェット（兆候）</div><div class="sd">後縁付近で剥離開始。機体が振動。ASK-21はバフェットが弱い。</div></div>
+<div class="arr">→</div>
+<div class="stg ds"><div class="sl">段階C ⚠</div><div class="si">🚨</div><div class="sn">完全失速</div><div class="sd">翼上面全体から剥離。揚力急減・急激な沈下。低高度では致命的。</div></div>
+<div class="arr">→</div>
+<div class="stg"><div class="sl">回復</div><div class="si">✈</div><div class="sn">機首下げ・速度回復</div><div class="sd">通常滑空姿勢より少し機首を下げ迎角を減らして速度回復。</div></div>
+</div></div>
+<div class="al dg"><h4>⚠ 重要：失速は速度が遅い時だけではない</h4><p>旋回中・引き起こし中・荷重増加時など、<strong>いかなる速度でも臨界迎角を超えると失速する。</strong></p></div>
+<div class="g2">
+<div class="card"><h3><span class="b">✓</span> 失速回復の基本操作</h3><ol><li>機首を通常滑空姿勢より少し下げる</li><li>迎角を減らして速度を回復</li><li>傾きがあればラダーで旋転防止</li><li>バンクを戻してから滑空姿勢へ</li></ol></div>
+<div class="card"><h3><span class="b">✗</span> やってはいけないこと</h3><ul><li>機首下がった状態で操縦桿を引く（二次失速）</li><li>粗いエルロン操作（翼端失速・スピン）</li><li>急激・粗い操作全般</li><li>エアブレーキ開の場合：先に閉じてから</li></ul></div>
+</div>
+<div class="dm"><h3>運動包囲線図 と ASK-21 速度制限</h3>
+<svg viewBox="0 0 550 240" xmlns="http://www.w3.org/2000/svg">
+<line x1="68" y1="200" x2="520" y2="200" stroke="#8BA5C2" stroke-width="1.5"/>
+<line x1="68" y1="14" x2="68" y2="200" stroke="#8BA5C2" stroke-width="1.5"/>
+<path d="M68,106 Q78,66 122,54 L218,48 L415,48" fill="none" stroke="#E8A020" stroke-width="2"/>
+<path d="M68,106 Q78,144 122,156 L218,163 L415,163" fill="none" stroke="#4FAADD" stroke-width="2"/>
+<line x1="252" y1="14" x2="252" y2="215" stroke="#4FAADD" stroke-width="1.5" stroke-dasharray="4 4"/>
+<line x1="362" y1="14" x2="362" y2="215" stroke="#E8A020" stroke-width="1.5" stroke-dasharray="4 4"/>
+<line x1="455" y1="14" x2="455" y2="215" stroke="#E05050" stroke-width="2" stroke-dasharray="5 3"/>
+<rect x="415" y="14" width="40" height="186" fill="rgba(224,80,80,.06)"/>
+<text x="252" y="222" fill="#4FAADD" font-size="10" text-anchor="middle" font-family="sans-serif">VA 180</text>
+<text x="362" y="222" fill="#E8A020" font-size="10" text-anchor="middle" font-family="sans-serif">VRA 200</text>
+<text x="455" y="222" fill="#E05050" font-size="10" text-anchor="middle" font-family="sans-serif">VNE 280</text>
+<text x="56" y="51" fill="#3CC87A" font-size="10" text-anchor="end" font-family="sans-serif">+5.3G</text>
+<text x="56" y="109" fill="#8BA5C2" font-size="10" text-anchor="end" font-family="sans-serif">1G</text>
+<text x="56" y="160" fill="#4FAADD" font-size="10" text-anchor="end" font-family="sans-serif">-3G</text>
+<text x="158" y="35" fill="#3CC87A" font-size="10" font-family="sans-serif">通常運用範囲</text>
+<text x="428" y="46" fill="#E05050" font-size="9" font-family="sans-serif">構造</text>
+<text x="428" y="58" fill="#E05050" font-size="9" font-family="sans-serif">破壊</text>
+<circle cx="122" cy="106" r="4" fill="#E8A020"/>
+<text x="122" y="96" fill="#E8A020" font-size="9" text-anchor="middle" font-family="sans-serif">VS1</text>
+</svg>
+</div>
+<div class="dm"><h3>旋回時の失速速度（基本失速速度 70 km/h）</h3>
+<table class="tbl" style="margin-bottom:0;"><thead><tr><th>バンク角</th><th>荷重倍数</th><th>失速速度倍数</th><th>失速速度</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td>0°（水平）</td><td>1.00</td><td>1.00</td><td>70 km/h</td><td class="grn">正常</td></tr>
+<tr><td>30°</td><td>1.15</td><td>1.07</td><td>75 km/h</td><td class="ylw">注意</td></tr>
+<tr><td>45°（急旋回）</td><td>1.41</td><td>1.19</td><td class="ylw">83 km/h</td><td class="ylw">要注意</td></tr>
+<tr><td>60°</td><td>2.00</td><td>1.41</td><td class="red">99 km/h</td><td class="red">危険</td></tr>
+</tbody></table>
+</div>
+</section>
+<!-- S5 空域・管制・気象 -->
+<section class="section" id="s5">
+<div class="st"><div class="sico">🗺</div><h2><small>Section 5</small>空域・管制・気象情報</h2></div>
+<div class="dm"><h3>日本の空域構造（高度別）</h3>
+<div class="aw">
+<div class="ar"><div class="albl">全高度</div><div class="abar" style="background:rgba(10,20,60,.8);border:1px solid rgba(79,170,221,.3);">福岡FIR（飛行情報区）── 日本周辺全域をカバー</div></div>
+<div class="ar"><div class="albl">18,000ft+</div><div class="abar" style="background:rgba(20,36,85,.8);border:1px solid rgba(79,170,221,.4);width:85%;">航空交通管制区（管制区）── 主にIFR機の管制</div></div>
+<div class="ar"><div class="albl">2,000ft AGL</div><div class="abar" style="background:rgba(60,200,122,.08);border:1px solid rgba(60,200,122,.4);width:60%;">管制区底（一般に2,000ft AGL）── グライダーに関係する下限</div></div>
+<div class="ar"><div class="albl">3,000ft MSL</div><div class="abar" style="background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.5);width:50%;">航空交通管制圏・情報圏 ── 空港周辺（地表〜3,000ft MSL）</div></div>
+<div class="ar"><div class="albl">地表付近</div><div class="abar" style="background:rgba(30,48,80,.8);border:1px solid rgba(255,255,255,.2);width:35%;">訓練空域（毎年許可申請が必要　法92条）</div></div>
+</div></div>
+<div class="g2">
+<div class="card"><h3><span class="b">!</span> 管制区・管制圏内の操縦練習</h3><p>原則<span class="red">禁止（法92条）</span>。ただし国土交通大臣の許可があれば可。滑空場ごとに毎年許可申請を行う。</p></div>
+<div class="card"><h3><span class="b">!</span> フライトプランの提出</h3><p><strong>5nm以上</strong>進出する場合に必要。<br>提出先：SWIMシステム（Web）または東京FAIB（電話）</p></div>
+</div>
+<div class="dm"><h3>航空情報の種類（AIM-J より）</h3>
+<table class="tbl" style="margin-bottom:0;"><thead><tr><th>種類</th><th>内容</th><th>周期</th></tr></thead>
+<tbody>
+<tr><td class="ylw">NOTAM</td><td>施設・業務・方式・危険の設定・状態・変更。花火・パラシュートなども</td><td>随時</td></tr>
+<tr><td>AIP</td><td>民間航空の運航に必要な永続的情報（計器進入図・出発方式等）</td><td>28日</td></tr>
+<tr><td>AIP Amendment</td><td>AIPの恒久的な変更・追加</td><td>28日</td></tr>
+<tr><td>AIP Supplement</td><td>AIPの一時的変更</td><td>28日</td></tr>
+<tr><td>AIC</td><td>安全・飛行技術・行政法律上のお知らせ的情報</td><td>随時</td></tr>
+</tbody></table>
+</div>
+<div class="al am"><h4>気象情報の確認ポイント</h4><p>天気図（ASAS・高層天気図）・METAR・TAF・BlipMap・観天望気。<br>特に<strong>風向風速・横風成分・視程・雲底・雷・乱気流・変化傾向</strong>を確認する。VMCが維持できるか、飛行規程の横風制限内かを判断。</p></div>
+</section>
+<!-- S6 飛行前点検 -->
+<section class="section" id="s6">
+<div class="st"><div class="sico">🔧</div><h2><small>Section 6</small>組立・地上取扱・飛行前点検</h2></div>
+<div class="dm"><h3>外部・内部点検の確認項目</h3>
+<div class="g2">
+<div class="card"><h3><span class="b">外部</span> 確認</h3><ul><li>主翼・胴体・尾翼の損傷・変形</li><li>操縦翼面・ヒンジ・ピン・ロック</li><li>エアブレーキ（左右同時開閉・ロック）</li><li>車輪・曳航フック</li><li>ピトー管・静圧孔（詰まりなし）</li><li>キャノピー（傷・ひび・ロック）</li></ul></div>
+<div class="card"><h3><span class="b">内部</span> コックピット確認</h3><ul><li>シートベルト装着確認</li><li>ペダル位置調整</li><li>操縦桿・ラダー・トリム動作</li><li>エアブレーキ・計器類</li><li>高度計セット</li><li>無線・キャノピーロック</li></ul></div>
+</div></div>
+<div class="g2">
+<div class="al am"><h4>操縦系統点検で確認すること</h4><p>操縦桿とラダーペダルを動かし、エルロン・エレベーター・ラダーが<strong>正しい方向に、滑らかに、十分な範囲で動くこと</strong>を確認。引っかかり・遊び・異音がないかも確認。</p></div>
+<div class="al dg"><h4>ピトー管・静圧孔が詰まると…</h4><p>速度計・高度計・昇降計が異常値を示します。速度計が正しくないと<strong>失速や速度超過の危険</strong>があります。</p></div>
+</div>
+<div class="dm"><h3>発航前の最終確認（チェックリスト）</h3>
+<div class="ck">
+<div class="ci"><span class="ct">🔒 キャノピー</span><span class="cs">閉・ロック確認</span></div>
+<div class="ci"><span class="ct">🪢 ベルト</span><span class="cs">確実に装着</span></div>
+<div class="ci"><span class="ct">🕹 操縦自由</span><span class="cs">三舵フル動作確認</span></div>
+<div class="ci"><span class="ct">✈ トリム</span><span class="cs">離陸位置に設定</span></div>
+<div class="ci"><span class="ct">🛑 エアブレーキ</span><span class="cs">閉・ロック確認</span></div>
+<div class="ci"><span class="ct">📊 計器</span><span class="cs">高度計・速度計確認</span></div>
+<div class="ci"><span class="ct">📻 無線</span><span class="cs">周波数・動作確認</span></div>
+<div class="ci"><span class="ct">💨 風</span><span class="cs">風向風速の確認</span></div>
+<div class="ci"><span class="ct">👁 対地・対空警戒</span><span class="cs">周囲安全確認</span></div>
+<div class="ci"><span class="ct">🪝 曳航索</span><span class="cs">装着・フック確認</span></div>
+</div>
+<div class="al dg" style="margin-bottom:0;"><h4>点検中に不具合を見つけたら</h4><p>飛行を中止し、<strong>整備担当者または運航責任者に報告</strong>する。自分で勝手に判断して飛行してはいけない。</p></div>
+</div>
+</section>
+<!-- S7 発航・曳航・着陸 -->
+<section class="section" id="s7">
+<div class="st"><div class="sico">🚀</div><h2><small>Section 7</small>発航・曳航・着陸</h2></div>
+<div class="dm"><h3>場周経路と着陸フロー</h3>
+<svg viewBox="0 0 550 210" xmlns="http://www.w3.org/2000/svg">
+<rect x="225" y="70" width="100" height="26" rx="3" fill="rgba(30,48,80,.9)" stroke="#8BA5C2" stroke-width="1.5"/>
+<text x="275" y="88" fill="#F4F8FC" font-size="11" text-anchor="middle" font-family="sans-serif">滑走路</text>
+<path d="M275,70 L275,33 L90,33 L90,146 L275,146 L275,97" stroke="#E8A020" stroke-width="2" fill="none" stroke-dasharray="8 4"/>
+<polygon points="275,33 270,48 280,48" fill="#E8A020"/>
+<line x1="415" y1="40" x2="415" y2="78" stroke="#4FAADD" stroke-width="2"/>
+<polygon points="415,84 410,70 420,70" fill="#4FAADD"/>
+<text x="430" y="63" fill="#4FAADD" font-size="11" font-family="sans-serif">風↓</text>
+<text x="275" y="22" fill="#E8A020" font-size="10" text-anchor="middle" font-family="sans-serif">① 離脱後 上昇帯へ</text>
+<text x="75" y="28" fill="#8BA5C2" font-size="9" text-anchor="middle" font-family="sans-serif">クロスウィンド</text>
+<text x="56" y="92" fill="#8BA5C2" font-size="9" text-anchor="middle" transform="rotate(-90,56,92)" font-family="sans-serif">ダウンウィンド</text>
+<text x="183" y="160" fill="#8BA5C2" font-size="9" text-anchor="middle" font-family="sans-serif">ベースレッグ</text>
+<path d="M275,146 L275,186" stroke="#3CC87A" stroke-width="2.5"/>
+<polygon points="275,193 270,180 280,180" fill="#3CC87A"/>
+<text x="295" y="172" fill="#3CC87A" font-size="11" font-family="sans-serif">ファイナル</text>
+<text x="175" y="40" fill="#E8A020" font-size="9" font-family="sans-serif">≈300m AGL</text>
+<text x="72" y="152" fill="#E8A020" font-size="9" font-family="sans-serif">≈150m AGL</text>
+<text x="120" y="202" fill="#3CC87A" font-size="9" font-family="sans-serif">最終旋回 100m AGL 以上</text>
+</svg></div>
+<div class="g2">
+<div class="card"><h3><span class="b">!</span> ウィンチ曳航 速度目安（ASK-21）</h3>
+<table class="tbl" style="margin-top:8px;margin-bottom:0;"><thead><tr><th>フェーズ</th><th>速度</th></tr></thead>
+<tbody>
+<tr><td>曳航速度</td><td class="ylw">100〜120 km/h</td></tr>
+<tr><td>最大ウィンチ曳航速度 VW</td><td class="ylw">150 km/h</td></tr>
+<tr><td>安全高度の目安</td><td class="ylw">約 70m AGL</td></tr>
+<tr><td>離脱後の速度セット</td><td>90 km/h</td></tr>
+</tbody></table></div>
+<div class="card"><h3><span class="b">!</span> 着陸の判定基準</h3><ul>
+<li>進入速度の変化：<strong class="ylw">±9 km/h以内</strong></li>
+<li>接地地点：指定地点から前方<strong class="ylw">60m以内</strong></li>
+<li>横滑り状態での接地：不可</li>
+<li>接地後の大きな方向偏位：不可</li>
+<li>エアブレーキは滑らかに操作</li>
+</ul></div>
+</div>
+<div class="g2">
+<div class="al dg"><h4>⚠ ファイナルで高すぎる場合</h4><p>エアブレーキを適切に使い降下角を大きくする。急激な操作や無理な横滑りは避ける。</p></div>
+<div class="al dg"><h4>⚠ ファイナルで低すぎる場合</h4><p>速度を維持しエアブレーキを閉じてパスを修正。届かない場合は無理に機首を上げず、安全に着陸できる場所を選ぶ。</p></div>
+</div>
+<div class="al am"><h4>曳航前の打ち合わせで確認すること</h4><p>曳航方法・曳航高度・離脱地点・曳航速度・索切れ時対応・離脱不能時対応・無線・風・滑走路・場周経路・緊急時の合図</p></div>
+</section>
+<!-- S8 ソアリング・性能 -->
+<section class="section" id="s8">
+<div class="st"><div class="sico">☁</div><h2><small>Section 8</small>ソアリング・機体性能</h2></div>
+<div class="g3">
+<div class="card"><h3><span class="b">👁</span> サーマルの兆候</h3><ul><li>積雲（発達した積雲の下）</li><li>地表の強い日射がある場所</li><li>地形・風の収束域</li><li>鳥のソアリング</li><li>他の滑空機の上昇</li><li>バリオメーターの変化</li></ul></div>
+<div class="card"><h3><span class="b">📍</span> サーマル内での行動</h3><ul><li>円滑・釣り合いの取れた旋回</li><li>バンク角は状況に応じて調整</li><li>他機との安全間隔を保つ</li><li>外れたら風下への流れを考慮</li><li>低高度ではサーマルより着陸優先</li></ul></div>
+<div class="card"><h3><span class="b">⚠</span> 常に意識すること</h3><ul><li>見張り・速度・高度・位置</li><li>風・帰投可能性</li><li>上昇より安全に戻れる余裕</li><li><strong class="red">低高度旋回は失速・スピンの危険</strong></li></ul></div>
+</div>
+<div class="dm"><h3>ポーラーカーブと最良滑空速度</h3>
+<svg viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg">
+<line x1="52" y1="163" x2="498" y2="163" stroke="#8BA5C2" stroke-width="1.5"/>
+<line x1="52" y1="14" x2="52" y2="163" stroke="#8BA5C2" stroke-width="1.5"/>
+<path d="M70,46 Q125,40 178,63 Q258,102 358,142 Q418,158 480,163" fill="none" stroke="#E8A020" stroke-width="2.5"/>
+<circle cx="158" cy="44" r="5" fill="#3CC87A"/>
+<line x1="158" y1="44" x2="158" y2="163" stroke="#3CC87A" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="158" y="175" fill="#3CC87A" font-size="10" text-anchor="middle" font-family="sans-serif">最小沈下速度</text>
+<line x1="52" y1="163" x2="262" y2="74" stroke="#4FAADD" stroke-width="1.5" stroke-dasharray="5 3"/>
+<circle cx="255" cy="76" r="5" fill="#4FAADD"/>
+<line x1="255" y1="76" x2="255" y2="163" stroke="#4FAADD" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="255" y="175" fill="#4FAADD" font-size="10" text-anchor="middle" font-family="sans-serif">最良滑空速度</text>
+<line x1="52" y1="116" x2="338" y2="104" stroke="#E05050" stroke-width="1.5" stroke-dasharray="5 3"/>
+<circle cx="333" cy="104" r="4" fill="#E05050"/>
+<text x="348" y="102" fill="#E05050" font-size="10" font-family="sans-serif">マクレディ速度</text>
+<text x="255" y="30" fill="#E8A020" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">ポーラーカーブ</text>
+<text x="280" y="181" fill="#8BA5C2" font-size="11" text-anchor="middle" font-family="sans-serif">対気速度 →</text>
+<text x="20" y="85" fill="#8BA5C2" font-size="10" text-anchor="middle" transform="rotate(-90,20,85)" font-family="sans-serif">沈下率 ↓</text>
+</svg>
+</div>
+<div class="g2">
+<div class="al inf"><h4>最良滑空速度（ベストL/D）</h4><p>原点からポーラーカーブへの接線の接点。最も遠くへ飛べる速度。<strong>向かい風・沈下帯では速度を増やす。</strong></p></div>
+<div class="al am"><h4>マクレディ理論（Speed to Fly）</h4><p>次に期待する上昇率に合わせて速度を決める。沈下が強い時や向かい風では速め、弱い条件では無駄に速くしない。</p></div>
+</div>
+</section>
+<!-- S9 異常・緊急時 -->
+<section class="section" id="s9">
+<div class="st"><div class="sico">🚨</div><h2><small>Section 9</small>異常・緊急時対応</h2></div>
+<div class="al dg"><h4>🚨 異常時の大原則</h4><p>① <strong>まず機体を飛ばす（速度・姿勢の確保）</strong><br>② 他機警戒・地上クリア・着陸場所の選定<br>③ 原因究明よりも<strong>操縦と着陸を優先する</strong></p></div>
+<div class="dm"><h3>索切れ時の対応（高度別）</h3>
+<div class="aw">
+<div class="ar"><div class="albl">AGL 150m以上</div><div class="abar" style="background:rgba(60,200,122,.1);border:1px solid rgba(60,200,122,.4);">通常または小場周で着陸。最終旋回は100m以下にならないように。</div></div>
+<div class="ar"><div class="albl">AGL 100〜150m</div><div class="abar" style="background:rgba(232,160,32,.1);border:1px solid rgba(232,160,32,.4);">アプローチ姿勢 → 離脱 → 直進か判断。小場周で着陸。最終旋回 100m以上確保。</div></div>
+<div class="ar"><div class="albl" style="color:var(--danger);">AGL 100m以下</div><div class="abar" style="background:rgba(224,80,80,.1);border:1px solid rgba(224,80,80,.5);"><span class="red">旋回禁止。</span> 直進してアプローチ姿勢へ。ダイブブレーキ＋フォワードスリップで降下角を調整。</div></div>
+<div class="ar"><div class="albl" style="color:var(--danger);">離陸直後〜10m</div><div class="abar" style="background:rgba(224,80,80,.15);border:1px solid rgba(224,80,80,.6);"><span class="red">機首上げ禁止。</span> 水平を保ち前進 → 離脱 → 接地姿勢で直進着陸。</div></div>
+<div class="ar"><div class="albl">離陸前</div><div class="abar" style="background:rgba(30,48,80,.8);border:1px solid rgba(255,255,255,.15);">離脱 → 水平保持 → ブレーキ使用 → 停止</div></div>
+</div></div>
+<div class="g2">
+<div class="card"><h3><span class="b">!</span> 各装置の故障対応</h3>
+<table class="tbl" style="margin-top:8px;margin-bottom:0;"><thead><tr><th>故障装置</th><th>対処</th></tr></thead>
+<tbody>
+<tr><td>エレベーター</td><td>トリムでコントロール→早期着陸</td></tr>
+<tr><td>エルロン</td><td>ラダーでコントロール→早期着陸</td></tr>
+<tr><td>ラダー</td><td>エルロンでコントロール→早期停止</td></tr>
+<tr><td>エアブレーキ左右差</td><td>フォワードスリップで調整</td></tr>
+<tr><td>高度計故障</td><td>姿勢・地形で判断→早期着陸</td></tr>
+<tr><td>速度計故障</td><td>姿勢・風切り音・操縦感覚で判断</td></tr>
+<tr><td>無線機故障</td><td>一方通信継続・翼振りで合図</td></tr>
+</tbody></table>
+</div>
+<div class="card"><h3><span class="b">!</span> 場外着陸 1W4Sチェック</h3>
+<div class="mn">
+<div class="mi"><span class="L">W</span><span class="W">Wind</span><span class="D">風向・風速<br>進入方向決定</span></div>
+<div class="mi"><span class="L">S</span><span class="W">Size</span><span class="D">長さ・幅の確認</span></div>
+<div class="mi"><span class="L">S</span><span class="W">Surface</span><span class="D">地表の状態</span></div>
+<div class="mi"><span class="L">S</span><span class="W">Surrounding</span><span class="D">周囲の障害物</span></div>
+<div class="mi"><span class="L">S</span><span class="W">Slope</span><span class="D">地面の傾斜</span></div>
+</div>
+</div>
+</div>
+<div class="al am"><h4>ポーポイズへの対応</h4><p>上昇角を少し緩め、ピッチングを抑えて正常な上昇を回復する。操縦桿で追いかけると悪化するので、落ち着いて小さく修正する。</p></div>
+</section>
+
+<!-- QA 100問 完全収録 -->
+<section class="section" id="qa">
+<div class="st"><div class="sico">❓</div><h2><small>口述試験対策</small>100問 完全収録・模範回答付き</h2></div>
+<div class="al inf"><h4>📌 使い方</h4><p>各問をタップして模範回答を確認。試験では数値・根拠・判断理由まで答えられることが重要です。</p></div>
+
+<div class="qac" id="qchap1"><div class="qact"><span class="qactT">Ⅰ 試験全体・機長の責任（Q1〜Q5）</span><button class="chapPlay" onclick="playChapter('qchap1', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q1</span><span style="flex:1;text-align:left;">試験官は口述で何を見ていますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q1 question')" data-text="試験官は口述で何を見ていますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q1 answer')" data-text="単なる知識ではなく、機長として安全に飛行を計画し、状況を認識し、危険を予測して判断できるかを見ています。規則の遵守・飛行前準備・発航判断・場周判断・異常時対応・着陸判断が重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">単なる知識ではなく、<strong>機長として安全に飛行を計画し、状況を認識し、危険を予測して判断できるか</strong>を見ています。規則の遵守・飛行前準備・発航判断・場周判断・異常時対応・着陸判断が重要です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q2</span><span style="flex:1;text-align:left;">機長の責任とは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q2 question')" data-text="機長の責任とは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q2 answer')" data-text="機長は、その飛行の安全について最終責任を負います。機体・気象・航空情報・滑空場・曳航設備・自分の体調・同乗者・運航体制を確認し、安全でないと判断した場合は飛行を中止します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機長は、その飛行の安全について<strong>最終責任</strong>を負います。機体・気象・航空情報・滑空場・曳航設備・自分の体調・同乗者・運航体制を確認し、安全でないと判断した場合は飛行を中止します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q3</span><span style="flex:1;text-align:left;">飛行を中止すべき場合はどのような時ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q3 question')" data-text="飛行を中止すべき場合はどのような時ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q3 answer')" data-text="機体に不具合がある、気象が悪い、横風や突風が技量を超える、航空情報上の制限がある、曳航設備に不安がある、自分の体調が悪い、運航体制に不備がある場合です。迷った場合は飛ばない判断をします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機体に不具合がある、気象が悪い、横風や突風が技量を超える、航空情報上の制限がある、曳航設備に不安がある、自分の体調が悪い、運航体制に不備がある場合です。<strong>迷った場合は飛ばない判断をします。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q4</span><span style="flex:1;text-align:left;">自家用操縦士として大切な姿勢は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q4 question')" data-text="自家用操縦士として大切な姿勢は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q4 answer')" data-text="無理をしないこと、安全側に判断すること、規則と飛行規程を守ることです。技量を見せるのではなく、危険を予測して避けることが重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">無理をしないこと、<strong>安全側に判断すること</strong>、規則と飛行規程を守ることです。技量を見せるのではなく、危険を予測して避けることが重要です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q5</span><span style="flex:1;text-align:left;">わからない質問を受けた場合、どう答えますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q5 question')" data-text="わからない質問を受けた場合、どう答えますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q5 answer')" data-text="推測で断定せず、「飛行規程で確認します」「安全側に判断します」と答えます。わからないまま飛行するのではなく、確認してから判断する姿勢が重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">推測で断定せず、<strong>「飛行規程で確認します」「安全側に判断します」</strong>と答えます。わからないまま飛行するのではなく、確認してから判断する姿勢が重要です。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap2"><div class="qact"><span class="qactT">Ⅱ 証明書・書類・航空日誌（Q6〜Q10）</span><button class="chapPlay" onclick="playChapter('qchap2', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q6</span><span style="flex:1;text-align:left;">飛行前に確認すべき機体書類は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q6 question')" data-text="飛行前に確認すべき機体書類は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q6 answer')" data-text="①航空機登録証明書 ②耐空証明書 ③運用限界等指定書 ④航空日誌 ⑤飛行規程などを確認します。特に有効性と、使用する機体が飛行可能な状態であることを確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>①航空機登録証明書 ②耐空証明書 ③運用限界等指定書 ④航空日誌 ⑤飛行規程</strong>などを確認します。特に有効性と、使用する機体が飛行可能な状態であることを確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q7</span><span style="flex:1;text-align:left;">航空日誌では何を確認しますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q7 question')" data-text="航空日誌では何を確認しますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q7 answer')" data-text="整備状況・前回飛行後の不具合・未処置事項・点検記録・飛行時間などを確認します。未処置の不具合があれば、飛行してよいか整備担当者や運航責任者に確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">整備状況・前回飛行後の不具合・未処置事項・点検記録・飛行時間などを確認します。<strong>未処置の不具合があれば、飛行してよいか整備担当者や運航責任者に確認します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q8</span><span style="flex:1;text-align:left;">耐空証明書で確認することは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q8 question')" data-text="耐空証明書で確認することは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q8 answer')" data-text="耐空証明が有効であること、使用する機体が耐空性を有していることを確認します。有効性に疑いがある場合は飛行しません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">耐空証明が<strong>有効であること</strong>、使用する機体が耐空性を有していることを確認します。有効性に疑いがある場合は飛行しません。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q9</span><span style="flex:1;text-align:left;">運用限界等指定書で確認することは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q9 question')" data-text="運用限界等指定書で確認することは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q9 answer')" data-text="その機体に認められた運用範囲・重量・速度・操縦制限・装備・運用条件を確認します。運用限界を超えた飛行はできません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">その機体に認められた<strong>運用範囲・重量・速度・操縦制限・装備・運用条件</strong>を確認します。運用限界を超えた飛行はできません。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q10</span><span style="flex:1;text-align:left;">飛行規程で特に確認すべき項目は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q10 question')" data-text="飛行規程で特に確認すべき項目は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q10 answer')" data-text="速度制限・重量重心・通常操作・非常操作・失速・スピン回復・進入速度・曳航速度・エアブレーキ操作・性能を確認します。審査では使用機の数値を答えられることが重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">速度制限・重量重心・通常操作・非常操作・失速・スピン回復・進入速度・曳航速度・エアブレーキ操作・性能を確認します。<strong>審査では使用機の数値を答えられることが重要です。</strong></div></div></div>
+</div></div>
+
+<div class="qac" id="qchap3"><div class="qact"><span class="qactT">Ⅲ 重量・重心位置（Q11〜Q15）</span><button class="chapPlay" onclick="playChapter('qchap3', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q11</span><span style="flex:1;text-align:left;">重量・重心位置を確認する理由は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q11 question')" data-text="重量・重心位置を確認する理由は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q11 answer')" data-text="重量や重心位置が許容範囲を外れると、操縦性・失速特性・着陸性能・曳航性能に悪影響があります。特に後方重心は不安定になり、失速・スピンからの回復が難しくなるため危険です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">重量や重心位置が許容範囲を外れると、操縦性・失速特性・着陸性能・曳航性能に悪影響があります。特に<strong>後方重心は不安定になり、失速・スピンからの回復が難しくなるため危険</strong>です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q12</span><span style="flex:1;text-align:left;">空虚重量・搭載重量・全備重量の違いを説明してください。</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q12 question')" data-text="空虚重量・搭載重量・全備重量の違いを説明してください。" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q12 answer')" data-text="空虚重量は機体自体の重量、搭載重量は搭乗者やバラスト・荷物などの重量、全備重量は空虚重量に搭載重量を加えた飛行時の重量です。全備重量が許容範囲内か確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">空虚重量は機体自体の重量、搭載重量は搭乗者やバラスト・荷物などの重量、<strong>全備重量は空虚重量に搭載重量を加えた飛行時の重量</strong>です。全備重量が許容範囲内か確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q13</span><span style="flex:1;text-align:left;">前方重心の影響は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q13 question')" data-text="前方重心の影響は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q13 answer')" data-text="機首下げ傾向が強くなり、操縦桿が重くなります。着陸時の引き起こしが難しくなり、接地が荒くなる可能性があります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機首下げ傾向が強くなり、操縦桿が重くなります。<strong>着陸時の引き起こしが難しくなり、接地が荒くなる可能性</strong>があります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q14</span><span style="flex:1;text-align:left;">後方重心の影響は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q14 question')" data-text="後方重心の影響は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q14 answer')" data-text="ピッチ方向に不安定になり、失速やスピンに入りやすくなります。回復も難しくなるため、後方重心は特に危険です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">ピッチ方向に不安定になり、<strong>失速やスピンに入りやすくなります。回復も難しくなるため、後方重心は特に危険</strong>です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q15</span><span style="flex:1;text-align:left;">重量が増えると速度にどう影響しますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q15 question')" data-text="重量が増えると速度にどう影響しますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q15 answer')" data-text="失速速度・最小沈下速度・旋回時の必要速度が増えます。着陸時のエネルギーも大きくなり、接地距離も伸びます。飛行重量に応じた速度を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">失速速度・最小沈下速度・旋回時の必要速度が<strong>増えます</strong>。着陸時のエネルギーも大きくなり、接地距離も伸びます。飛行重量に応じた速度を確認します。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap4"><div class="qact"><span class="qactT">Ⅳ 航空情報・気象情報（Q16〜Q20）</span><button class="chapPlay" onclick="playChapter('qchap4', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q16</span><span style="flex:1;text-align:left;">飛行前に入手すべき航空情報は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q16 question')" data-text="飛行前に入手すべき航空情報は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q16 answer')" data-text="NOTAM・空域制限・滑空場の使用状況・滑走路状態・障害物・周辺交通・イベント・管制・情報機関との連絡方法を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">NOTAM・空域制限・滑空場の使用状況・滑走路状態・障害物・周辺交通・イベント・管制・情報機関との連絡方法を確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q17</span><span style="flex:1;text-align:left;">飛行前に確認すべき気象情報は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q17 question')" data-text="飛行前に確認すべき気象情報は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q17 answer')" data-text="天気図・風向風速・視程・雲量・雲底・気温・気圧・降水・雷・乱気流・予報を確認します。滑空機では、発航・場周・着陸・帰投に影響する風が特に重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">天気図・風向風速・視程・雲量・雲底・気温・気圧・降水・雷・乱気流・予報を確認します。滑空機では、<strong>発航・場周・着陸・帰投に影響する風が特に重要</strong>です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q18</span><span style="flex:1;text-align:left;">気象情報を見て、どのように飛行可否を判断しますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q18 question')" data-text="気象情報を見て、どのように飛行可否を判断しますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q18 answer')" data-text="現在の気象・予報・風・雲底・視程・雷・滑空場周辺の状況を総合して判断します。自分の技量や使用機の限界も考え、少しでも安全に不安があれば飛行を中止します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">現在の気象・予報・風・雲底・視程・雷・滑空場周辺の状況を総合して判断します。<strong>自分の技量や使用機の限界も考え、少しでも安全に不安があれば飛行を中止します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q19</span><span style="flex:1;text-align:left;">横風が強い場合、何を考えますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q19 question')" data-text="横風が強い場合、何を考えますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q19 answer')" data-text="横風成分・突風・滑走路幅・機体の限界・自分の技量・発航・着陸時の方向維持を考えます。安定した発航・進入・接地が難しい場合は飛行しません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">横風成分・突風・滑走路幅・機体の限界・自分の技量・発航・着陸時の方向維持を考えます。<strong>安定した発航・進入・接地が難しい場合は飛行しません。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q20</span><span style="flex:1;text-align:left;">雲底が低い場合、何が問題ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q20 question')" data-text="雲底が低い場合、何が問題ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q20 answer')" data-text="場周高度・他機回避・地形回避・安全な帰投が難しくなります。有視界飛行条件（VMC）を満たせない恐れもあるため、雲底が低い場合は無理に飛行しません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">場周高度・他機回避・地形回避・安全な帰投が難しくなります。<strong>有視界飛行条件（VMC）を満たせない恐れ</strong>もあるため、雲底が低い場合は無理に飛行しません。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap5"><div class="qact"><span class="qactT">Ⅴ 組立・地上取扱・飛行前点検（Q21〜Q30）</span><button class="chapPlay" onclick="playChapter('qchap5', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q21</span><span style="flex:1;text-align:left;">組立で注意すべきことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q21 question')" data-text="組立で注意すべきことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q21 answer')" data-text="組立に適した場所で、作業補助者を指揮し、飛行規程に従って行います。主翼・尾翼・ピン・ロック・操縦系統の接続を確実に確認し、安全に配慮します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">組立に適した場所で、作業補助者を指揮し、飛行規程に従って行います。<strong>主翼・尾翼・ピン・ロック・操縦系統の接続を確実に確認し</strong>、安全に配慮します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q22</span><span style="flex:1;text-align:left;">地上取扱で注意することは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q22 question')" data-text="地上取扱で注意することは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q22 answer')" data-text="風向風速・周囲の人・障害物・翼端・尾部・キャノピーを確認します。方向転換・移動・係留は補助者と声を掛け合い、突風による翼上げや機体損傷を防ぎます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">風向風速・周囲の人・障害物・翼端・尾部・キャノピーを確認します。方向転換・移動・係留は補助者と声を掛け合い、<strong>突風による翼上げや機体損傷を防ぎます。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q23</span><span style="flex:1;text-align:left;">外部点検で確認する主な項目は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q23 question')" data-text="外部点検で確認する主な項目は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q23 answer')" data-text="主翼・胴体・尾翼・操縦翼面・ヒンジ・ピン・ロック・エアブレーキ・車輪・曳航フック・ピトー管・静圧孔・キャノピーを確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">主翼・胴体・尾翼・操縦翼面・ヒンジ・ピン・ロック・エアブレーキ・車輪・曳航フック・ピトー管・静圧孔・キャノピーを確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q24</span><span style="flex:1;text-align:left;">内部点検で確認する主な項目は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q24 question')" data-text="内部点検で確認する主な項目は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q24 answer')" data-text="シートベルト・ペダル位置・操縦桿・ラダー・トリム・エアブレーキ・計器・高度計・無線・キャノピーロックを確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">シートベルト・ペダル位置・操縦桿・ラダー・トリム・エアブレーキ・計器・高度計・無線・キャノピーロックを確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q25</span><span style="flex:1;text-align:left;">操縦系統の点検で重要なことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q25 question')" data-text="操縦系統の点検で重要なことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q25 answer')" data-text="操縦桿とラダーペダルを動かし、エルロン・エレベーター・ラダーが正しい方向に、滑らかに、十分な範囲で動くことを確認します。引っかかり・遊び・異音がないかも見ます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">操縦桿とラダーペダルを動かし、エルロン・エレベーター・ラダーが<strong>正しい方向に、滑らかに、十分な範囲で動くことを確認</strong>します。引っかかり・遊び・異音がないかも見ます。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q26</span><span style="flex:1;text-align:left;">エアブレーキの点検で見ることは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q26 question')" data-text="エアブレーキの点検で見ることは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q26 answer')" data-text="左右が同時に開閉すること、ロックが確実なこと、引っかかりや左右差がないことを確認します。着陸時の降下角調整に使う重要な装置です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">左右が同時に開閉すること、<strong>ロックが確実なこと</strong>、引っかかりや左右差がないことを確認します。着陸時の降下角調整に使う重要な装置です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q27</span><span style="flex:1;text-align:left;">ピトー管・静圧孔の確認が必要な理由は？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q27 question')" data-text="ピトー管・静圧孔の確認が必要な理由は？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q27 answer')" data-text="詰まりがあると速度計・高度計・昇降計に異常が出るためです。速度計が正しくないと失速や速度超過の危険があります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">詰まりがあると速度計・高度計・昇降計に異常が出るためです。<strong>速度計が正しくないと失速や速度超過の危険</strong>があります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q28</span><span style="flex:1;text-align:left;">キャノピーの確認事項は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q28 question')" data-text="キャノピーの確認事項は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q28 answer')" data-text="傷・ひび・開閉・ロック・非常時の操作方法を確認します。飛行中に開くと操縦に支障が出るため、発航前に確実にロックします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">傷・ひび・開閉・ロック・非常時の操作方法を確認します。<strong>飛行中に開くと操縦に支障が出るため</strong>、発航前に確実にロックします。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q29</span><span style="flex:1;text-align:left;">飛行前点検中に不具合を見つけたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q29 question')" data-text="飛行前点検中に不具合を見つけたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q29 answer')" data-text="飛行を中止し、整備担当者または運航責任者に報告します。自分で勝手に判断して飛行してはいけません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">飛行を中止し、<strong>整備担当者または運航責任者に報告します</strong>。自分で勝手に判断して飛行してはいけません。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q30</span><span style="flex:1;text-align:left;">発航前の最終確認を述べてください。</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q30 question')" data-text="発航前の最終確認を述べてください。" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q30 answer')" data-text="キャノピー閉・ロック、ベルト装着、操縦自由確認、トリム設定、エアブレーキ閉・ロック確認、計器・高度計確認、無線確認、風の確認、対地・対空警戒、曳航索装着を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">キャノピー閉・ロック、ベルト装着、操縦自由確認、トリム設定、<strong>エアブレーキ閉・ロック確認</strong>、計器・高度計確認、無線確認、風の確認、対地・対空警戒、曳航索装着を確認します。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap6"><div class="qact"><span class="qactT">Ⅵ 発航準備・場周経路（Q31〜Q36）</span><button class="chapPlay" onclick="playChapter('qchap6', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q31</span><span style="flex:1;text-align:left;">曳航前の打ち合わせで確認することは？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q31 question')" data-text="曳航前の打ち合わせで確認することは？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q31 answer')" data-text="曳航方法・曳航高度・離脱地点・曳航速度・索切れ時対応・離脱不能時対応・無線・風・滑走路・場周経路・緊急時の合図を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">曳航方法・曳航高度・離脱地点・曳航速度・索切れ時対応・離脱不能時対応・無線・風・滑走路・場周経路・緊急時の合図を確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q32</span><span style="flex:1;text-align:left;">発航の可否判断で見ることは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q32 question')" data-text="発航の可否判断で見ることは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q32 answer')" data-text="機体・気象・風・滑走路・曳航設備・周囲の交通・運航体制・自分の準備状態を確認します。条件が整わなければ発航しません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機体・気象・風・滑走路・曳航設備・周囲の交通・運航体制・自分の準備状態を確認します。<strong>条件が整わなければ発航しません。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q33</span><span style="flex:1;text-align:left;">場周経路で常に確認する三つは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q33 question')" data-text="場周経路で常に確認する三つは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q33 answer')" data-text="ポジション・高度・速度です。科目前後だけでなく、飛行中は常にこの三つを確認し、風による偏流も意識します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>ポジション・高度・速度</strong>です。科目前後だけでなく、飛行中は常にこの三つを確認し、風による偏流も意識します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q34</span><span style="flex:1;text-align:left;">場周経路の判定で大切なことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q34 question')" data-text="場周経路の判定で大切なことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q34 answer')" data-text="所定の経路を適切な高度と速度で飛行し、先行機と安全間隔を保つことです。操作は円滑で釣り合いが取れている必要があります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">所定の経路を<strong>適切な高度と速度で飛行し</strong>、先行機と安全間隔を保つことです。操作は円滑で釣り合いが取れている必要があります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q35</span><span style="flex:1;text-align:left;">先行機との間隔はどう考えますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q35 question')" data-text="先行機との間隔はどう考えますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q35 answer')" data-text="自機の位置・高度・速度・風・先行機の進入状況を見て、安全に着陸できる間隔を確保します。近すぎる場合は場周を調整し、無理に詰めません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">自機の位置・高度・速度・風・先行機の進入状況を見て、安全に着陸できる間隔を確保します。<strong>近すぎる場合は場周を調整し、無理に詰めません。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q36</span><span style="flex:1;text-align:left;">偏流を意識するとはどういうことですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q36 question')" data-text="偏流を意識するとはどういうことですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q36 answer')" data-text="風で機体が流されるため、機首方位と対地航跡は一致しません。風に応じて機首を修正し、意図したコースを飛ぶことです。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">風で機体が流されるため、機首方位と対地航跡は一致しません。<strong>風に応じて機首を修正し、意図したコースを飛ぶこと</strong>です。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap7"><div class="qact"><span class="qactT">Ⅶ ウィンチ曳航による離陸（Q37〜Q45）</span><button class="chapPlay" onclick="playChapter('qchap7', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q37</span><span style="flex:1;text-align:left;">ウィンチ曳航の目的は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q37 question')" data-text="ウィンチ曳航の目的は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q37 answer')" data-text="滑空機が安全に高度を獲得することです。発航中は速度・姿勢・方向・曳航索・横風・索切れを常に意識します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">滑空機が安全に高度を獲得することです。発航中は速度・姿勢・方向・曳航索・横風・索切れを常に意識します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q38</span><span style="flex:1;text-align:left;">ウィンチ曳航開始時の手順を説明してください。</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q38 question')" data-text="ウィンチ曳航開始時の手順を説明してください。" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q38 answer')" data-text="キャノピーを閉めてロックし、曳航索を装着します。レリーズ・スモールリング・ヒューズを確認し、風向風速・対地・対空警戒を行います。準備が整ったら翼端保持者に「準備良し」と伝えます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">キャノピーを閉めてロックし、曳航索を装着します。レリーズ・スモールリング・ヒューズを確認し、風向風速・対地・対空警戒を行います。<strong>準備が整ったら翼端保持者に「準備良し」と伝えます。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q39</span><span style="flex:1;text-align:left;">地上滑走中の操作は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q39 question')" data-text="地上滑走中の操作は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q39 answer')" data-text="エルロンで翼を水平に保ち、ラダーで方向を維持します。横風があれば風上側の翼をわずかに下げます。機首上げ・機首下げの過大姿勢を避けます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">エルロンで翼を水平に保ち、ラダーで方向を維持します。横風があれば風上側の翼をわずかに下げます。<strong>機首上げ・機首下げの過大姿勢を避けます。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q40</span><span style="flex:1;text-align:left;">離陸時の注意点は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q40 question')" data-text="離陸時の注意点は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q40 answer')" data-text="適正な速度になったら自然に浮揚させます。機首上げ姿勢で滑走すると急激な上昇になり危険です。機首下げすぎると地上滑走が長くなります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">適正な速度になったら自然に浮揚させます。<strong>機首上げ姿勢で滑走すると急激な上昇になり危険</strong>です。機首下げすぎると地上滑走が長くなります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q41</span><span style="flex:1;text-align:left;">ウィンチ曳航で安全高度までは何に注意しますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q41 question')" data-text="ウィンチ曳航で安全高度までは何に注意しますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q41 answer')" data-text="急な上昇姿勢を避け、速度を確保します。索切れやウィンチトラブルを常に想定し、異常時にすぐアプローチ姿勢へ移れるようにします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">急な上昇姿勢を避け、速度を確保します。<strong>索切れやウィンチトラブルを常に想定し</strong>、異常時にすぐアプローチ姿勢へ移れるようにします。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q42</span><span style="flex:1;text-align:left;">安全高度の目安は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q42 question')" data-text="安全高度の目安は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q42 answer')" data-text="資料では約70m AGLを安全高度として扱っています。実際には滑空場の運航基準や教官・審査員の指示に従います。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">資料では<strong>約70m AGL</strong>を安全高度として扱っています。実際には滑空場の運航基準や教官・審査員の指示に従います。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q43</span><span style="flex:1;text-align:left;">ウィンチ曳航中の速度目安は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q43 question')" data-text="ウィンチ曳航中の速度目安は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q43 answer')" data-text="ASK-21の資料例では、曳航速度は100〜120 km/hです。最大ウィンチ曳航速度VWは150 km/h。使用機の飛行規程と当日の条件を優先します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">ASK-21の資料例では、曳航速度は<strong>100〜120 km/h</strong>です。最大ウィンチ曳航速度VWは<strong>150 km/h</strong>。使用機の飛行規程と当日の条件を優先します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q44</span><span style="flex:1;text-align:left;">ウィンチのパワーが絞られてきたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q44 question')" data-text="ウィンチのパワーが絞られてきたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q44 answer')" data-text="徐々に滑空姿勢へ移行します。姿勢が安定したらレリーズを引いて曳航索を離脱し、離脱を確認して速度を90 km/hにセットします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">徐々に滑空姿勢へ移行します。姿勢が安定したら<strong>レリーズを引いて曳航索を離脱</strong>し、離脱を確認して速度を90 km/hにセットします。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q45</span><span style="flex:1;text-align:left;">曳航中にポーポイズが発生したらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q45 question')" data-text="曳航中にポーポイズが発生したらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q45 answer')" data-text="上昇角を少し緩め、ピッチングを抑えて正常な上昇を回復します。操縦桿で追いかけると悪化するので、落ち着いて小さく修正します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">上昇角を少し緩め、ピッチングを抑えて正常な上昇を回復します。<strong>操縦桿で追いかけると悪化するので</strong>、落ち着いて小さく修正します。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap8"><div class="qact"><span class="qactT">Ⅷ 滑空による着陸（Q46〜Q55）</span><button class="chapPlay" onclick="playChapter('qchap8', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q46</span><span style="flex:1;text-align:left;">着陸で判定される主な項目は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q46 question')" data-text="着陸で判定される主な項目は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q46 answer')" data-text="進入速度・横風修正・エアブレーキによる降下角調整・三舵の適切な操作・最終進入経路・指定地点への接地・接地後の方向維持です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">進入速度・横風修正・エアブレーキによる降下角調整・三舵の適切な操作・最終進入経路・<strong>指定地点への接地・接地後の方向維持</strong>です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q47</span><span style="flex:1;text-align:left;">最終進入速度はどう決めますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q47 question')" data-text="最終進入速度はどう決めますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q47 answer')" data-text="製造者が定めた推奨最小進入速度に、風速勾配や突風を考慮して決めます。使用機の飛行規程と運航基準に従います。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">製造者が定めた<strong>推奨最小進入速度に、風速勾配や突風を考慮して決めます</strong>。使用機の飛行規程と運航基準に従います。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q48</span><span style="flex:1;text-align:left;">着陸時の速度許容はどの程度が目安ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q48 question')" data-text="着陸時の速度許容はどの程度が目安ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q48 answer')" data-text="資料では、進入速度は±9 km/h以内の変化が判定基準とされています。速度を安定させることが重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">資料では、進入速度は<strong>±9 km/h以内の変化</strong>が判定基準とされています。速度を安定させることが重要です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q49</span><span style="flex:1;text-align:left;">指定地点への接地で求められることは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q49 question')" data-text="指定地点への接地で求められることは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q49 answer')" data-text="指定地点から前方60m以内に、安全な姿勢で接地すること。横滑り状態で接地したり、接地後に大きく方向偏位してはいけません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">指定地点から前方<strong>60m以内</strong>に、安全な姿勢で接地すること。横滑り状態で接地したり、接地後に大きく方向偏位してはいけません。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q50</span><span style="flex:1;text-align:left;">エアブレーキは何のために使いますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q50 question')" data-text="エアブレーキは何のために使いますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q50 answer')" data-text="抗力を増やして降下角を調整するために使います。接地点を合わせるために、速度を維持しながら滑らかに操作します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">抗力を増やして<strong>降下角を調整する</strong>ために使います。接地点を合わせるために、速度を維持しながら滑らかに操作します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q51</span><span style="flex:1;text-align:left;">ファイナルで高すぎる場合はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q51 question')" data-text="ファイナルで高すぎる場合はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q51 answer')" data-text="エアブレーキを適切に使い、降下角を大きくして接地点を合わせます。急激な操作や無理な横滑りは避けます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">エアブレーキを適切に使い、降下角を大きくして接地点を合わせます。<strong>急激な操作や無理な横滑りは避けます。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q52</span><span style="flex:1;text-align:left;">ファイナルで低すぎる場合はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q52 question')" data-text="ファイナルで低すぎる場合はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q52 answer')" data-text="まず速度を維持します。エアブレーキを閉じ、パスを修正します。それでも届かない場合は、無理に機首を上げず、安全に着陸できる場所を選びます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">まず速度を維持します。エアブレーキを閉じ、パスを修正します。それでも届かない場合は、<strong>無理に機首を上げず、安全に着陸できる場所を選びます。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q53</span><span style="flex:1;text-align:left;">横風着陸で注意することは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q53 question')" data-text="横風着陸で注意することは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q53 answer')" data-text="進入中は偏流を修正し、接地時には機軸を進行方向に合わせます。風上翼が上がらないようにエルロンを使い、ラダーで方向を維持します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">進入中は偏流を修正し、接地時には機軸を進行方向に合わせます。<strong>風上翼が上がらないようにエルロンを使い、ラダーで方向を維持します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q54</span><span style="flex:1;text-align:left;">着陸時にオーバースピードになると何が危険ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q54 question')" data-text="着陸時にオーバースピードになると何が危険ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q54 answer')" data-text="接地点が伸び、滑走距離が長くなり、オーバーランの危険があります。フレアから接地までの距離も長くなります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">接地点が伸び、滑走距離が長くなり、<strong>オーバーランの危険</strong>があります。フレアから接地までの距離も長くなります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q55</span><span style="flex:1;text-align:left;">着陸時に速度が遅すぎると何が危険ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q55 question')" data-text="着陸時に速度が遅すぎると何が危険ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q55 answer')" data-text="失速・沈下増大・ハードランディングの危険があります。低高度では回復余地がないため、進入速度を確実に守ります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">失速・沈下増大・ハードランディングの危険があります。<strong>低高度では回復余地がないため、進入速度を確実に守ります。</strong></div></div></div>
+</div></div>
+
+<div class="qac" id="qchap9"><div class="qact"><span class="qactT">Ⅸ 低速飛行・失速・急旋回・最良滑空（Q56〜Q72）</span><button class="chapPlay" onclick="playChapter('qchap9', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q56</span><span style="flex:1;text-align:left;">低速飛行の目的は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q56 question')" data-text="低速飛行の目的は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q56 answer')" data-text="最小操縦速度付近での減速感・失速間際の操縦性・通常滑空へ戻るときの加速感を理解することです。失速させないことが重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">最小操縦速度付近での減速感・失速間際の操縦性・通常滑空へ戻るときの加速感を理解することです。<strong>失速させないことが重要</strong>です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q57</span><span style="flex:1;text-align:left;">低速飛行の実施速度の目安は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q57 question')" data-text="低速飛行の実施速度の目安は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q57 answer')" data-text="資料では70〜75 km/hとされています。使用機の重量や飛行規程に基づき、当該機の最小操縦速度を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">資料では<strong>70〜75 km/h</strong>とされています。使用機の重量や飛行規程に基づき、当該機の最小操縦速度を確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q58</span><span style="flex:1;text-align:left;">低速飛行の判定基準は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q58 question')" data-text="低速飛行の判定基準は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q58 answer')" data-text="円滑で釣り合いの取れた操作であること、速度は＋9 km/h・−5 km/h以内、針路と傾斜角を適切に維持すること、失速させないことです。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">円滑で釣り合いの取れた操作であること、速度は<strong>＋9 km/h・−5 km/h以内</strong>、針路と傾斜角を適切に維持すること、失速させないことです。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q59</span><span style="flex:1;text-align:left;">低速飛行で粗いエルロン操作が危険な理由は？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q59 question')" data-text="低速飛行で粗いエルロン操作が危険な理由は？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q59 answer')" data-text="失速間際では翼の余裕が少なく、粗いエルロン操作で片翼失速やスピンにつながる危険があるためです。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">失速間際では翼の余裕が少なく、<strong>粗いエルロン操作で片翼失速やスピンにつながる危険</strong>があるためです。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q60</span><span style="flex:1;text-align:left;">低速飛行から通常滑空に戻す時の注意は？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q60 question')" data-text="低速飛行から通常滑空に戻す時の注意は？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q60 answer')" data-text="機首を滑空姿勢に戻し、加速を待ちます。すぐに急操作せず、速度が回復してから通常の操縦に移ります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機首を滑空姿勢に戻し、加速を待ちます。<strong>すぐに急操作せず、速度が回復してから通常の操縦に移ります。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q61</span><span style="flex:1;text-align:left;">失速とは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q61 question')" data-text="失速とは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q61 answer')" data-text="迎角が大きくなりすぎて翼上面の気流が剥離し、揚力が急に減少する状態です。速度が遅い時だけでなく、旋回中や引き起こし中にも起こります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">迎角が大きくなりすぎて<strong>翼上面の気流が剥離し、揚力が急に減少する状態</strong>です。速度が遅い時だけでなく、旋回中や引き起こし中にも起こります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q62</span><span style="flex:1;text-align:left;">失速回復の基本操作は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q62 question')" data-text="失速回復の基本操作は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q62 answer')" data-text="機首を通常滑空姿勢より少し下げ、迎角を減らして速度を回復します。傾きがあればラダーで旋転を防ぎ、バンクを戻してから滑空姿勢にします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>機首を通常滑空姿勢より少し下げ、迎角を減らして速度を回復します。</strong>傾きがあればラダーで旋転を防ぎ、バンクを戻してから滑空姿勢にします。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q63</span><span style="flex:1;text-align:left;">失速回復でやってはいけないことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q63 question')" data-text="失速回復でやってはいけないことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q63 answer')" data-text="機首が下がった状態で操縦桿を引くこと（二次失速）、粗いエルロン操作（スピン誘発）をすることです。回復操作は確実かつ滑らかに行います。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機首が下がった状態で操縦桿を引くこと（二次失速）、粗いエルロン操作（スピン誘発）をすることです。<strong>回復操作は確実かつ滑らかに</strong>行います。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q64</span><span style="flex:1;text-align:left;">ダイブブレーキ開の失速回復では何をしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q64 question')" data-text="ダイブブレーキ開の失速回復では何をしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q64 answer')" data-text="バフェッティングまたは完全失速の兆候を確認したら、ダイブブレーキを閉じるとともに機首を通常滑空姿勢より少し下げ、速度を回復します。終了時にはダイブブレーキのロックを確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">バフェッティングまたは完全失速の兆候を確認したら、<strong>ダイブブレーキを閉じるとともに機首を通常滑空姿勢より少し下げ</strong>、速度を回復します。終了時にはダイブブレーキのロックを確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q65</span><span style="flex:1;text-align:left;">旋回中の失速で注意することは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q65 question')" data-text="旋回中の失速で注意することは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q65 answer')" data-text="バンクが深くなり内滑りになるとスピンに入りやすくなります。失速が近づいたら粗いエルロン操作を避け、ラダーを適切に使い、旋転を防ぎます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">バンクが深くなり内滑りになるとスピンに入りやすくなります。失速が近づいたら<strong>粗いエルロン操作を避け、ラダーを適切に使い、旋転を防ぎます。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q66</span><span style="flex:1;text-align:left;">急旋回の目的は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q66 question')" data-text="急旋回の目的は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q66 answer')" data-text="ソアリングを想定し、最小沈下速度付近でバンク45度の旋回を円滑に行うことです。速度・バンク・釣り合い・見張りを維持する能力を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">ソアリングを想定し、最小沈下速度付近で<strong>バンク45度の旋回を円滑に行う</strong>ことです。速度・バンク・釣り合い・見張りを維持する能力を確認します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q67</span><span style="flex:1;text-align:left;">急旋回の実施速度の考え方は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q67 question')" data-text="急旋回の実施速度の考え方は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q67 answer')" data-text="最小沈下速度とバンク45度で増える荷重を考慮します。資料では90〜95 km/hを例示しています。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">最小沈下速度とバンク45度で増える荷重を考慮します。資料では<strong>90〜95 km/h</strong>を例示しています。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q68</span><span style="flex:1;text-align:left;">バンク45度で失速速度が増える理由は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q68 question')" data-text="バンク45度で失速速度が増える理由は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q68 answer')" data-text="旋回により荷重倍数が増え（1.41G）、必要な揚力が増えるためです。失速速度は直線飛行の1.19倍になります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">旋回により<strong>荷重倍数が増え（1.41G）、必要な揚力が増える</strong>ためです。失速速度は直線飛行の1.19倍になります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q69</span><span style="flex:1;text-align:left;">急旋回でスパイラルダイブに入りそうな場合は？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q69 question')" data-text="急旋回でスパイラルダイブに入りそうな場合は？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q69 answer')" data-text="バンクが深くなりすぎて速度が増える場合、バンクを浅くして回復します。機首下げと速度増加を放置しません。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">バンクが深くなりすぎて速度が増える場合、<strong>バンクを浅くして回復します</strong>。機首下げと速度増加を放置しません。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q70</span><span style="flex:1;text-align:left;">最良滑空比速度による滑空の目的は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q70 question')" data-text="最良滑空比速度による滑空の目的は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q70 answer')" data-text="大気の状態に応じて、最も効率よく距離を稼ぐ速度を選ぶことです。クロスカントリーやサーマル間移動で重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">大気の状態に応じて、<strong>最も効率よく距離を稼ぐ速度を選ぶこと</strong>です。クロスカントリーやサーマル間移動で重要です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q71</span><span style="flex:1;text-align:left;">最良滑空速度は常に一定ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q71 question')" data-text="最良滑空速度は常に一定ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q71 answer')" data-text="一定ではありません。機体重量・向かい風・追い風・沈下帯・上昇帯により最適速度は変わります。大気の状態に対応した速度を選びます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">一定ではありません。<strong>機体重量・向かい風・追い風・沈下帯・上昇帯により最適速度は変わります。</strong>大気の状態に対応した速度を選びます。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q72</span><span style="flex:1;text-align:left;">マクレディ理論を説明してください。</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q72 question')" data-text="マクレディ理論を説明してください。" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q72 answer')" data-text="次に期待する上昇率や大気の状態に合わせて飛行速度を決める考え方です。沈下が強い時や向かい風では速め、弱い条件では無駄に速くしすぎないようにします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">次に期待する上昇率や大気の状態に合わせて飛行速度を決める考え方です。<strong>沈下が強い時や向かい風では速め</strong>、弱い条件では無駄に速くしすぎないようにします。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap10"><div class="qact"><span class="qactT">Ⅹ ソアリング（Q73〜Q80）</span><button class="chapPlay" onclick="playChapter('qchap10', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q73</span><span style="flex:1;text-align:left;">サーマル・ソアリングで必要な能力は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q73 question')" data-text="サーマル・ソアリングで必要な能力は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q73 answer')" data-text="サーマルの兆候を見つけ、構造を考え、適切な方向から入域し、円滑で釣り合いの取れた旋回でサーマル内に留まる能力です。他機・地形・風にも注意します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">サーマルの兆候を見つけ、構造を考え、適切な方向から入域し、<strong>円滑で釣り合いの取れた旋回でサーマル内に留まる能力</strong>です。他機・地形・風にも注意します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q74</span><span style="flex:1;text-align:left;">サーマルの兆候には何がありますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q74 question')" data-text="サーマルの兆候には何がありますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q74 answer')" data-text="積雲・地表の日射・地形・風の収束・鳥・他の滑空機の上昇・バリオの変化などです。ただし兆候だけで断定せず、周囲の安全を確認します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">積雲・地表の日射・地形・風の収束・鳥・他の滑空機の上昇・バリオの変化などです。<strong>ただし兆候だけで断定せず、周囲の安全を確認します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q75</span><span style="flex:1;text-align:left;">サーマルから外れた場合はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q75 question')" data-text="サーマルから外れた場合はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q75 answer')" data-text="上昇が強かった方向や風下への流れを考え、旋回中心を修正して再入域を試みます。ただし低高度ではサーマル探しを続けず、着陸判断を優先します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">上昇が強かった方向や風下への流れを考え、旋回中心を修正して再入域を試みます。<strong>ただし低高度ではサーマル探しを続けず、着陸判断を優先します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q76</span><span style="flex:1;text-align:left;">リッジ・ソアリングで重要なことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q76 question')" data-text="リッジ・ソアリングで重要なことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q76 answer')" data-text="地形と風向風速から上昇流域を判断し、地形から安全な距離を保つことです。他機・乱気流・退避方向・リッジ横断時の操作にも注意します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">地形と風向風速から上昇流域を判断し、<strong>地形から安全な距離を保つこと</strong>です。他機・乱気流・退避方向・リッジ横断時の操作にも注意します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q77</span><span style="flex:1;text-align:left;">ウェーブ・ソアリングで重要なことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q77 question')" data-text="ウェーブ・ソアリングで重要なことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q77 answer')" data-text="上昇流域と乱気流域を予測し、適切に入域・離脱できることです。強い乱気流・ローター・高高度・風下への流され・必要な管制機関との調整に注意します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">上昇流域と乱気流域を予測し、適切に入域・離脱できることです。<strong>強い乱気流・ローター・高高度・風下への流され・必要な管制機関との調整</strong>に注意します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q78</span><span style="flex:1;text-align:left;">ソアリング中に常に意識することは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q78 question')" data-text="ソアリング中に常に意識することは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q78 answer')" data-text="見張り・速度・釣り合い・高度・位置・風・帰投可能性です。上昇を追うことより、安全に戻って着陸できる余裕を保つことが重要です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">見張り・速度・釣り合い・高度・位置・風・帰投可能性です。<strong>上昇を追うことより、安全に戻って着陸できる余裕を保つことが重要</strong>です。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q79</span><span style="flex:1;text-align:left;">低高度でサーマルを見つけた場合、旋回しますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q79 question')" data-text="低高度でサーマルを見つけた場合、旋回しますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q79 answer')" data-text="原則として無理に旋回しません。低高度旋回は失速・スピンの危険が高いため、着陸準備を優先します。サーマル利用は十分な高度がある場合に限ります。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">原則として<strong>無理に旋回しません</strong>。低高度旋回は失速・スピンの危険が高いため、着陸準備を優先します。サーマル利用は十分な高度がある場合に限ります。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q80</span><span style="flex:1;text-align:left;">サーマル間の速度はどう決めますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q80 question')" data-text="サーマル間の速度はどう決めますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q80 answer')" data-text="最良滑空速度を基本に、風・沈下・期待上昇率・機体重量を考慮して決めます。大気の状態に応じたSpeed to Flyの考え方を使います。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">最良滑空速度を基本に、風・沈下・期待上昇率・機体重量を考慮して決めます。<strong>大気の状態に応じたSpeed to Flyの考え方を使います。</strong></div></div></div>
+</div></div>
+
+<div class="qac" id="qchap11"><div class="qact"><span class="qactT">Ⅺ 曳航中の異常・緊急時（Q81〜Q90）</span><button class="chapPlay" onclick="playChapter('qchap11', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q81</span><span style="flex:1;text-align:left;">曳航不調対応の大原則は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q81 question')" data-text="曳航不調対応の大原則は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q81 answer')" data-text="第一に速度の確保です。高度AGL100m以下では旋回せず直進して着陸します。AGL100m前後で迷った場合も直進を選びます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">第一に<strong>速度の確保</strong>です。<strong>高度AGL100m以下では旋回せず直進して着陸します。</strong>AGL100m前後で迷った場合も直進を選びます。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q82</span><span style="flex:1;text-align:left;">離陸前に曳航索切れが起きたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q82 question')" data-text="離陸前に曳航索切れが起きたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q82 answer')" data-text="曳航索を離脱し、水平を保って前進し、ブレーキを使って停止します。慌てて方向を乱さないようにします。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">曳航索を離脱し、水平を保って前進し、<strong>ブレーキを使って停止します</strong>。慌てて方向を乱さないようにします。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q83</span><span style="flex:1;text-align:left;">離陸直後から10m以下で索切れしたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q83 question')" data-text="離陸直後から10m以下で索切れしたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q83 answer')" data-text="機首を下げすぎないように注意し、滑らかに接地姿勢にします。曳航索を離脱し、水平を保って直進し、接地・着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">機首を下げすぎないように注意し、滑らかに接地姿勢にします。<strong>曳航索を離脱し、水平を保って直進し、接地・着陸します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q84</span><span style="flex:1;text-align:left;">AGL100m以下で索切れしたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q84 question')" data-text="AGL100m以下で索切れしたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q84 answer')" data-text="滑らかにアプローチ姿勢にし、曳航索を離脱して直進します。機速が安定したらダイブブレーキを開き、必要に応じてフォワードスリップを併用し、滑走路内または安全な不時着場に着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">滑らかにアプローチ姿勢にし、曳航索を離脱して<strong>直進します</strong>。機速が安定したらダイブブレーキを開き、必要に応じてフォワードスリップを併用し、滑走路内または安全な不時着場に着陸します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q85</span><span style="flex:1;text-align:left;">AGL100m以上で索切れしたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q85 question')" data-text="AGL100m以上で索切れしたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q85 answer')" data-text="まずアプローチ姿勢にして速度を確保し、曳航索を離脱します。直進着陸できれば直進、不可能な場合は風下側に旋回し、最終旋回が100mを下回らないように着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">まずアプローチ姿勢にして速度を確保し、曳航索を離脱します。直進着陸できれば直進、不可能な場合は風下側に旋回し、<strong>最終旋回が100mを下回らないように着陸します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q86</span><span style="flex:1;text-align:left;">AGL150m以上で索切れしたらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q86 question')" data-text="AGL150m以上で索切れしたらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q86 answer')" data-text="アプローチ姿勢にして曳航索を離脱し、姿勢が安定したらチェックポイントへ向かいます。通常場周が可能なら通常場周、難しければ小場周で、最終旋回が100mを下回らないように着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">アプローチ姿勢にして曳航索を離脱し、姿勢が安定したらチェックポイントへ向かいます。<strong>通常場周が可能なら通常場周、難しければ小場周で、最終旋回が100mを下回らないように着陸します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q87</span><span style="flex:1;text-align:left;">ウィンチ曳航中に速度不足・速度過大になったらどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q87 question')" data-text="ウィンチ曳航中に速度不足・速度過大になったらどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q87 answer')" data-text="特に安全高度までは上昇角を上げすぎず、速度に注意します。無線連絡し、改善しなければ離脱して高度に応じた着陸を行います。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">特に安全高度までは上昇角を上げすぎず、速度に注意します。<strong>無線連絡し、改善しなければ離脱して高度に応じた着陸を行います。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q88</span><span style="flex:1;text-align:left;">ウィンチエンジントラブル時はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q88 question')" data-text="ウィンチエンジントラブル時はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q88 answer')" data-text="上昇角と速度に注意し、回復しなければ離脱します。その後は高度に応じて、直進着陸・場周・小場周を判断します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">上昇角と速度に注意し、回復しなければ離脱します。その後は高度に応じて、<strong>直進着陸・場周・小場周を判断します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q89</span><span style="flex:1;text-align:left;">曳航索離脱不能時はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q89 question')" data-text="曳航索離脱不能時はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q89 answer')" data-text="所定の手順に従います。資料では、ウィンチ上空で旋回して索を切らせ、障害物の少ない滑走路近くを高速で逆進入または正進入する方法が示されています。実際には運航基準と教官・審査員の指示に従います。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">所定の手順に従います。資料では、<strong>ウィンチ上空で旋回して索を切らせ、障害物の少ない滑走路近くを高速で逆進入または正進入する方法</strong>が示されています。実際には運航基準と教官・審査員の指示に従います。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q90</span><span style="flex:1;text-align:left;">曳航索を追い越した場合はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q90 question')" data-text="曳航索を追い越した場合はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q90 answer')" data-text="自然離脱することもありますが、離脱していなければ直ちに離脱し、速度を維持して滑空・接地します。地上滑走中なら離脱・ブレーキ・停止です。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">自然離脱することもありますが、離脱していなければ<strong>直ちに離脱し、速度を維持して滑空・接地します</strong>。地上滑走中なら離脱・ブレーキ・停止です。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap12"><div class="qact"><span class="qactT">Ⅻ 諸系統・装置故障（Q91〜Q98）</span><button class="chapPlay" onclick="playChapter('qchap12', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q91</span><span style="flex:1;text-align:left;">異常時に最初に行うことは何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q91 question')" data-text="異常時に最初に行うことは何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q91 answer')" data-text="まず機体を飛ばすことです。速度と姿勢を確保し、他機警戒・地上クリア・安全な着陸場所の選定を行います。原因究明よりも操縦と着陸を優先します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">まず<strong>機体を飛ばすこと</strong>です。速度と姿勢を確保し、他機警戒・地上クリア・安全な着陸場所の選定を行います。<strong>原因究明よりも操縦と着陸を優先します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q92</span><span style="flex:1;text-align:left;">エレベーター故障時はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q92 question')" data-text="エレベーター故障時はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q92 answer')" data-text="トリムでコントロールを試みます。大きな操作は避け、速度と姿勢を安定させ、早めに着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>トリムでコントロールを試みます。</strong>大きな操作は避け、速度と姿勢を安定させ、早めに着陸します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q93</span><span style="flex:1;text-align:left;">エルロン故障時はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q93 question')" data-text="エルロン故障時はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q93 answer')" data-text="ラダーによるコントロールを試みます。外滑りになりやすいため速度をつけ、安全な姿勢で早めに着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>ラダーによるコントロールを試みます。</strong>外滑りになりやすいため速度をつけ、安全な姿勢で早めに着陸します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q94</span><span style="flex:1;text-align:left;">ラダー故障時はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q94 question')" data-text="ラダー故障時はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q94 answer')" data-text="エルロンでコントロールを試みます。地上滑走で方向制御が難しくなるため、接地後はブレーキを使用し、早めに停止します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>エルロンでコントロールを試みます。</strong>地上滑走で方向制御が難しくなるため、接地後はブレーキを使用し、早めに停止します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q95</span><span style="flex:1;text-align:left;">ダイブブレーキに左右差が出た場合は？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q95 question')" data-text="ダイブブレーキに左右差が出た場合は？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q95 answer')" data-text="可能であれば反対側を合わせる操作を行います。進入パスは必要に応じてフォワードスリップで調整し、安全に着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">可能であれば反対側を合わせる操作を行います。<strong>進入パスは必要に応じてフォワードスリップで調整し</strong>、安全に着陸します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q96</span><span style="flex:1;text-align:left;">高度計が故障した場合はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q96 question')" data-text="高度計が故障した場合はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q96 answer')" data-text="軽く叩いてみて改善を確認します。それでも異常があれば、ポジション・パス角・周囲の地形・滑空場との位置関係で高度を判断し、早めに着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">軽く叩いてみて改善を確認します。それでも異常があれば、<strong>ポジション・パス角・周囲の地形・滑空場との位置関係で高度を判断し、早めに着陸します。</strong></div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q97</span><span style="flex:1;text-align:left;">速度計が故障した場合はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q97 question')" data-text="速度計が故障した場合はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q97 answer')" data-text="地平線に対する姿勢・風切り音・操縦感覚を使って速度を判断します。低速や急操作を避け、安全側の速度を保って早めに着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body"><strong>地平線に対する姿勢・風切り音・操縦感覚</strong>を使って速度を判断します。低速や急操作を避け、安全側の速度を保って早めに着陸します。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q98</span><span style="flex:1;text-align:left;">無線機故障時はどうしますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q98 question')" data-text="無線機故障時はどうしますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q98 answer')" data-text="一方通信を続け、ピストや他機に自機の意図を伝える努力をします。チェックポイントで翼を振るなど所定の方法で合図し、見張りを強化して着陸します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">一方通信を続け、ピストや他機に自機の意図を伝える努力をします。<strong>チェックポイントで翼を振るなど所定の方法で合図し</strong>、見張りを強化して着陸します。</div></div></div>
+</div></div>
+
+<div class="qac" id="qchap13"><div class="qact"><span class="qactT">XIII 場外着陸・総合能力（Q99〜Q100）</span><button class="chapPlay" onclick="playChapter('qchap13', this)">▶ この章を通して聞く</button></div><div class="ql2">
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q99</span><span style="flex:1;text-align:left;">場外着陸を決意したら何を確認しますか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q99 question')" data-text="場外着陸を決意したら何を確認しますか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q99 answer')" data-text="無線で連絡し、候補地の1W4Sを確認します。Wind（風）・Size（大きさ）・Surface（表面状態）・Surrounding（周囲の障害物）・Slope（傾斜）を見て進入方向を決めます。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">無線で連絡し、候補地の<strong>1W4S</strong>を確認します。<strong>W</strong>ind（風）・<strong>S</strong>ize（大きさ）・<strong>S</strong>urface（表面状態）・<strong>S</strong>urrounding（周囲の障害物）・<strong>S</strong>lope（傾斜）を見て進入方向を決めます。</div></div></div>
+<div class="qi"><div class="qqrow"><button class="qq" onclick="tqa(this)"><span class="qlb">Q100</span><span style="flex:1;text-align:left;">背風着陸が必要な場合の注意点は何ですか？</span><span class="qa2">▼</span></button><button class="spk" onclick="speakText(this,'Q100 question')" data-text="背風着陸が必要な場合の注意点は何ですか？" title="質問を読み上げ" aria-label="質問を読み上げ">🔊</button></div><div class="qa3"><button class="spk spkA" onclick="speakText(this,'Q100 answer')" data-text="早めに高度処理し、進入パスを浅くし、障害物に注意します。対地速度が速く見えるため機速を落としすぎないようにします。フレアから接地までの距離が長くなるため、目標は十分手前に置きます。接地後はラダー・エルロンの効きが急速に弱くなるため、早めに方向修正します。" title="回答を読み上げ" aria-label="回答を読み上げ">🔊 回答を読み上げる</button><div class="qa3body">早めに高度処理し、進入パスを浅くし、障害物に注意します。<strong>対地速度が速く見えるため機速を落としすぎないようにします</strong>。フレアから接地までの距離が長くなるため、目標は十分手前に置きます。接地後はラダー・エルロンの効きが急速に弱くなるため、<strong>早めに方向修正します。</strong></div></div></div>
+</div></div>
+</section>
+
+<!-- まとめ -->
+<section class="section" id="sm">
+<div class="st"><div class="sico">📌</div><h2><small>直前確認</small>暗唱まとめ</h2></div>
+<div class="al am"><h4>試験当日はこう考える</h4></div>
+<div class="mb">
+<div class="mbt">まず確認：<span>ポジション・高度・速度</span></div>
+<div class="mbt">次に確認：<span>風・他機・着陸場所</span></div>
+<div class="mbt">迷ったら：<span>直進、安全側、早めに着陸</span></div>
+<div class="mbt">索切れ 100m以下：<span>絶対に旋回しない。直進・直線着陸。</span></div>
+<div class="mbt">異常時の最初の行動：<span>まず機体を飛ばす（速度・姿勢の確保）</span></div>
+<div class="mbt">失速回復：<span>機首を少し下げ→速度回復→急な操作は禁止</span></div>
+<div class="mbt">場外着陸：<span>1W4S（Wind / Size / Surface / Surrounding / Slope）</span></div>
+<div class="mbt">着陸速度許容：<span>±9 km/h以内　接地地点：指定地点前方60m以内</span></div>
+<div class="mbt">後方重心：<span>失速・スピンに入りやすく回復困難。最も危険。</span></div>
+<div class="mbt">わからない質問：<span>「飛行規程で確認します」「安全側に判断します」</span></div>
+</div>
+<div class="dm" style="margin-top:24px;"><h3>ASK-21 重要数値まとめ</h3>
+<div class="g2" style="margin-bottom:0;">
+<table class="tbl" style="margin-bottom:0;"><thead><tr><th>速度記号</th><th>値</th><th>意味</th></tr></thead>
+<tbody>
+<tr><td class="red">VNE</td><td class="red">280 km/h</td><td>超過禁止速度</td></tr>
+<tr><td class="ylw">VRA</td><td class="ylw">200 km/h</td><td>悪気流速度</td></tr>
+<tr><td class="blu">VA</td><td class="blu">180 km/h</td><td>運動速度</td></tr>
+<tr><td>VT</td><td>180 km/h</td><td>航空機曳航速度</td></tr>
+<tr><td>VW</td><td>150 km/h</td><td>ウィンチ曳航速度</td></tr>
+<tr><td>曳航速度目安</td><td class="ylw">100〜120 km/h</td><td>ウィンチ曳航中</td></tr>
+<tr><td>離脱後速度</td><td>90 km/h</td><td>設定速度</td></tr>
+</tbody></table>
+<table class="tbl" style="margin-bottom:0;"><thead><tr><th>項目</th><th>基準値</th></tr></thead>
+<tbody>
+<tr><td>基本失速速度</td><td>70 km/h（水平飛行）</td></tr>
+<tr><td>バンク45°失速速度</td><td>83 km/h</td></tr>
+<tr><td>急旋回実施速度</td><td>90〜95 km/h</td></tr>
+<tr><td>低速飛行実施速度</td><td>70〜75 km/h</td></tr>
+<tr><td>安全高度目安</td><td>約70m AGL</td></tr>
+<tr><td>進入速度許容</td><td>±9 km/h</td></tr>
+<tr><td>接地地点許容</td><td>指定地点前方60m以内</td></tr>
+</tbody></table>
+</div></div>
+<div class="al gn" style="margin-top:20px;"><h4>✈ 上級滑空機の自家用口述では…</h4><p>うまく飛ぶことよりも、<strong>危険を予測し、無理をせず、機長として安全に判断できること</strong>を示すことが大切です。</p></div>
+</section>
+</main>
+</div>
+<script>
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tqa(btn){
+  const item=btn.closest('.qi');
+  item.classList.toggle('open');
+  item.querySelector('.qa3').classList.toggle('show');
+}
+
+/* ===== Web Speech API による読み上げ機能 ===== */
+let ttsRate = 1.0;
+let ttsVoice = null;
+let currentSpeakBtn = null;
+
+function populateVoices(){
+  const voices = speechSynthesis.getVoices();
+  const jaVoices = voices.filter(v => v.lang && v.lang.startsWith('ja'));
+  const sel = document.getElementById('ttsVoiceSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const list = jaVoices.length ? jaVoices : voices;
+  list.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + (v.lang ? ' (' + v.lang + ')' : '');
+    sel.appendChild(opt);
+  });
+  if (list.length) ttsVoice = list[0];
+  sel.onchange = () => { ttsVoice = list[sel.value]; };
+}
+
+if ('speechSynthesis' in window) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+
+function clearSpeakingState(){
+  document.querySelectorAll('.spk.speaking').forEach(b => b.classList.remove('speaking'));
+  currentSpeakBtn = null;
+}
+
+function speakText(btnEl, idLabel, rawText){
+  if (!('speechSynthesis' in window)) {
+    alert('お使いのブラウザは読み上げ機能に対応していません。');
+    return;
+  }
+  const text = rawText || btnEl.getAttribute('data-text') || btnEl.closest('.qi')?.innerText || '';
+  // Toggle off if same button clicked while speaking
+  if (currentSpeakBtn === btnEl && speechSynthesis.speaking && !chapterPlaying) {
+    speechSynthesis.cancel();
+    clearSpeakingState();
+    return;
+  }
+  stopChapterPlayback();
+  speechSynthesis.cancel();
+  clearSpeakingState();
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ja-JP';
+  utter.rate = ttsRate;
+  if (ttsVoice) utter.voice = ttsVoice;
+  utter.onend = clearSpeakingState;
+  utter.onerror = clearSpeakingState;
+
+  btnEl.classList.add('speaking');
+  currentSpeakBtn = btnEl;
+  speechSynthesis.speak(utter);
+}
+
+function speakSection(){
+  if (!('speechSynthesis' in window)) {
+    alert('お使いのブラウザは読み上げ機能に対応していません。');
+    return;
+  }
+  const activeSection = document.querySelector('.section.active');
+  if (!activeSection) return;
+  speechSynthesis.cancel();
+  clearSpeakingState();
+  const text = activeSection.innerText;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ja-JP';
+  utter.rate = ttsRate;
+  if (ttsVoice) utter.voice = ttsVoice;
+  const playBtn = document.getElementById('ttsPlayAllBtn');
+  if (playBtn) playBtn.classList.add('speaking');
+  utter.onend = () => { if (playBtn) playBtn.classList.remove('speaking'); };
+  utter.onerror = () => { if (playBtn) playBtn.classList.remove('speaking'); };
+  speechSynthesis.speak(utter);
+}
+
+function stopSpeaking(){
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+  clearSpeakingState();
+  stopChapterPlayback();
+  const playBtn = document.getElementById('ttsPlayAllBtn');
+  if (playBtn) playBtn.classList.remove('speaking');
+}
+
+function setTtsRate(val){
+  ttsRate = parseFloat(val);
+}
+
+/* ===== 章ごとの「問題→回答」連続自動再生 ===== */
+let chapterQueue = [];
+let chapterQueueIndex = 0;
+let chapterPlayBtn = null;
+let chapterPlaying = false;
+
+function playChapter(chapId, btnEl){
+  if (!('speechSynthesis' in window)) {
+    alert('お使いのブラウザは読み上げ機能に対応していません。');
+    return;
+  }
+  // Toggle off if this chapter is already playing
+  if (chapterPlaying && chapterPlayBtn === btnEl) {
+    stopChapterPlayback();
+    return;
+  }
+  stopChapterPlayback();
+
+  const chapEl = document.getElementById(chapId);
+  if (!chapEl) return;
+  const items = Array.from(chapEl.querySelectorAll('.qi'));
+
+  chapterQueue = [];
+  items.forEach(item => {
+    const qBtn = item.querySelector('.spk:not(.spkA)');
+    const aBtn = item.querySelector('.spk.spkA');
+    const qText = qBtn ? qBtn.getAttribute('data-text') : '';
+    const aText = aBtn ? aBtn.getAttribute('data-text') : '';
+    if (qText) chapterQueue.push({text: qText, item: item});
+    if (aText) chapterQueue.push({text: aText, item: item});
+  });
+
+  if (!chapterQueue.length) return;
+
+  chapterQueueIndex = 0;
+  chapterPlaying = true;
+  chapterPlayBtn = btnEl;
+  btnEl.classList.add('playing');
+  btnEl.textContent = '⏸ 停止';
+
+  speakChapterQueueNext();
+}
+
+function speakChapterQueueNext(){
+  if (!chapterPlaying || chapterQueueIndex >= chapterQueue.length) {
+    stopChapterPlayback();
+    return;
+  }
+  const entry = chapterQueue[chapterQueueIndex];
+
+  document.querySelectorAll('.qi.speaking-now').forEach(el => el.classList.remove('speaking-now'));
+  entry.item.classList.add('speaking-now');
+  // Auto-open the accordion so the user can follow along visually
+  entry.item.classList.add('open');
+  const qa3 = entry.item.querySelector('.qa3');
+  if (qa3) qa3.classList.add('show');
+  entry.item.scrollIntoView({behavior:'smooth', block:'center'});
+
+  const utter = new SpeechSynthesisUtterance(entry.text);
+  utter.lang = 'ja-JP';
+  utter.rate = ttsRate;
+  if (ttsVoice) utter.voice = ttsVoice;
+  utter.onend = () => {
+    chapterQueueIndex++;
+    if (chapterPlaying) speakChapterQueueNext();
+  };
+  utter.onerror = () => {
+    chapterQueueIndex++;
+    if (chapterPlaying) speakChapterQueueNext();
+  };
+  speechSynthesis.speak(utter);
+}
+
+function stopChapterPlayback(){
+  chapterPlaying = false;
+  speechSynthesis.cancel();
+  document.querySelectorAll('.qi.speaking-now').forEach(el => el.classList.remove('speaking-now'));
+  if (chapterPlayBtn) {
+    chapterPlayBtn.classList.remove('playing');
+    chapterPlayBtn.textContent = '▶ この章を通して聞く';
+  }
+  chapterPlayBtn = null;
+  chapterQueue = [];
+  chapterQueueIndex = 0;
+}
+</script>
+
+<div class="tts-bar">
+  <button id="ttsPlayAllBtn" onclick="speakSection()" title="このセクションを全部読み上げ">🔊 セクション全体を読む</button>
+  <select id="ttsVoiceSelect" title="読み上げ音声を選択"></select>
+  <select onchange="setTtsRate(this.value)" title="読み上げ速度">
+    <option value="0.8">遅め</option>
+    <option value="1.0" selected>標準</option>
+    <option value="1.2">速め</option>
+    <option value="1.5">かなり速め</option>
+  </select>
+  <button class="tts-stop" onclick="stopSpeaking()" title="読み上げを停止">⏹ 停止</button>
+</div>
+</body>
+</html>

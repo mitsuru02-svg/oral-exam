@@ -35,20 +35,6 @@
   .st h2 small{display:block;font-size:10px;font-weight:400;color:var(--amber);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px}
   .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
   .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
-  @media(max-width:900px){
-    .g2,.g3{grid-template-columns:1fr}
-    .sidebar{
-      display:block;
-      position:fixed; top:0; left:0; height:100vh; z-index:200;
-      transform:translateX(-100%); transition:transform .25s ease;
-      box-shadow:4px 0 24px rgba(0,0,0,.4);
-    }
-    .sidebar.open{transform:translateX(0);}
-    .menu-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150;}
-    .menu-overlay.open{display:block;}
-    .hamburger-btn{display:flex;}
-    .content{padding:24px 16px 80px;}
-  }
   .hamburger-btn{
     display:none; align-items:center; justify-content:center;
     width:40px; height:40px; border-radius:8px;
@@ -63,7 +49,21 @@
     color:var(--muted); font-size:16px; cursor:pointer;
     position:absolute; top:14px; right:14px;
   }
-  @media(max-width:900px){.sidebar-close{display:flex;}}
+  @media(max-width:900px){
+    .g2,.g3{grid-template-columns:1fr}
+    .sidebar{
+      display:block;
+      position:fixed; top:0; left:0; height:100vh; z-index:200;
+      transform:translateX(-100%); transition:transform .25s ease;
+      box-shadow:4px 0 24px rgba(0,0,0,.4);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .menu-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:150;}
+    .menu-overlay.open{display:block;}
+    .hamburger-btn{display:flex !important;}
+    .sidebar-close{display:flex !important;}
+    .content{padding:24px 16px 80px;}
+  }
   .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:16px}
   .card h3{font-size:13px;font-weight:700;color:var(--amber);margin-bottom:7px;display:flex;align-items:center;gap:6px}
   .card h3 .b{background:var(--amber);color:var(--navy);font-size:9px;font-weight:900;padding:1px 5px;border-radius:3px}

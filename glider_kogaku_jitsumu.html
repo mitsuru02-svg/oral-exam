@@ -219,6 +219,10 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 .tts-bar select.tts-rate{
   font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:5px 6px;background:#fff;color:var(--ink);
 }
+.tts-bar select.tts-voice{
+  font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:5px 6px;background:#fff;color:var(--ink);
+  max-width:180px;
+}
 .tts-bar .tts-icon{font-size:14px;line-height:1;}
 
 .tts-reading{
@@ -1287,19 +1291,47 @@ document.querySelectorAll('.qa-q').forEach(function(q){
     playing: false,
     paused: false,
     rate: 1.0,
-    voice: null
+    voice: null,
+    voiceLang: null    // lang string of the chosen voice, used on the utterance instead of a hardcoded 'ja-JP'
   };
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   function pickJapaneseVoice(){
     var voices = synth.getVoices() || [];
-    var ja = voices.filter(function(v){ return /ja|Japan/i.test(v.lang) || /Japan|日本/i.test(v.name); });
-    return ja[0] || null;
+    if (!voices.length) return null;
+    var ja = voices.filter(function(v){ return /^ja/i.test(v.lang); });
+    if (!ja.length) return null;
+    // Prefer the voice the OS/browser marks as default for its language —
+    // on iPhone this tends to track the voice chosen in Settings > Accessibility > Spoken Content.
+    var def = ja.find(function(v){ return v.default; });
+    return def || ja[0];
   }
-  // Voices may load asynchronously
+
+  var allVoiceSelects = [];
+
+  function refreshVoice(){
+    var v = pickJapaneseVoice();
+    if (v){
+      state.voice = v;
+      state.voiceLang = v.lang;
+    }
+    allVoiceSelects.forEach(function(sel){ buildVoiceOptions(sel); });
+  }
+
+  // Voices load asynchronously, especially on first page load on iOS/Safari.
   if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = function(){ state.voice = pickJapaneseVoice(); };
+    synth.onvoiceschanged = refreshVoice;
   }
-  state.voice = pickJapaneseVoice();
+  refreshVoice();
+  // iOS Safari sometimes fires onvoiceschanged late or not at all on first load; poll briefly as a fallback.
+  var voicePollTries = 0;
+  var voicePollTimer = setInterval(function(){
+    voicePollTries++;
+    if (state.voice || voicePollTries > 20){ clearInterval(voicePollTimer); return; }
+    refreshVoice();
+  }, 250);
 
   function getChapterIdFromBar(bar){
     var section = bar.closest('.chapter');
@@ -1357,6 +1389,17 @@ document.querySelectorAll('.qa-q').forEach(function(q){
     stopBtn.disabled = !(state.playing || state.paused);
   }
 
+  function makeUtterance(text){
+    var utter = new SpeechSynthesisUtterance(text);
+    // Use the chosen voice's own language tag rather than forcing 'ja-JP'.
+    // Forcing a fixed lang can make iOS pick a different built-in voice than
+    // the one the person selected in Settings > Accessibility > Spoken Content.
+    utter.lang = state.voiceLang || 'ja-JP';
+    utter.rate = state.rate;
+    if (state.voice) utter.voice = state.voice;
+    return utter;
+  }
+
   function speakIndex(bar, idx){
     if (idx < 0 || idx >= state.blocks.length){
       // finished
@@ -1373,12 +1416,11 @@ document.querySelectorAll('.qa-q').forEach(function(q){
     highlightBlock(block.anchor);
     updateStatus(bar, '読み上げ中… (' + (idx+1) + ' / ' + state.blocks.length + ')');
 
-    var utter = new SpeechSynthesisUtterance(block.text);
-    utter.lang = 'ja-JP';
-    utter.rate = state.rate;
-    if (state.voice) utter.voice = state.voice;
+    var utter = makeUtterance(block.text);
     utter.onend = function(){
       if (state.playing && !state.paused){
+        // Queue the next block immediately (no cancel() here) so playback
+        // doesn't stutter or leave a gap between sentences.
         speakIndex(bar, idx+1);
       }
     };
@@ -1387,7 +1429,6 @@ document.querySelectorAll('.qa-q').forEach(function(q){
         speakIndex(bar, idx+1);
       }
     };
-    synth.cancel(); // ensure clean queue
     synth.speak(utter);
   }
 
@@ -1407,6 +1448,32 @@ document.querySelectorAll('.qa-q').forEach(function(q){
     speakIndex(bar, 0);
   }
 
+  function buildVoiceOptions(selectEl){
+    var voices = (synth.getVoices() || []).filter(function(v){ return /^ja/i.test(v.lang); });
+    var current = selectEl.value;
+    selectEl.innerHTML = '';
+    if (!voices.length){
+      var opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '端末の標準の声';
+      selectEl.appendChild(opt);
+      selectEl.disabled = true;
+      return;
+    }
+    selectEl.disabled = false;
+    voices.forEach(function(v, i){
+      var opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = v.name + (v.default ? '（標準）' : '');
+      selectEl.appendChild(opt);
+    });
+    // select the voice matching current state.voice, defaulting to index 0
+    var idx = voices.findIndex(function(v){ return v === state.voice; });
+    selectEl.value = String(idx >= 0 ? idx : 0);
+    selectEl.dataset.voices = 'bound';
+    selectEl.__voices = voices;
+  }
+
   function setupBar(bar){
     var chapterId = getChapterIdFromBar(bar);
     bar.innerHTML =
@@ -1418,14 +1485,32 @@ document.querySelectorAll('.qa-q').forEach(function(q){
         '<option value="1.3">速度: 速い</option>' +
         '<option value="1.6">速度: かなり速い</option>' +
       '</select>' +
+      '<select class="tts-voice" title="読み上げの声"></select>' +
       '<span class="tts-status">このページを音声で聞けます（要点を整理した解説文を読み上げます）。</span>';
 
     var playBtn = bar.querySelector('.tts-play');
     var stopBtn = bar.querySelector('.tts-stop');
     var rateSel = bar.querySelector('.tts-rate');
+    var voiceSel = bar.querySelector('.tts-voice');
 
     rateSel.addEventListener('change', function(){
       state.rate = parseFloat(rateSel.value);
+    });
+
+    buildVoiceOptions(voiceSel);
+    allVoiceSelects.push(voiceSel);
+
+    voiceSel.addEventListener('change', function(){
+      var voices = voiceSel.__voices || [];
+      var v = voices[parseInt(voiceSel.value, 10)];
+      if (v){
+        state.voice = v;
+        state.voiceLang = v.lang;
+      }
+      // keep all chapters' dropdowns in sync since voice choice is global
+      allVoiceSelects.forEach(function(sel){
+        if (sel !== voiceSel) sel.value = voiceSel.value;
+      });
     });
 
     playBtn.addEventListener('click', function(){
@@ -1440,10 +1525,18 @@ document.querySelectorAll('.qa-q').forEach(function(q){
         updateStatus(bar, '一時停止中です。');
         updateButtons(bar);
       } else if (mode === 'resume'){
-        synth.resume();
-        state.paused = false;
-        updateStatus(bar, '読み上げ中… (' + (state.index+1) + ' / ' + state.blocks.length + ')');
-        updateButtons(bar);
+        // iOS Safari sometimes silently fails to resume after a real pause;
+        // re-speaking the current block is more reliable than relying on resume() alone.
+        if (isIOS) {
+          synth.cancel();
+          state.paused = false;
+          speakIndex(bar, state.index);
+        } else {
+          synth.resume();
+          state.paused = false;
+          updateStatus(bar, '読み上げ中… (' + (state.index+1) + ' / ' + state.blocks.length + ')');
+          updateButtons(bar);
+        }
       }
     });
 

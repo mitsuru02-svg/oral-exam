@@ -5,1256 +5,210 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="口述試験">
-<meta name="theme-color" content="#161b22">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icons/icon-192.png">
-<title>自家用操縦士 口述試験2</title>
+<meta name="theme-color" content="#0d1117">
+<title>滑空機 学習ポータル</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
-  background: #0d1117; color: #e6edf3; min-height: 100vh;
-  padding-top: env(safe-area-inset-top);
+  background: #0d1117;
+  color: #e6edf3;
+  min-height: 100vh;
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* ── HEADER ── */
 .header {
-  background: #161b22; border-bottom: 1px solid #21262d;
-  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-  position: sticky; top: 0; z-index: 100;
+  background: #161b22;
+  border-bottom: 1px solid #21262d;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-.header-icon {
-  width: 30px; height: 30px;
+.header-logo {
+  width: 36px; height: 36px;
   background: linear-gradient(135deg, #3b82f6, #1e40af);
-  border-radius: 7px; display: flex; align-items: center;
-  justify-content: center; font-size: 15px; flex-shrink: 0;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
 }
-.header-titles { flex: 1; min-width: 0; }
-.header-titles h1 { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.header-titles .sub { font-size: 10px; color: #8b949e; margin-top: 1px; }
-.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-.header-btns { display: flex; gap: 5px; align-items: center; }
-.header-badge { background: #21262d; border: 1px solid #30363d; border-radius: 20px; padding: 2px 8px; font-size: 10px; color: #8b949e; }
-#networkBadge { font-size: 10px; color: #8b949e; }
+.header-title { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+.header-sub { font-size: 11px; color: #8b949e; margin-top: 2px; }
 
-/* voice toggle in header */
-.voice-toggle {
-  background: #21262d; border: 1px solid #30363d; border-radius: 6px;
-  padding: 5px 8px; font-size: 14px; color: #8b949e; cursor: pointer;
-  display: flex; align-items: center; line-height: 1;
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 36px 20px 28px;
 }
-.voice-toggle.on { background: #0d2044; border-color: #3b82f6; color: #93c5fd; }
-.voice-toggle.hf-on { background: #0a2e1a; border-color: #1a7f37; color: #3fb950; }
+.hero-icon { font-size: 52px; margin-bottom: 14px; }
+.hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.hero p { font-size: 14px; color: #8b949e; line-height: 1.7; }
 
-.container { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+/* ── CARDS ── */
+.container { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
 
-/* ── START SCREEN ── */
-.start-screen { text-align: center; padding: 40px 12px; }
-.start-icon { font-size: 56px; }
-.start-title-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
-.start-screen h2 { font-size: 22px; font-weight: 700; }
-.mode-card .mode-inner { display: flex; align-items: center; gap: 10px; }
-.mode-card .mode-icon { font-size: 20px; margin-bottom: 0; flex-shrink: 0; }
-.mode-card .mode-text { text-align: left; }
-.start-screen p { color: #8b949e; font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
-.stats-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
-.stat-box { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 14px 20px; text-align: center; min-width: 100px; }
-.stat-box .num { font-size: 26px; font-weight: 700; color: #3b82f6; }
-.stat-box .label { font-size: 11px; color: #8b949e; margin-top: 3px; }
-.mode-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
-.mode-card {
-  background: #161b22; border: 2px solid #21262d; border-radius: 12px;
-  padding: 16px 18px; cursor: pointer; transition: all 0.2s; text-align: left; min-width: 140px;
+.section-label {
+  font-size: 11px;
+  color: #484f58;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin: 24px 0 10px;
 }
-.mode-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
-.mode-card.selected { border-color: #3b82f6; background: #0d2044; }
-.mode-card .mode-icon { font-size: 22px; margin-bottom: 6px; }
-.mode-card .mode-name { font-size: 14px; font-weight: 600; }
-.mode-card .mode-desc { font-size: 11px; color: #8b949e; margin-top: 3px; }
 
-.btn-primary {
-  background: #3b82f6; color: white; border: none; border-radius: 10px;
-  padding: 14px 36px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 14px;
+  padding: 16px 18px;
+  text-decoration: none;
+  color: #e6edf3;
+  margin-bottom: 10px;
+  transition: border-color .2s, background .2s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn-primary:hover { background: #2563eb; }
-.btn-primary:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-.btn-secondary {
-  background: #21262d; color: #e6edf3; border: 1px solid #30363d;
-  border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; transition: all 0.2s;
+.card:hover { border-color: #3b82f6; background: #0d1b30; transform: translateY(-1px); }
+.card:active { transform: scale(.98); }
+
+.card-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
 }
-.btn-secondary:hover { background: #30363d; }
+.card-icon.blue   { background: #0d2044; }
+.card-icon.green  { background: #0a2e1a; }
+.card-icon.amber  { background: #2d1d00; }
+.card-icon.purple { background: #1a0a3d; }
+.card-icon.teal   { background: #042d28; }
 
-/* ── EXAM SCREEN ── */
-.exam-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #21262d;
+.card-body { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.progress-info { font-size: 13px; color: #8b949e; }
-.progress-bar-wrap { background: #21262d; border-radius: 4px; height: 4px; width: 160px; margin-top: 6px; }
-.progress-bar { background: #3b82f6; border-radius: 4px; height: 4px; transition: width 0.4s; }
-.score-display { text-align: right; font-size: 13px; color: #8b949e; }
-.score-display span { color: #e6edf3; font-weight: 600; }
+.card-desc { font-size: 12px; color: #8b949e; line-height: 1.5; }
 
-.question-card {
-  background: #161b22; border: 1px solid #21262d; border-radius: 14px;
-  padding: 22px 20px; margin-bottom: 16px; position: relative;
+.card-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
-.q-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.q-label {
-  display: inline-block; background: #0d2044; color: #3b82f6;
-  border: 1px solid #1e40af; border-radius: 6px; padding: 3px 10px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+.badge-blue   { background: #0d2044; color: #60a5fa; border: 1px solid #1e3a6e; }
+.badge-green  { background: #0a2e1a; color: #3fb950; border: 1px solid #1a5c33; }
+.badge-amber  { background: #2d1d00; color: #d29922; border: 1px solid #5c3d00; }
+.badge-purple { background: #1a0a3d; color: #a78bfa; border: 1px solid #3d1a7a; }
+.badge-teal   { background: #042d28; color: #2dd4bf; border: 1px solid #0a5c54; }
+
+.card-arrow {
+  color: #484f58;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-left: 4px;
 }
-/* speak question button */
-.btn-speak-q {
-  background: transparent; border: 1px solid #30363d; border-radius: 20px;
-  padding: 4px 12px; font-size: 12px; color: #8b949e; cursor: pointer;
-  display: flex; align-items: center; gap: 5px; transition: all 0.2s;
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  padding: 24px 16px;
+  font-size: 12px;
+  color: #484f58;
+  border-top: 1px solid #161b22;
 }
-.btn-speak-q:hover { border-color: #3b82f6; color: #93c5fd; }
-.btn-speak-q.speaking { border-color: #3b82f6; color: #3b82f6; animation: pulse 1.2s infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
-
-.question-text { font-size: 16px; line-height: 1.8; font-weight: 500; }
-
-.answer-area { margin-bottom: 14px; }
-.answer-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.answer-area label { font-size: 13px; color: #8b949e; }
-
-/* MIC button */
-.btn-mic {
-  width: 42px; height: 42px; border-radius: 50%; border: 2px solid #30363d;
-  background: #161b22; color: #8b949e; font-size: 18px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;
-}
-.btn-mic:hover { border-color: #3b82f6; color: #3b82f6; }
-.btn-mic.recording {
-  border-color: #f85149; background: #2d0f0f; color: #f85149;
-  animation: mic-pulse 1s infinite;
-}
-.btn-mic.unsupported { opacity: 0.3; cursor: not-allowed; }
-@keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(248,81,73,.4);} 50%{box-shadow:0 0 0 8px rgba(248,81,73,0);} }
-
-.answer-area textarea {
-  width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 10px;
-  padding: 14px 16px; font-size: 16px; color: #e6edf3; line-height: 1.7;
-  resize: vertical; min-height: 120px; font-family: inherit; transition: border-color 0.2s;
-}
-.answer-area textarea:focus { outline: none; border-color: #3b82f6; }
-
-/* mic hint */
-.mic-hint { font-size: 11px; color: #484f58; margin-top: 6px; text-align: center; }
-
-.action-row { display: flex; gap: 10px; align-items: center; }
-.btn-judge {
-  background: #1a7f37; color: white; border: none; border-radius: 10px;
-  padding: 13px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
-  transition: background 0.2s; flex: 1;
-}
-.btn-judge:hover { background: #15692e; }
-.btn-judge:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
-.btn-skip {
-  background: transparent; color: #8b949e; border: 1px solid #30363d;
-  border-radius: 10px; padding: 13px 16px; font-size: 14px; cursor: pointer; transition: all 0.2s;
-}
-.btn-skip:hover { color: #e6edf3; border-color: #484f58; }
-
-/* RESULT */
-.result-box { border-radius: 12px; padding: 20px; margin-top: 16px; border: 1px solid; animation: slideIn 0.3s ease; }
-@keyframes slideIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-.result-box.correct { background: #0a2e1a; border-color: #1a7f37; }
-.result-box.incorrect { background: #2d0f0f; border-color: #b91c1c; }
-.result-box.partial { background: #2d1d00; border-color: #b45309; }
-.result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.result-badge { font-size: 22px; }
-.result-title { font-size: 17px; font-weight: 700; }
-.result-title.correct { color: #3fb950; }
-.result-title.incorrect { color: #f85149; }
-.result-title.partial { color: #d29922; }
-.result-body { font-size: 14px; line-height: 1.8; color: #c9d1d9; }
-.model-answer { margin-top: 14px; background: rgba(255,255,255,.04); border-radius: 8px; padding: 14px 16px; }
-.model-answer-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.model-answer-label { font-size: 11px; color: #8b949e; font-weight: 700; letter-spacing: .08em; }
-.btn-speak-ans {
-  background: transparent; border: 1px solid #30363d; border-radius: 20px;
-  padding: 3px 10px; font-size: 11px; color: #8b949e; cursor: pointer;
-  display: flex; align-items: center; gap: 4px;
-}
-.btn-speak-ans:hover { border-color: #3b82f6; color: #93c5fd; }
-.btn-speak-ans.speaking { border-color: #3b82f6; color: #3b82f6; animation: pulse 1.2s infinite; }
-.model-answer-text { font-size: 14px; line-height: 1.8; color: #c9d1d9; }
-
-.next-row { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
-
-/* LOADING */
-.loading-box { display: flex; align-items: center; gap: 12px; padding: 18px; color: #8b949e; font-size: 14px; }
-.spinner { width: 20px; height: 20px; border: 2px solid #30363d; border-top-color: #3b82f6; border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg);} }
-
-/* FINAL */
-.final-screen { text-align: center; padding: 36px 16px; }
-.final-score-ring {
-  width: 130px; height: 130px; border-radius: 50%; margin: 0 auto 20px;
-  display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800;
-}
-.final-score-ring.pass { background: radial-gradient(circle,#0a2e1a,#0d1117); border: 3px solid #3fb950; color: #3fb950; }
-.final-score-ring.fail { background: radial-gradient(circle,#2d0f0f,#0d1117); border: 3px solid #f85149; color: #f85149; }
-.final-grade { font-size: 14px; color: #8b949e; margin-top: 4px; }
-.final-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
-.final-stat { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 12px 18px; min-width: 90px; }
-.final-stat .fs-num { font-size: 20px; font-weight: 700; }
-.final-stat .fs-label { font-size: 11px; color: #8b949e; margin-top: 2px; }
-.final-stat.green .fs-num { color: #3fb950; }
-.final-stat.yellow .fs-num { color: #d29922; }
-.final-stat.red .fs-num { color: #f85149; }
-
-.hidden { display: none !important; }
-
-/* install banner */
-.install-banner {
-  display: none; background: #0d2044; border: 1px solid #1e40af; border-radius: 10px;
-  padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: #93c5fd;
-  align-items: center; gap: 8px;
-}
-.install-banner.visible { display: flex; }
-.install-banner button { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
-
-/* カテゴリ選択 */
-.cat-section { margin-bottom: 20px; }
-.cat-section-title { font-size: 12px; color: #8b949e; margin-bottom: 8px; letter-spacing: 0.05em; text-align:left; }
-.cat-cards { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.cat-card {
-  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
-  padding: 8px 12px; cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; gap: 6px; font-size: 13px;
-}
-.cat-card:hover { border-color: #3b82f6; }
-.cat-card.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
-.cat-card .cat-icon { font-size: 16px; }
-.cat-card .cat-count { font-size: 10px; color: #8b949e; margin-left: 2px; }
-.cat-card.selected .cat-count { color: #60a5fa; }
-
-/* 中断ボタン */
-.btn-abort {
-  background: transparent; border: 1px solid #30363d; border-radius: 6px;
-  padding: 4px 10px; font-size: 12px; color: #8b949e; cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-abort:hover { border-color: #f85149; color: #f85149; }
-
-/* チェックボタン */
-.btn-check {
-  background: transparent; border: 1px solid #30363d; border-radius: 6px;
-  padding: 4px 10px; font-size: 13px; color: #8b949e; cursor: pointer;
-  transition: all 0.2s; display: flex; align-items: center; gap: 4px;
-}
-.btn-check:hover { border-color: #d29922; color: #d29922; }
-.btn-check.checked { border-color: #d29922; color: #d29922; background: #2d1d00; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-icon">✈</div>
-  <div class="header-titles">
-    <h1>口述試験対策</h1>
-    <div class="sub">自家用操縦士（滑空機）</div>
+  <div class="header-logo">✈</div>
+  <div>
+    <div class="header-title">滑空機 学習ポータル</div>
+    <div class="header-sub">自家用操縦士（上級滑空機）</div>
   </div>
-  <div class="header-right">
-    <div class="header-btns">
-      <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊</button>
-      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚 HF</button>
-      <div class="header-badge">187問</div>
-    </div>
-    <div id="networkBadge">確認中...</div>
-  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-icon">🛩</div>
+  <h1>学習メニュー</h1>
+  <p>目的に合わせて学習ツールを選んでください</p>
 </div>
 
 <div class="container">
 
-  <!-- START SCREEN -->
-  <div id="startScreen" class="start-screen">
-    <div class="start-title-row">
-      <div class="start-icon">🛩</div>
-      <h2>口述模擬試験</h2>
-    </div>
-    <p>問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
-    <div style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
-      🤚 <strong style="color:#3fb950">ON</strong> にすることで、完全ハンズフリー。<br>
-      「<strong>採点</strong>」と言うと結果表示、その後「<strong>次</strong>」と言うと次の問題に進みます。
-    </div>
-    <div class="stats-row">
-      <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
-      <div class="stat-box"><div class="num" id="savedCorrect">0</div><div class="label">正解数</div></div>
-      <div class="stat-box"><div class="num" id="savedTotal">0</div><div class="label">解答数</div></div>
-      <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
-    </div>
-    <div class="mode-cards">
-      <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
-        <div class="mode-inner">
-          <div class="mode-icon">🔀</div>
-          <div class="mode-text">
-            <div class="mode-name">ランダム</div>
-          </div>
-        </div>
-      </div>
-      <div class="mode-card" onclick="selectMode('wrong')" id="modeWrong">
-        <div class="mode-inner">
-          <div class="mode-icon">🎯</div>
-          <div class="mode-text">
-            <div class="mode-name">苦手問題</div>
-          </div>
-        </div>
-      </div>
-      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
-        <div class="mode-inner">
-          <div class="mode-icon">⭐</div>
-          <div class="mode-text">
-            <div class="mode-name">チェック</div>
-          </div>
-        </div>
-      </div>
-      <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
-        <div class="mode-inner">
-          <div class="mode-icon">📋</div>
-          <div class="mode-text">
-            <div class="mode-name">順番通り</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- カテゴリ選択 -->
-    <div class="cat-section">
-      <div class="cat-section-title">📂 カテゴリ（タップで絞り込み）</div>
-      <div class="cat-cards" id="catCards"></div>
-    </div>
+  <div class="section-label">試験対策</div>
 
-    <div style="margin-bottom:20px">
-      <label style="font-size:13px;color:#8b949e;margin-right:8px">出題数：</label>
-      <select id="countSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
-        <option value="5">5問</option>
-        <option value="10" selected>10問</option>
-        <option value="20">20問</option>
-        <option value="187">全問 (187問)</option>
-      </select>
+  <a class="card" href="./oral-exam.html">
+    <div class="card-icon blue">🎤</div>
+    <div class="card-body">
+      <div class="card-name">口述模擬試験</div>
+      <div class="card-desc">AI採点・音声対応・ハンズフリー対応<br>187問収録</div>
     </div>
-    <button class="btn-primary" onclick="startExam()">試験開始</button>
-  </div>
+    <span class="card-badge badge-blue">AI採点</span>
+    <span class="card-arrow">›</span>
+  </a>
 
-  <!-- EXAM SCREEN -->
-  <div id="examScreen" class="hidden">
-    <div class="exam-header">
-      <div class="progress-info">
-        <div>問題 <span id="qNum">1</span> / <span id="qTotal">10</span></div>
-        <div class="progress-bar-wrap">
-          <div class="progress-bar" id="progressBar" style="width:0%"></div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="score-display">
-          正解 <span id="scoreDisplay">0</span> / <span id="answeredDisplay">0</span>
-        </div>
-        <button class="btn-abort" onclick="confirmAbort()">✕ 終了</button>
-      </div>
+  <a class="card" href="./jitchi_shiken_taisaku.html">
+    <div class="card-icon amber">✈️</div>
+    <div class="card-body">
+      <div class="card-name">実地試験対策参考書</div>
+      <div class="card-desc">実地試験の手順・チェックリスト</div>
     </div>
+    <span class="card-badge badge-amber">参考書</span>
+    <span class="card-arrow">›</span>
+  </a>
 
-    <div class="question-card">
-      <div class="q-label-row">
-        <div class="q-label">問 <span id="qNumBadge">1</span></div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button class="btn-check" id="btnCheck" onclick="toggleCheck()">☆</button>
-          <button class="btn-speak-q" id="btnSpeakQ" onclick="speakQuestion()">
-            <span>🔊</span><span>問題を聞く</span>
-          </button>
-        </div>
-      </div>
-      <div class="question-text" id="questionText"></div>
-    </div>
+  <div class="section-label">参考書・教材</div>
 
-    <div class="answer-area" id="answerArea">
-      <div class="answer-label-row">
-        <label>あなたの解答：</label>
-        <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="マイクで解答">🎤</button>
-      </div>
-      <textarea id="userAnswer" placeholder="ここに解答を入力、またはマイクボタンで話してください..." onkeydown="handleKeydown(event)"></textarea>
-      <div class="mic-hint" id="micHint">🎤 マイクボタンを押して話すと自動入力されます</div>
+  <a class="card" href="./%E8%87%AA%E5%AE%B6%E7%94%A8%E6%93%8D%E7%B8%A6%E5%A3%AB%E5%8F%A3%E9%A0%AD%E8%A9%A6%E9%A8%93%E5%8F%82%E8%80%83%E6%9B%B8.html">
+    <div class="card-icon green">📖</div>
+    <div class="card-body">
+      <div class="card-name">口頭試験参考書</div>
+      <div class="card-desc">全問図解版・187問収録</div>
     </div>
+    <span class="card-badge badge-green">全問</span>
+    <span class="card-arrow">›</span>
+  </a>
 
-    <div class="action-row">
-      <button class="btn-judge" id="judgeBtn" onclick="submitAnswer()">採点する</button>
-      <button class="btn-skip" onclick="skipQuestion()">スキップ</button>
+  <a class="card" href="./glider_kanzen.html">
+    <div class="card-icon teal">🔊</div>
+    <div class="card-body">
+      <div class="card-name">教本（音声付き）</div>
+      <div class="card-desc">章ごとに音声で学習できる教本</div>
     </div>
+    <span class="card-badge badge-teal">音声</span>
+    <span class="card-arrow">›</span>
+  </a>
 
-    <div id="loadingBox" class="loading-box hidden">
-      <div class="spinner"></div>
-      <span id="loadingText">採点中...</span>
+  <a class="card" href="./glider_kogaku_jitsumu.html">
+    <div class="card-icon purple">📝</div>
+    <div class="card-body">
+      <div class="card-name">Y.fuka先生の講義ノート</div>
+      <div class="card-desc">工学・実務の詳細講義資料</div>
     </div>
-
-    <div id="resultBox" class="hidden"></div>
-
-    <div id="nextRow" class="next-row hidden">
-      <button class="btn-secondary" id="btnShowAns" onclick="showAnswer()">模範解答を見る</button>
-      <button class="btn-primary" onclick="nextQuestion()">次の問題 →</button>
-    </div>
-  </div>
-
-  <!-- FINAL SCREEN -->
-  <div id="finalScreen" class="hidden final-screen">
-    <h2 style="margin-bottom:20px">試験結果</h2>
-    <div class="final-score-ring" id="finalRing"><span id="finalPct">0%</span></div>
-    <div class="final-grade" id="finalGrade"></div>
-    <div class="final-stats">
-      <div class="final-stat green"><div class="fs-num" id="fsCorrect">0</div><div class="fs-label">正解</div></div>
-      <div class="final-stat yellow"><div class="fs-num" id="fsPartial">0</div><div class="fs-label">部分正解</div></div>
-      <div class="final-stat red"><div class="fs-num" id="fsWrong">0</div><div class="fs-label">不正解</div></div>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn-secondary" onclick="reviewWrong()">間違えた問題を復習</button>
-      <button class="btn-primary" onclick="showStart()">トップへ戻る</button>
-    </div>
-  </div>
+    <span class="card-badge badge-purple">講義</span>
+    <span class="card-arrow">›</span>
+  </a>
 
 </div>
 
-<!-- Install banner -->
-<div style="padding:24px 16px 16px;border-top:1px solid #21262d;display:flex;flex-direction:column;gap:10px;max-width:400px;margin:0 auto;">
-  <a href="https://mitsuru02-svg.github.io/oral-exam/%E8%87%AA%E5%AE%B6%E7%94%A8%E6%93%8D%E7%B8%A6%E5%A3%AB%E5%8F%A3%E9%A0%AD%E8%A9%A6%E9%A8%93%E5%8F%82%E8%80%83%E6%9B%B8.html"
-     target="_blank"
-     style="display:flex;align-items:center;gap:10px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:13px 16px;color:#e6edf3;font-size:14px;text-decoration:none;transition:border-color .2s;"
-     onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#30363d'">
-    <span style="font-size:20px">📖</span><span>自家用操縦士口頭試験参考書</span>
-  </a>
-  <a href="https://mitsuru02-svg.github.io/oral-exam/glider_kanzen.html"
-     target="_blank"
-     style="display:flex;align-items:center;gap:10px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:13px 16px;color:#e6edf3;font-size:14px;text-decoration:none;transition:border-color .2s;"
-     onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#30363d'">
-    <span style="font-size:20px">🔊</span><span>教本（音声付き）</span>
-  </a>
-  <a href="https://mitsuru02-svg.github.io/oral-exam/jitchi_shiken_taisaku.html"
-     target="_blank"
-     style="display:flex;align-items:center;gap:10px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:13px 16px;color:#e6edf3;font-size:14px;text-decoration:none;transition:border-color .2s;"
-     onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#30363d'">
-    <span style="font-size:20px">✈️</span><span>実地試験対策参考書</span>
-  </a>
-  <a href="https://mitsuru02-svg.github.io/oral-exam/glider_kogaku_jitsumu.html"
-     target="_blank"
-     style="display:flex;align-items:center;gap:10px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:13px 16px;color:#e6edf3;font-size:14px;text-decoration:none;transition:border-color .2s;"
-     onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#30363d'">
-    <span style="font-size:20px">📝</span><span>Y.fuka先生の講義ノート</span>
-  </a>
-</div>
-<div class="install-banner" id="installBanner">
-  <span>📲</span>
-  <span style="flex:1">ホーム画面に追加してオフラインで使えます</span>
-  <button onclick="installApp()">追加</button>
-  <button onclick="document.getElementById('installBanner').classList.remove('visible')" style="background:#21262d">✕</button>
+<div class="footer">
+  たきかわスカイパーク ／ ASK-21
 </div>
 
-<script src="./qa_data.js"></script>
-<script>
-const CATEGORIES = [{"id": "ch1", "name": "資格・書類", "icon": "📋", "indices": [0, 1, 2, 3, 180, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 26, 27, 28, 181, 29, 30, 85, 105, 109, 110, 130, 131, 132, 133, 153, 154, 160, 161, 167, 182, 170, 171, 174, 175]}, {"id": "ch2", "name": "機体性能", "icon": "✈️", "indices": [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 61, 62, 64, 65, 66, 67, 68, 78, 80, 81, 82, 83, 86, 106, 107, 108, 112, 113, 114, 123, 138, 183, 184, 149, 150, 156, 162, 168, 177, 178]}, {"id": "ch3", "name": "気象", "icon": "🌤️", "indices": [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 63, 128, 134, 135, 136, 137, 147, 148, 157, 179]}, {"id": "ch4", "name": "緊急処置", "icon": "⚡", "indices": [58, 69, 70, 71, 72, 73, 74, 75, 76, 77, 79, 84, 111]}, {"id": "ch5", "name": "通信・空域", "icon": "📡", "indices": [87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 124, 129, 169, 172, 173]}, {"id": "ch6", "name": "計器・航法", "icon": "🧭", "indices": [115, 116, 117, 118, 119, 120, 121, 122, 125, 126, 127, 151, 152, 185, 158]}, {"id": "ch7", "name": "航空医学", "icon": "🏥", "indices": [139, 140, 141, 142, 143, 144, 145, 146, 155, 155, 159, 163, 164, 165, 166, 176]}];
-</script>
-<script>
-'use strict';
-
-// ── ハンズフリーモード ────────────────────────────────────────
-let handsFreeMode = false;
-function toggleHandsFree() {
-  handsFreeMode = !handsFreeMode;
-  const btn = document.getElementById('handsFreeBtn');
-  if (handsFreeMode) {
-    btn.textContent = '🤚 ON'; btn.title = 'ハンズフリーON';
-    btn.classList.remove('on'); btn.classList.add('hf-on');
-    document.getElementById('micHint').textContent = '🟢 ハンズフリー: 問題後に自動録音、「採点して」で採点、「次へ」で次の問題';
-  } else {
-    btn.textContent = '🤚'; btn.title = 'ハンズフリーOFF';
-    btn.classList.remove('on');
-    document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
-    stopMic();
-  }
-}
-
-// ── 設定 ────────────────────────────────────────────────────
-// Cloudflare WorkerのURLをデプロイ後にここへ貼る
-// ローカル(start.py)で使う場合は '/api/chat' のまま
-const CONFIG = {
-  API_ENDPOINT: 'https://oral-exam-proxy.mitsuru02.workers.dev',
-};
-// ────────────────────────────────────────────────────────────
-
-// ── PWA ──────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
-
-// ── Network badge ─────────────────────────────────────────────
-function updateNetworkBadge() {
-  const b = document.getElementById('networkBadge');
-  if (!b) return;
-  if (navigator.onLine) { b.textContent = '🟢 AI採点'; b.style.color = '#3fb950'; }
-  else                  { b.textContent = '🟡 KW採点'; b.style.color = '#d29922'; }
-}
-window.addEventListener('online',  updateNetworkBadge);
-window.addEventListener('offline', updateNetworkBadge);
-
-// ── Offline keyword scoring ───────────────────────────────────
-function scoreOffline(userAns, modelAns) {
-  if (!userAns.trim()) return { verdict:'不正解', comment:'解答が入力されていません。', score:0 };
-  const kws = modelAns.replace(/[。、！？「」『』【】（）…]/g,' ').split(/[\s　]+/).filter(w=>w.length>=2);
-  let hits=0, missed=[];
-  for (const kw of kws) { if (userAns.includes(kw)) hits++; else missed.push(kw); }
-  const r = kws.length>0 ? hits/kws.length : 0;
-  if (r>=0.75) return { verdict:'正解',   comment:'主要なキーワードを含んでいます。（オフライン採点）', score:100 };
-  if (r>=0.40) return { verdict:'部分正解', comment:`一部不足。キーワード例：「${missed.slice(0,5).join('、')}」（オフライン採点）`, score:50 };
-  return { verdict:'不正解', comment:`主要な内容が不足。キーワード例：「${missed.slice(0,5).join('、')}」（オフライン採点）`, score:0 };
-}
-
-// ══════════════════════════════════════════════════════════════
-// VOICE — TTS (読み上げ)
-// ══════════════════════════════════════════════════════════════
-let voiceEnabled = true;
-let ttsVoice = null;
-let currentUtterance = null;
-let speakGeneration = 0;  // 世代番号：新しい speak() が呼ばれたら古い onend を無視
-
-function initVoices() {
-  const load = () => {
-    const voices = speechSynthesis.getVoices();
-
-    // iOS/macOS で品質の高い日本語音声を優先順位順に探す
-    const preferred = [
-      'O-ren（拡張）',          // iOS 高品質
-      'O-ren',          // iOS 高品質
-      'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
-      'Hattori',        // iOS 高品質
-      'Otoya',          // iOS/macOS 高品質（男性）
-      'お-れん',
-      'はっとり',
-    ];
-
-    // 名前で優先音声を探す
-    ttsVoice = null;
-    for (const name of preferred) {
-      const v = voices.find(v => v.name.includes(name));
-      if (v) { ttsVoice = v; break; }
-    }
-
-    // 見つからなければローカルの日本語音声 → ネットワーク音声の順
-    if (!ttsVoice) {
-      ttsVoice = voices.find(v => v.lang === 'ja-JP' && v.localService)
-              || voices.find(v => v.lang === 'ja-JP')
-              || voices.find(v => v.lang.startsWith('ja'))
-              || null;
-    }
-
-    // デバッグ用：使用する音声をコンソールに表示
-    window._ttsVoice = ttsVoice;
-    if (ttsVoice) console.log('TTS voice:', ttsVoice.name, ttsVoice.lang);
-    else console.log('TTS voice: browser default');
-  };
-  load();
-  speechSynthesis.onvoiceschanged = load;
-}
-if ('speechSynthesis' in window) initVoices();
-
-
-// ══ TTS前処理：日本語の読み上げを改善 ══════════════════════════════
-function ttsClean(text) {
-  // 1. 全角 → 半角
-  text = text.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
-  text = text.replace(/\u3000/g, ' ');
-
-  // 2. 数字→日本語読みヘルパー
-  function numJp(s) {
-    s = String(s);
-    if (s.includes('.')) {
-      const [i, d] = s.split('.');
-      return numJpInt(parseInt(i)) + '点' + d.split('').map(x => '零一二三四五六七八九'[x]).join('');
-    }
-    return numJpInt(parseInt(s));
-  }
-  function numJpInt(n) {
-    if (n === 0) return 'ゼロ';
-    const d = ['','一','二','三','四','五','六','七','八','九'];
-    function four(n) {
-      let s = '';
-      if (Math.floor(n/1000))     s += (Math.floor(n/1000)===1?'':d[Math.floor(n/1000)])+'千';
-      if (Math.floor(n%1000/100)) s += (Math.floor(n%1000/100)===1?'':d[Math.floor(n%1000/100)])+'百';
-      if (Math.floor(n%100/10))   s += (Math.floor(n%100/10)===1?'':d[Math.floor(n%100/10)])+'十';
-      if (n%10) s += d[n%10];
-      return s;
-    }
-    const parts = [], units = ['','万','億'];
-    let tmp = n, i = 0;
-    while (tmp > 0) { parts.push([tmp%10000, units[i++]]); tmp = Math.floor(tmp/10000); }
-    let res = '';
-    parts.reverse().forEach(([v,u]) => { if(v) res += four(v)+u; });
-    return res;
-  }
-
-  // 3. 略語辞書（長い順）
-  [
-    ['IMSAFE','アイムセーフ'], ['CAVOK','キャボック'], ['VORMET','ブイオーアールメット'],
-    ['METAR','メター'], ['BECMG','ビカミング'], ['SPECI','スペシー'],
-    ['TEMPO','テンポ'], ['INTER','インター'], ['SPECIAL','スペシャル'],
-    ['AEIS','エーイーアイエス'], ['ATIS','エーティーアイエス'],
-    ['VFR','ブイエフアール'], ['IFR','アイエフアール'],
-    ['VMC','ブイエムシー'],   ['IMC','アイエムシー'],
-    ['VHF','ブイエイチエフ'], ['UHF','ユーエイチエフ'],
-    ['VNE','ブイエヌイー'], ['VBS','ブイビーエス'], ['VRA','ブイアールエー'],
-    ['TAF','ターフ'], ['VRB','バリアブル'], ['SAR','サーチアンドレスキュー'],
-    ['QNH','キューエヌエイチ'], ['QFE','キューエフイー'],
-    ['AGL','エージーエル'], ['MSL','エムエスエル'],
-    ['IAS','アイエーエス'], ['TAS','ティーエーエス'], ['TBO','ティービーオー'],
-    ['GS','グラウンドスピード'], ['HF','エイチエフ'],
-    ['VT','ブイティー'], ['VW','ブイダブリュー'], ['VA','ブイエー'],
-    ['DA','ドリフトアングル'], ['WCA','ウインドコレクションアングル'],
-    ['HZ','ヘイズ'], ['BR','ミスト'], ['FG','フォグ'], ['CB','積乱雲'],
-    ['NO','ナンバー'], ['CODE','コード'],
-  ].forEach(([en, ja]) => {
-    text = text.replace(new RegExp('(?<![A-Za-z])' + en + '(?![A-Za-z])', 'g'), ja);
-  });
-
-  // 4. 単位付き数値（長いパターン優先）
-  text = text.replace(/(\d+(?:\.\d+)?)\s*(?:ft|FT)/g,  (_, n) => numJp(n)+'フィート');
-  text = text.replace(/(\d+)\s*km\/h/g,                 (_, n) => numJp(n)+'キロ');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*kt/g,          (_, n) => numJp(n)+'ノット');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*kg/g,          (_, n) => numJp(n)+'キログラム');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*daN/g,         (_, n) => numJp(n)+'デカニュートン');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*km(?!\/)/g,    (_, n) => numJp(n)+'キロメートル');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*(?:MHz|MHZ)/g, (_, n) => numJp(n)+'メガヘルツ');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*m(?![ghHz\/A-Za-z])/g, (_, n) => numJp(n)+'メートル');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*%/g,           (_, n) => numJp(n)+'パーセント');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*℃/g,          (_, n) => numJp(n)+'度');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*°/g,           (_, n) => numJp(n)+'度');
-  text = text.replace(/(\d+(?:\.\d+)?)\s*W(?![A-Za-z])/g, (_, n) => numJp(n)+'ワット');
-  text = text.replace(/mg\/dL\/H/g, 'ミリグラムパーデシリットルパーアワー');
-
-  // 5. 数字の範囲（16～20 → 十六から二十）
-  text = text.replace(/(\d+)\s*[~〜～]\s*(\d+)/g, (_, a, b) => numJp(a)+'から'+numJp(b));
-
-  // 6. 残りの数字（単位なし）—— \b は CJK 前後で効かないため lookahead/behind を使う
-  text = text.replace(/(?<![.\d])(\d{2,})(?![.\d])/g, (_, n) => numJp(n));
-  text = text.replace(/(?<![.\d])(\d)(?![.\d])/g,     (_, n) => '零一二三四五六七八九'[n]);
-
-  // 7. 航空用語の読み仮名（TTSが誤読しやすい語）
-  const kanjiWords = [
-    ['尾翼',    'びよく'],
-    ['昇降舵',  'しょうこうだ'],
-    ['補助翼',  'ほじょよく'],
-    ['方向舵',  'ほうこうだ'],
-    ['主翼',    'しゅよく'],
-    ['翼端',    'よくたん'],
-    ['操縦桿',  'そうじゅうかん'],
-    ['曳航索',  'えいこうさく'],
-    ['曳航機',  'えいこうき'],
-    ['曳航',    'えいこう'],
-    ['滑空機',  'かっくうき'],
-    ['耐空証明','たいくうしょうめい'],
-    ['場周経路','じょうしゅうけいろ'],
-    ['不時着',  'ふじちゃく'],
-    ['着陸帯',  'ちゃくりくたい'],
-    ['繋留',    'けいりゅう'],
-    ['誘導抵抗','ゆうどうていこう'],
-    ['地面効果','じめんこうか'],
-    ['失速',    'しっそく'],
-    ['旋回',    'せんかい'],
-    ['離脱',    'りだつ'],
-  ];
-  kanjiWords.forEach(([kanji, yomi]) => {
-    text = text.replace(new RegExp(kanji, 'g'), yomi);
-  });
-
-  // 8. 記号
-  text = text.replace(/…/g, '。');
-  text = text.replace(/±/g, 'プラスマイナス');
-  text = text.replace(/[~〜～]/g, 'から');
-  text = text.replace(/[①②③④⑤⑥⑦⑧⑨⑩]/g,
-    c => ['一','二','三','四','五','六','七','八','九','十'][c.codePointAt(0)-0x2460] + '、');
-  text = text.replace(/・/g, '、');
-  text = text.replace(/\//g, 'スラッシュ');
-
-  return text;
-}
-
-function speak(text, onEnd) {
-  if (!voiceEnabled || !('speechSynthesis' in window)) { if (onEnd) onEnd(); return; }
-
-  // 世代番号を進めて古い発話のコールバックを無効化
-  speakGeneration++;
-  const myGen = speakGeneration;
-
-  // iOSでは cancel() を呼ばず、paused状態だけ解除する
-  if (speechSynthesis.paused) speechSynthesis.resume();
-
-  const clean = ttsClean(text).replace(/（/g,'(').replace(/）/g,')');
-
-  function doSpeak() {
-    if (myGen !== speakGeneration) return; // 既に新しい発話が来ていたら中止
-    const utt = new SpeechSynthesisUtterance(clean);
-    utt.lang   = 'ja-JP';
-    utt.rate   = 0.88;
-    utt.pitch  = 1.05;
-    utt.volume = 1.0;
-
-    utt.onend = () => {
-      if (myGen !== speakGeneration) return; // 古い世代は無視
-      currentUtterance = null;
-      if (onEnd) onEnd();
-    };
-    utt.onerror = (e) => {
-      if (myGen !== speakGeneration) return;
-      if (e.error === 'interrupted') return; // cancel()によるものは無視
-      currentUtterance = null;
-      if (onEnd) onEnd();
-    };
-    currentUtterance = utt;
-    speechSynthesis.speak(utt);
-  }
-
-  // 現在再生中なら cancel() してから少し待って発話
-  if (speechSynthesis.speaking) {
-    speechSynthesis.cancel();
-    setTimeout(doSpeak, 400);
-  } else {
-    doSpeak();
-  }
-}
-
-function stopSpeaking() {
-  speakGeneration++; // 古い世代のコールバックを無効化
-  currentUtterance = null;
-  if ('speechSynthesis' in window) {
-    speechSynthesis.cancel();
-  }
-}
-
-function toggleVoice() {
-  voiceEnabled = !voiceEnabled;
-  const btn = document.getElementById('voiceToggle');
-  if (voiceEnabled) { btn.textContent = '🔊'; btn.classList.add('on'); btn.title = '音声ON'; }
-  else              { btn.textContent = '🔇'; btn.classList.remove('on'); btn.title = '音声OFF'; stopSpeaking(); }
-}
-
-// Speak the current question
-function speakQuestion() {
-  const btn = document.getElementById('btnSpeakQ');
-  const text = document.getElementById('questionText').textContent;
-  if (btn.classList.contains('speaking')) { stopSpeaking(); btn.classList.remove('speaking'); return; }
-  btn.classList.add('speaking');
-  speak(text, () => btn.classList.remove('speaking'));
-}
-
-// Speak result + model answer
-function speakResult(verdict, comment, modelAnswer) {
-  if (!voiceEnabled) return;
-  let msg = '';
-  if (verdict==='正解')    msg = '正解です。' + comment;
-  else if (verdict==='部分正解') msg = '部分正解です。' + comment + '。模範解答は次の通りです。' + modelAnswer;
-  else                     msg = '不正解です。' + comment + '。模範解答は次の通りです。' + modelAnswer;
-  speak(msg);
-}
-
-// ══════════════════════════════════════════════════════════════
-// VOICE — STT (音声入力)
-// ══════════════════════════════════════════════════════════════
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let isRecording = false;
-let accumulatedText = '';
-
-function initRecognition() {
-  if (!SpeechRecognition) {
-    document.getElementById('micBtn').classList.add('unsupported');
-    document.getElementById('micHint').textContent = 'このブラウザは音声入力に対応していません';
-    return;
-  }
-  recognition = new SpeechRecognition();
-  recognition.lang = 'ja-JP';
-  recognition.continuous = true;       // keep listening
-  recognition.interimResults = true;   // show partial results
-
-  recognition.onresult = (e) => {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) {
-        accumulatedText += e.results[i][0].transcript;
-      } else {
-        interim = e.results[i][0].transcript;
-      }
-    }
-
-    const fullText = accumulatedText + interim;
-
-    // ── 音声コマンド検出 ──────────────────────────────────────
-    // 「採点して」「採点」→ 採点実行
-    if (/採点(して)?/.test(fullText)) {
-      accumulatedText = fullText.replace(/採点(して)?/g, '').trim();
-      document.getElementById('userAnswer').value = accumulatedText;
-      stopMic();
-      setTimeout(() => submitAnswer(), 300);
-      return;
-    }
-    // 「次」「次へ」「Next」「ネクスト」→ 次の問題へ
-    if (/(次(の問題)?(へ)?|[Nn]ext|ネクスト)/.test(fullText.trim()) && !document.getElementById("nextRow").classList.contains("hidden")) {
-      accumulatedText = '';
-      document.getElementById('userAnswer').value = '';
-      stopMic();
-      const nextBtn = document.querySelector('#nextRow .btn-primary');
-      if (nextBtn && !document.getElementById('nextRow').classList.contains('hidden')) {
-        setTimeout(() => nextQuestion(), 300);
-      }
-      return;
-    }
-    // ────────────────────────────────────────────────────────
-
-    document.getElementById('userAnswer').value = fullText;
-  };
-
-  recognition.onend = () => {
-    if (isRecording) {
-      // iOS Safari sometimes stops; restart if still recording
-      try { recognition.start(); } catch(e) { stopMic(); }
-    }
-  };
-
-  recognition.onerror = (e) => {
-    if (e.error !== 'aborted') stopMic();
-  };
-}
-initRecognition();
-
-function toggleMic() {
-  const micBtn = document.getElementById('micBtn');
-  if (micBtn.classList.contains('unsupported')) return;
-  if (isRecording) stopMic(); else startMic();
-}
-
-function startMic() {
-  if (!recognition) return;
-  stopSpeaking(); // stop TTS before listening
-  accumulatedText = document.getElementById('userAnswer').value;
-  isRecording = true;
-  document.getElementById('micBtn').classList.add('recording');
-  document.getElementById('micHint').textContent = handsFreeMode ? '🔴 録音中…「採点して」で採点、「次へ」で次の問題' : '🔴 録音中… もう一度ボタンを押すと停止';
-  try { recognition.start(); } catch(e) { stopMic(); }
-}
-
-function stopMic() {
-  isRecording = false;
-  document.getElementById('micBtn').classList.remove('recording');
-  document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
-  try { recognition.stop(); } catch(e) {}
-}
-
-// ══════════════════════════════════════════════════════════════
-// APP STATE
-// ══════════════════════════════════════════════════════════════
-let mode = 'random';
-let selectedCategory = null;
-let checkedIndices = JSON.parse(localStorage.getItem('checkedIndices') || '[]');
-let examQuestions = [];
-let currentIdx = 0;
-let correctCount = 0, partialCount = 0, wrongCount = 0, answered = 0;
-let results = [];
-let wrongIndices   = JSON.parse(localStorage.getItem('wrongIndices')  || '[]');
-let sessionCorrect = parseInt(localStorage.getItem('totalCorrect')    || '0');
-let sessionTotal   = parseInt(localStorage.getItem('totalAnswered')   || '0');
-
-document.getElementById('savedCorrect').textContent = sessionCorrect;
-document.getElementById('savedTotal').textContent   = sessionTotal;
-
-function selectMode(m) {
-  if (m === 'checked' && checkedIndices.length === 0) {
-    alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
-    return;
-  }
-  mode = m;
-  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-  const el = document.getElementById('mode' + m[0].toUpperCase() + m.slice(1));
-  if (el) el.classList.add('selected');
-}
-
-function initCatCards() {
-  const container = document.getElementById('catCards');
-  if (!container || container.children.length > 0) return;
-  const allBtn = document.createElement('div');
-  allBtn.className = 'cat-card selected';
-  allBtn.id = 'cat-all';
-  allBtn.innerHTML = `<span class="cat-icon">🔄</span><span>全問</span><span class="cat-count">${QA_DATA.length}</span>`;
-  allBtn.onclick = () => selectCategory(null);
-  container.appendChild(allBtn);
-  CATEGORIES.forEach(cat => {
-    const btn = document.createElement('div');
-    btn.className = 'cat-card';
-    btn.id = 'cat-' + cat.id;
-    btn.innerHTML = `<span class="cat-icon">${cat.icon}</span><span>${cat.name}</span><span class="cat-count">${cat.indices.length}</span>`;
-    btn.onclick = () => selectCategory(cat.id);
-    container.appendChild(btn);
-  });
-}
-
-function selectCategory(catId) {
-  selectedCategory = catId;
-  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
-  const target = catId ? document.getElementById('cat-' + catId) : document.getElementById('cat-all');
-  if (target) target.classList.add('selected');
-  const pool = getCategoryPool();
-  if (catId === 'checked' && pool.length === 0) {
-    alert('チェック問題がありません。問題画面の ☆ ボタンでチェックできます。');
-    selectCategory(null);
-    return;
-  }
-  const sel = document.getElementById('countSelect');
-  sel.options[3].value = pool.length;
-  sel.options[3].text = `全問 (${pool.length}問)`;
-  if (parseInt(sel.value) > pool.length) sel.value = Math.min(pool.length, 10);
-}
-
-function getCategoryPool() {
-  // カテゴリ絞り込みのみ（checkedモードはstartExamで処理）
-  if (!selectedCategory) return [...Array(QA_DATA.length).keys()];
-  const cat = CATEGORIES.find(c => c.id === selectedCategory);
-  return cat ? [...cat.indices] : [...Array(QA_DATA.length).keys()];
-}
-
-// チェックボタンのトグル
-function toggleCheck() {
-  const qIdx = examQuestions[currentIdx];
-  const btn = document.getElementById('btnCheck');
-  if (checkedIndices.includes(qIdx)) {
-    checkedIndices = checkedIndices.filter(i => i !== qIdx);
-    btn.textContent = '☆';
-    btn.classList.remove('checked');
-  } else {
-    checkedIndices.push(qIdx);
-    btn.textContent = '⭐';
-    btn.classList.add('checked');
-  }
-  localStorage.setItem('checkedIndices', JSON.stringify(checkedIndices));
-  // チェック数を各所に反映
-  updateCheckedCount();
-}
-
-// チェック状態を反映
-function updateCheckedCount() {
-  const n = checkedIndices.length;
-  const el = document.getElementById('checkedCount');
-  if (el) el.textContent = n;
-  // モードカードの表示も更新
-  const modeEl = document.getElementById('modeChecked');
-  if (modeEl) {
-    const nameEl = modeEl.querySelector('.mode-name');
-    if (nameEl) nameEl.textContent = n > 0 ? `チェック(${n})` : 'チェック';
-  }
-}
-
-function updateCheckBtn() {
-  const qIdx = examQuestions[currentIdx];
-  const btn = document.getElementById('btnCheck');
-  if (!btn) return;
-  if (checkedIndices.includes(qIdx)) {
-    btn.textContent = '⭐'; btn.classList.add('checked');
-  } else {
-    btn.textContent = '☆'; btn.classList.remove('checked');
-  }
-}
-
-// 中断確認
-function confirmAbort() {
-  if (confirm('試験を終了して表紙に戻りますか？')) {
-    stopSpeaking(); stopMic();
-    document.getElementById('examScreen').classList.add('hidden');
-    showStart();
-  }
-}
-
-function startExam() {
-  const count = parseInt(document.getElementById('countSelect').value);
-  let pool = getCategoryPool();
-  if (mode === 'checked') {
-    // カテゴリ絞り込みがある場合はその中のチェック問題、なければ全チェック問題
-    pool = checkedIndices.filter(i => pool.includes(i));
-    if (pool.length === 0) {
-      alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
-      return;
-    }
-  } else if (mode === 'wrong') {
-    const wrongInCat = wrongIndices.filter(i => pool.includes(i));
-    if (wrongInCat.length > 0) pool = wrongInCat;
-    else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
-  }
-  if (mode !== 'order') pool = pool.sort(() => Math.random() - 0.5);
-  examQuestions = pool.slice(0, Math.min(count, pool.length));
-  currentIdx = 0; correctCount = 0; partialCount = 0; wrongCount = 0; answered = 0; results = [];
-  document.getElementById('startScreen').classList.add('hidden');
-  document.getElementById('examScreen').classList.remove('hidden');
-  document.getElementById('qTotal').textContent = examQuestions.length;
-  showQuestion();
-}
-
-function showQuestion() {
-  stopSpeaking(); stopMic();
-  const qIdx = examQuestions[currentIdx];
-  const qa   = QA_DATA[qIdx];
-
-  document.getElementById('qNum').textContent       = currentIdx + 1;
-  document.getElementById('qNumBadge').textContent  = qIdx + 1;
-  document.getElementById('questionText').textContent = qa.q;
-  document.getElementById('userAnswer').value = '';
-  document.getElementById('userAnswer').disabled = false;
-  document.getElementById('resultBox').classList.add('hidden');
-  document.getElementById('resultBox').innerHTML = '';
-  document.getElementById('nextRow').classList.add('hidden');
-  document.getElementById('loadingBox').classList.add('hidden');
-  document.getElementById('judgeBtn').disabled = false;
-  document.getElementById('btnSpeakQ').classList.remove('speaking');
-  updateCheckBtn();
-  document.getElementById('micBtn').classList.remove('recording');
-  document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
-
-  const progress = (currentIdx / examQuestions.length) * 100;
-  document.getElementById('progressBar').style.width = progress + '%';
-  document.getElementById('scoreDisplay').textContent   = correctCount + partialCount;
-  document.getElementById('answeredDisplay').textContent = answered;
-
-  // Auto-read question if voice is on → 読み上げ完了後に自動マイクON
-  // iOSは cancel() 直後の speak() を無視するため 350ms 待つ
-  if (voiceEnabled) {
-    document.getElementById('btnSpeakQ').classList.add('speaking');
-    setTimeout(() => {
-      speak(qa.q, () => {
-        document.getElementById('btnSpeakQ').classList.remove('speaking');
-        // ハンズフリーモードONなら自動でマイク開始
-        if (handsFreeMode && recognition) {
-          setTimeout(() => startMic(), 400);
-        }
-      });
-    }, 350);
-  } else if (handsFreeMode && recognition) {
-    // 音声OFFでもハンズフリーならマイクON
-    setTimeout(() => startMic(), 400);
-  }
-}
-
-function handleKeydown(e) {
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submitAnswer();
-}
-
-async function submitAnswer() {
-  const userAns = document.getElementById('userAnswer').value.trim();
-  if (!userAns) {
-    document.getElementById('userAnswer').style.borderColor = '#b91c1c';
-    setTimeout(() => document.getElementById('userAnswer').style.borderColor = '', 1000);
-    return;
-  }
-  stopMic(); stopSpeaking();
-  const qIdx = examQuestions[currentIdx];
-  const qa   = QA_DATA[qIdx];
-  document.getElementById('judgeBtn').disabled = true;
-  document.getElementById('userAnswer').disabled = true;
-  document.getElementById('loadingBox').classList.remove('hidden');
-
-  // Offline
-  if (!navigator.onLine) {
-    setTimeout(() => {
-      document.getElementById('loadingBox').classList.add('hidden');
-      handleResult(scoreOffline(userAns, qa.a), qa, qIdx, userAns);
-    }, 300);
-    return;
-  }
-
-  // Online AI scoring
-  try {
-    document.getElementById('loadingText').textContent = 'AI採点中...';
-    const prompt = `あなたは自家用操縦士（滑空機）口述試験の採点官です。
-
-【問題】${qa.q}
-【模範解答】${qa.a}
-【受験者の解答】${userAns}
-
-採点基準：
-- 「正解」：主要なポイントを正しく含んでいる
-- 「部分正解」：一部正しいが重要な要素が欠けている
-- 「不正解」：主要なポイントが誤っているか欠けている
-
-JSON形式のみで回答（前後のテキスト不要）：
-{"verdict":"正解"|"部分正解"|"不正解","comment":"採点コメント","score":100|50|0}`;
-
-    // プロキシ経由でAnthropic APIへ（CONFIG.API_ENDPOINTで切り替え）
-    const res  = await fetch(CONFIG.API_ENDPOINT, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:800,
-        messages:[{role:'user', content:prompt}] })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const result = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
-    document.getElementById('loadingBox').classList.add('hidden');
-    handleResult(result, qa, qIdx, userAns);
-  } catch(e) {
-    document.getElementById('loadingBox').classList.add('hidden');
-    const r = scoreOffline(userAns, qa.a);
-    r.comment = '（AI接続エラー・自動採点）' + r.comment;
-    handleResult(r, qa, qIdx, userAns);
-  }
-}
-
-function handleResult(result, qa, qIdx, userAns) {
-  const isCorrect = result.verdict === '正解';
-  const isPartial = result.verdict === '部分正解';
-  answered++;
-  if (isCorrect) { correctCount++; wrongIndices = wrongIndices.filter(i=>i!==qIdx); }
-  else { if (isPartial) partialCount++; else wrongCount++; if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx); }
-  localStorage.setItem('wrongIndices', JSON.stringify(wrongIndices));
-  results.push({qIdx, verdict:result.verdict, userAns});
-
-  const cls   = isCorrect ? 'correct' : isPartial ? 'partial' : 'incorrect';
-  const icon  = isCorrect ? '✅' : isPartial ? '⚠️' : '❌';
-  const title = isCorrect ? '正解！' : isPartial ? '部分正解' : '不正解';
-
-  const box = document.getElementById('resultBox');
-  box.className = `result-box ${cls}`;
-  box.innerHTML = `
-    <div class="result-header">
-      <span class="result-badge">${icon}</span>
-      <span class="result-title ${cls}">${title}</span>
-    </div>
-    <div class="result-body">${result.comment || (isCorrect ? 'よくできました！' : '')}</div>
-    ${!isCorrect ? `
-    <div class="model-answer">
-      <div class="model-answer-label-row">
-        <span class="model-answer-label">▼ 模範解答</span>
-        <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
-      </div>
-      <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
-    </div>` : ''}
-  `;
-  box.classList.remove('hidden');
-  document.getElementById('scoreDisplay').textContent    = correctCount + partialCount;
-  document.getElementById('answeredDisplay').textContent = answered;
-
-  const nextRow = document.getElementById('nextRow');
-  nextRow.classList.remove('hidden');
-  const showAnsBtn = document.getElementById('btnShowAns');
-  showAnsBtn.style.display = isCorrect ? 'none' : '';
-
-  // Auto-speak result → 読み上げ完了後にハンズフリーならマイク再開
-  if (handsFreeMode) {
-    const textToSpeak = (() => {
-      let msg = '';
-      if (result.verdict==='正解')         msg = '正解です。' + (result.comment||'');
-      else if (result.verdict==='部分正解') msg = '部分正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
-      else                                 msg = '不正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
-      return msg;
-    })();
-    speak(textToSpeak, () => {
-      // 読み上げ完了後にマイクON → 「次へ」コマンド待ち
-      if (handsFreeMode) setTimeout(() => startMic(), 400);
-    });
-  } else {
-    speakResult(result.verdict, result.comment || '', isCorrect ? '' : qa.a);
-  }
-}
-
-function speakModelAnswer() {
-  const btn  = document.getElementById('btnSpeakAns');
-  const text = document.getElementById('modelAnswerText').textContent;
-  if (btn.classList.contains('speaking')) { stopSpeaking(); btn.classList.remove('speaking'); return; }
-  btn.classList.add('speaking');
-  speak(text, () => btn.classList.remove('speaking'));
-}
-
-function showAnswer() {
-  const qIdx = examQuestions[currentIdx];
-  const qa   = QA_DATA[qIdx];
-  const box  = document.getElementById('resultBox');
-  if (!box.querySelector('.model-answer')) {
-    box.innerHTML += `
-      <div class="model-answer">
-        <div class="model-answer-label-row">
-          <span class="model-answer-label">▼ 模範解答</span>
-          <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
-        </div>
-        <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
-      </div>`;
-  }
-  document.getElementById('btnShowAns').style.display = 'none';
-  if (voiceEnabled) speakModelAnswer();
-}
-
-function skipQuestion() {
-  answered++; wrongCount++;
-  const qIdx = examQuestions[currentIdx];
-  if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
-  localStorage.setItem('wrongIndices', JSON.stringify(wrongIndices));
-  results.push({qIdx, verdict:'スキップ', userAns:''});
-  nextQuestion();
-}
-
-function nextQuestion() {
-  stopSpeaking();
-  currentIdx++;
-  if (currentIdx >= examQuestions.length) showFinalScreen();
-  else showQuestion();
-}
-
-function showFinalScreen() {
-  stopSpeaking();
-  sessionCorrect += correctCount; sessionTotal += answered;
-  localStorage.setItem('totalCorrect',   sessionCorrect);
-  localStorage.setItem('totalAnswered',  sessionTotal);
-  document.getElementById('examScreen').classList.add('hidden');
-  document.getElementById('finalScreen').classList.remove('hidden');
-  const pct = answered>0 ? Math.round((correctCount/answered)*100) : 0;
-  document.getElementById('finalPct').textContent   = pct + '%';
-  document.getElementById('finalRing').className    = 'final-score-ring ' + (pct>=70?'pass':'fail');
-  document.getElementById('finalGrade').textContent = pct>=80 ? '合格圏内！' : pct>=60 ? 'もう少し練習が必要です' : '要復習';
-  document.getElementById('fsCorrect').textContent  = correctCount;
-  document.getElementById('fsPartial').textContent  = partialCount;
-  document.getElementById('fsWrong').textContent    = wrongCount;
-  const grade = pct>=80 ? '合格圏内！よくできました。' : pct>=60 ? 'あと少しです。苦手問題を復習しましょう。' : '要復習です。もう一度練習しましょう。';
-  speak(`試験終了。正答率${pct}パーセント。${grade}`);
-}
-
-function reviewWrong() {
-  if (!wrongIndices.length) { alert('間違えた問題はありません！'); return; }
-  mode = 'wrong'; document.getElementById('countSelect').value = Math.min(wrongIndices.length,10);
-  showStart(); setTimeout(()=>selectMode('wrong'), 50);
-}
-
-function showStart() {
-  stopSpeaking(); stopMic();
-  document.getElementById('finalScreen').classList.add('hidden');
-  document.getElementById('examScreen').classList.add('hidden');
-  document.getElementById('startScreen').classList.remove('hidden');
-  document.getElementById('savedCorrect').textContent = sessionCorrect;
-  document.getElementById('savedTotal').textContent   = sessionTotal;
-  updateNetworkBadge();
-  updateCheckedCount();
-}
-
-// ── PWA install prompt ─────────────────────────────────────────
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault(); deferredPrompt = e;
-  document.getElementById('installBanner').classList.add('visible');
-});
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').classList.remove('visible'); deferredPrompt = null;
-});
-function installApp() {
-  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; }); }
-}
-
-// Init
-window.addEventListener('DOMContentLoaded', () => {
-  updateNetworkBadge();
-  initCatCards();
-  const el = document.getElementById('totalQCount');
-  if (el) el.textContent = QA_DATA.length;
-  updateCheckedCount();
-});
-</script>
 </body>
 </html>

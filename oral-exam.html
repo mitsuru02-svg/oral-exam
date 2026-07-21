@@ -1059,7 +1059,7 @@ JSON形式のみで回答（前後のテキスト不要）：
     // プロキシ経由でAnthropic APIへ（CONFIG.API_ENDPOINTで切り替え）
     const res  = await fetch(CONFIG.API_ENDPOINT, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:800,
+      body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:800,
         messages:[{role:'user', content:prompt}] })
     });
     const data = await res.json();

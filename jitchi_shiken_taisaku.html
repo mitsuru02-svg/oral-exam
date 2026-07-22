@@ -87,7 +87,7 @@
   .sb-link:hover{color:var(--text); background:var(--panel-raised);}
   .sb-link.active{color:var(--amber); border-left-color:var(--amber); background:var(--panel-raised);}
   #menu-toggle{
-    display:none; position:fixed; top:12px; left:96px; z-index:60;
+    display:none; position:fixed; top:14px; left:14px; z-index:60;
     background:var(--panel-hi); border:1px solid var(--line); color:var(--text);
     width:40px; height:40px; border-radius:6px; font-size:18px;
   }
@@ -234,7 +234,14 @@
 </style>
 </head>
 <body>
-<a href="./index.html" style="position:fixed;top:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:6px 12px;color:#8b949e;font-size:13px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.4);">‹ ホーム</a>
+<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;">
+  <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;">‹</a>
+  <div style="width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#1e40af);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✈</div>
+  <div>
+    <div style="font-size:13px;font-weight:600;color:#e6edf3;">実地試験対策教本</div>
+    <div style="font-size:10px;color:#8b949e;margin-top:1px;">自家用操縦士（滑空機）</div>
+  </div>
+</div>
 <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
 <div class="app">
   <nav id="sidebar">

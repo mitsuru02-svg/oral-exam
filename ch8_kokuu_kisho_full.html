@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第8章 航空気象 | 完全版リファレンス</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+  :root{
+    --navy-950:#070b14; --navy-900:#0c1220; --navy-800:#121a2c; --navy-700:#1a2540; --navy-600:#243458;
+    --line:#2a3a5c; --amber:#e8a33d; --amber-bright:#ffc25c; --amber-dim:#8a6a30; --sky:#5fb4d6;
+    --danger:#e0563f; --ok:#5fbf8c; --ink:#e8ecf4; --ink-dim:#9aa8c4; --ink-faint:#5c6a8a;
+    --mono:'Space Mono', monospace; --sans:'Noto Sans JP', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;background:var(--navy-950);color:var(--ink);font-family:var(--sans);}
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px 140px;}
+
+  /* HERO */
+  .hero{padding:44px 20px 26px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--navy-900),var(--navy-950));}
+  .hero-inner{max-width:980px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:0.12em;color:var(--amber);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .eyebrow::before{content:"AIM-J §8 完全版";border:1px solid var(--amber-dim);padding:2px 8px;border-radius:3px;color:var(--amber-bright);}
+  h1.title{font-size:clamp(24px,4.2vw,36px);margin:0 0 8px;line-height:1.3;font-weight:900;}
+  .hero-lede{color:var(--ink-dim);max-width:720px;line-height:1.85;font-size:14.5px;}
+  .stat-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .stat-row b{color:var(--amber-bright);font-size:15px;display:block;}
+
+  /* STICKY BLOCK NAV */
+  .block-nav{position:sticky;top:0;z-index:50;background:rgba(7,11,20,0.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;padding:10px 20px;}
+  .block-nav-inner{max-width:980px;margin:0 auto;display:flex;gap:6px;}
+  .block-nav a{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--line);padding:6px 10px;border-radius:16px;text-decoration:none;flex-shrink:0;transition:.15s;}
+  .block-nav a:hover{color:var(--amber-bright);border-color:var(--amber-dim);}
+  .block-nav a:first-child{color:var(--amber-bright);border-color:var(--amber-dim);background:rgba(232,163,61,0.08);margin-right:4px;}
+
+  /* BLOCK SHELL */
+  .block{margin-top:52px;scroll-margin-top:60px;}
+  .block-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;flex-wrap:wrap;}
+  .block-head .blocknum{font-family:var(--mono);font-size:13px;color:var(--amber);border:1px solid var(--amber-dim);border-radius:4px;padding:2px 8px;}
+  .block-head h2{font-size:24px;margin:0;font-weight:900;}
+  .block-intro{color:var(--ink-dim);font-size:14px;line-height:1.9;max-width:760px;margin:8px 0 20px;}
+
+  .tts-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 20px;padding:10px 14px;background:var(--navy-900);border:1px solid var(--line);border-radius:8px;}
+  .tts-btn{font-family:var(--mono);font-size:11px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
+  .tts-btn:hover{background:rgba(95,180,214,0.12);}
+  .tts-btn.playing{background:var(--sky);color:var(--navy-950);}
+  .tts-btn.tts-stop{border-color:var(--danger);color:var(--danger);}
+  .tts-btn.tts-stop:hover{background:rgba(224,86,63,0.12);}
+  .tts-status{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+  .tts-voice{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;max-width:180px;cursor:pointer;}
+  .tts-controls-mini{margin:0 0 14px;padding:0;background:none;border:none;gap:6px;}
+  .tts-controls-mini .tts-btn{font-size:10px;padding:4px 9px;}
+
+  /* ACCORDION TOPIC CARDS */
+  details.topic{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--navy-900);overflow:hidden;scroll-margin-top:70px;transition:border-color .3s, box-shadow .3s;}
+  details.topic.reading{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber);}
+  details.topic[open]{border-color:var(--amber-dim);}
+  details.topic summary{padding:12px 16px;cursor:pointer;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:baseline;gap:10px;}
+  details.topic summary::-webkit-details-marker{display:none;}
+  details.topic summary::before{content:"▸";color:var(--amber);font-size:11px;transition:.15s;flex-shrink:0;}
+  details.topic[open] summary::before{transform:rotate(90deg);}
+  details.topic summary .num{font-family:var(--mono);font-size:11px;color:var(--amber-bright);flex-shrink:0;}
+  .topic-body{padding:0 16px 16px 36px;color:var(--ink-dim);font-size:13.5px;line-height:1.95;}
+  .topic-body p{margin:0 0 10px;}
+  .topic-body ul, .topic-body ol{padding-left:18px;margin:0 0 10px;}
+  .topic-body li{margin-bottom:4px;}
+  .topic-body b{color:var(--ink);}
+  .topic-body table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+  .topic-body th,.topic-body td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;}
+  .topic-body th{background:var(--navy-800);color:var(--amber-bright);font-family:var(--mono);font-weight:400;font-size:11px;}
+  .example-box{font-family:var(--mono);font-size:12px;background:var(--navy-950);border:1px dashed var(--line);border-radius:6px;padding:10px 12px;margin:8px 0;color:var(--sky);white-space:pre-wrap;}
+  .callout{border-left:3px solid var(--danger);background:rgba(224,86,63,0.08);padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12.5px;}
+  .callout.ok{border-color:var(--ok);background:rgba(95,191,140,0.08);}
+  .callout.info{border-color:var(--sky);background:rgba(95,180,214,0.08);}
+
+  /* METAR LAB (interactive) */
+  .metar-examples{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .metar-examples button{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:6px;padding:6px 9px;cursor:pointer;}
+  .metar-examples button.active{border-color:var(--amber);color:var(--amber-bright);}
+  .metar-raw{font-family:var(--mono);font-size:13.5px;background:var(--navy-950);border:1px solid var(--line);border-radius:8px;padding:14px;line-height:2.1;word-break:break-all;}
+  .tok{padding:2px 3px;border-radius:3px;cursor:pointer;transition:.12s;}
+  .tok:hover,.tok.sel{outline:2px solid var(--amber-bright);background:rgba(232,163,61,0.15);}
+  .tok.c-station{color:#bfe1ff;} .tok.c-time{color:#c9b8ff;} .tok.c-wind{color:var(--sky);}
+  .tok.c-vis{color:#a8e6b0;} .tok.c-wx{color:var(--danger);} .tok.c-cloud{color:#d7d2c4;}
+  .tok.c-temp{color:var(--amber-bright);} .tok.c-qnh{color:#ff9d9d;}
+  .metar-explain{margin-top:12px;min-height:56px;background:var(--navy-800);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--ink-dim);line-height:1.85;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;font-family:var(--mono);color:var(--ink-faint);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+
+  /* GRIDS */
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:10px 0;}
+  .info-card{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:14px;}
+  .info-card .t{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:6px;}
+  .info-card .d{font-size:12px;color:var(--ink-dim);line-height:1.8;}
+  .symbol-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:10px 0;}
+  .symbol-card{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:12px 8px;text-align:center;}
+  .symbol-card svg{width:38px;height:38px;margin-bottom:6px;}
+  .symbol-card .name{font-size:11.5px;font-weight:700;}
+  .symbol-card .en{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);}
+
+  /* CB / DOWNBURST reused blocks */
+  .cb-stage-tabs{display:flex;gap:8px;margin-bottom:12px;}
+  .cb-stage-tabs button{flex:1;font-family:var(--mono);font-size:11.5px;padding:8px 6px;background:var(--navy-800);border:1px solid var(--line);border-radius:6px;color:var(--ink-dim);cursor:pointer;}
+  .cb-stage-tabs button.active{background:var(--amber);color:var(--navy-950);border-color:var(--amber);font-weight:700;}
+  .cb-svg-wrap,.db-svg-wrap{background:var(--navy-950);border:1px solid var(--line);border-radius:8px;padding:10px;}
+  .cb-caption{margin-top:10px;font-size:13px;color:var(--ink-dim);line-height:1.85;min-height:40px;}
+  .hazard-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .hazard-tags span{font-family:var(--mono);font-size:10.5px;padding:4px 9px;border-radius:12px;border:1px solid;}
+  .hazard-tags .h1{color:var(--danger);border-color:var(--danger);}
+  .hazard-tags .h2{color:var(--amber-bright);border-color:var(--amber-dim);}
+  .hazard-tags .h3{color:var(--sky);border-color:var(--sky);}
+  .db-points{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .db-point{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11.5px;color:var(--ink-dim);line-height:1.6;}
+  .db-point b{color:var(--amber-bright);font-family:var(--mono);display:block;margin-bottom:4px;}
+
+  /* PIREP */
+  .pirep-box{background:var(--navy-950);border:1px solid var(--line);border-radius:8px;padding:14px;margin:8px 0;}
+  .pirep-line{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;}
+  .pirep-line .who{font-family:var(--mono);font-size:10.5px;color:var(--amber);width:58px;flex-shrink:0;padding-top:2px;}
+  .pirep-line .txt{font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.7;}
+
+  @media (max-width:640px){
+    .db-points{grid-template-columns:repeat(2,1fr);}
+    .topic-body{padding-left:20px;}
+  }
+
+  footer.note{text-align:center;margin-top:50px;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
+</style>
+</head>
+<body>
+<a href="./index.html" style="position:fixed;top:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:6px 12px;color:#8b949e;font-size:13px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.4);">‹ ホーム</a>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">第8章 航空気象（気象庁監修）</div>
+    <h1 class="title">AIM-J第8章・航空気象。<br>800番から897番＋附録まで、全項目収録。</h1>
+    <p class="hero-lede">
+      各項目は開閉式カードにまとめ、音声で聞きながら実際の本文を目で追える構成にしています。図解が必要な箇所には、その場でSVG図を挿入しています。
+    </p>
+    <div class="stat-row">
+      <div><b>8</b>ブロック構成</div>
+      <div><b>61</b>項目（800〜897・附録）</div>
+      <div><b>10</b>個の図解（インタラクティブ5＋静的5）</div>
+      <div><b>69</b>個の音声読み上げ（ブロック＋項目単位）</div>
+    </div>
+  </div>
+</div>
+
+<div class="block-nav">
+  <div class="block-nav-inner">
+    <a href="ch9_anzen_koku_igaku.html">§9 運航安全・航空医学 →</a>
+    <a href="#b1">① 総論・観測(800-804)</a>
+    <a href="#b2">② 通報式の読み方(810-816)</a>
+    <a href="#b3">③ 飛行中の気象情報(820-824)</a>
+    <a href="#b4">④ VFR気象(830-839)</a>
+    <a href="#b5">⑤ IFR気象(840-849)</a>
+    <a href="#b6">⑥ 悪天と飛行(850-865)</a>
+    <a href="#b7">⑦ 雲と風(870-886)</a>
+    <a href="#b8">⑧ 気象通報・附録(890-899)</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ BLOCK 1 ============ -->
+<div class="block" id="b1">
+  <div class="block-head"><span class="blocknum">800-804</span><h2>① 総論・観測網とブリーフィング</h2></div>
+  <p class="block-intro">気象情報がどこから来て、どう入手するかの土台部分です。ここを押さえておくと、あとの通報式の話が「誰が何のために作っている電文か」がわかって頭に入りやすくなります。</p>
+  <div class="tts-controls" data-tts-id="block1">
+    <button class="tts-btn tts-play">▶ ブロック①を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" open data-tid="800">
+    <summary><span class="num">800</span>一般</summary>
+    <div class="topic-body">
+      <p>この章は気象庁監修。一般的な気象学の理論そのものより、「飛行計画に必要な気象情報」と「実際に遭遇する気象障害への対応」に重点が置かれています。試験対策としても、暗記より“対応”を意識すると理解しやすい章です。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="801">
+    <summary><span class="num">801</span>気象観測網と気象情報</summary>
+    <div class="topic-body">
+      <p>全国の空港には航空地方気象台・航空測候所・航空気象観測所が配置され、観測結果は「航空観測気象報」としてまとめられます。観測主体は3パターンあります。</p>
+      <ul>
+        <li>気象庁が委託した地方公共団体等が観測し、気象庁が通報</li>
+        <li>気象庁が委託した民間事業者が観測から通報まで実施</li>
+        <li>一部空港は観測・通報が完全自動化</li>
+      </ul>
+      <p>さらに防衛省や都道府県が観測・通報する空港もあります。世界中の観測データは国際協力の通信網で気象庁に集まり、スーパーコンピュータによる数値予報の元データになります。航空交通管理センター(ATMC)内には気象庁の航空交通気象センター(ATMetC)が置かれ、悪天の影響を考慮した航空交通管理に直結しています。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="802">
+    <summary><span class="num">802</span>飛行前の気象ブリーフィング</summary>
+    <div class="topic-body">
+      <p>パイロットは、航空気象情報提供システム「MetAir」、気象庁ホームページ（航空気象情報）、または民間気象会社から気象情報を確認する義務があります。不明点は管轄の航空気象官署に電話でブリーフィングを受けられます。MetAirのセルフブリーフィングページで提供される情報は次の9種類です。</p>
+      <ul>
+        <li>予想図／実況図・解析図／METAR・TAF／地上天気図</li>
+        <li>高層実況・エマグラム／航空気象解説報／飛行場ナウキャスト</li>
+        <li>高層天気図・予想天気図／火山情報・台風情報</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="803">
+    <summary><span class="num">803</span>MetAirで提供される天気図等</summary>
+    <div class="topic-body">
+      <p>まず覚えておくと便利なのが、気圧面と高度のおおよその対応です。</p>
+      <table>
+        <tr><th>気圧面</th><th>高度目安</th><th>気圧面</th><th>高度目安</th></tr>
+        <tr><td>150hPa</td><td>約45,000ft</td><td>500hPa</td><td>約18,000ft</td></tr>
+        <tr><td>200hPa</td><td>約39,000ft</td><td>700hPa</td><td>約10,000ft</td></tr>
+        <tr><td>250hPa</td><td>約34,000ft</td><td>850hPa</td><td>約5,000ft</td></tr>
+        <tr><td>300hPa</td><td>約30,000ft</td><td>900hPa</td><td>約3,000ft</td></tr>
+      </table>
+      <p>天気図の表題は記号化されています（例：FXFE502＝500hPaの24時間予想天気図）。主な種類の記号は AS＝解析(現況)、FS＝地上予報、FU＝高層予報、FB＝悪天予想、AU＝高層解析、UB＝悪天実況、WT＝台風予想、SP＝速報、TS＝雲解析など。予想図の末尾数字は予報時間で、2＝24時間後、4＝48時間後、7＝72時間後を表します。</p>
+      <p>主な天気図の使い分けは以下の通りです。</p>
+      <table>
+        <tr><th>図の種類</th><th>使いどころ</th></tr>
+        <tr><td>地上天気図</td><td>高低気圧・前線の位置と発達/衰弱をつかみ、大まかな天気推移を把握</td></tr>
+        <tr><td>等圧面天気図</td><td>上層風・気温・凍結高度は分かるが、雲や降水の広がり、着氷・タービュランス・雷雨の発生は分からない</td></tr>
+        <tr><td>国内悪天解析図</td><td>雲・降水分布、強度、乱気流/着氷のPIREP、予報官コメントで悪天の詳細を把握</td></tr>
+        <tr><td>国内悪天予想図</td><td>地上〜45,000ftの雷電・乱気流等の悪天域と強度、高低気圧・前線・0℃線</td></tr>
+        <tr><td>空域に関する気象図</td><td>ジェット気流や悪天予測に有効な国際航空用悪天予想図、三十分大気解析など</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="804">
+    <summary><span class="num">804</span>気象庁から提供される気象電文等</summary>
+    <div class="topic-body">
+      <p>よく使う電文の一覧です。次のブロックで詳しく解読しますが、まずは全体像を。</p>
+      <table>
+        <tr><th>種類</th><th>コード名</th><th>内容</th></tr>
+        <tr><td rowspan="4">航空気象観測報</td><td>METAR</td><td>定時飛行場実況気象</td></tr>
+        <tr><td>SPECI</td><td>特別飛行場実況気象</td></tr>
+        <tr><td>SCAN</td><td>航空気象観測所実況気象</td></tr>
+        <tr><td>従来型METAR AUTO</td><td>従来型自動飛行場実況気象</td></tr>
+        <tr><td rowspan="4">航空気象予報</td><td>TAF</td><td>運航用飛行場予報（発表から30時間有効）</td></tr>
+        <tr><td>VOLMET</td><td>放送向け運航用飛行場予報（同30時間）</td></tr>
+        <tr><td>TREND</td><td>着陸用飛行場予報（発表から2時間有効）</td></tr>
+        <tr><td>TAKE-OFF FORECAST</td><td>離陸用飛行場予報（発表から6時間有効）</td></tr>
+        <tr><td>空域気象情報</td><td>SIGMET</td><td>シグメット情報</td></tr>
+        <tr><td>火山灰情報</td><td>VAA</td><td>航空路火山灰情報</td></tr>
+        <tr><td rowspan="2">機上気象報</td><td>AIREP</td><td>機上気象報告（国際線）</td></tr>
+        <tr><td>PIREP</td><td>機上気象報告</td></tr>
+        <tr><td rowspan="2">一般気象</td><td>SYNOP</td><td>地上実況気象</td></tr>
+        <tr><td>TEMP</td><td>高層実況気象</td></tr>
+        <tr><td rowspan="3">電報略語</td><td>AMD</td><td>修正報</td></tr>
+        <tr><td>COR</td><td>訂正報</td></tr>
+        <tr><td>RTD</td><td>遅延報</td></tr>
+      </table>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 2 ============ -->
+<div class="block" id="b2">
+  <div class="block-head"><span class="blocknum">810-816</span><h2>② 気象通報式の読み方（METAR・TAF・SIGMET）</h2></div>
+  <p class="block-intro">この章の心臓部です。METAR/SPECIを確実に解読できることが前提とされています。実際の電文をクリックして意味を確認できるラボと、SCAN・従来型AUTO・TAF・SIGMET・火山灰情報のカードを用意しました。</p>
+  <div class="tts-controls" data-tts-id="block2">
+    <button class="tts-btn tts-play">▶ ブロック②を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" open data-tid="810">
+    <summary><span class="num">810</span>気象通報式・全体像</summary>
+    <div class="topic-body">
+      <p>観測報は通信回線で地域センターに集まり、重要度に応じて国際的に交換されます。METARは<b>1時間毎または30分毎</b>に定時通報。SPECIは重要な変化があったなど特別観測の基準に該当した場合に随時発表されます（有人観測と自動観測でタイミングの基準が一部異なります）。SCANは一部空港での簡略化観測、従来型METAR AUTOは観測装置が10分毎に自動通報するものです。米軍飛行場発表のMETAR/TAFは日本方式と一部異なります。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="811">
+    <summary><span class="num">811</span>METAR/SPECIの解読 ── クリックして読むラボ</summary>
+    <div class="topic-body">
+      <p>METAR/SPECIは、通報種類→地点略号→観測日時→(AUTO)→風→視程→RVR→現在天気→雲→CAVOK→気温/露点→QNH→低層ウィンドシアー→国内記事、の順で構成されます。下の電文のグループをクリックすると解説が出ます。</p>
+      <div class="metar-examples">
+        <button class="active" data-ex="0">通常観測 (VFR日和)</button>
+        <button data-ex="1">ガスト+雷雨 (IFR注意)</button>
+        <button data-ex="2">CAVOK</button>
+      </div>
+      <div class="metar-raw" id="metarRaw"></div>
+      <div class="metar-explain" id="metarExplain">グループをクリックすると、ここに解説が出ます。</div>
+      <div class="legend">
+        <span><i style="background:#bfe1ff"></i>地点</span><span><i style="background:#c9b8ff"></i>時刻</span>
+        <span><i style="background:#5fb4d6"></i>風</span><span><i style="background:#a8e6b0"></i>視程</span>
+        <span><i style="background:#e0563f"></i>現在天気</span><span><i style="background:#d7d2c4"></i>雲</span>
+        <span><i style="background:#ffc25c"></i>気温/露点</span><span><i style="background:#ff9d9d"></i>QNH</span>
+      </div>
+      <p style="margin-top:14px;">補足ポイント（原文の細則から）：</p>
+      <ul>
+        <li><b>風</b>：静穏(4kt以下)は00000KT。風向が定まらない・変動が大きい場合はVRB。10分間で顕著な変化があれば、その変化後の値が示され平均対象時間は10分より短くなることがある。</li>
+        <li><b>視程</b>：10km以上は9999。5,000mまでは100m刻み、5,000〜9,999mは1,000m刻み。100m未満は0000。</li>
+        <li><b>RVR</b>：視程が1,500m以下、またはRVRが観測上限（2,000mまたは1,800m）以下のときに通報。最大4滑走路分まで。変化傾向はU(上昇)/D(下降)/N(変化なし)。</li>
+        <li><b>現在天気</b>：強度(弱/並/強)＋特性＋降水／視程障害／その他現象の順で、重要な順に最大3群。VC＝飛行場から8〜16km圏内の現象。</li>
+        <li><b>雲</b>：FEW(1-2/8)・SCT(3-4/8)・BKN(5-7/8)・OVC(8/8)。高さは100ft単位3桁。CB/TCUは必ず通報。何もなければNSC、自動観測でNCD。</li>
+        <li><b>CAVOK</b>：視程10km以上・雲底5,000ftまたはMSA最大値未満に雲なし・積乱雲/塔状積雲なし・悪天現象なし、の3条件がすべて揃うとこの一語に置き換わる（自動観測では非適用）。</li>
+        <li><b>気温/露点</b>：0℃未満はMを前置（例：M03/M06）。</li>
+        <li><b>QNH</b>：本文はQ+hPa、国内記事はA+インチ(0.01inHg単位)。</li>
+        <li><b>低層ウィンドシアー</b>：観測前30分以内に滑走路面上1,600ft以下の進入域/離陸域にあった場合、WS+滑走路番号。全滑走路はWS ALL RWY。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="812">
+    <summary><span class="num">812</span>SCANの解読</summary>
+    <div class="topic-body">
+      <p>SCANは航空気象観測所設置空港で、地方公共団体等が観測し気象庁が通報する方式。MetAirの表示で地点略号から文が始まっている（METAR/SPECIの識別語がない）場合はSCANを意味します。METAR/SPECIと異なる主な点：</p>
+      <ul>
+        <li>「特別な現在天気」は表にある9種類のみ。<b>複数該当する場合は順序が最も重大な現象1つだけが報じられる</b>点に注意（見落としやすい）。</li>
+        <li>強度は「－」と「＋」のみ（TS・SN・RAにのみ付加）。降水種はRA・SN・GRのみ。視程障害はBR・FGのみ。</li>
+        <li>雲がまったくない場合はSKC。CAVOKに相当する条件（視程10km以上・雲底5,000ft/MSA未満に雲なしかつ積乱雲なし・該当天気なし）がそろえばCAVOKで示される。</li>
+      </ul>
+      <table>
+        <tr><th>順位</th><th>略語</th><th>現象</th><th>順位</th><th>略語</th><th>現象</th></tr>
+        <tr><td>1</td><td>FC</td><td>ろうと雲(竜巻)</td><td>6</td><td>+SN</td><td>強い雪</td></tr>
+        <tr><td>2</td><td>+TS</td><td>強い雷電</td><td>7</td><td>SN</td><td>雪</td></tr>
+        <tr><td>3</td><td>TS</td><td>雷電</td><td>8</td><td>+RA</td><td>強い雨</td></tr>
+        <tr><td>4</td><td>SHGR</td><td>ひょう・あられ</td><td>9</td><td>RA</td><td>雨</td></tr>
+        <tr><td>5</td><td>BLSN</td><td>地ふぶき</td><td>-</td><td>FG/BR</td><td>霧/もや</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="813">
+    <summary><span class="num">813</span>従来型METAR AUTOの解読</summary>
+    <div class="topic-body">
+      <p>観測装置のみによる完全自動通報で、10分毎に更新。観測日時の後に「AUTO」が付くのが目印です。<b>民間気象会社のブリーフィングには含まれないことがある</b>ので注意。METARとの違い：</p>
+      <ul>
+        <li>視程はRVRまたは視程計設置場所の値であり、目視観測の卓越視程と一致しないことがある。</li>
+        <li>現在天気はRA・SNの2種類のみ（強度・特性は付かない）。霧やもや等の視程障害は示されない。</li>
+        <li>雲は雲形・対流雲の付加群が報じられない（///が付く）。雲を検知しなければNCD。</li>
+        <li>国内記事にRI(降雨強度mm/h)・SD(積雪深cm、1時間前との差)が付くことがある。</li>
+      </ul>
+      <div class="callout">VMCかIMCかの判断を従来型METAR AUTOのみで行うべきではない、と明記されています。可能ならMETAR/SPECIで再確認を。</div>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="814">
+    <summary><span class="num">814</span>飛行場予報（TAF・VOLMET・TREND・離陸用予報）</summary>
+    <div class="topic-body">
+      <p><b>運航用飛行場予報(TAF)</b>：1日4回（00・06・12・18UTC）、有効期間は発表から30時間。構成は 記号→予報地点→発表日時→有効期間→風→卓越視程→重要な予報天気/NSW→雲/NSC→CAVOK→変化群。修正はTAF AMD、訂正はTAF COR。未入電はNIL。</p>
+      <div class="example-box">TAF RJEC 221100Z 2212/2318 03015KT 9999 FEW020
+  BECMG 2214/2216 05025G40KT 4000 SHRA BKN012 BKN030CB
+  TEMPO 2216/2220 2000 TSRA BKN008</div>
+      <p>読み方の骨格：<b>2212/2318</b>＝有効期間(22日12時〜23日18時UTC)。<b>BECMG 2214/2216</b>＝14時〜16時の間に規則的または不規則に変化しその後継続。<b>TEMPO 2216/2220</b>＝16〜20時の間に一時的変動（合計が期間の1/2未満）。天気予報の終息はNSW、雲なし予報はNSC。</p>
+      <p>変化指示符の考え方：</p>
+      <table>
+        <tr><th>指示符</th><th>意味</th></tr>
+        <tr><td>BECMG</td><td>1〜4時間の期間内に規則的または不規則に変化し、以後その状態が続く</td></tr>
+        <tr><td>TEMPO</td><td>1時間未満の一時的変動が断続的に発生し、合計時間が予報期間の1/2未満</td></tr>
+      </table>
+      <p><b>VOLMET</b>：VOLMET放送向けTAF。記号VOLMETを前置し、放送では基本群＋変化群4群を超えた部分は放送されない。<b>TREND</b>：成田・東京・中部・関西・福岡の各空港でMETARに付加、有効期間2時間。重要変化がなければNOSIG。時刻群はFM(開始)/TL(終了)/AT(発生時刻)。<b>離陸用飛行場予報(TAKE-OFF FORECAST)</b>：離陸前概ね3時間以内用、有効期間6時間、地上気温・風向風速・QNHで構成し最大積載量算出に利用。</p>
+      <table>
+        <tr><th>種別</th><th>有効期間</th><th>用途</th></tr>
+        <tr><td>TAF</td><td>30時間</td><td>飛行計画全般</td></tr>
+        <tr><td>VOLMET</td><td>30時間</td><td>放送向けTAF</td></tr>
+        <tr><td>TREND</td><td>2時間</td><td>着陸判断（主要5空港）</td></tr>
+        <tr><td>TAKE-OFF FORECAST</td><td>6時間</td><td>離陸・最大積載量算出（主要5空港）</td></tr>
+      </table>
+      <p>このほか、台風・強風・大雨・大雪・高潮等が予想される場合の<b>飛行場警報</b>、施設に被害を与えうる雷の発生が予想される場合の<b>飛行場気象情報</b>も同じ気象官署から発表されます。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="815">
+    <summary><span class="num">815</span>空域気象情報（SIGMET）</summary>
+    <div class="topic-body">
+      <p>SIGMETは福岡FIR全域・全高度を対象に、運航に重大な影響を与える悪天候の発現が予想または観測され持続すると予想される場合に気象庁本庁から発表。有効時間は<b>台風・火山灰の拡散状況は6時間以内、その他は4時間以内</b>。</p>
+      <ul>
+        <li>雷電（不明瞭/隙間なし/線状のCbなど、ひょうを伴う場合を含め8区分）</li>
+        <li>台風[TC]／強い乱気流[SEV TURB]</li>
+        <li>着氷（強いもの[SEV ICE]、着氷性の雨による強いもの）</li>
+        <li>強い山岳波[SEV MTW]／強い砂じん嵐（ちり・砂）</li>
+        <li>火山灰の拡散状況[VA]／放射性物質の状況[RDOACT CLD]</li>
+      </ul>
+      <p>識別ヘッダー：WCJP31＝熱帯低気圧関連、WVJP31＝火山灰拡散関連、WSJP31＝それ以外。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="816">
+    <summary><span class="num">816</span>航空路火山灰に関する情報（VAA）</summary>
+    <div class="topic-body">
+      <p>ICAOが指名する世界9か所の航空路火山灰情報センター(VAAC)のひとつである<b>東京VAAC</b>が、東アジア・北西太平洋域と北極圏の一部を担当。責任領域内で運航への影響がある/予想される場合にVAAを発表します。</p>
+      <p>情報の種類（①②はICAO勧告に基づく国際向け、③〜⑥は国内向け）：</p>
+      <table>
+        <tr><th>情報</th><th>内容</th></tr>
+        <tr><td>①航空路火山灰情報（電文）</td><td>実況＋6/12/18時間先の分布予測</td></tr>
+        <tr><td>②火山灰拡散予測図(VAG)</td><td>①を図示。消散見込み時は"NO VA EXP"表示</td></tr>
+        <tr><td>③火山灰実況図(VACI)</td><td>高度・分布範囲の実況を図示</td></tr>
+        <tr><td>④狭域拡散予測図(VAGFN)</td><td>1時間毎に6時間先まで、高度別（FL180〜FL550／SFC〜FL180）</td></tr>
+        <tr><td>⑤定時拡散・降灰予測図（国内火山）</td><td>単発噴火を仮定した3時間先までの分布・降灰予測</td></tr>
+        <tr><td>⑥推定噴煙流向報（国内火山）</td><td>噴火速報等発表時に噴煙高度・高層風情報を提供</td></tr>
+      </table>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 3 ============ -->
+<div class="block" id="b3">
+  <div class="block-head"><span class="blocknum">820-824</span><h2>③ 飛行中に利用できる気象情報</h2></div>
+  <p class="block-intro">地上でのブリーフィングだけでなく、飛行中にもリアルタイムで気象情報を取りにいく手段が用意されています。</p>
+  <div class="tts-controls" data-tts-id="block3">
+    <button class="tts-btn tts-play">▶ ブロック③を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" data-tid="821">
+    <summary><span class="num">821</span>管制機関等からの気象情報</summary>
+    <div class="topic-body">
+      <p>タワー等に飛行場の最新気象情報を要求すれば入手可能。気象機関からの情報のほか、タワーが観察した一般的気象情報、他機からのPIREP、レーダーで視認された気象情報も含まれます。SIGMETは必要に応じて該当空域を飛行中の機に伝送されます。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="822">
+    <summary><span class="num">822</span>ATIS</summary>
+    <div class="topic-body">
+      <p>気象情報・飛行場の状態・保安施設の運用状況等を自動音声で特定周波数に繰り返し放送。METAR・SPECI・PIREP等が発出/報告され次第、内容が更新されます。VHFのほか衛星データリンクでも入手可能。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="823">
+    <summary><span class="num">823</span>広域対空援助局（FSC）による気象情報の提供</summary>
+    <div class="topic-body">
+      <p>各地のリモート通信サイト経由でVHFにより、飛行の安全に必要な情報の提供・収集・伝達を行う機関です。入手できる情報：SIGMET／METAR・SPECI／飛行場予報／気象レーダーエコー情報／TREND／気象・火山活動のPIREP(受信後2時間以内)。パイロット自身のPIREP通報も可能で、隣接国の気象情報も取得できます。乱気流PIREPは「Severe」「Moderate」に加え、航空会社収集分の「Light」「Smooth」情報も提供されます。</p>
+      <div class="pirep-box">
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">Request Turbulence PIREP between NIKKO and PEONY on Y11 at FL330.</div></div>
+        <div class="pirep-line"><div class="who">FSC</div><div class="txt">AIR SMOOTH over NIKKO FL330 reported by Boeing 767 at 0030</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="824">
+    <summary><span class="num">824</span>VOLMET</summary>
+    <div class="topic-body">
+      <p>音声放送による気象情報提供。広範囲向けのHFと局地向けのVHFがありますが、<b>日本はHFのみ運用</b>。日本(Tokyo局)は太平洋地域グループに属し、毎時10分・40分から5分間ずつ、次の順で放送します。</p>
+      <ol>
+        <li>成田・東京・新千歳・中部・関西・福岡・インチョンのMETAR&TREND</li>
+        <li>成田・関西のTAF</li>
+        <li>福岡FIR／インチョンFIR内の有効なSIGMET発表の有無</li>
+        <li>成田METAR&TRENDの反復</li>
+        <li>訂正報（訂正はホンコン局が担当）</li>
+      </ol>
+      <p>電文のうち5群（基本群+変化群4群）を超える部分は放送されません。世界の主なVOLMETグループの放送タイミング（H=毎時）：</p>
+      <table>
+        <tr><th>時間帯</th><th>発信局・担当地域</th></tr>
+        <tr><td>H+00,30</td><td>Honolulu：Hawaii地域4空港</td></tr>
+        <tr><td>H+05,35</td><td>Honolulu：米国西海岸7空港</td></tr>
+        <tr><td>H+10,40</td><td>Tokyo：上記7空港</td></tr>
+        <tr><td>H+15,45</td><td>Hong Kong：台湾・北京地域7空港</td></tr>
+        <tr><td>H+20,50</td><td>Auckland：南太平洋地域7空港</td></tr>
+        <tr><td>H+25,55</td><td>Honolulu：Alaska地域・Vancouver</td></tr>
+      </table>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 4 ============ -->
+<div class="block" id="b4">
+  <div class="block-head"><span class="blocknum">830-839</span><h2>④ VFRフライトのための気象</h2></div>
+  <p class="block-intro">グライダー訓練生にとって最も直結するブロックです。VMCの数値条件、雲の見極め、離着陸時の風とガスト対応まで。</p>
+  <div class="tts-controls" data-tts-id="block4">
+    <button class="tts-btn tts-play">▶ ブロック④を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" data-tid="831">
+    <summary><span class="num">831</span>飛行計画のための気象解析</summary>
+    <div class="topic-body">
+      <p>地上天気図で高低気圧・前線の位置を把握するのが基本。着眼点は次の通りです。</p>
+      <ul>
+        <li><b>高気圧圏内</b>：haze・smoke・fog等の視程障害に注意。夏は正午頃から積雲が急増、山岳ではその発達が速い。</li>
+        <li><b>低気圧</b>：位置・中心示度・発達衰弱・移動方向速度・降水域を検討。低いシーリングと降水で視程が悪化しやすい。</li>
+        <li><b>前線</b>：地上天気図で位置を把握し、雲の状態・風向風速・気温差から強度を判断。</li>
+      </ul>
+      <p>高層天気図（850/700/500hPa）で高低気圧の勢力を、状態曲線で雲形・雲頂高度の予想と大気安定度を、上層風でタービュランス予想の材料を確認します。加えて気象レーダー・アメダス・衛星画像・METAR・SYNOPで実況を、TAFや降水短時間予報で今後を把握します。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="832">
+    <summary><span class="num">832</span>VMC（有視界気象状態）── 高度帯別の数値条件</summary>
+    <div class="topic-body">
+      <p>VFRはVMCで行わなければなりません。条件は高度帯によって3段階に分かれます。</p>
+      <table>
+        <tr><th>高度帯</th><th>飛行視程</th><th>雲からの距離</th></tr>
+        <tr><td>3,000m以上</td><td>8,000m以上</td><td>垂直：上下300m以内に雲なし／水平：1,500m以内に雲なし</td></tr>
+        <tr><td>3,000m未満（管制区・管制圏・情報圏）</td><td>5,000m以上</td><td>垂直：上方150m・下方300m以内に雲なし／水平：600m以内に雲なし</td></tr>
+        <tr><td>3,000m未満（それ以外の空域）</td><td>1,500m以上</td><td>同上</td></tr>
+        <tr><td>地表/水面から300m以下（クラスG空域）</td><td>1,500m以上（例外あり）</td><td>雲から離れて飛行でき、地表/水面を引き続き視認できること</td></tr>
+      </table>
+      <p>さらに、管制圏・情報圏内の飛行場、または国土交通大臣が告示指定した飛行場でVFR離着陸するには、<b>地上視程5,000m以上・雲高300m以上</b>が必要です。</p>
+      <svg viewBox="0 0 700 300" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin-top:10px;">
+        <line x1="60" y1="270" x2="680" y2="270" stroke="var(--ink-faint)" stroke-width="1.5"/>
+        <text x="20" y="275" fill="var(--ink-faint)" font-size="10" font-family="monospace">地表</text>
+        <rect x="60" y="220" width="620" height="46" fill="#1a2540" stroke="var(--line)"/>
+        <text x="70" y="238" fill="var(--ink)" font-size="11" font-weight="700">300m以下（クラスG）</text>
+        <text x="70" y="254" fill="var(--ink-dim)" font-size="10">視程1,500m以上・雲から離れて飛行、地表を視認</text>
+        <rect x="60" y="150" width="620" height="70" fill="#121a2c" stroke="var(--line)"/>
+        <text x="70" y="170" fill="var(--ink)" font-size="11" font-weight="700">3,000m未満（それ以外の空域）</text>
+        <text x="70" y="186" fill="var(--ink-dim)" font-size="10">視程1,500m以上</text>
+        <text x="70" y="202" fill="var(--ink-dim)" font-size="10">雲から 垂直:上150m/下300m　水平:600m</text>
+        <rect x="60" y="80" width="620" height="70" fill="#1a2540" stroke="var(--line)"/>
+        <text x="70" y="100" fill="var(--ink)" font-size="11" font-weight="700">3,000m未満（管制区・管制圏・情報圏）</text>
+        <text x="70" y="116" fill="var(--ink-dim)" font-size="10">視程5,000m以上</text>
+        <text x="70" y="132" fill="var(--ink-dim)" font-size="10">雲から 垂直:上150m/下300m　水平:600m</text>
+        <rect x="60" y="20" width="620" height="60" fill="#121a2c" stroke="var(--amber-dim)"/>
+        <text x="70" y="38" fill="var(--amber-bright)" font-size="11" font-weight="700">3,000m以上</text>
+        <text x="70" y="54" fill="var(--ink-dim)" font-size="10">視程8,000m以上</text>
+        <text x="70" y="70" fill="var(--ink-dim)" font-size="10">雲から 垂直:300m　水平:1,500m</text>
+        <line x1="30" y1="20" x2="30" y2="270" stroke="var(--ink-faint)" stroke-width="1" marker-start="url(#arrUp)" marker-end="url(#arrDown)"/>
+        <text x="10" y="150" fill="var(--ink-faint)" font-size="10" transform="rotate(-90 10 150)">高度</text>
+        <defs>
+          <marker id="arrUp" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M4,0 L8,7 L0,7 z" fill="var(--ink-faint)"/></marker>
+          <marker id="arrDown" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto"><path d="M4,7 L8,0 L0,0 z" fill="var(--ink-faint)"/></marker>
+        </defs>
+      </svg>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="833_871">
+    <summary><span class="num">833・871</span>VFRフライトに影響する雲 ／ 10種雲形図鑑</summary>
+    <div class="topic-body">
+      <p>雲底高度は雲量と密接に関係します。雲量1/8〜4/8なら雲底が低くても避けて飛べますが、雲量が増えるほどVMC維持の見極めは難しくなります。飛行場周辺の離着陸練習（トラフィックパターン高度1,000ft前後）なら雲底1,500ft程度、空中操作（2,000〜3,000ft）ならさらに500ft以上の余裕が必要とされています。ローカルフライトに関連する雲を、10種雲形と合わせて一覧にしました。</p>
+      <svg viewBox="0 0 700 320" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <line x1="40" y1="300" x2="680" y2="300" stroke="var(--ink-faint)" stroke-width="1.5"/>
+        <text x="10" y="304" fill="var(--ink-faint)" font-size="10" font-family="monospace">地表</text>
+        <!-- 上層 -->
+        <rect x="40" y="20" width="640" height="60" fill="#121a2c" stroke="var(--line)"/>
+        <text x="52" y="38" fill="var(--ink)" font-size="11" font-weight="700">上層</text>
+        <ellipse cx="120" cy="55" rx="30" ry="8" fill="#8aa0c8" opacity="0.7"/>
+        <ellipse cx="180" cy="52" rx="26" ry="7" fill="#8aa0c8" opacity="0.5"/>
+        <text x="230" y="58" fill="var(--ink-dim)" font-size="10.5">巻雲Ci・巻層雲Cs・巻積雲Cc　── 圏界面付近、影響は小さい</text>
+        <!-- 中層 -->
+        <rect x="40" y="90" width="640" height="60" fill="#1a2540" stroke="var(--line)"/>
+        <text x="52" y="108" fill="var(--ink)" font-size="11" font-weight="700">中層</text>
+        <ellipse cx="120" cy="125" rx="34" ry="12" fill="#a8b4d6" opacity="0.8"/>
+        <ellipse cx="175" cy="120" rx="24" ry="9" fill="#a8b4d6" opacity="0.6"/>
+        <text x="230" y="128" fill="var(--ink-dim)" font-size="10.5">高層雲As・高積雲Ac・乱層雲Ns　── 発達すると悪天のもと</text>
+        <!-- 下層 -->
+        <rect x="40" y="160" width="640" height="60" fill="#121a2c" stroke="var(--line)"/>
+        <text x="52" y="178" fill="var(--ink)" font-size="11" font-weight="700">下層</text>
+        <ellipse cx="120" cy="195" rx="36" ry="14" fill="#c7cfe8" opacity="0.9"/>
+        <ellipse cx="180" cy="190" rx="28" ry="12" fill="#c7cfe8" opacity="0.7"/>
+        <text x="230" y="198" fill="var(--ink-dim)" font-size="10.5">層雲St・層積雲Sc　── 比較的穏やか、St は急変に注意</text>
+        <!-- 垂直発達 -->
+        <rect x="40" y="230" width="640" height="60" fill="#1a2540" stroke="var(--amber-dim)"/>
+        <text x="52" y="248" fill="var(--amber-bright)" font-size="11" font-weight="700">垂直発達</text>
+        <path d="M105 280 Q95 250 120 235 Q130 210 155 230 Q175 220 178 245 Q195 250 180 280 Z" fill="#d7d2c4" opacity="0.9"/>
+        <path d="M225 280 Q210 235 245 210 Q260 175 290 205 Q315 195 318 230 Q340 240 320 280 Z" fill="#9aa8c4" opacity="0.9"/>
+        <text x="360" y="248" fill="var(--ink-dim)" font-size="10.5">積雲Cu（左）／積乱雲Cb・塔状積雲TCu（右）</text>
+        <text x="360" y="264" fill="var(--danger)" font-size="10.5" font-weight="700">── Cb/TCuは要警戒、絶対回避の対象</text>
+      </svg>
+      <table>
+        <tr><th>雲形</th><th>層</th><th>雲底/雲頂の目安</th><th>ローカルフライトでの注意点</th></tr>
+        <tr><td>巻雲 Ci／巻層雲 Cs／巻積雲 Cc</td><td>上層</td><td>非常に高い（圏界面付近）</td><td>密度が薄く視程への影響は小さい</td></tr>
+        <tr><td>高層雲 As／高積雲 Ac</td><td>中層</td><td>中層</td><td>温暖前線接近で厚みを増し降水開始のサイン</td></tr>
+        <tr><td>乱層雲 Ns</td><td>中層（下層〜上層に及ぶことも）</td><td>雲底が乱れ低い</td><td>低気圧・前線の雨域や冬の日本海側降雪時。付近で激しいタービュランスのことがある</td></tr>
+        <tr><td>層雲 St</td><td>下層</td><td>雲底100〜200ft／雲頂1,000ft前後</td><td>接地逆転層で発生しやすく、1/8→8/8に急変することがある。地面に着けば濃霧に</td></tr>
+        <tr><td>層積雲 Sc</td><td>下層</td><td>雲底2,000〜3,000ft／雲頂5,000〜8,000ft</td><td>離着陸への障害は少ないが空中操作の障害になりやすい</td></tr>
+        <tr><td>積雲 Cu</td><td>下層〜垂直発達</td><td>雲底2,000〜3,500ft／雲頂7,000〜13,000ft</td><td>下は上昇気流があり揺れやすい</td></tr>
+        <tr><td>塔状積雲 TCu</td><td>垂直発達</td><td>雲頂15,000〜20,000ft、時に25,000ft以上</td><td>Cuが発達した状態。要警戒</td></tr>
+        <tr><td>積乱雲 Cb</td><td>垂直発達</td><td>雲底はCuと同程度、雲頂35,000〜45,000ft超も</td><td>絶対回避。詳細はブロック⑥で</td></tr>
+      </table>
+      <div class="callout info">下層+中層の2層構成で雲層間を飛ぶ場合、下層雲量は4/8以下かつ急増しない条件が必要。5/8を超えると雲の下に降りられなくなり危険（原文の図8-13の教訓）。</div>
+      <p><b>その他の特徴的な雲</b>：乳房雲(mamma)＝Ci/Cc/Ac/As/Sc/Cbの一部に現れる乳房状の雲で乱気流の目印（雲底から2,000ft以上離れること推奨）。浪雲(billow cloud)＝上下の気層で風速差があり湿っていると発生、タービュランスの目印。尾流雲(virga)＝雲からの降水が地上に届く前に蒸発する現象で、折れ曲がっている箇所はウィンドシアー層。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="834">
+    <summary><span class="num">834</span>視程</summary>
+    <div class="topic-body">
+      <p>VFRでは姿勢や機位確認を水平線・山・島・地形の目視に頼るため、常に良好な視程が必要です。法的にはVMCの限界は飛行場周辺5,000mですが、初歩練習ではさらに良い視程が望まれます。視程障害の代表例：</p>
+      <table>
+        <tr><th>現象</th><th>特徴</th><th>視程の目安</th></tr>
+        <tr><td>降水（雨・雪）</td><td>雪の方が雨より障害が大きい。降雪域は雲底から白い幕のように見える</td><td>並の雨/雪で5km以下、激しい降雪で1km以下</td></tr>
+        <tr><td>HAZE（煙霧）</td><td>春先〜初秋に多い。安定層付近に濃く滞留。梅雨明け後の太平洋高気圧下で毎日発生も</td><td>薄いと3〜5km、濃いと2km程度</td></tr>
+        <tr><td>SMOKE（煙）</td><td>大気安定度と地上付近の風向風速に大きく左右される。弱風だと風下側に滞留</td><td>他の現象と重なると1km以下も</td></tr>
+      </table>
+      <p>飛行中はVHFで適切な周波数をモニターしていれば、視程悪化のアドバイスを得られることがあります。視程は「悪化しはじめる／移動する／激しくなる」パターンに注意して常時観測することが大切です。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="835">
+    <summary><span class="num">835</span>離着陸時の風</summary>
+    <div class="topic-body">
+      <p>地上風の風向は気圧配置に加え、飛行場の地理条件や海陸風の影響を受けます。滑走路方向は最多風向に合わせて作られますが、正対しない風の日も多く、機種ごとに横風制限値が定められています。</p>
+      <p><b>ガスト</b>：離陸中に急に風速が増しその直後に減じると、対気速度が急減し再接地の危険も。進入着陸でも同様で、風速増加の瞬間は揚力急増でパスが高め、減少の瞬間は揚力急減で接地点手前の落着気味の着陸になりやすい。対策は、平均値と最小値の差をアプローチスピードに上乗せして進入すること。</p>
+      <p><b>地上風の通報</b>：タワー/レディオは<b>2分間平均</b>、ATISはMETAR/SPECIによる<b>10分間平均</b>（磁方位）。2分計はICAOの標準で、過去2分間（6秒毎更新）の平均・最大・最小風速と平均風向・変動幅を表示します。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="836">
+    <summary><span class="num">836</span>上昇気流・下降気流</summary>
+    <div class="topic-body">
+      <p>平坦地では上昇気流は町・工場地帯・荒地・畑の上で、下降気流は湖・沼・河・森の上で発生しやすい傾向があります。</p>
+      <table>
+        <tr><th>局面</th><th>上昇気流の影響</th><th>下降気流の影響</th></tr>
+        <tr><td>離陸時</td><td>上昇角/率が増えむしろプラス</td><td>上昇角/率が低下。強烈な場合は機首を上げすぎると失速の危険</td></tr>
+        <tr><td>着陸時</td><td>見かけの迎角増→揚力増→パスが高め。出力減・機首下げが必要なことも</td><td>パスが低め・速度も減少。出力を増やしてから機首を上げる。接地点が手前になりがち</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="837">
+    <summary><span class="num">837</span>VFR飛行に障害を与える気象現象</summary>
+    <div class="topic-body">
+      <p><b>IMCへの移行</b>：VFR中はIMC空域を絶対に避ける。姿勢判定不能や衝突の危険、0℃以下での着氷のリスクがある。視程・雲底が悪化してきたら早めの帰投判断を。</p>
+      <p><b>タービュランス</b>：上昇・下降気流の隣接、風向風速差、山岳/建物への強風衝突、大型機の後方乱気流（ウェイクタービュランス）などが原因。下層不安定層の上のCu雲の下、山脈風下側、海岸線付近は要警戒。</p>
+      <p><b>着氷</b>：0℃以下での降水遭遇で前面ガラス・翼・ピトー管に着氷。気化器着氷は0℃以上でも外気温10℃以下＋高湿度の降下中に発生しうる。</p>
+      <p><b>低気圧・前線</b>：低気圧接近時はNs系の雲・低い雲底・強風・視程悪化に注意。前線は寒冷前線（速度30〜50km/h、Cu/TCu/Cbが西から堤防状に発達し南東進）、温暖前線（移動は遅いが広範囲に悪天）、停滞前線、閉塞前線でそれぞれ特徴が異なります。</p>
+      <p><b>雷雨</b>：VFRにとって最も危険。雷雲から十分な距離を保てないなら速やかに着陸を。単独Cbの雷雨は激しいが30〜40分程度で終わることが多く、巨大雷雨は数時間続くこともあります。</p>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 5 ============ -->
+<div class="block" id="b5">
+  <div class="block-head"><span class="blocknum">840-849</span><h2>⑤ IFRに必要な気象の知識</h2></div>
+  <p class="block-intro">「雲の中に入ってはならない」VFRに対し、IFRは「雲中飛行を前提に気象をとらえる」発想の転換が必要です。</p>
+  <div class="tts-controls" data-tts-id="block5">
+    <button class="tts-btn tts-play">▶ ブロック⑤を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" data-tid="841">
+    <summary><span class="num">841</span>IMC</summary>
+    <div class="topic-body"><p>計器気象状態(IMC)とは、VMC以外の気象状態のこと。定義はVMCの裏返しです。</p></div>
+  </details>
+
+  <details class="topic" data-tid="842">
+    <summary><span class="num">842</span>ウェザーミニマ</summary>
+    <div class="topic-body">
+      <p>航路上は雲中でも視程ゼロでもATC指示に従っていれば安全ですが、離陸時・進入着陸時は別。離陸操作は目視で行うため一定の視界が必要（エンジン故障時に引き返せる条件も考慮）。進入継続には一定以上の地上視程(RVR)、最終段階では滑走路目視が必須です。離着陸それぞれに定められた最低気象条件を総称して「ウェザーミニマ」と呼びます。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="843">
+    <summary><span class="num">843</span>代替飛行場の選定</summary>
+    <div class="topic-body">
+      <p>目的飛行場が着陸最低気象条件未満になっても安全に降りられるよう、到着時にオルタネートミニマ（目的飛行場より高い基準値）以上と予想される代替飛行場を選び、必要燃料を搭載します。選定条件：</p>
+      <ol>
+        <li>目的飛行場に近いこと</li>
+        <li>目的飛行場より気象条件が良いこと（オルタネートミニマ基準）</li>
+        <li>低気圧・前線接近時は代替の予報値が目的地より良いこと</li>
+        <li>目的地までの燃料＋代替までの燃料＋法定残量を搭載できること</li>
+      </ol>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="844">
+    <summary><span class="num">844</span>飛行計画</summary>
+    <div class="topic-body">
+      <p>各種気象図・資料で出発地・航路上・目的地・代替飛行場の現況と変化傾向を把握して計画を作成。悪天や天候悪化が予想される場合は対処方法をあらかじめ検討します。上層風の予想データで航路上の変化と揺れも予測し、代替飛行場の予報がマージナルなら第2の代替飛行場も考慮して燃料を決定します。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="845">
+    <summary><span class="num">845</span>雲中飛行</summary>
+    <div class="topic-body">
+      <p>IFRではATCクリアランスに従って雲中飛行を行う前提で気象をとらえます。積雲・塔状積雲などの対流雲はタービュランス・着氷・帯電・放電・落雷を伴うことがあり要迂回、積乱雲は絶対回避。巻雲・巻層雲等の薄い雲を除き雲中の視程はほぼゼロで、計器のみに依存した飛行が必要です。空間識失調（傾いた/急上昇・急降下している錯覚）はタービュランスのある雲中で起きやすく、計器のスキャンを優先し平衡感覚に頼ってはいけません。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="846">
+    <summary><span class="num">846</span>視程障害</summary>
+    <div class="topic-body">
+      <p>IFRで視程障害が問題になるのは離陸時と着陸時のみ。可否は飛行視程および地上視程（RVR観測があればRVR）で判断されます。最低気象条件未満なら離陸・進入自体を行わないため安全上の問題は起きませんが、ぎりぎりの状況では高度な技術と判断が要求されます。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="847">
+    <summary><span class="num">847</span>IFRに影響を与える気象現象</summary>
+    <div class="topic-body">
+      <p><b>タービュランスをもたらす現象</b>：台風・熱帯低気圧・低気圧中心付近の雲中／前線面の雲中／寒冷前線通過後の寒気団内雲中／対流性の雲中(Cu,TCu,Cb)／トラフ通過時の雲中／山岳波の中とその雲中／ウィンドシアー面とその層の雲中。</p>
+      <p><b>着氷が起きる現象</b>：寒冷前線面と前線後面の寒気内雲中／冬季日本海沿岸の寒気張り出し時の雲中／0℃〜-40℃(SAT)程度の各種雲中／冬季低気圧中心付近の雲中。気化器着氷は+10℃以下＋高湿度なら雲中でなくても起こりうる点に注意。</p>
+      <p><b>雷雨のもとで起こりうる危険</b>：地上風向の急変・強風/ガスト／低いシーリング／雲中の激しいタービュランス／雲底下の下降気流とタービュランス／強雨(雪)による視程悪化と滑走路冠水／落雷・電光・帯電・放電／あられ・ひょう／低温時の着氷。</p>
+      <p><b>低気圧中心付近で起こりうる現象</b>：強い地上風と中心通過時の風向急変／低いシーリング／視程悪化と滑走路冠水／下層の乱気流／中層の風向風速変化／厚い雲／低温時の着氷。</p>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 6 ============ -->
+<div class="block" id="b6">
+  <div class="block-head"><span class="blocknum">850-865</span><h2>⑥ 悪天と飛行</h2></div>
+  <p class="block-intro">この章のハイライト。雷雨・台風・ひょう・乱気流・着氷・山岳波・火山灰、そして日本特有の低気圧型と季節の悪天まで。</p>
+  <div class="tts-controls" data-tts-id="block6">
+    <button class="tts-btn tts-play">▶ ブロック⑥を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" open data-tid="850">
+    <summary><span class="num">850</span>悪天9種の記号</summary>
+    <div class="topic-body">
+      <p>国際的に定められた主な悪天現象と記号です。口頭試問でも頻出。</p>
+      <div class="symbol-grid" id="symbolGrid"></div>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="851">
+    <summary><span class="num">851</span>雷雨 ── 積乱雲(Cb)の一生</summary>
+    <div class="topic-body">
+      <p>気団性雷雨の場合、発達期→成熟期→衰弱期の3段階で危険度が変化します。タブで切り替えてください。</p>
+      <div class="cb-stage-tabs">
+        <button class="active" data-stage="0">① 発達期</button>
+        <button data-stage="1">② 成熟期（最危険）</button>
+        <button data-stage="2">③ 衰弱期</button>
+      </div>
+      <div class="cb-svg-wrap"><div id="cbSvg"></div></div>
+      <div class="cb-caption" id="cbCaption"></div>
+      <div class="hazard-tags" id="cbHazards"></div>
+      <p style="margin-top:14px;"><b>雷雲の中の通過が避けられない場合</b>：①機上レーダーで最も降雨の少ない空域を選ぶ ②できるだけ直線コース ③線状のCbはなるべく直角に通過 ④セルに入ってしまったらそのまま進む方がよい（引き返そうとすると混乱しやすい）⑤強い上昇/下降気流でピトー系計器が狂うため、ジャイロ系計器で姿勢を維持。統計上-8℃〜+8℃で90%の落雷があり、フリージングレベルの上下5,000ftを避けるのが有効です。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="852">
+    <summary><span class="num">852</span>台風</summary>
+    <div class="topic-body">
+      <p>日本には8〜10月を中心に年平均数個の台風が襲来。ジェット機は高高度巡航や気象レーダーで対応の余地がありますが、レシプロ機は運航がほぼ全面的に制約されます。</p>
+      <svg viewBox="0 0 500 300" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <defs>
+          <marker id="typhArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--sky)"/></marker>
+        </defs>
+        <circle cx="250" cy="150" r="90" fill="none" stroke="var(--line)" stroke-width="1"/>
+        <path d="M250 60 A90 90 0 0 1 340 150" stroke="var(--danger)" stroke-width="6" fill="none"/>
+        <path d="M160 150 A90 90 0 0 1 250 60" stroke="var(--sky)" stroke-width="3" fill="none" opacity="0.5"/>
+        <path d="M250 240 A90 90 0 0 1 160 150" stroke="var(--sky)" stroke-width="3" fill="none" opacity="0.5"/>
+        <path d="M340 150 A90 90 0 0 1 250 240" stroke="var(--danger)" stroke-width="6" fill="none"/>
+        <circle cx="250" cy="150" r="14" fill="#3a4568" stroke="var(--ink)" />
+        <text x="250" y="155" fill="var(--ink)" font-size="10" text-anchor="middle" font-family="monospace">台風</text>
+        <path d="M170 260 L250 150" stroke="var(--amber-bright)" stroke-width="2.5" marker-end="url(#typhArrow)" opacity="0.9"/>
+        <text x="150" y="278" fill="var(--amber-bright)" font-size="11" font-family="monospace">進行方向</text>
+        <path d="M250 150 Q290 120 320 90" stroke="var(--sky)" stroke-width="1.5" fill="none" marker-end="url(#typhArrow)"/>
+        <text x="360" y="70" fill="var(--sky)" font-size="10" font-family="monospace">回転風</text>
+        <text x="380" y="120" fill="var(--danger)" font-size="12" font-weight="700">危険半円</text>
+        <text x="380" y="136" fill="var(--ink-dim)" font-size="10">（回転風＋進行速度が</text>
+        <text x="380" y="150" fill="var(--ink-dim)" font-size="10">　同じ向きで強め合う）</text>
+        <text x="70" y="200" fill="var(--sky)" font-size="12" font-weight="700">可航半円</text>
+        <text x="70" y="216" fill="var(--ink-dim)" font-size="10">（打ち消し合い</text>
+        <text x="70" y="230" fill="var(--ink-dim)" font-size="10">　風が弱まる）</text>
+      </svg>
+      <ul>
+        <li>見落としやすい危険：台風外周の「らせん状降雨帯（スパイラルレインバンド）」の積乱雲。経路にかかると突破困難。</li>
+        <li>着陸不能の主因は「風」。位置・大きさ・進行方向速度と滑走路方位から横風制限値超過の時期を判断。降水を伴うためウェットランウェイにも注意。</li>
+        <li>地上風40kt超え頃から、上空のウィンドシアーによる激しい乱気流と低高度の乱気流が重なり操縦困難になることがある。</li>
+        <li>気象庁の台風予報：5日(120時間)先までの中心位置(予報円)・進行方向速度・中心気圧・最大風速/最大瞬間風速・暴風警戒域。予報円内に中心が入る確率は70%。予報期間後半ほど誤差が大きい。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="853">
+    <summary><span class="num">853</span>ひょう</summary>
+    <div class="topic-body">
+      <p>直径0.5〜8cmの氷の粒。強い上昇流・多量の過冷却水滴・高い雲頂高度をもつ積乱雲中で発達し、雲中を上昇と落下を繰り返すことで年輪状の断面になります。ひょうは<b>積乱雲の外にも降る</b>ため、Cbを避けていても被害を受けることがあります。最盛期にできる「かなとこ雲」の中まで運ばれたひょうは再び持ち上げられず外へ落下するため、かなとこ雲の下（雷さんの軒下）を通るのは危険。回避は風上側を飛ぶのが安全、風下側なら大きく迂回を。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="854_855">
+    <summary><span class="num">854・855</span>強い乱気流・強いスコールライン ── 7つの発生源</summary>
+    <div class="topic-body">
+      <p>乱気流は滑走路上数フィートから40,000ft以上まで至るところに存在します。</p>
+      <div class="info-grid">
+        <div class="info-card"><div class="t">①積乱雲中の乱気流</div><div class="d">大気中最高強度。目視・レーダーで回避可能</div></div>
+        <div class="info-card"><div class="t">②山岳波による乱気流</div><div class="d">日本全国の山岳地帯で発生。強烈</div></div>
+        <div class="info-card"><div class="t">③晴天乱気流(CAT)</div><div class="d">ジェット気流のフロンタルゾーンで発生。目にもレーダーにも映らない</div></div>
+        <div class="info-card"><div class="t">④中層雲雲底乱気流</div><div class="d">中層雲の雲底〜数千ft下まで発生することがある</div></div>
+        <div class="info-card"><div class="t">⑤前線面上の乱気流</div><div class="d">特に寒冷前線面で激しい</div></div>
+        <div class="info-card"><div class="t">⑥低高度の乱気流</div><div class="d">地形・建造物の風下側の渦</div></div>
+        <div class="info-card"><div class="t">⑦ウェイクタービュランス</div><div class="d">大型機航跡。安定・弱風時に残りやすい</div></div>
+      </div>
+      <p><b>CATの兆候</b>：風速の急激な増加／気温が1分に1℃以上変化／SAT計の0.1℃桁が不規則変化／マッハ数の不規則変化／操縦桿の小刻みな振動。衛星画像でジェット気流南側に見える波状のCi雲列「トランスバースバンド」もCATの指標（強いものは強いスコールラインと呼ばれる）。日本付近では11月頃〜3月頃にジェットが強化、酷寒期は北緯30°以南までジェット軸が南下し最大風速250ktを記録することも。</p>
+      <p><b>遭遇時の対処</b>：シートベルト確実に締める→フライアティチュード優先でエンジン出力・ピッチ修正は最小限→航法計器とエンジン計器を監視→雲やレーダー等で状況把握し離脱方法を検討→強度に関わらず早めに管制機関等へ通報→必要ならコース/高度変更を要求→詳細情報を関係機関に連絡。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="856">
+    <summary><span class="num">856</span>強い着氷</summary>
+    <div class="topic-body">
+      <p>SIGMET対象の「強い着氷」には、着氷性の雨によるものも含まれます。</p>
+      <ul>
+        <li><b>着氷性の雨</b>：雨滴が機体等に当たって着氷。寒冷前線面上の発達した積雲系にみぞれ・あられと共存することがあり、激しいクリアーアイスに近い。</li>
+        <li><b>高濃度氷晶による着氷(ICI)</b>：活発な積乱雲に関連して発生。</li>
+      </ul>
+      <p>着氷への対応：小刻みな振動を感じたら少し速度を落とす／ピトー管・静圧孔の着氷でIASがおかしくなったら一定の飛行姿勢を維持／激しい着氷層の厚さは通常2,000〜5,000ft程度なので高度変更が有効／強い着氷時はオートパイロットを使わず操縦系統を凍結させないよう常時動かす／早めに管制機関等へ通報。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="857">
+    <summary><span class="num">857</span>山岳波</summary>
+    <div class="topic-body">
+      <p>山脈を越える気流が風下側で波動を起こす現象。SIGMETの「強い山岳波[SEV MTW]」は30m/s(600ft/min)以上の下降気流を伴う、または強い乱気流(severe turbulence)に遭遇するような山岳波と定義されています。水蒸気を十分含む場合、ローター雲・レンズ雲・キャップ雲が発生の目印になります（詳細は雲のセクション874）。</p>
+      <svg viewBox="0 0 600 240" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <defs><marker id="mwArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--sky)"/></marker></defs>
+        <line x1="0" y1="200" x2="600" y2="200" stroke="var(--ink-faint)" stroke-width="1"/>
+        <path d="M100 200 L220 60 L280 200 Z" fill="#2c3654" stroke="var(--line)"/>
+        <text x="230" y="70" fill="var(--ink-dim)" font-size="10" font-family="monospace">山</text>
+        <ellipse cx="200" cy="45" rx="40" ry="10" fill="#c7cfe8" opacity="0.85"/>
+        <text x="150" y="30" fill="var(--ink-dim)" font-size="9" font-family="monospace">キャップ雲</text>
+        <path d="M40 150 C 90 130, 150 90, 220 60" stroke="var(--sky)" stroke-width="1.5" fill="none" marker-end="url(#mwArrow)"/>
+        <path d="M280 200 C 320 160, 340 110, 330 80 C 322 60, 300 70, 310 100 C 316 122, 350 130, 380 100 C 400 78, 390 55, 400 40" stroke="var(--sky)" stroke-width="1.5" fill="none" marker-end="url(#mwArrow)"/>
+        <ellipse cx="365" cy="95" rx="34" ry="9" fill="#c7cfe8" opacity="0.85" transform="rotate(-20 365 95)"/>
+        <text x="410" y="90" fill="var(--ink-dim)" font-size="9" font-family="monospace">レンズ雲</text>
+        <ellipse cx="330" cy="185" rx="22" ry="14" fill="#9aa8c4" opacity="0.9"/>
+        <path d="M310 195 q10 -18 20 0 q10 -18 20 0" stroke="var(--danger)" stroke-width="1.5" fill="none"/>
+        <text x="285" y="225" fill="var(--danger)" font-size="9" font-family="monospace">ローター雲（乱気流）</text>
+        <text x="30" y="130" fill="var(--ink-faint)" font-size="9" font-family="monospace">気流</text>
+      </svg>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="858">
+    <summary><span class="num">858</span>広範囲の砂じん嵐</summary>
+    <div class="topic-body">
+      <p>SIGMET対象。ちりによる強い砂じん嵐[HVY DS]、砂による強い砂じん嵐[HVY SS]として区分されます。視程を著しく悪化させます。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="859">
+    <summary><span class="num">859</span>火山灰</summary>
+    <div class="topic-body">
+      <p>火山灰を構成する珪酸塩等の融点は一般に1,100℃以下で、ジェットエンジン燃焼室の温度より低いため、エンジン高温部で融解し高圧ノズル・ガイドベーンやタービンブレードに融着します。結果として気道が塞がれ燃焼圧力と圧縮機排気圧が急上昇してサージングを引き起こし、急激な推力低下からフレームアウトに至ることがあります。そのため火山灰雲中の飛行を余儀なくされた場合は<b>エンジンをアイドル推力に保つ</b>ことが推奨されます。エンジン停止後も、常温では融着物質がもろく再始動の圧力・温度変化で剥落しうるため、再始動を試みる価値はあります。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="860_861">
+    <summary><span class="num">860・861</span>悪い天気と低気圧 ── 日本の温帯低気圧3タイプ＋寒冷低気圧</summary>
+    <div class="topic-body">
+      <p>日本付近で発達する温帯低気圧には特徴的な3つの型があります。</p>
+      <div class="info-grid">
+        <div class="info-card"><div class="t">南岸低気圧</div><div class="d">急速に発達し強い風雨。冬期は太平洋側にも降雪。大陸からの高気圧の南側後面で発生し、上層は気圧の谷の前面。</div></div>
+        <div class="info-card"><div class="t">日本海低気圧</div><div class="d">暖域で強い南寄りの風。中心に近い北日本で暴風雨雪。春一番が典型例、5月発生のものはメイストーム。</div></div>
+        <div class="info-card"><div class="t">二つ玉低気圧</div><div class="d">上記2つの特徴を併せ持ち雲と降水域が広い。その後1つにまとまり急激に発達することがある。</div></div>
+        <div class="info-card"><div class="t">寒冷低気圧（切離低気圧）</div><div class="d">上層に寒気を伴い気層が不安定。メソスケール擾乱で積乱雲が発達。東〜南東の暖気側下層に湿潤暖気が流入すると大雨になることも。300/500hPa広域天気図で判別しやすい。</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="862">
+    <summary><span class="num">862</span>冬季の悪い天気</summary>
+    <div class="topic-body">
+      <p>冬の悪天の代表は「雪」と「風」。シベリア高気圧が優勢になると衛星画像に沿海州から日本海への「すじ雲」が現れ、地上天気図は西高東低の気圧配置になります。雨か雪かの判断は重要で、次が目安です。</p>
+      <ul>
+        <li>500hPa天気図の-30℃等温線が雨雪判別の目安</li>
+        <li>850hPa天気図の-6℃等温線も目安</li>
+        <li>状態曲線：下層不安定・T-Td=0〜2℃・予想雲頂温度-15℃以下・地上気温+2〜3℃以下、かつ積雲系の雲</li>
+      </ul>
+      <p>離島では季節風が強く、内陸飛行場では周辺地形の影響で風向風速に局地的特色が出ます。横風制限値だけでなく周辺の乱気流にも注意。冬は積雪・凍結・スラッシュによる滑走路状態（ランウェイコンディション）の運航制限判断も重要です。日本海の低気圧が朝鮮元山沖付近から日本海を発達しながら東北東進する場合や、東シナ海南部発生の低気圧が東海沖〜八丈島付近を通って北東進する場合は、それぞれ北日本・関東地方の大雪要因になります。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="863">
+    <summary><span class="num">863</span>春と秋の悪い天気</summary>
+    <div class="topic-body">
+      <p>冬のシベリア高気圧と夏の太平洋高気圧の勢力が入れ替わる時期、両気団の境界に停滞前線ができ、広範囲に悪天をもたらします。1週間程度雨が続くこともあり、低シーリング・視程障害でフライトが大きく制約されます。西日本、特に瀬戸内海沿岸では前線停滞時に霧がかかることがあります。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="864">
+    <summary><span class="num">864</span>梅雨前線</summary>
+    <div class="topic-body">
+      <p>インドモンスーン・太平洋亜熱帯高気圧・オホーツク海方面のブロッキング高気圧が絡み合って形成される停滞前線。沖縄・奄美で5月中旬、西日本・東日本で6月上旬〜中旬に梅雨入り。梅雨明けは沖縄・奄美で6月下旬、西日本・東日本で7月中〜下旬です。通常の停滞前線より温度傾度は緩やかですが、水蒸気の水平傾度が大きく、地形性の収束と重なると豪雨になります。7月には太平洋高気圧の縁辺から暖湿気流と下層ジェットが流入し、30,000〜40,000ft以上のCbが連続発生して大雨をもたらすことがあります。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="865">
+    <summary><span class="num">865</span>海霧</summary>
+    <div class="topic-body">
+      <p>初夏〜夏、千島近海から北海道東海上・三陸沖でよく発生。オホーツク海からの冷たい海流上に暖かく湿った空気が流入して広範囲の海霧を作ります。釧路・帯広・新千歳・函館・三沢・八戸・松島・仙台など海岸近くの飛行場は、風向次第で視程ほぼゼロ・離着陸不能になることがあります。</p>
+      <p>予想のポイント：①広範囲の高気圧に覆われている ②低気圧/前線がない ③海面水温20℃未満 ④T-Td=0〜2℃ ⑤海面水温と露点温度差0〜1℃ ⑥数ノットの風 ⑦接地逆転がある ⑧接地逆転の上4,000〜5,000ft付近にも逆転層。海面水温が20℃以上ではほぼ発生しません（海面水温図の20℃等温線が南限の目安）。移流は速く、飛行場周辺風速の数倍の速さで滑走路を覆うこともあります。目的地が霧による悪視程を報じてきたら、上空でホールディングして待つより早めの引き返し判断が得策です。</p>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 7 ============ -->
+<div class="block" id="b7">
+  <div class="block-head"><span class="blocknum">870-886</span><h2>⑦ 雲と風</h2></div>
+  <p class="block-intro">雲の分布から読み取れる気象情報、風系の大循環からジェット気流、そして低層ウィンドシアー・ダウンバーストへの実践的対策まで。</p>
+  <div class="tts-controls" data-tts-id="block7">
+    <button class="tts-btn tts-play">▶ ブロック⑦を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" data-tid="872_874">
+    <summary><span class="num">872-874</span>特徴的な雲・雲の分布・雲からわかる気象情報</summary>
+    <div class="topic-body">
+      <p><b>低気圧の前線に伴う雲の分布</b>：温暖前線は数百km前方のCiから始まり、中層・下層雲が重なり幾重にもできる高層雲(As)へ。前線が山脈にかかると強い上昇流でCbが中層雲の上に頭を出すことがあります。寒冷前線は強さによって開きが大きく、強い場合は連なるCbの雲頂が35,000〜40,000ftに達し数百マイル続くことも。</p>
+      <p><b>ジェット気流に沿う雲</b>：ポーラージェットの南側50〜60マイルには広範囲に巻雲系の雲層。2本のジェットが合流するとジェット巻雲やジェットクラウド（らせん状のことも）が現れます。</p>
+      <p><b>トラフ前後の雲</b>：トラフ前面には中層に塔状高積雲(Accas)ができ、強い乱気流と着氷を伴う。雲底下が乾燥していると降水が蒸発して中層雲雲底乱気流が発生（尾流雲が目印）。</p>
+      <p><b>ウィンドシアーやKH波による雲</b>：積雲系（Ac/Cc）としてかなり激しい乱気流を伴うことが多く、層の厚さは2,000ft程度。前線層上でケルビン・ヘルムホルツ波(KH波)が発生すると浪雲(billow cloud)ができ、タービュランスの目印になります。</p>
+      <p><b>山岳波による雲</b>：ローター雲・レンズ雲・キャップ雲が発生の目印。</p>
+      <p><b>雲の形からわかること</b>：条件つき不安定層があると朝は晴れていても日射で積雲が急発達してCbになる。積乱雲の最盛期は20〜30分程度で終わるのが普通で、衰弱期にはかなとこ雲からできたCi/Csが広がり雲中飛行の障害はなくなる。中層に安定層/逆転層があると下層のCu雲頂が「頭きん雲」状に押さえられる。Scの雲海に断層が見え始めたら、その部分は1〜2時間で雲が薄くなり晴れ間が出るサイン。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="881">
+    <summary><span class="num">881</span>風系 ── 大循環から山谷風まで</summary>
+    <div class="topic-body">
+      <table>
+        <tr><th>風系</th><th>説明</th></tr>
+        <tr><td>貿易風</td><td>赤道〜北緯30°付近に定常的に吹く北東〜東風。南北の貿易風が集まる帯を熱帯収束帯(ITCZ)と呼ぶ</td></tr>
+        <tr><td>極偏東風</td><td>北極〜北緯60°付近に卓越する北東〜東風</td></tr>
+        <tr><td>中緯度偏西風</td><td>北緯30°〜60°付近の西風。この中に集中的に強いジェット気流が存在</td></tr>
+        <tr><td>季節風(モンスーン)</td><td>大陸と海洋の温度差で発達。冬のシベリア高気圧はこの一例</td></tr>
+        <tr><td>高気圧風系</td><td>北半球では右回りに吹き出す。移動性高気圧は春秋に多く、域内は好天だが後面は天気が崩れやすい</td></tr>
+        <tr><td>低気圧風系</td><td>北半球では左回りに吹き込む。上昇気流卓越で雲・降水多め。日本近海では直径500〜1,000km程度が最多</td></tr>
+        <tr><td>海陸風</td><td>日中は海風、夜間は陸風。瀬戸内沿岸が代表例。一般風が弱いと明瞭</td></tr>
+        <tr><td>山谷風</td><td>日中は谷風（吹き上げ）、夜間は山風（吹き下ろし）。山風の方が強い</td></tr>
+        <tr><td>斜面下降風（カタ風）</td><td>フェーン風（下降気流が山麓で高温低湿）と重力風（下降しても山頂の気温が低すぎてなお低温）の2種</td></tr>
+      </table>
+      <p>温帯低気圧と熱帯低気圧の違い：温帯低気圧は中緯度偏西風帯に発生し顕著な前線構造を持つ。熱帯低気圧（台風/ハリケーン/サイクロン）は熱帯海洋上に発生し前線構造を持ちません。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="882">
+    <summary><span class="num">882</span>ジェットストリーム</summary>
+    <div class="topic-body">
+      <p>一般に風速60kt以上（WMO定義では30m/s下限）、長さ数千km・幅数百km・厚さ数kmで、鉛直・水平とも強いシアーを持つ西風の強風帯です。</p>
+      <table>
+        <tr><th>名称</th><th>略号</th><th>平均的中心高度</th></tr>
+        <tr><td>Polar Night Jet Stream</td><td>JPN</td><td>約90,000ft（成層圏、冬）</td></tr>
+        <tr><td>Equatorial Jet Stream</td><td>JE</td><td>約150,000ft</td></tr>
+        <tr><td>Subtropical Jet Stream</td><td>JS</td><td>40,000〜45,000ft（冬、西風）</td></tr>
+        <tr><td>Polar Jet Stream</td><td>JP</td><td>30,000〜35,000ft（冬、西風）</td></tr>
+        <tr><td>Arctic Jet Stream</td><td>JA</td><td>25,000〜30,000ft</td></tr>
+      </table>
+      <p>ジェット気流を横切るときの風・気温変化からCATをある程度予測できます。中心軸と同じ高度を通過する場合、水平ウィンドシアーが大きくCATが発生しやすいのは前線帯を横切る区間。中心軸より低い高度では垂直ウィンドシアーも加わり、気温急減・風速急減の区間でCATが起きやすいとされています。</p>
+      <svg viewBox="0 0 600 260" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <defs><marker id="jsArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--amber-bright)"/></marker></defs>
+        <line x1="40" y1="220" x2="580" y2="220" stroke="var(--ink-faint)" stroke-width="1"/>
+        <text x="10" y="224" fill="var(--ink-faint)" font-size="10" font-family="monospace">地表</text>
+        <!-- 寒気側(左) / 暖気側(右) 温度勾配 -->
+        <rect x="40" y="20" width="260" height="200" fill="#1a2540" opacity="0.5"/>
+        <rect x="300" y="20" width="280" height="200" fill="#3a2a1a" opacity="0.35"/>
+        <text x="90" y="40" fill="var(--sky)" font-size="11" font-weight="700">寒気側</text>
+        <text x="500" y="40" fill="var(--amber-bright)" font-size="11" font-weight="700">暖気側</text>
+        <!-- ジェット気流の断面(楕円) -->
+        <ellipse cx="300" cy="90" rx="90" ry="26" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+        <circle cx="300" cy="90" r="4" fill="var(--amber-bright)"/>
+        <text x="300" y="72" fill="var(--amber-bright)" font-size="10" text-anchor="middle" font-family="monospace">ジェット気流中心軸</text>
+        <path d="M300 90 L560 90" stroke="var(--amber-bright)" stroke-width="1" stroke-dasharray="3 3"/>
+        <path d="M560 60 L560 220" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="2 4"/>
+        <text x="480" y="235" fill="var(--ink-dim)" font-size="9" font-family="monospace">中心軸と同じ高度を横切る区間</text>
+        <text x="480" y="248" fill="var(--danger)" font-size="9" font-weight="700">→ 水平シアーでCAT</text>
+        <path d="M300 150 L560 150" stroke="var(--sky)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="330" y="168" fill="var(--ink-dim)" font-size="9" font-family="monospace">軸より低い高度</text>
+        <text x="330" y="181" fill="var(--danger)" font-size="9" font-weight="700">→ 垂直+水平シアーでCAT</text>
+        <path d="M60 200 L560 200" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="1 4"/>
+      </svg>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="883">
+    <summary><span class="num">883</span>地上風と地形の影響</summary>
+    <div class="topic-body">
+      <p>低気圧周辺の地上風は北半球で反時計回り。地表摩擦のため通常25°〜35°程度等圧線と角度をなして低気圧側へ吹き込みます。地上風にはピーク(peak)・静止値(lull)の脈動があり、METAR/SPECIでは平均風より10kt以上強いピーク値の最大値を"maximum wind"と呼びます。建造物や地形の風下側では、風速25〜30kt超で渦が剥離して流れ、狭い谷間ではベンチュリー効果で下層ジェット的な強風（峡谷風）が吹き抜けることがあります。接地逆転層があると、離陸上昇中に揚力・推力の同時低下で上昇角を保てないケースや、低層ウィンドシアーのリスクが高まります。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="884">
+    <summary><span class="num">884</span>低層における風の乱れ ── ダウンバーストとグライドパス</summary>
+    <div class="topic-body">
+      <p>積乱雲の下では、上昇気流中の水蒸気が急冷して雲粒・雨滴・ひょうを作り、凝結熱で上昇流が一層強化される一方、降水が空気を引きずり下ろして下降気流を生みます。上昇気流が特に激しいと、空気と水滴の塊がジャンプしてから激しい下降気流として地表に打ち当たることがあります。これが<b>ダウンバースト</b>（吹き出し口が直径4km以下のものは<b>マイクロバースト</b>）で、規模は直径1km未満〜15km超、持続5〜30分、最大風速120ktに達することもあります。次々発生する場合、第1波先端の「gust front」前面で上昇気流ができ、最初に吹く突風は「first gust」と呼ばれます。</p>
+      <div class="db-svg-wrap"><div id="dbSvg"></div></div>
+      <div class="db-points">
+        <div class="db-point"><b>A</b>正規のグライドパス上。異常なし。</div>
+        <div class="db-point"><b>B</b>向い風が急増しIASも増加。降水開始の兆候。ゴーアラウンドの判断はここで始めておく。</div>
+        <div class="db-point"><b>C</b>IAS過大・高度もパスより高め。修正しすぎは危険。ゴーアラウンドはこの地点で開始するのが最適。</div>
+        <div class="db-point"><b>C→D</b>向い風が消え、下降流が本格化。放置すると接地手前で急激に沈む。</div>
+      </div>
+      <p style="margin-top:12px;"><b>エナジートレイド</b>：ウィンドシアー対応の第一手段は推力増加ですが、速度と高度を相互変換する考え方もあります。速度10kt減で得られる高度は、150→140ktで約128ft、110→100ktで約93ft。逆に速度20kt減では150→130ktで約247ft。<b>速度を高度に変えるのは有効（Vref以上の余力があれば）ですが、高度を速度に変えるのは推奨されません</b>（わずかな速度のために大きな高度を失うため）。</p>
+      <p><b>前線・海風前線・沿岸前線によるウィンドシアー</b>：前線移動速度が約30kt以上、または前線をはさむ気温差が約5℃以上でウィンドシアー/タービュランスが予想されます。海風前線の上昇流は300〜700ft/分に達することがあります。沿岸前線は気象庁の地上天気図には描かれない局地前線で、空港近くにあり上空が南風・地上が北風という状況で南から進入する場合は低層ウィンドシアーに要警戒です。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="885">
+    <summary><span class="num">885</span>低高度ウィンドシアーと下降気流対策</summary>
+    <div class="topic-body">
+      <p>最も重要なのは「差し迫っていることを知ること」と「避けるか対応するか直ちに決断すること」。機上での検知方法：</p>
+      <ul>
+        <li>対流活動域やその周辺（レーダーエコー強度の変化、強エコー範囲の縮小）</li>
+        <li>短時間での風向風速の変化／ガストフロントの兆候（地表のちり・砂の吹き上げ）</li>
+        <li>対流雲が尾流雲(virga)を伴うとき</li>
+        <li>機上気象レーダーでの探索／INS風と通報地上風の比較</li>
+        <li>複数地点の地上風の比較／ATCや他機からの情報活用</li>
+        <li>空港気象ドップラーレーダー・ライダーの情報、ウィンドシアー警報システムの活用</li>
+      </ul>
+      <p>最初の徴候：向い風の急減＝IAS減少・機首下がる・高度下がる／追い風の急増でも同様。逆に向い風の急増・追い風の急減ではIAS増加・機首上がる・高度上がる、という反応になります。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="886">
+    <summary><span class="num">886</span>ウィンドシアー/マイクロバーストの検出装置</summary>
+    <div class="topic-body">
+      <table>
+        <tr><th>装置</th><th>原理と特徴</th></tr>
+        <tr><td>空港気象ドップラーレーダー(DRAW)</td><td>降水粒子の速度からウィンドシアー/マイクロバーストを検出。新千歳・成田・東京・中部・大阪・関西・福岡・鹿児島・那覇等に設置。<b>雨や雪が降っていない領域では情報が得られない</b></td></tr>
+        <tr><td>空港気象ドップラーライダー(LIDAR)</td><td>エーロゾルの速度から非降水時の低層ウィンドシアー/マイクロバーストを検出。成田・東京・関西の国際空港に設置。降水時/霧発生時は探知範囲が狭まる</td></tr>
+        <tr><td>ウィンドシアー警報システム</td><td>GPWSのウィンドシアー警報システムと、予知型ウィンドシアー警報システム(PWS)。機上装置が検知すると警報</td></tr>
+      </table>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK 8 ============ -->
+<div class="block" id="b8">
+  <div class="block-head"><span class="blocknum">890-899</span><h2>⑧ パイロットの気象通報 ＋ 附録</h2></div>
+  <p class="block-intro">気象状態に遭遇したパイロット自身が、次の一機のために情報を還元する仕組みです。口頭試験の頻出テーマでもあります。</p>
+  <div class="tts-controls" data-tts-id="block8">
+    <button class="tts-btn tts-play">▶ ブロック⑧を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" data-tid="890_891">
+    <summary><span class="num">890・891</span>パイロットの気象報告とAIREP</summary>
+    <div class="topic-body">
+      <p>運航の妨げとなる気象に遭遇したら、できる限り速やかに管制機関または広域対空援助局へ通報すべきとされています。洋上飛行等での位置通報に紐づく定型の気象報告が<b>AIREP</b>、それ以外の随時通報が<b>PIREP</b>です。通報時は自機の型式に加え、on top / below overcast / between layers / in cloud / in and out of cloud / weather clear といった飛行状態の表現を添えるとよいとされています。無線で即座に通報できない場合は、着陸後できるだけ早く気象機関または管制運航情報官に伝えます。</p>
+      <p>ICAOの強度基準の要点：</p>
+      <table>
+        <tr><th>用語</th><th>目安</th></tr>
+        <tr><td>Moderate turbulence</td><td>姿勢/高度に中程度の変化、常にポジティブコントロール下。加速度計の読みの変化0.5〜1.0G</td></tr>
+        <tr><td>Severe turbulence</td><td>姿勢/高度が急変、短時間操縦不能もありうる。加速度計の読みの変化1.0Gより大</td></tr>
+        <tr><td>Moderate icing</td><td>機首方位/高度の変更が望ましい程度</td></tr>
+        <tr><td>Severe icing</td><td>早急に変更しなければ危険な状況に陥る程度</td></tr>
+        <tr><td>Severe mountain wave</td><td>30m/s(600ft/min)以上の下降気流、またはsevere turbulence相当</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="892">
+    <summary><span class="num">892</span>着氷のPIREP</summary>
+    <div class="topic-body">
+      <p>Moderate以上の着氷が認められた場合はできるだけ早く通報すべきとされています。</p>
+      <div class="pirep-box"><div class="pirep-line"><div class="who">PILOT</div><div class="txt">JA666C, encountered moderate icing between Kibi and Kagawa, time 0720 to 0740, 9,000 feet, in cloud, Diamond, 120 knots IAS.</div></div></div>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="893">
+    <summary><span class="num">893</span>タービュランスのPIREP</summary>
+    <div class="topic-body">
+      <p>通報すべき7項目：①航空機の位置 ②発生時刻(UTC) ③強度 ④「雲中」か「雲の外」か ⑤飛行高度 ⑥航空機の型式 ⑦継続時間。継続時間の表現：Occasional＝時間の1/3未満、Intermittent＝1/3〜2/3、Continuous＝2/3より多く。</p>
+      <div class="pirep-box">
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">JA8194, over Kushimoto, 0430, severe turbulence in cloud at FL330, one minute, Boeing 747.</div></div>
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">JA5784, from Hanamaki to Akita, 0748 to 0800, continuous moderate CAT, 8,500 feet.</div></div>
+      </div>
+      <p>ICAOのタービュランス強度定義：</p>
+      <table>
+        <tr><th>呼び方</th><th>機体の変化</th><th>機内の変化</th></tr>
+        <tr><td>Light</td><td>高度/姿勢に短時間の軽度な不規則変化。IASに大きな変化なし</td><td>ベルトに僅かに締め付けられる感じ。歩行は可能</td></tr>
+        <tr><td>Moderate</td><td>高度/姿勢に中程度の変化。常に操縦可能。IASに変化あり</td><td>ベルトに明らかな締め付け。歩行は困難</td></tr>
+        <tr><td>Severe</td><td>高度/姿勢が大きく急変。操縦不能になることも。耐空性に影響の可能性</td><td>ベルトに激しく押し付け/無重力感。歩行不可能</td></tr>
+      </table>
+      <p>Lightの範囲内でも特に強め/弱めの場合は「Plus」「Minus」を付け、揺れない状態は「Smooth」と表現します（航空会社間で統一運用されるC-PIREP）。福岡FIR内の洋上データリンク空域でCPDLC接続機がModerate以上に遭遇した場合は、原則CPDLCのフリーテキストでダウンリンクされます。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="894">
+    <summary><span class="num">894</span>低高度ウィンドシアーのPIREP</summary>
+    <div class="topic-body">
+      <p>離陸時・進入中にウィンドシアーに遭遇したら積極的に通報すべきとされています。管制官はこれを受けて直ちに関連機に警報を発し、他機が回避や対応をとりやすくなります。決まった語法はまだ確立されていないため、速度・高度の損失や取った措置をそのまま伝えるか、FMS等があれば上下の風向風速を通報するのが望ましいとされます。</p>
+      <div class="pirep-box">
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">JA3845, encountered wind shear, loss of 20 knots at 400 feet.</div></div>
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">Miyazaki Tower, All Nippon 613, encountered wind shear on final, gained 25 knots between 600 and 400 feet followed by loss of 40 knots.</div></div>
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">JA8432, we had wind shear on final, 240/35 at 2,000 feet, 160/15 at 1,000 feet.</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="895">
+    <summary><span class="num">895</span>雷雨のPIREP</summary>
+    <div class="topic-body">
+      <p>航路上またはその近辺に雷雨を発見した場合は回避（IFRでは回避を要求）と共に状況を通報。実際に被雷した場合も速やかにATCへ通報し、後続機への周知で連続被雷の軽減が期待できます。</p>
+      <div class="pirep-box">
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">Tokyo Control, Japan Air 12, observed CB with lightning 50 miles ahead, cloud top appears FL390 or higher, request deviation to the southeast about 20 miles.</div></div>
+        <div class="pirep-line"><div class="who">PILOT</div><div class="txt">Komatsu Approach, IBEX63 just took a lightning strike in this area.</div></div>
+        <div class="pirep-line"><div class="who">ATC</div><div class="txt">IBEX63, do you need any assistance?</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="896">
+    <summary><span class="num">896</span>火山活動のPIREP</summary>
+    <div class="topic-body">
+      <p>火山灰雲を発見した場合、必要なら回避（IFRでは要求）し、ICAO AIREP SPECIAL FORMのItem 1〜8（機体識別・位置・時刻・高度・火山活動観測内容・気温・風・補足情報）を直ちにATS機関へ通報。着陸後は残りのItem 9〜16も含めたVAR（Volcanic Activity Report）フォームで飛行後報告を行う必要があります。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="897">
+    <summary><span class="num">897</span>その他のPIREP</summary>
+    <div class="topic-body">
+      <p>管制機関等から気象に関する情報を求められる際のATC用語：<span class="example-box" style="display:inline-block;margin:0;">REQUEST FLIGHT CONDITIONS</span></p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="appendix">
+    <summary><span class="num">附録</span>大気現象の強度基準（気象庁航空気象観測指針）</summary>
+    <div class="topic-body">
+      <table>
+        <tr><th>現象</th><th>弱(－)</th><th>並</th><th>強(＋)</th></tr>
+        <tr><td>雨・しゅう雨</td><td>瞬間強度3mm/h未満</td><td>3〜15mm/h未満</td><td>15mm/h以上</td></tr>
+        <tr><td>霧雨・着氷性霧雨</td><td>視程1,000m以上</td><td>500〜1,000m未満</td><td>500m未満</td></tr>
+        <tr><td>雪・しゅう雪</td><td>瞬間強度1mm/h未満／視程概ね1,000m以上</td><td>1〜3mm/h未満／200〜1,000m未満</td><td>3mm/h以上／概ね200m未満</td></tr>
+        <tr><td>砂じん嵐</td><td colspan="2">視程500m以上</td><td>500m未満</td></tr>
+        <tr><td>雷（電光・雷鳴）</td><td>遠雷程度</td><td>弱と強の中間</td><td>光度が激しく全身に光、耳をろうする音</td></tr>
+      </table>
+      <p style="font-size:11.5px;color:var(--ink-faint);">※みぞれ・氷晶・じん旋風は国内では強度を観測しない。ろうと雲は無強度で報じるが、竜巻（陸上）/waterspout（水上）は「＋(強)」を付す。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="appendix_1">
+    <summary><span class="num">附録</span>RVRの通報値（測定器別の刻み幅）</summary>
+    <div class="topic-body">
+      <p>RVR観測装置には透過率計と前方散乱計があり、それぞれ通報の刻み幅が異なります（民間空港では透過率方式は不使用）。</p>
+      <table>
+        <tr><th>RVR帯</th><th>通報ステップの目安</th></tr>
+        <tr><td>50m未満（前方散乱計）</td><td>50m未満とだけ通報</td></tr>
+        <tr><td>低いRVR帯</td><td>25〜50m刻み</td></tr>
+        <tr><td>中間のRVR帯</td><td>50〜100m刻み</td></tr>
+        <tr><td>高いRVR帯</td><td>100〜200m刻み</td></tr>
+        <tr><td>上限超過</td><td>機器の上限値（1,800mまたは2,000m）を超える、として通報</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="appendix_2">
+    <summary><span class="num">附録</span>気象庁から提供される情報（リンク集）</summary>
+    <div class="topic-body">
+      <p>MetAirで提供される主な天気図等は、地上天気図・予報図／等圧面天気図／悪天実況・解析・予想図／断面図／火山灰関連図など多岐にわたります。気象庁ウェブサイトの主な参照先（原文の脚注より）：</p>
+      <ul>
+        <li>天気図全般：気象庁ウェブサイト「weather_map」ページ</li>
+        <li>高層天気図：気象庁ウェブサイト「numericmap（type=upper）」ページ</li>
+        <li>数値予報天気図：気象庁ウェブサイト「numericmap（type=nwp）」ページ</li>
+        <li>航空関連情報全般：気象庁「arinfo」ページ</li>
+        <li>火山灰情報（東京VAAC）：気象庁VAACページ</li>
+      </ul>
+      <div class="callout info">具体的なURLは気象庁サイトの構成変更で変わることがあるため、このリファレンスでは項目名のみ示しています。最新のリンクはMetAirまたは気象庁サイトのトップから辿ってください。</div>
+    </div>
+  </details>
+</div>
+
+<footer class="note">FULL COVERAGE BUILD — CHAPTER 8 / AVIATION METEOROLOGY — v1.0（800〜897・附録）</footer>
+</div>
+
+<script>
+/* ================= METAR DATA (reused engine) ================= */
+const metarExamples = [
+  { raw:"METAR RJEC 221200Z 03020G40KT 9999 FEW020 SCT100 24/18 Q1012 NOSIG=",
+    tokens:[
+      {t:"METAR",c:null,note:null},
+      {t:"RJEC",c:"c-station",note:"<b>地点</b>：RJEC＝仙台空港のICAOコード。"},
+      {t:"221200Z",c:"c-time",note:"<b>観測時刻</b>：22日 12:00 UTC。"},
+      {t:"03020G40KT",c:"c-wind",note:"<b>風向風速</b>：030°から20kt、最大瞬間風速40kt(Gust)。突風差20ktは強め。"},
+      {t:"9999",c:"c-vis",note:"<b>卓越視程</b>：9999＝10km以上。"},
+      {t:"FEW020",c:"c-cloud",note:"<b>雲</b>：FEW(1-2/8)、雲底2,000ft。"},
+      {t:"SCT100",c:"c-cloud",note:"<b>雲</b>：SCT(3-4/8)、雲底10,000ft。"},
+      {t:"24/18",c:"c-temp",note:"<b>気温/露点</b>：24℃/18℃。差が小さいほど霧・低シーリングのリスク。"},
+      {t:"Q1012",c:"c-qnh",note:"<b>QNH</b>：1012hPa。"},
+      {t:"NOSIG",c:null,note:"<b>短時間予報</b>：今後2時間、重大な変化なしの見込み。"},
+    ]},
+  { raw:"METAR RJEC 221200Z 03020G40KT 3000 TSRA FEW008 BKN015CB 19/18 Q1002 BECMG 1214 1500 +TSRA=",
+    tokens:[
+      {t:"METAR",c:null,note:null},
+      {t:"RJEC",c:"c-station",note:"<b>地点</b>：仙台空港。"},
+      {t:"221200Z",c:"c-time",note:"<b>観測時刻</b>：22日12:00 UTC。"},
+      {t:"03020G40KT",c:"c-wind",note:"<b>風向風速</b>：030°20kt、突風40kt。"},
+      {t:"3000",c:"c-vis",note:"<b>視程</b>：3,000m。降水で低下。"},
+      {t:"TSRA",c:"c-wx",note:"<b>現在天気</b>：TS(雷電)+RA(雨)＝雷雨。"},
+      {t:"FEW008",c:"c-cloud",note:"<b>雲</b>：FEW、雲底800ft。"},
+      {t:"BKN015CB",c:"c-cloud",note:"<b>雲＋種別</b>：BKN、1,500ft、CB(積乱雲)。CB明示は要注意サイン。"},
+      {t:"19/18",c:"c-temp",note:"<b>気温/露点</b>：差1℃、ほぼ飽和。霧・低シーリング警戒。"},
+      {t:"Q1002",c:"c-qnh",note:"<b>QNH</b>：1002hPa。低気圧接近を示唆。"},
+      {t:"BECMG",c:null,note:"<b>変化予報</b>：この先、状態が変化する見込み。"},
+      {t:"1214",c:"c-time",note:"<b>変化の時間帯</b>：12:00〜14:00 UTC。"},
+      {t:"1500",c:"c-vis",note:"<b>変化後の視程</b>：1,500mまで悪化見込み。"},
+      {t:"+TSRA",c:"c-wx",note:"<b>変化後の天気</b>：＋は「強い」。強い雷雨に発達見込み。"},
+    ]},
+  { raw:"METAR RJEC 221200Z 27008KT CAVOK 22/12 Q1018 NOSIG=",
+    tokens:[
+      {t:"METAR",c:null,note:null},
+      {t:"RJEC",c:"c-station",note:"<b>地点</b>：仙台空港。"},
+      {t:"221200Z",c:"c-time",note:"<b>観測時刻</b>：22日12:00 UTC。"},
+      {t:"27008KT",c:"c-wind",note:"<b>風向風速</b>：270°8kt。穏やかな西風。"},
+      {t:"CAVOK",c:"c-vis",note:"<b>CAVOK</b>：視程10km以上・雲量5/8未満で5,000ft以下に雲なし・悪天なし、の3条件を一語で表す。"},
+      {t:"22/12",c:"c-temp",note:"<b>気温/露点</b>：差10℃、比較的乾燥。"},
+      {t:"Q1018",c:"c-qnh",note:"<b>QNH</b>：1018hPa。高気圧下の安定した気圧。"},
+      {t:"NOSIG",c:null,note:"<b>短時間予報</b>：大きな変化なしの見込み。"},
+    ]},
+];
+let curEx = 0;
+function renderMetar(idx){
+  curEx = idx;
+  const ex = metarExamples[idx];
+  const el = document.getElementById('metarRaw');
+  el.innerHTML = ex.tokens.map((tok,i)=> tok.c ? `<span class="tok ${tok.c}" data-i="${i}">${tok.t}</span> ` : `<span>${tok.t}</span> `).join('');
+  document.getElementById('metarExplain').innerHTML = 'グループをクリックすると、ここに解説が出ます。';
+  el.querySelectorAll('.tok').forEach(span=>{
+    span.addEventListener('click', ()=>{
+      el.querySelectorAll('.tok').forEach(s=>s.classList.remove('sel'));
+      span.classList.add('sel');
+      document.getElementById('metarExplain').innerHTML = ex.tokens[span.getAttribute('data-i')].note || '（固定の見出し語です）';
+    });
+  });
+}
+document.querySelectorAll('.metar-examples button').forEach((btn,i)=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.metar-examples button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderMetar(i);
+  });
+});
+renderMetar(0);
+
+/* ================= SYMBOL GRID (850) ================= */
+const symbols = [
+  {name:"活発な雷電",en:"Thunderstorm",svg:`<svg viewBox="0 0 40 40"><path d="M8 20 h24 M20 8 v24 M12 12 l16 16 M28 12 l-16 16" stroke="var(--danger)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`},
+  {name:"熱帯低気圧",en:"Tropical Cyclone",svg:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="12" fill="none" stroke="var(--sky)" stroke-width="3"/><path d="M20 8 a12 12 0 0 1 12 12" stroke="var(--sky)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`},
+  {name:"ひょう",en:"Hail",svg:`<svg viewBox="0 0 40 40"><path d="M20 6 L30 20 L20 34 L10 20 Z" fill="none" stroke="var(--amber-bright)" stroke-width="3"/></svg>`},
+  {name:"強い乱気流",en:"Severe Turbulence",svg:`<svg viewBox="0 0 40 40"><path d="M6 26 q6 -14 12 0 q6 -14 12 0 q6 -14 12 0" stroke="var(--danger)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`},
+  {name:"強いスコールライン",en:"Squall Line",svg:`<svg viewBox="0 0 40 40"><path d="M8 10 v20 M8 10 l6 4 M8 18 l6 4 M8 26 l6 4" stroke="var(--sky)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`},
+  {name:"強い着氷",en:"Severe Icing",svg:`<svg viewBox="0 0 40 40"><path d="M20 6 v28 M20 6 l-6 6 M20 6 l6 6 M20 20 l-6 6 M20 20 l6 6" stroke="#bfe1ff" stroke-width="3" stroke-linecap="round"/></svg>`},
+  {name:"山岳波",en:"Mountain Wave",svg:`<svg viewBox="0 0 40 40"><path d="M4 26 q6 -18 12 0 q6 -18 12 0 q6 -18 12 0" stroke="var(--ink-dim)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`},
+  {name:"広範囲の砂じん嵐",en:"Widespread Duststorm",svg:`<svg viewBox="0 0 40 40"><path d="M6 14 h28 M6 20 h28 M6 26 h28" stroke="var(--amber-dim)" stroke-width="3" stroke-linecap="round"/></svg>`},
+  {name:"火山の噴火",en:"Volcanic Eruption",svg:`<svg viewBox="0 0 40 40"><path d="M8 32 L18 12 L22 12 L32 32 Z" fill="none" stroke="var(--danger)" stroke-width="3"/><circle cx="20" cy="8" r="3" fill="var(--amber-bright)"/></svg>`},
+];
+document.getElementById('symbolGrid').innerHTML = symbols.map(s=>`<div class="symbol-card">${s.svg}<div class="name">${s.name}</div><div class="en">${s.en}</div></div>`).join('');
+
+/* ================= CB STAGES (851) ================= */
+const cbStages = [
+  { caption:"上昇気流が支配的。積雲がむくむくと垂直に発達していく段階。まだ降水は始まらないが、上昇気流帯に入ると強い突き上げを受ける。",
+    hazards:[["h3","上昇気流"],["h2","弱い乱気流"]],
+    svg:`<svg viewBox="0 0 400 200" width="100%"><rect x="0" y="0" width="400" height="200" fill="var(--navy-950)"/><line x1="0" y1="175" x2="400" y2="175" stroke="var(--line)"/><path d="M150 175 Q160 95 200 60 Q240 95 250 175 Z" fill="#3a4568" stroke="#5c6a8a" stroke-width="1.5"/><path d="M190 165 l0 -80" stroke="var(--sky)" stroke-width="2" marker-end="url(#arrow)"/><path d="M210 165 l0 -80" stroke="var(--sky)" stroke-width="2" marker-end="url(#arrow)"/><text x="200" y="192" fill="var(--ink-faint)" font-size="11" text-anchor="middle" font-family="monospace">発達期 (Cumulus Stage)</text><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--sky)"/></marker></defs></svg>` },
+  { caption:"上昇気流と下降気流が同居し、雨・雹・雷電・強い突風が同時発生する最も危険な段階。-8〜+8℃帯を雲頂が通過するあたりで落雷が集中する。",
+    hazards:[["h1","強い乱気流"],["h1","落雷"],["h1","ひょう"],["h2","強い着氷"]],
+    svg:`<svg viewBox="0 0 400 200" width="100%"><rect x="0" y="0" width="400" height="200" fill="var(--navy-950)"/><line x1="0" y1="175" x2="400" y2="175" stroke="var(--line)"/><path d="M100 175 Q110 35 200 15 Q290 35 300 175 Z" fill="#3a4568" stroke="#5c6a8a" stroke-width="1.5"/><path d="M160 55 h80" stroke="var(--amber-bright)" stroke-width="1" stroke-dasharray="4 3"/><text x="330" y="58" fill="var(--amber-bright)" font-size="9" font-family="monospace">-8〜+8℃帯</text><path d="M170 160 l0 -85" stroke="var(--sky)" stroke-width="2" marker-end="url(#arrow2)"/><path d="M230 160 l0 -85" stroke="var(--danger)" stroke-width="2" marker-end="url(#arrow3)"/><path d="M195 25 l-10 20 l14 2 l-10 20" stroke="var(--amber-bright)" stroke-width="2" fill="none"/><text x="200" y="192" fill="var(--ink-faint)" font-size="11" text-anchor="middle" font-family="monospace">成熟期 (Mature Stage)</text><defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--sky)"/></marker><marker id="arrow3" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto"><path d="M0,8 L8,4 L0,0 z" fill="var(--danger)"/></marker></defs></svg>` },
+  { caption:"下降気流が支配的になり上昇気流が弱まって雲全体が崩れていく段階。ピークは過ぎるが、直下にはまだダウンバーストの危険が残ることがある。",
+    hazards:[["h2","弱〜中程度の乱気流"],["h3","局地的な下降流"]],
+    svg:`<svg viewBox="0 0 400 200" width="100%"><rect x="0" y="0" width="400" height="200" fill="var(--navy-950)"/><line x1="0" y1="175" x2="400" y2="175" stroke="var(--line)"/><path d="M90 175 Q130 95 200 85 Q270 95 310 175 Z" fill="#2c3654" stroke="#5c6a8a" stroke-width="1.5" opacity="0.7"/><path d="M190 90 l0 75" stroke="var(--danger)" stroke-width="2" marker-end="url(#arrow4)"/><path d="M210 90 l0 75" stroke="var(--danger)" stroke-width="2" marker-end="url(#arrow4)"/><text x="200" y="192" fill="var(--ink-faint)" font-size="11" text-anchor="middle" font-family="monospace">衰弱期 (Dissipating Stage)</text><defs><marker id="arrow4" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto"><path d="M0,8 L8,4 L0,0 z" fill="var(--danger)"/></marker></defs></svg>` },
+];
+let curCbStage = 0;
+function renderCb(idx){
+  curCbStage = idx;
+  document.getElementById('cbSvg').innerHTML = cbStages[idx].svg;
+  document.getElementById('cbCaption').textContent = cbStages[idx].caption;
+  document.getElementById('cbHazards').innerHTML = cbStages[idx].hazards.map(h=>`<span class="${h[0]}">${h[1]}</span>`).join('');
+}
+document.querySelectorAll('.cb-stage-tabs button').forEach((btn,i)=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.cb-stage-tabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCb(i);
+    hardStop();
+  });
+});
+renderCb(0);
+
+/* ================= DOWNBURST SVG (884) ================= */
+document.getElementById('dbSvg').innerHTML = `
+<svg viewBox="0 0 600 210" width="100%">
+  <rect x="0" y="0" width="600" height="210" fill="var(--navy-900)"/>
+  <line x1="20" y1="182" x2="580" y2="182" stroke="var(--line)"/>
+  <line x1="60" y1="172" x2="480" y2="40" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="60" y="168" fill="var(--ink-faint)" font-size="10" font-family="monospace">正規グライドパス</text>
+  <path d="M60 170 C 160 115, 240 68, 300 88 C 340 102, 380 145, 420 170" stroke="var(--amber-bright)" stroke-width="2.5" fill="none"/>
+  <circle cx="60" cy="170" r="4" fill="var(--sky)"/><text x="52" y="192" fill="var(--sky)" font-size="13" font-family="monospace">A</text>
+  <circle cx="220" cy="96" r="4" fill="var(--sky)"/><text x="228" y="88" fill="var(--sky)" font-size="13" font-family="monospace">B</text>
+  <circle cx="300" cy="88" r="4" fill="var(--amber-bright)"/><text x="308" y="80" fill="var(--amber-bright)" font-size="13" font-family="monospace">C</text>
+  <circle cx="420" cy="170" r="4" fill="var(--danger)"/><text x="428" y="192" fill="var(--danger)" font-size="13" font-family="monospace">D</text>
+  <path d="M300 40 v42" stroke="var(--danger)" stroke-width="2" marker-end="url(#arrowdb)"/>
+  <text x="310" y="45" fill="var(--danger)" font-size="10" font-family="monospace">downdraft core</text>
+  <defs><marker id="arrowdb" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto"><path d="M0,8 L8,4 L0,0 z" fill="var(--danger)"/></marker></defs>
+</svg>`;
+
+/* ================= TTS ENGINE (block-level, seekable) ================= */
+const pronFix = (s) => s
+  .replace(/航空測候所/g,'こうくうそっこうじょ').replace(/観測所/g,'かんそくじょ')
+  .replace(/時間毎/g,'じかんごと').replace(/分毎/g,'ふんごと')
+  .replace(/9か所/g,'きゅうかしょ').replace(/発出/g,'はっしゅつ').replace(/行う/g,'おこなう')
+  .replace(/積乱雲/g,'せきらんうん').replace(/積雲/g,'せきうん')
+  .replace(/中心示度/g,'ちゅうしんしど').replace(/雲頂高度/g,'うんちょうこうど')
+  .replace(/上方/g,'じょうほう').replace(/高層雲/g,'こうそううん')
+  .replace(/雲形/g,'うんけい').replace(/乱層雲/g,'らんそううん').replace(/層雲/g,'そううん')
+  .replace(/揚力/g,'ようりょく').replace(/機首/g,'きしゅ')
+  .replace(/METAR/g,'めたー').replace(/TAF/g,'たふ').replace(/VOLMET/g,'ぼるめっと')
+  .replace(/PIREP/g,'ぱいれっぷ').replace(/AIREP/g,'えあれっぷ').replace(/CAVOK/g,'きゃぶおーけー')
+  .replace(/NOSIG/g,'のーしぐ').replace(/BECMG/g,'びかみんぐ').replace(/TEMPO/g,'てんぽ')
+  .replace(/SIGMET/g,'しぐめっと').replace(/QNH/g,'きゅーえぬえいち').replace(/RVR/g,'あーるぶいあーる')
+  .replace(/IAS/g,'あいえーえす').replace(/VMC/g,'ぶいえむしー').replace(/IMC/g,'あいえむしー')
+  .replace(/着氷/g,'ちゃくひょう').replace(/露点/g,'ろてん').replace(/卓越/g,'たくえつ')
+  .replace(/突風/g,'とっぷう').replace(/乱気流/g,'らんきりゅう')
+  .replace(/雲底/g,'うんてい').replace(/雲量/g,'うんりょう').replace(/悪天/g,'あくてん')
+  .replace(/前線/g,'ぜんせん').replace(/滑走路/g,'かっそうろ').replace(/山岳波/g,'さんがくは')
+  .replace(/<[^>]+>/g,'');
+
+function stripHtml(html){ const tmp=document.createElement('div'); tmp.innerHTML=html; return tmp.textContent||tmp.innerText||''; }
+
+function splitToChunks(parts){
+  const chunks=[];
+  parts.forEach(p=>{
+    const sentences=p.text.replace(/([。！？])/g,'$1\u0000').split('\u0000').map(s=>s.trim()).filter(Boolean);
+    (sentences.length?sentences:[p.text]).forEach(sentence=>{
+      const msPerChar = (p.lang||'ja-JP').startsWith('en')?90:175;
+      chunks.push({text:sentence, lang:p.lang||'ja-JP', estMs:Math.max(400, sentence.length*msPerChar)});
+    });
+  });
+  return chunks;
+}
+
+const LECTURE_SCRIPTS = {"blockIntros": {"block1": "さて、ここから第8章、航空気象の講義を始めます。最初のブロックは、気象情報がどこから来て、どうやって手に入れるか、という土台の話です。ここを押さえておくと、あとで出てくる電文の話が、誰が何のために作っているのかが分かった上で理解できます。まずは全体の地図を頭に入れましょう。", "block2": "ここからが、この章で最も重要なブロックです。METARとTAF、確実に読めるようになることが前提とされています。細かい記号が多く出てきますが、一つ一つを個別に暗記しようとすると効率が悪くなります。すべての規則の根底には、一つの共通した考え方があります。それは、パイロットがその一瞬の判断に使える情報だけを、誤解の余地なく機械的に並べる、ということです。この軸を持って聞いてください。", "block3": "次のブロックは短めです。地上でブリーフィングを受けるだけでなく、飛行中にもリアルタイムで気象情報を取りにいく手段がある、という話をします。", "block4": "ここからは、グライダーの訓練生にとって最も直結するブロックです。VMCの数値、雲の見極め、離着陸時の風。試験本番で実際に使う知識が詰まっています。", "block5": "ここからはIFRの気象知識です。VFRでは雲の中に入ってはいけない、というのが基本でしたが、IFRでは発想が逆になります。雲中飛行を前提に気象をとらえる。この切り替えが、このブロックのテーマです。", "block6": "ここからがこの章の中心部分です。雷雨、台風、ひょう、乱気流、着氷、山岳波、火山灰。そして日本特有の低気圧のタイプと、季節ごとの悪天候を扱います。項目数は多いですが、それぞれ独立していますので、気になるところから聞いてもらって構いません。", "block7": "このブロックでは、雲の形から読み取れる気象情報、風の大循環からジェット気流、そして低層ウィンドシアーとダウンバーストへの実践的な対策まで扱います。", "block8": "最後のブロックです。気象状態に遭遇したパイロット自身が、次の一機のために情報を還元する仕組み、PIREPとAIREPについて扱います。口頭試験でもよく問われるテーマですので、実際の通報例文の言い回しまで押さえておきましょう。"}, "topics": {"800": "第8章、航空気象。この章は気象庁の監修を受けています。一つ、心構えとして覚えておいてください。この章は気象学の理論そのものを教える章ではなく、飛行計画に必要な気象情報と、実際に遭遇する気象障害への対応、この2点に重点が置かれています。それぞれの規則が何のためにあるのかを意識しながら聞いてください。", "801": "気象観測網の話です。全国の空港には航空地方気象台や航空測候所、航空気象観測所が配置されていて、観測結果は航空観測気象報としてまとめられます。ここでの要点は、観測の主体が一つではないということです。気象庁が委託した地方公共団体が観測して気象庁が通報するパターン、民間事業者が観測から通報まで行うパターン、そして一部の空港では観測も通報も完全に自動化されています。この違いは覚えておいてください。あとで出てくるMETARとSCANと従来型オートの違いは、この観測主体の違いから生まれています。有人観測は人の目で見た総合判断、自動観測はセンサーが拾える範囲だけの機械的な値。この軸で理解すると、後半の細かい規則が把握しやすくなります。", "802": "飛行前の気象ブリーフィングです。パイロットには、フライトに必要な気象情報を確認する義務があります。使う手段は、航空気象情報提供システム、通称メットエア、それから気象庁のホームページ、または民間の気象会社です。不明点があれば、管轄の航空気象官署に電話でブリーフィングを受けることもできます。メットエアのセルフブリーフィングページで提供される情報は9種類。予想図、実況図と解析図、メタールとタフ、地上天気図、高層実況とエマグラム、航空気象解説報、飛行場ナウキャスト、高層天気図と予想天気図、そして火山情報と台風情報です。すべてを覚える必要はありませんが、これだけの情報が揃っているという点は押さえておいてください。", "803": "メットエアで提供される天気図の話です。まず、覚えておくと便利なのが、気圧面と高度のおおよその対応関係です。500ヘクトパスカルはおよそ1万8千フィート、700ヘクトパスカルはおよそ1万フィート、850ヘクトパスカルはおよそ5千フィート。この3つはまず覚えておいてください。天気図の表題は記号化されていて、たとえばエフエックスエフイー502は、500ヘクトパスカルの24時間予想天気図という意味になります。末尾の数字が予報時間で、2なら24時間後、4なら48時間後、7なら72時間後です。そして天気図の使い分けについて。地上天気図は高低気圧と前線のおおまかな動きを見るためのもの。等圧面天気図は上層風や気温は分かりますが、雲や降水の広がり、着氷やタービュランスの発生までは分かりません。それを把握するには、国内悪天解析図や悪天予想図を用います。この使い分けは試験でも問われる点です。", "804": "気象庁から提供される電文の一覧です。ここは細かい表なので、今の段階ですべてを覚える必要はありません。次のブロックで一つずつ丁寧に解読していきますので、ここでは全体像だけをつかんでください。航空気象観測報には、メタール、スペシ、スキャン、従来型メタールオートの4種類。航空気象予報には、タフ、ボルメット、トレンド、離陸用予報の4種類。それから空域気象情報のシグメット、火山灰情報のブイエーエー、機上気象報のエアレップとパイレップがあります。名称の羅列に見えるかもしれませんが、次のブロックで意味がつながっていきます。", "810": "気象通報式、全体像の話です。基本として、METARは1時間毎または30分毎に定時通報されます。これに対してSPECIは、重要な変化があったときなど、特別観測の基準に該当した場合に随時発表されるものです。この定時か随時かという違いが基本の軸になります。SCANは一部の空港で行われる簡略化された観測、従来型メタールオートは観測装置が10分毎に自動で通報するもの、という位置づけです。米軍飛行場から発表されるMETARやTAFは、日本方式と一部異なる点があるので注意してください。", "811": "ここからは、この章の中でも特に重要な項目、METARとSPECIの読み方に入ります。構成は多くの要素からなりますが、すべての規則の根底には、一つの共通した考え方があります。それは、パイロットがその一瞬で安全判断に使える情報だけを、誤解の余地なく機械的な順番で並べる、ということです。この一点をまず押さえてください。このあとの細かい規則は、すべてこの原則の応用にすぎません。構成の順番は、通報の種類、地点略号、観測日時、オート、風、視程、RVR、現在天気、雲、キャブオーケー、気温と露点、キューエヌエイチ、低層ウィンドシアー、国内記事です。この並び順も、覚えておくと初見の電文に対応しやすくなります。いくつか、注意すべき点を挙げます。風が静穏、つまり4ノット以下のときは00000ケーティーと表記されます。風向が定まらないときはブイアールビー。視程が9999というのは、9999メートルという意味ではなく、10キロメートル以上という意味の記号です。雲はフューが1から2の8分の1、スキャッタードが3から4の8分の1、ブロークンが5から7の8分の1、オーバーキャストが8分の8。積乱雲、シービーと塔状積雲、ティーシーユーは必ず通報されます。ここで一つ、確認しておきたい点があります。キャブオーケーは、天気が良いという意味ではありません。視程10キロメートル以上、雲底5000フィート未満に雲がない、そして悪天現象がない。この3つの条件がすべて揃って初めて使える言葉です。一つでも欠ければ、キャブオーケーは使われません。試験でも問われやすい点ですので、押さえておいてください。", "812": "SCANの解読です。SCANは、航空気象観測所が設置されている空港で、地方公共団体等が観測し、気象庁が通報する方式です。見分け方は、メットエアの表示で、METARやSPECIという識別語がなく、いきなり地点略号から文章が始まっている場合、それがSCANです。METARとの大きな違いは、特別な現在天気が表にある9種類しか使われないこと、そして複数の現象が同時に起きていても、表の順序で最も重大な現象、一つしか報じられないことです。この点は見落としやすいので注意してください。", "813": "従来型メタールオートの解読です。これは観測装置だけによる完全自動通報で、10分毎に更新されます。観測日時のあとにオートという文字が付くのが目印です。ここで一つ、実務上重要な注意点があります。民間の気象会社が提供するブリーフィング情報には、この従来型メタールオートが含まれていないことがあります。この電文だけでVMCかIMCかを判断するべきではない、と原文にも明記されています。可能であれば、METARやSPECIで再確認する。この姿勢を持っておいてください。", "814": "飛行場予報、タフの話です。タフは1日4回、00時、06時、12時、18時、UTCで発表され、有効期間は発表から30時間です。ここで、試験でよく問われる区別があります。BECMGとTEMPOの違いです。整理すると、変化したあと、その状態が継続するのがBECMG。一時的に悪化して、また回復する可能性があるのがTEMPOです。これは代替飛行場の判断にも関わります。目的地がBECMGで悪化するなら、その時間以降は基本的に悪いままと考えて計画すべきですが、TEMPOであれば、一時的に基準を割る瞬間があっても、回復する可能性があるという前提で判断できます。この違いの理解は、燃料計画における安全側の考え方に直結します。このほか、ボルメット放送向けのタフ、成田や東京など主要5空港のトレンド、そして離陸用飛行場予報についても、それぞれ有効期間と用途が定められています。", "815": "空域気象情報、シグメットです。シグメットは、福岡FIR全域、全高度を対象に、運航に重大な影響を与える悪天候が予想または観測され、持続すると予想される場合に、気象庁本庁から発表されます。有効時間は、台風と火山灰の拡散状況については6時間以内、それ以外は4時間以内です。この違いも覚えておいてください。対象となる現象は、雷電、台風、強い乱気流、着氷、強い山岳波、強い砂じん嵐、火山灰の拡散状況、そして放射性物質の状況です。", "816": "航空路火山灰に関する情報、ブイエーエーです。ICAOが指名する世界9か所の航空路火山灰情報センター、ブイエーエーシーのうちの一つが、東京ブイエーエーシーです。東アジアと北西太平洋域、それから北極圏の一部を担当しています。情報の種類には、実況と6、12、18時間先の分布予測を示す航空路火山灰情報、それを図示した火山灰拡散予測図、高度別に分布予測を示す狭域拡散予測図などがあります。", "821": "管制機関等からの気象情報です。タワー等に飛行場の最新気象情報を要求すれば、入手できます。ここでの要点は、管制機関からの情報には、気象機関から提供されたものだけでなく、タワーが目で見て観察した一般的気象情報、他機からのパイレップ、レーダーで視認された気象情報も含まれている、という点です。", "822": "ATISです。気象情報、飛行場の状態、保安施設の運用状況などを、自動音声で特定の周波数に繰り返し放送するものです。METAR、SPECI、パイレップなどが発出または報告され次第、内容が更新されます。", "823": "広域対空援助局、通称エフエスシーによる気象情報の提供です。各地のリモート通信サイトを通じてVHFにより、飛行の安全に必要な情報の提供、収集、伝達を行っている機関です。パイロットはここを通じて、シグメット、METAR、SPECI、飛行場予報、気象レーダーエコー情報、トレンド、そして気象や火山活動に関するパイレップを入手できます。パイロット自身がパイレップを通報することも可能です。乱気流のパイレップについては、シビアやモデレートに加えて、航空会社が収集したライトやスムースの情報も提供されます。", "824": "ボルメットです。音声放送による気象情報の提供で、広範囲向けのHFと、局地向けのVHFがありますが、日本はHFのみを運用しています。日本、東京局は太平洋地域のグループに属していて、毎時10分と40分から5分間ずつ、決まった順番で放送しています。成田、東京、新千歳、中部、関西、福岡、インチョンのMETARとトレンド、それから成田と関西のタフ、という順です。電文のうち、基本群プラス変化群4群を超えた部分は放送されない、という制約も覚えておいてください。", "831": "飛行計画のための気象解析です。地上天気図で、高気圧と低気圧、前線の位置を把握するのが基本になります。高気圧圏内では、もやや煙霧といった視程障害に注意が必要です。夏は正午頃から積雲が急に増えることも覚えておいてください。低気圧の場合は、位置、中心の示度、発達しているか衰弱しているか、移動の方向と速度、降水域を検討します。前線については、地上天気図で位置を把握した上で、雲の状態や風向風速、気温差から強度を判断します。高層天気図で高低気圧の勢力を、状態曲線で雲形や雲頂高度の予想と大気の安定度を確認する。この積み重ねが飛行計画のための気象解析です。", "832": "VMC、有視界気象状態です。ここは、グライダーパイロットにとって最も直結する項目の一つです。数字だけを見ると複雑ですが、背景にある考え方は一つです。高高度、高速域ほど、他機との相対速度が大きくなるため、視認して回避するまでの時間的な余裕が必要になります。だから視程も、雲からの距離も、より厳しくなります。この一本の軸で理解してください。3000メートル以上では、視程8000メートル以上、雲からは垂直に300メートル、水平に1500メートル。3000メートル未満で管制区や管制圏を飛ぶ場合は、視程5000メートル以上、雲からは垂直に上方150メートル下方300メートル、水平に600メートル。それ以外の空域では視程1500メートル以上。地表から300メートル以下、いわゆるクラスジー空域では、視程1500メートル以上で、雲から離れて飛べて、地表または水面を引き続き視認できることが条件です。高いところ、速いところほど厳しい、という感覚で数字を整理すると覚えやすくなります。", "833_871": "VFRフライトに影響する雲と、10種雲形の話をまとめて講義します。まず、雲底の高さがその日によって異なる理由について整理します。地表付近の空気が上昇して露点に達し、水蒸気が凝結し始める高度、これが雲底です。気温が高く湿度が低い日ほど、この高度は高くなります。同じ積雲でも、乾燥した晴れの日は雲底が高く、湿った日は低くなります。10種雲形は、4つのグループに分けて覚えると整理しやすくなります。上層は巻雲、巻層雲、巻積雲。中層は高層雲、高積雲、乱層雲で、これらは発達すると悪天のもとになります。下層は層雲と層積雲で、比較的穏やかです。垂直発達型が積雲と積乱雲で、ここは要警戒です。層雲は雲底が100から200フィートと低く、接地逆転層があるときに発生しやすく、急速に8分の8まで雲量が増えることもあります。積雲は雲底2000から3500フィート、雲頂は7000から13000フィートで、下では上昇気流があり揺れやすい点も押さえておいてください。原文の中でも特に重要な教訓があります。下層と中層、2層構成の雲の間を飛ぶ際、下層の雲量は8分の4以下で、かつ急増しないことが条件です。8分の5を超えると、雲の下に降りられなくなります。実際の飛行判断に直結する点ですので、覚えておいてください。", "834": "視程の話です。VFRでは、姿勢や機位の確認を水平線や山、地形の目視に頼るため、常に良好な視程が必要です。法律上はVMCの限界は飛行場周辺5000メートルですが、初歩の練習ではさらに良い視程が望まれます。視程を悪くする代表的な現象を3つ挙げます。降水、これは雪の方が雨より障害が大きくなります。ヘイズ、煙霧は春先から初秋に多く、梅雨明け後の太平洋高気圧下では毎日のように発生します。スモークは、大気の安定度と地上付近の風向風速に大きく左右され、弱風だと風下側に滞留して視程を悪化させます。", "835": "離着陸時の風です。地上風の風向は気圧配置に左右されますが、それだけでなく、飛行場の地理条件や海陸風の影響も受けます。特に重要なのがガストです。離陸中に急に風速が増して、その直後に減じると、対気速度が急に減って、再接地の危険もあります。進入着陸でも同様で、風速が増した瞬間は揚力が急増してパスが高めに、減った瞬間は揚力が急減して接地点手前の落着気味の着陸になりやすくなります。対策は、平均値と最小値の差をアプローチスピードに上乗せして進入することです。地上風の通報について、タワーやレディオは2分間平均、ATISはMETARによる10分間平均という違いも押さえておいてください。", "836": "上昇気流と下降気流の話です。平坦な地形では、上昇気流は町や工場地帯、荒地、畑の上で、下降気流は湖や沼、河、森の上で発生しやすい傾向があります。離陸時に下降気流に遭遇すると、上昇角と上昇率がともに低くなり、機首角度を大きくしすぎると失速に近づく危険があります。着陸時に上昇気流があると、見かけの迎角が増えて揚力が増加し、パスが高めになりやすくなります。逆に下降気流があるとパスが低めになり、接地点が手前になりがちです。それぞれの局面で風がどう作用するか、押さえておいてください。", "837": "VFR飛行に障害を与える気象現象、まとめの項目です。まずIMCへの移行。VFR中はIMC空域を避けなければなりません。視程や雲底が悪化してきたら、早めの帰投判断が重要です。タービュランスは、上昇気流と下降気流の隣接や、山岳や建物への強風の衝突、大型機の後方乱気流などが原因になります。着氷は、0度以下での降水遭遇で、前面ガラスや翼、ピトー管に発生します。気化器着氷は、0度以上でも、外気温10度以下で湿度が高い降下中に発生することがあるので注意が必要です。そして雷雨。VFRにとって最も危険な現象です。雷雲から十分な距離を保てないなら、速やかに着陸する。これが原則です。", "841": "IMC、計器気象状態です。定義はシンプルで、VMC以外の気象状態のことをIMCと呼びます。VMCの条件を裏返せば、そのままIMCの定義になります。", "842": "ウェザーミニマの話です。航路上では、雲中であっても視程ゼロであっても、ATCの指示に従っていれば安全です。問題になるのは離陸時と進入着陸時です。離陸操作は目視で行うため一定の視界が必要ですし、進入を継続するには一定以上の地上視程、RVRが必要で、最終段階では滑走路を目視しなければなりません。この、離着陸それぞれに定められた最低気象条件を、総称してウェザーミニマと呼びます。", "843": "代替飛行場の選定です。目的飛行場が着陸最低気象条件未満になっても、安全に別の飛行場に降りられるよう、あらかじめ代替飛行場を選んでおきます。条件は4つです。目的飛行場に近いこと。最低気象条件として目的飛行場より条件が良いこと、これをオルタネートミニマと呼びます。低気圧や前線が接近している場合は、代替の予報値が目的地より良いこと。そして、目的地までの燃料に加えて、代替までの燃料と、法定の残量まで確保できること。この4つはセットで覚えてください。", "844": "飛行計画です。各種の気象図や資料で、出発地、航路上、目的地、そして代替飛行場の現況と、これからの変化傾向を把握して計画を作ります。悪天や天候悪化が予想される場合は、対処方法をあらかじめ検討しておきます。代替飛行場の予報がぎりぎり、マージナルな場合は、第2の代替飛行場も考慮して燃料を決定します。", "845": "雲中飛行です。IFRでは、ATCクリアランスに従って、雲中飛行を行うことを前提に気象をとらえます。積雲や塔状積雲などの対流雲は、タービュランスや着氷、落雷を伴うことがあるため迂回すべきであり、積乱雲は回避しなければなりません。ここで、体の仕組みについて触れておきます。雲中でタービュランスに遭遇すると、空間識失調という錯覚が起きやすくなります。耳の中の三半規管は加速度しか検知できず、一定速度の動きやゆっくりした姿勢変化は感じ取れません。雲中で揺られながら緩やかに旋回すると、体はまっすぐ飛んでいると錯覚し、逆に水平飛行に戻す操作をすると急に傾いたように感じることがあります。対策は、目で見た計器の指示を、体の感覚より常に優先することです。", "846": "視程障害です。IFRで視程障害が問題になるのは、離陸時と着陸時だけです。可否は、飛行視程と地上視程、RVRが観測されていればRVR、で判断されます。最低気象条件未満であれば、そもそも離陸も進入も行わないため安全上の問題は起きませんが、ぎりぎりの状況で飛行する場合には、高度な技術と的確な判断が要求されます。", "847": "IFRに影響を与える気象現象、まとめです。タービュランスをもたらす現象は、台風や熱帯低気圧、前線面の雲中、寒冷前線通過後の寒気団内、対流性の雲中、トラフ通過時、山岳波、ウィンドシアー面です。着氷が起きる現象は、寒冷前線面とその後面、冬季日本海沿岸、0度からマイナス40度程度の各種雲中、冬季低気圧中心付近です。気化器の着氷は、プラス10度以下で湿度が高ければ、雲中でなくても起こりうるため注意が必要です。雷雨のもとでは、風向の急変、低いシーリング、激しいタービュランス、下降気流、視程悪化、落雷、あられやひょう、そして低温時の着氷、これだけの危険が重なりうることを押さえておいてください。", "850": "悪天9種の記号です。国際的に定められた主な悪天現象と記号で、口頭試問でも頻出です。活発な雷電、熱帯低気圧、ひょう、強い乱気流、強いスコールライン、強い着氷、山岳波、広範囲の砂じん嵐、そして火山の噴火。この9つを、画面のカードを見ながら記号と名前をセットで覚えてください。", "851": "雷雨、積乱雲の一生です。気団性雷雨の場合、発達期、成熟期、衰弱期という3つの段階があり、それぞれで危険度が大きく異なります。なぜ発達期から成熟期にかけてここまで変化するのか、仕組みを整理します。上昇気流の中で水蒸気が凝結すると、凝結熱、潜熱が放出されます。周囲より暖かくなった空気はさらに軽くなり、上昇を加速させます。これが発達期です。やがて雲の中に雨粒やひょうが育ちすぎると、上昇気流では支えきれなくなり、その重さで空気ごと引きずり下ろす形で下降気流に転じます。これが成熟期に、上昇流と下降流が同居して、乱気流、落雷、ひょうが同時に発生する理由です。エネルギーを溜め込むほど、崩れるときも激しくなる、と理解してください。統計上、マイナス8度からプラス8度の間で90パーセントの落雷があるとされています。フリージングレベルの上下5000フィートを避けるのが有効です。雷雲の中を通らざるを得ない場合は、機上レーダーで最も降雨の少ない空域を選ぶ、できるだけ直線コースをとる、線状のCbはなるべく直角に通過する、という原則があります。もう一つ、万一セルに入ってしまった場合は、そのまま進む方が安全とされています。引き返そうとすると、強いタービュランスの中でかえって混乱しやすいためです。", "852": "台風です。日本には8月から10月を中心に、年平均で数個の台風が襲来します。ジェット機は高高度巡航や気象レーダーである程度対応できますが、レシプロ機の場合は運航がほぼ全面的に制約されます。見落としやすい危険は、台風外周にできるらせん状降雨帯の積乱雲です。着陸不能になる主な要因は風であり、横風制限値を超える時期の判断が重要になります。台風の進行方向右側が左側より危険とされる理由についても整理しておきます。台風自身の回転する風と、台風全体が進んでいく速度、この2つのベクトルが、右側では同じ向きに重なって強め合い、左側では打ち消し合って弱くなります。これが危険半円と呼ばれる理由です。", "853": "ひょうです。直径0.5から8センチの氷の粒で、強い上昇流と多量の過冷却水滴、高い雲頂高度をもつ積乱雲の中で育ちます。雲の中で上昇と落下を繰り返しながら大きくなるため、年輪のような断面になります。重要な注意点として、ひょうは積乱雲の外にも降るため、Cbを避けて飛んでいても被害を受けることがあります。特に最盛期にできるかなとこ雲の中まで運ばれたひょうは、持ち上げられずに外へ落下します。そのため、かなとこ雲の下を通るのは危険とされています。回避するなら風上側が安全で、風下側に回る場合は大きく迂回してください。", "854_855": "強い乱気流と強いスコールラインです。乱気流には7つの発生源があります。積乱雲中、山岳波、晴天乱気流のCAT、中層雲雲底、前線面上、低高度、そしてウェイクタービュランスです。この中で、CATと山岳波によるものは、目にもレーダーにも映らない点が重要です。CATが見えない理由を整理すると、隣り合う気層の風速差、垂直シアーが大きくなりすぎて、層状の流れが渦を巻いて崩れる現象がCATの正体です。ジェット気流の前線帯付近で、このシアーが集中しやすくなります。コックピットでのCATの兆候としては、風速の急激な増加、気温が1分間に1度以上変わること、操縦桿への小刻みな振動などが挙げられます。遭遇したときの対処は、まずシートベルトを確実に締めること。そして、エンジン出力と機首姿勢の修正は最小限にとどめることが基本です。", "856": "強い着氷です。着氷には、着氷性の雨によるものと、高濃度氷晶によるもの、大きく2種類があります。着氷の仕組みを整理します。0度を下回ってもまだ凍らずに液体のままでいる過冷却水滴が、機体に触れた瞬間、衝撃で一気に凍結します。ゆっくり凍ればデコボコの白い霧氷、水滴が大きく一気に凍ればツルツルで剥がれにくい雨氷になります。着氷性の雨が特に危険視されるのは、水滴が大きく、機体表面に薄く広がって空力を大きく乱す、雨氷に近いタイプになりやすいためです。対応としては、ピトー管や静圧孔の着氷でIASがおかしくなった場合、一定の飛行姿勢を維持することです。激しい着氷層の厚さは通常2000から5000フィート程度のため、高度変更が有効です。", "857": "山岳波です。山脈を越える気流が、風下側で波動を起こす現象です。シグメット対象の強い山岳波は、毎秒30メートル、分速600フィート以上の下降気流を伴う、またはシビアタービュランスに遭遇するような山岳波と定義されています。水蒸気を十分含んでいる場合、ローター雲、レンズ雲、キャップ雲が発生の目印になります。", "858": "広範囲の砂じん嵐です。シグメット対象で、ちりによる強い砂じん嵐と、砂による強い砂じん嵐に区分されます。視程を著しく悪化させる現象です。", "859": "火山灰です。危険性の仕組みを整理します。火山灰を構成する珪酸塩などの融点は、一般に1100度以下で、これはジェットエンジンの燃焼室の温度より低くなっています。そのため、エンジンの高温部で溶けて、高圧ノズルのガイドベーンやタービンブレードに融着します。結果として気道が塞がれ、燃焼圧力と圧縮機の排気圧が急上昇してサージングを引き起こし、急激な推力低下からフレームアウトに至ることがあります。火山灰雲中の飛行を余儀なくされた場合は、エンジンをアイドル推力に保つことが推奨されています。", "860_861": "悪い天気と低気圧、日本付近で発達する温帯低気圧の3つのタイプです。南岸低気圧は急速に発達して強い風雨をもたらし、冬期は太平洋側にも降雪を運びます。日本海低気圧は暖域で強い南寄りの風が吹き、北日本で暴風雨雪をもたらします。春一番が典型例です。二つ玉低気圧は、この2つの特徴を併せ持ち、雲と降水の範囲が広くなります。寒冷低気圧、切離低気圧とも呼ばれますが、上層に寒気を伴い気層が不安定になり、メソスケールの擾乱が発生すると積乱雲が発達します。この4つのタイプを、名前と特徴をセットで覚えておくと、天気図を見たときの判断が速くなります。", "862": "冬季の悪い天気です。冬の悪天の代表は雪と風です。シベリア高気圧が優勢になると、衛星画像に沿海州から日本海へのすじ雲が現れ、地上天気図は西高東低の気圧配置になります。雨か雪かの判断は重要で、500ヘクトパスカル天気図のマイナス30度の等温線、850ヘクトパスカル天気図のマイナス6度の等温線が、判別の目安になります。冬は積雪や凍結、スラッシュによる滑走路状態、ランウェイコンディションの判断も重要になります。", "863": "春と秋の悪い天気です。冬のシベリア高気圧と夏の太平洋高気圧の勢力が入れ替わる時期に、両気団の境界に停滞前線ができて、広範囲に悪天をもたらします。1週間程度雨が続くこともあり、低いシーリングと視程障害でフライトが大きく制約されます。", "864": "梅雨前線です。インドモンスーン、太平洋の亜熱帯高気圧、オホーツク海方面のブロッキング高気圧が絡み合ってできる停滞前線です。沖縄と奄美で5月中旬、西日本と東日本で6月上旬から中旬に梅雨入りします。7月に入ると、太平洋高気圧の縁辺から暖湿な気流と下層ジェット気流が流入して、3万から4万フィート以上のCbが連続発生し、大雨をもたらすことがあります。", "865": "海霧です。初夏から夏にかけて、千島近海から北海道東海上、三陸沖でよく発生します。オホーツク海からの冷たい海流の上に、暖かく湿った空気が流入して、広範囲の海霧を作ります。釧路や新千歳、函館など海岸近くの飛行場は、風向次第で視程がほぼゼロになり、離着陸不能になることがあります。実践的な点として、目的地が霧による悪視程を報じてきた場合は、上空でホールディングして待つより、早めに引き返す判断をした方が得策だと原文に明記されています。海霧の移流は速く、待っていても回復する可能性は低いためです。", "872_874": "特徴的な雲、雲の分布、そして雲の形からわかる気象情報をまとめて講義します。温暖前線は、数百キロ前方の巻雲から始まり、中層雲、下層雲が順に重なっていきます。寒冷前線は強さによって幅がありますが、強い場合は連なるCbの雲頂が3万5千から4万フィートに達することもあります。雲の形からわかることとして、特に重要なのは、積乱雲の最盛期は20分から30分程度で終わるのが普通、という点です。衰弱期には、かなとこ雲からできた巻雲や巻層雲が広がり、雲中飛行の障害はなくなります。", "881": "風系です。貿易風、極偏東風、中緯度偏西風という地球規模の大循環から、季節風、高気圧風系、低気圧風系、そして海陸風、山谷風といった、より小さなスケールの風まで、複数の種類があります。中緯度偏西風の中に、集中的に風速の強いベルトが存在し、これがジェット気流です。海陸風は、日中は海から陸へ、夜は陸から海へ吹きます。瀬戸内沿岸が代表例です。", "882": "ジェットストリームです。一般に風速60ノット以上、長さ数千キロメートル、幅数百キロメートルの、西風の強風帯です。なぜジェット気流が生まれるのか、仕組みを整理します。ジェット気流の正体は、寒気と暖気の温度差が生む温度風です。南北の温度差が大きいほど、上空でその境目に沿って吹く西風は強くなります。冬に日本付近のジェットが最も強くなるのは、寒帯と亜熱帯の温度コントラストが年間で最大になるためです。温度差と風の強さの関係を理解しておくと、ジェット気流の位置や強さが季節や前線帯の位置と連動して変化する理由がつながります。", "883": "地上風と地形の影響です。低気圧周辺の地上風は、北半球では反時計回りになります。地表摩擦のため、通常25度から35度程度、等圧線と角度をなして低気圧側へ吹き込みます。建造物や地形の風下側では、風速25から30ノットを超えると渦が剥離して流れ、狭い谷間ではベンチュリー効果で、下層ジェット的な強風、峡谷風が吹き抜けることがあります。", "884": "低層における風の乱れ、ダウンバーストとグライドパスの話です。積乱雲の下では、上昇気流の中の水蒸気が急冷して、雲粒や雨滴、ひょうを作り、凝結熱で上昇流がさらに強化されます。一方で、降水が空気を引きずり下ろして下降気流を生みます。この下降気流が地表に強く打ち当たるのがダウンバーストで、吹き出し口が直径4キロメートル以下のものはマイクロバーストと呼ばれます。最大風速は120ノットに達することもあります。実際のグライドパス上では、A地点、B地点、C地点、D地点という4つのポイントで状況が変わります。A地点は正規のパス上で異常なし。B地点で向い風が急増してIASも増加し、降水開始の兆候が現れます。ゴーアラウンドの判断はここから始めておくべきです。C地点でIASが過大になり、高度もパスより高めになりますが、修正しすぎると危険です。ゴーアラウンドはこのC地点で開始するのが最も良いとされています。C地点からD地点にかけて、向い風が消えて下降流が本格化し、放置すると接地手前で急激に沈みます。エナジートレイドという考え方についても触れておきます。これは運動エネルギーが速度の2乗に比例するという物理法則に基づいています。速い速度域から少し減速するだけで、大きな高度が得られますが、遅い速度域では、同じ減速でも得られる高度はわずかです。速度を高度に変えるのは有効ですが、高度を速度に変えるのは推奨されません。わずかな速度のために、大きな高度を失うことになるためです。", "885": "低高度ウィンドシアーと下降気流対策です。最も重要なのは、差し迫っていることを察知すること、そして避けるか対応するか直ちに決断することです。機上での検知方法としては、対流活動域やその周辺でのレーダーエコーの変化、短時間での風向風速の変化、ガストフロントの兆候、対流雲が尾流雲を伴っているとき、などが挙げられます。最初の徴候としては、向い風の急減でIASが減少し、機首が下がり、高度が下がるパターン。逆に向い風の急増ではIASが増加し、機首が上がり、高度が上がるパターン。この2つを押さえておいてください。", "886": "ウィンドシアーとマイクロバーストの検出装置です。空港気象ドップラーレーダー、通称ドロウは、降水粒子の速度からウィンドシアーを検出しますが、雨や雪が降っていない領域では情報が得られません。空港気象ドップラーライダーは、エーロゾルの速度から非降水時のウィンドシアーを検出しますが、降水時や霧発生時は探知範囲が狭まります。この2つは互いに補完し合う関係にあると理解しておいてください。", "890_891": "パイロットの気象報告とAIREPです。運航の妨げとなる気象に遭遇したら、できる限り速やかに管制機関または広域対空援助局へ通報すべきとされています。洋上飛行などでの位置通報に紐づく定型の気象報告がAIREP、それ以外の随時通報がPIREPです。ICAOの強度基準として、モデレートタービュランスは姿勢や高度に中程度の変化があるが常に操縦可能な状態、シビアタービュランスは姿勢や高度が急変し、短時間操縦不能になることもある状態、と定義されています。", "892": "着氷のPIREPです。モデレート以上の着氷が認められた場合は、できるだけ早く通報すべきとされています。実際の通報例としては、機体番号に続けて、遭遇した着氷の強さ、場所、時刻、高度、雲の中か外か、機種、そしてIASを伝える形になります。", "893": "タービュランスのPIREPです。通報すべき7つの項目を挙げます。航空機の位置、発生時刻、強度、雲の中か外か、飛行高度、航空機の型式、そして継続時間です。継続時間の表現には3段階あり、オケージョナルは時間の3分の1未満、インターミッテントは3分の1から3分の2、コンティニュアスは3分の2より多く、となります。ここで、なぜここまで厳密に強度を定義するのか整理しておきます。揺れたという感覚は、機種やパイロットの主観によって大きく変わります。ジャンボのモデレートと、小型機のモデレートでは、実際の空気の乱れ方が異なることもあります。そのためICAOの定義は、操縦できるかどうか、加速度計の数値、機内の物がどう動くかという、機種に依存しない客観的な基準で線引きされています。これにより、後続機は自分の機体でその言葉が何を意味するかを正しく変換して備えることができます。PIREPが有効に機能する前提は、この共通言語としての厳密さにあります。", "894": "低高度ウィンドシアーのPIREPです。離陸時や進入中にウィンドシアーに遭遇したら、積極的に通報すべきとされています。管制官はこれを受けて、直ちに関連機に警報を発するため、他のパイロットが回避や対応を取りやすくなります。決まった語法はまだ確立されていないため、遭遇したときの速度と高度の損失、そして取った措置を、そのまま自分の言葉で伝えることが望ましいとされています。", "895": "雷雨のPIREPです。航路上またはその近辺に雷雨を発見した場合は、回避すると共に状況を通報します。実際に被雷した場合も、速やかにATCへ通報することが望ましいとされています。後続機への周知により、連続被雷の軽減が期待できます。", "896": "火山活動のPIREPです。火山灰雲を発見した場合、必要なら回避しつつ、ICAOのAIREPスペシャルフォームの、機体識別、位置、時刻、高度、火山活動の観測内容、気温、風、補足情報、この8項目を直ちにATS機関へ通報します。着陸後は、残りの項目も含めた、バー、ボルケーニックアクティビティレポートというフォームで、飛行後の報告を行う必要があります。", "897": "その他のPIREPです。管制機関等から気象に関する情報を求められる際のATC用語は、リクエスト、フライト、コンディションズです。", "appendix": "附録、大気現象の強度基準です。気象庁の航空気象観測指針による分類で、雨やしゅう雨、霧雨、雪などが、弱、並、強の3段階で定義されています。雨の場合、瞬間強度が1時間あたり3ミリ未満なら弱、3から15ミリ未満なら並、15ミリ以上なら強となります。", "appendix_1": "附録、RVRの通報値です。RVR観測装置には透過率計と前方散乱計があり、それぞれ通報の刻み幅が異なります。50メートル未満のRVR帯では50メートル未満とだけ通報され、RVRの値が高くなるにつれて、25メートル刻みから200メートル刻みまで、段階的に粗くなっていきます。", "appendix_2": "附録、気象庁から提供される情報のリンク集です。メットエアで提供される主な天気図は、地上天気図、等圧面天気図、悪天実況・解析・予想図、断面図、火山灰関連図など、多岐にわたります。具体的なURLはサイトの構成変更で変わることがあるため、このリファレンスでは項目名のみを示しています。"}, "display": {"800": "航空気象の章。気象学の理論よりも、次の2点に重点。\n1. 飛行計画に必要な気象情報\n2. 実際に遭遇する気象障害への対応", "801": "観測主体は3パターン。\n1. 地方公共団体等が観測→気象庁が通報\n2. 民間事業者が観測から通報まで実施\n3. 完全自動化(一部空港)\n\n有人観測=総合判断／自動観測=センサー任せ、の違いが後の規則差の元になる。", "802": "パイロットには気象情報確認の義務あり。\n\n手段：メットエア／気象庁HP／民間気象会社／航空気象官署への電話\n\nメットエアで見られる情報：\n①予想図 ②実況・解析図 ③METAR・TAF ④地上天気図 ⑤高層実況・エマグラム ⑥航空気象解説報 ⑦飛行場ナウキャスト ⑧高層天気図 ⑨火山・台風情報", "803": "気圧面と高度の対応（覚える3つ）\n・500hPa ≒ 18,000ft\n・700hPa ≒ 10,000ft\n・850hPa ≒ 5,000ft\n\n天気図記号の例：FXFE502＝500hPaの24時間予想天気図\n（末尾数字：2=24h後／4=48h後／7=72h後）\n\n使い分け：\n・地上天気図→高低気圧・前線の動き\n・等圧面天気図→上層風・気温（雲や着氷は分からない）\n・国内悪天解析／予想図→雲・降水・着氷・タービュランスの詳細", "811": "METAR/SPECIの並び順：\n通報種類→地点→観測日時→(AUTO)→風→視程→RVR→現在天気→雲→CAVOK→気温/露点→QNH→WS→国内記事\n\n注意ポイント：\n・静穏(4kt以下)＝00000KT／風向不定＝VRB\n・9999＝10km以上（メートルではない）\n・雲量：FEW(1-2/8)・SCT(3-4/8)・BKN(5-7/8)・OVC(8/8)\n・CB・TCUは必ず通報\n\nCAVOKの3条件（全部揃って初めて成立）：\n1. 視程10km以上\n2. 雲底5,000ft未満に雲なし\n3. 悪天現象なし", "812": "SCAN＝観測所設置空港での方式。METAR/SPECIとの違い：\n\n1. 特別な現在天気は9種類のみ\n2. 複数現象が同時発生しても、最も重大なもの1つだけ報じる（見落とし注意）\n3. 強度は－／＋のみ\n4. 雲なしはSKC", "813": "従来型METAR AUTO＝完全自動、10分毎更新。\n\nMETARとの違い：\n・視程はRVR/視程計の値（目視と一致しないことも）\n・現在天気はRA・SNのみ\n・雲形・対流雲の付加情報なし\n\n注意：これだけでVMC/IMCを判断しない（民間ブリーフィングに含まれないことも）", "814": "TAF＝1日4回発表、有効期間30時間。\n\nBECMG と TEMPO の違い：\n・BECMG＝変化後、その状態が継続\n・TEMPO＝一時的な変動で、また戻る可能性あり\n→ 代替飛行場・燃料計画の判断に直結\n\nそのほかの予報：\n・VOLMET＝放送向けTAF\n・TREND＝主要5空港、有効2時間\n・離陸用飛行場予報＝有効6時間", "815": "SIGMET＝福岡FIR全域・全高度が対象。\n\n有効時間：\n・台風／火山灰の拡散状況＝6時間以内\n・それ以外＝4時間以内\n\n対象現象：雷電／台風／強い乱気流／着氷／強い山岳波／強い砂じん嵐／火山灰拡散／放射性物質", "816": "VAA（航空路火山灰情報）＝東京VAACが東アジア・北西太平洋を担当。\n\n主な情報：\n・航空路火山灰情報（実況＋6/12/18時間予測）\n・火山灰拡散予測図(VAG)\n・狭域拡散予測図(VAGFN、高度別)", "821": "タワー等に要求すれば入手可能な気象情報：\n・気象機関からの情報\n・タワーの一般的観察\n・他機からのPIREP\n・レーダーで視認された気象情報", "822": "ATIS＝自動音声放送。\n気象情報・飛行場の状態・保安施設の運用状況を、特定周波数で繰り返し放送。METAR/SPECI/PIREP更新に応じて随時更新。", "823": "FSC（広域対空援助局）で入手できる情報：\nSIGMET／METAR・SPECI／飛行場予報／気象レーダーエコー／TREND／気象・火山活動のPIREP\n\nパイロット自身のPIREP通報も可能。乱気流PIREPはSevere/ModerateだけでなくLight/Smoothも提供。", "824": "VOLMET＝日本はHFのみ運用（東京局、太平洋グループ）。\n\n放送順（毎時10分・40分から5分間）：\n1. 主要7空港のMETAR&TREND\n2. 成田・関西のTAF\n3. SIGMETの有無\n4. 成田の反復\n5. 訂正報\n\n※基本群＋変化群4群を超える部分は放送されない", "831": "気象解析の着眼点：\n・高気圧圏内→もや・煙霧に注意、夏は正午から積雲急増\n・低気圧→位置・示度・発達衰弱・移動方向速度・降水域\n・前線→位置と強度（雲・風向風速・気温差から判断）\n\n高層天気図で勢力を、状態曲線で雲形と安定度を確認。", "832": "VMCの数値（高いところ・速いところほど厳しい）\n\n3,000m以上：視程8,000m以上／雲から垂直300m・水平1,500m\n\n3,000m未満（管制区等）：視程5,000m以上／雲から垂直上150m下300m・水平600m\n\nそれ以外の空域：視程1,500m以上\n\n地表300m以下(クラスG)：視程1,500m以上＋雲から離れて飛行＋地表を視認", "833_871": "雲底の高さ＝凝結高度で決まる（気温高い・湿度低いほど高い）\n\n10種雲形（4グループで整理）：\n・上層＝巻雲Ci／巻層雲Cs／巻積雲Cc\n・中層＝高層雲As／高積雲Ac／乱層雲Ns（発達すると悪天）\n・下層＝層雲St／層積雲Sc（穏やか）\n・垂直発達＝積雲Cu／積乱雲Cb（要警戒）\n\n重要な教訓：下層雲量は8分の4以下・急増しないこと（8分の5超で雲の下に降りられなくなる）", "834": "視程を悪くする3つの現象：\n1. 降水（雪＞雨で障害大）\n2. HAZE煙霧（春〜初秋、梅雨明け後は毎日発生も）\n3. SMOKE（弱風だと風下に滞留）", "835": "ガストの影響：\n・風速急増の瞬間→揚力急増→パス高め\n・風速急減の瞬間→揚力急減→接地点手前で落着気味\n→対策：平均と最小の差をアプローチスピードに上乗せ\n\n地上風の通報：タワー/レディオ＝2分平均、ATIS＝10分平均", "836": "上昇気流・下降気流の影響：\n\n離陸時：下降気流→上昇角/率低下、機首上げすぎで失速注意\n\n着陸時：\n・上昇気流→揚力増→パス高め\n・下降気流→パス低め、接地点手前になりがち", "837": "VFRの5大障害：\n1. IMCへの移行（早めの帰投判断）\n2. タービュランス（気流の隣接・強風衝突・後方乱気流）\n3. 着氷（0℃以下の降水／気化器着氷は+10℃以下＋高湿度）\n4. 低気圧・前線\n5. 雷雨（最も危険、距離を保てなければ着陸）", "841": "IMC＝VMC以外の気象状態。VMCの条件を裏返せば定義になる。", "842": "ウェザーミニマ＝離着陸時の最低気象条件の総称。\n\n航路上：ATC指示に従えば雲中・視程ゼロでも安全\n離陸時：目視操作のため一定の視界が必要\n進入着陸：地上視程(RVR)＋最終段階で滑走路目視が必須", "843": "代替飛行場の選定条件（4つ）：\n1. 目的飛行場に近いこと\n2. 気象条件が良いこと（オルタネートミニマ基準）\n3. 低気圧/前線接近時は代替の方が良い予報\n4. 目的地＋代替＋法定残量の燃料を確保", "844": "飛行計画のポイント：\n・出発地/航路上/目的地/代替の現況と変化傾向を把握\n・悪天が予想されるなら対処方法を事前検討\n・代替の予報がマージナルなら第2代替も考慮", "845": "IFR＝雲中飛行を前提に気象をとらえる。\n\n対流雲（Cu, TCu）→迂回／積乱雲→回避\n\n空間識失調のメカニズム：\n三半規管は加速度しか感知できない\n→ゆっくりした姿勢変化は錯覚を生む\n対策：計器の指示を体の感覚より優先", "846": "視程障害が問題になるのは離陸時・着陸時のみ。\n判断基準：飛行視程／地上視程(RVR)\n→最低気象条件未満なら、そもそも離陸・進入自体を行わない", "847": "IFRに影響する現象まとめ：\n\nタービュランス：台風／前線面／寒気団内／対流雲／トラフ／山岳波／ウィンドシアー面\n\n着氷：寒冷前線面／冬季日本海沿岸／0〜-40℃の雲中／冬季低気圧付近\n（気化器着氷は+10℃以下＋高湿度なら雲中でなくても発生）\n\n雷雨：風向急変／低シーリング／タービュランス／視程悪化／落雷／ひょう／着氷", "850": "悪天9種の記号：\n①活発な雷電 ②熱帯低気圧 ③ひょう ④強い乱気流 ⑤強いスコールライン ⑥強い着氷 ⑦山岳波 ⑧広範囲の砂じん嵐 ⑨火山の噴火", "851": "積乱雲の一生：\n\n①発達期：上昇気流が支配的（凝結熱で自己強化）\n②成熟期：上昇流＋下降流が同居＝最危険（落雷90%が-8〜+8℃帯）\n③衰弱期：下降気流が支配的\n\n通過が避けられない場合：\n・機上レーダーで最も降雨の少ない空域を選ぶ\n・直線コース、線状Cbは直角に通過\n・セルに入ったらそのまま進む（引き返すと混乱）", "852": "台風：\n・危険は「らせん状降雨帯」の積乱雲\n・着陸不能の主因は「風」（横風制限値）\n\n危険半円（進行方向右側）の理由：\n回転する風＋台風の移動速度が同じ向きに重なるため", "853": "ひょう：直径0.5〜8cm、上昇と落下を繰り返し年輪状に成長\n\n注意：積乱雲の外にも降る（かなとこ雲の下は特に危険）\n回避：風上側が安全、風下側なら大きく迂回", "854_855": "乱気流7つの発生源：\n①積乱雲中 ②山岳波 ③晴天乱気流CAT ④中層雲雲底 ⑤前線面上 ⑥低高度 ⑦ウェイクタービュランス\n\n※CAT・山岳波は目にもレーダーにも映らない\n（正体＝垂直シアーによる渦の崩壊）\n\n兆候：風速急増／気温1分1℃以上変化／操縦桿の振動\n対処：シートベルト確認→出力・姿勢修正は最小限", "856": "強い着氷：\n・着氷性の雨（クリアーアイスに近い）\n・高濃度氷晶(ICI)\n\n仕組み：過冷却水滴が接触の衝撃で凍結\n→ゆっくり凍る＝霧氷／急速に凍る＝雨氷\n\n対応：ピトー管着氷時は一定姿勢を維持、高度変更が有効（層の厚さ通常2,000〜5,000ft）", "857": "山岳波：山脈風下側の波動\n\nSIGMET基準：下降気流30m/s(600ft/min)以上、またはシビアタービュランス相当\n\n目印：ローター雲・レンズ雲・キャップ雲", "858": "広範囲の砂じん嵐：\n・ちりによるもの（HVY DS）\n・砂によるもの（HVY SS）\n視程を著しく悪化させる。", "859": "火山灰の危険性：\n\n1. 珪酸塩の融点(1100℃以下)＜エンジン燃焼室温度\n2. 高温部で溶けてタービンブレード等に融着\n3. 気道が塞がれサージング→フレームアウト\n\n対策：飛行を余儀なくされたらアイドル推力を維持", "860_861": "日本の温帯低気圧、3タイプ＋1：\n\n①南岸低気圧：急発達、太平洋側にも降雪\n②日本海低気圧：暖域で強い南風、春一番の典型\n③二つ玉低気圧：①②の特徴を併せ持つ\n④寒冷低気圧（切離低気圧）：上層寒気、メソ擾乱でCb発達", "862": "冬季の悪天：代表は「雪」と「風」\n\n雨雪判別の目安：\n・500hPa天気図の-30℃等温線\n・850hPa天気図の-6℃等温線\n\n滑走路状態（積雪・凍結・スラッシュ）の判断も重要", "863": "春秋の悪天：\n冬季高気圧と夏季高気圧の勢力交代時に停滞前線が発生\n→1週間程度の悪天、低シーリング・視程障害", "864": "梅雨前線：\n沖縄・奄美＝5月中旬入り／西日本・東日本＝6月上〜中旬入り\n\n7月は暖湿気流＋下層ジェットで、3〜4万ft超のCbが連続発生し大雨に", "865": "海霧：初夏〜夏、千島近海〜三陸沖に多発\n\n予想のポイント：\n・広範囲の高気圧、低気圧/前線なし\n・海面水温20℃未満\n・T-Td差0〜2℃、数ノットの弱風\n\n実践アドバイス：霧の報告を受けたら待つより早めの引き返し判断", "872_874": "前線に伴う雲の分布：\n・温暖前線→数百km前方から巻雲、その後中層・下層雲\n・寒冷前線→強い場合はCb雲頂35,000〜40,000ft超が連なる\n\n覚えておくべき点：積乱雲の最盛期は20〜30分程度で終わるのが普通", "881": "風系一覧：\n・貿易風／極偏東風／中緯度偏西風（大循環）\n・季節風／高気圧風系／低気圧風系\n・海陸風（日中は海風、夜は陸風）／山谷風\n\n中緯度偏西風の中に、集中的な強風帯＝ジェット気流", "882": "ジェットストリーム：風速60kt以上の西風強風帯\n\n正体＝南北の温度差が生む「温度風」\n→温度コントラストが大きいほど強い（冬に最強）\n\nCATの目安：中心軸を横切る区間、気温・風速の急変区間", "883": "地上風と地形：\n・低気圧周辺の地上風は北半球で反時計回り（等圧線と25〜35度の角度）\n・建造物/地形風下側：25〜30kt超で渦が剥離\n・狭い谷間：ベンチュリー効果で峡谷風", "884": "ダウンバースト：\n・上昇気流の限界→重さで下降気流に転換\n・マイクロバースト＝吹き出し口4km以下\n・最大風速120ktに達することも\n\nグライドパス上の変化：\nA地点：異常なし\nB地点：向い風急増→ゴーアラウンド判断を開始\nC地点：IAS過大→ゴーアラウンド開始に最適\nC→D：向い風消失→下降流本格化\n\nエナジートレイド：速度は2乗で効く\n→速い速度域からの減速は大きな高度を生む\n→高度を速度に変えるのは非推奨", "885": "低層ウィンドシアー対策：\n\n検知方法：\n・レーダーエコーの変化／風向風速の急変\n・ガストフロントの兆候／尾流雲\n\n最初の徴候：\n・向い風急減→IAS減少・機首下がる・高度下がる\n・向い風急増→IAS増加・機首上がる・高度上がる", "886": "検出装置：\n\n①空港気象ドップラーレーダー(DRAW)：降水粒子の速度で検出、無降水域は不可\n②空港気象ドップラーライダー：エーロゾルの速度で検出、降水/霧時は範囲縮小\n\n→互いに補完し合う関係", "890_891": "AIREP＝定型の位置通報に紐づく気象報告\nPIREP＝それ以外の随時通報\n\nICAO強度基準：\n・Moderate＝中程度の変化、常に操縦可能\n・Severe＝急変、短時間操縦不能もありうる", "892": "着氷のPIREP（Moderate以上は速やかに通報）：\n機体番号→強さ→場所→時刻→高度→雲の中/外→機種→IAS", "893": "タービュランスPIREPの7項目：\n①位置 ②時刻 ③強度 ④雲中/外 ⑤高度 ⑥型式 ⑦継続時間\n\n継続時間の表現：\n・Occasional＝1/3未満\n・Intermittent＝1/3〜2/3\n・Continuous＝2/3超\n\n強度が客観的に定義される理由：主観的な「揺れ」を機種に依存しない基準に変換するため", "894": "低高度ウィンドシアーのPIREP：\n離陸/進入中の遭遇は積極的に通報\n\n伝える内容：速度・高度の損失量、取った措置（決まった語法はまだ確立されていない）", "895": "雷雨のPIREP：\n発見時→回避＋状況通報\n被雷時→速やかにATCへ通報（後続機への周知で連続被雷を軽減）", "896": "火山活動のPIREP：\nICAO AIREPスペシャルフォーム 8項目：\n機体識別／位置／時刻／高度／観測内容／気温／風／補足情報\n\n着陸後：VAR（Volcanic Activity Report）で追加報告", "897": "その他のPIREP：\nATC用語「REQUEST FLIGHT CONDITIONS」", "appendix": "大気現象の強度基準（弱・並・強）\n\n例：雨の瞬間強度\n弱＝3mm/h未満／並＝3〜15mm/h未満／強＝15mm/h以上", "appendix_1": "RVRの通報値（測定器別の刻み幅）\n\n50m未満＝「50m未満」とだけ通報\n低いRVR帯＝25〜50m刻み\n中間＝50〜100m刻み\n高い帯＝100〜200m刻み", "appendix_2": "気象庁提供情報リンク集：\n地上天気図／等圧面天気図／悪天実況・解析・予想図／断面図／火山灰関連図\n\n※具体的URLはメットエアまたは気象庁サイトを参照", "804": "電文の種類一覧：\n\n観測報：METAR／SPECI／SCAN／従来型METAR AUTO\n予報：TAF／VOLMET／TREND／離陸用予報\nそのほか：SIGMET／VAA（火山灰）／AIREP・PIREP（機上気象報）", "810": "通報のタイミング：\n・METAR＝1時間毎または30分毎（定時）\n・SPECI＝特別観測基準に該当時（随時）\n・SCAN＝一部空港の簡略化観測\n・従来型METAR AUTO＝10分毎自動更新\n\n※米軍飛行場のMETAR/TAFは日本方式と一部異なる"}};
+
+function getTopicOrder(id){
+  const blockEl = document.getElementById(id.replace('block','b'));
+  if(!blockEl) return [];
+  const items = [];
+  const intro = LECTURE_SCRIPTS.blockIntros[id];
+  if(intro) items.push({tid:null, title:null, text:intro});
+  blockEl.querySelectorAll('details.topic').forEach(d=>{
+    const tid = d.getAttribute('data-tid');
+    const script = LECTURE_SCRIPTS.topics[tid];
+    if(script) items.push({tid, title:d.querySelector('summary').textContent.trim(), text:script});
+  });
+  return items;
+}
+function blockText(id){
+  // 手作りの講義調スクリプトを、ブロック導入文＋各トピックの順で連結する（読み上げ用）
+  return getTopicOrder(id).map(i=>i.text).join(' ');
+}
+
+let player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[] };
+
+function allControls(){ return document.querySelectorAll('.tts-controls'); }
+function updateButtons(){
+  allControls().forEach(c=>{
+    const id = c.getAttribute('data-tts-id');
+    const playBtn = c.querySelector('.tts-play');
+    const status = c.querySelector('.tts-status');
+    if(player.id===id && player.state!=='stopped'){
+      playBtn.textContent = player.state==='playing' ? '⏸ 一時停止' : '▶ 再開';
+      playBtn.classList.add('playing');
+      status.textContent = `${player.index+1} / ${player.chunks.length} 文`;
+    } else {
+      playBtn.textContent = playBtn.dataset.orig;
+      playBtn.classList.remove('playing');
+      status.textContent = '';
+    }
+  });
+}
+function hardStop(){
+  window.speechSynthesis.cancel();
+  player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[] };
+  updateButtons();
+  document.querySelectorAll('details.topic.reading').forEach(d=>{
+    d.classList.remove('reading');
+    if(d.dataset.autoOpened==='1'){ d.open = false; delete d.dataset.autoOpened; }
+  });
+}
+function highlightReadingTopic(){
+  const range = player.topicRanges.find(r=> player.index>=r.start && player.index<=r.end);
+  const activeTid = range ? range.tid : null;
+  document.querySelectorAll('details.topic').forEach(d=>{
+    const tid = d.getAttribute('data-tid');
+    if(activeTid && tid===activeTid){
+      d.classList.add('reading');
+      if(!d.open){ d.open = true; d.dataset.autoOpened = '1'; }
+      d.scrollIntoView({block:'center', behavior:'smooth'});
+    } else {
+      d.classList.remove('reading');
+      if(d.dataset.autoOpened==='1'){ d.open = false; delete d.dataset.autoOpened; }
+    }
+  });
+}
+function speakChunkFrom(index, charOffset){
+  window.speechSynthesis.cancel();
+  const chunk = player.chunks[index];
+  if(!chunk){ hardStop(); return; }
+  const text = pronFix(chunk.text.slice(charOffset));
+  const u = new SpeechSynthesisUtterance(text || '。');
+  if(selectedVoice){ u.voice = selectedVoice; u.lang = selectedVoice.lang; }
+  else { u.lang = chunk.lang; }
+  u.rate = 0.98;
+  player.index = index; player.offsetChars = charOffset; player.chunkStartedAt = Date.now(); player.state = 'playing';
+  u.onend = () => {
+    if(player.state !== 'playing') return;
+    if(index+1 < player.chunks.length){ speakChunkFrom(index+1, 0); updateButtons(); } else { hardStop(); }
+  };
+  window.speechSynthesis.speak(u);
+  updateButtons();
+  highlightReadingTopic();
+}
+function computeTopicRanges(topicOrder){
+  let cum = 0;
+  return topicOrder.map(item=>{
+    const count = splitToChunks([{text:item.text, lang:'ja-JP'}]).length;
+    const range = {tid:item.tid, start:cum, end:cum+count-1};
+    cum += count;
+    return range;
+  });
+}
+function startBlock(id){
+  const topicOrder = getTopicOrder(id);
+  const text = topicOrder.map(i=>i.text).join(' ');
+  if(!text) return;
+  hardStop();
+  player.id = id;
+  player.chunks = splitToChunks([{text, lang:'ja-JP'}]);
+  player.topicRanges = computeTopicRanges(topicOrder);
+  speakChunkFrom(0,0);
+}
+function startTopic(tid){
+  const script = LECTURE_SCRIPTS.topics[tid];
+  if(!script) return;
+  hardStop();
+  player.id = 'topic-' + tid;
+  player.chunks = splitToChunks([{text:script, lang:'ja-JP'}]);
+  player.topicRanges = [{tid, start:0, end:player.chunks.length-1}];
+  speakChunkFrom(0,0);
+}
+function startGeneric(id){
+  if(id.startsWith('topic-')){ startTopic(id.slice(6)); }
+  else { startBlock(id); }
+}
+function togglePlayPause(id){
+  if(player.id!==id || player.state==='stopped'){ startGeneric(id); return; }
+  if(player.state==='playing'){
+    try{ window.speechSynthesis.pause(); }catch(e){}
+    player.state='paused'; updateButtons();
+  } else if(player.state==='paused'){
+    try{ window.speechSynthesis.resume(); player.state='playing'; }
+    catch(e){ speakChunkFrom(player.index, player.offsetChars); }
+    updateButtons();
+  }
+}
+function seek(id, deltaMs){
+  if(player.id!==id || player.chunks.length===0) return;
+  const elapsedInChunk = player.state==='playing' ? (Date.now()-player.chunkStartedAt) : 0;
+  let totalMs = elapsedInChunk;
+  for(let i=0;i<player.index;i++) totalMs += player.chunks[i].estMs;
+  let totalAll = totalMs;
+  for(let i=player.index;i<player.chunks.length;i++) totalAll += (i===player.index ? (player.chunks[i].estMs-elapsedInChunk) : player.chunks[i].estMs);
+  let targetMs = Math.min(Math.max(0, totalMs+deltaMs), totalAll-100);
+  let i=0, acc=0;
+  while(i < player.chunks.length-1 && acc+player.chunks[i].estMs < targetMs){ acc += player.chunks[i].estMs; i++; }
+  const intoChunkMs = Math.max(0, targetMs-acc);
+  const chunk = player.chunks[i];
+  const msPerChar = chunk.lang.startsWith('en') ? 90 : 175;
+  const charOffset = Math.min(chunk.text.length, Math.floor(intoChunkMs/msPerChar));
+  speakChunkFrom(i, charOffset);
+}
+function back15(id){ seek(id, -15000); }
+function forward15(id){ seek(id, 15000); }
+
+/* ---- 読み上げ音声の選択 ---- */
+let selectedVoice = null;
+function populateVoiceSelects(){
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices || !voices.length) return;
+  const jaVoices = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('ja'));
+  let list = jaVoices.length ? jaVoices : voices;
+  // Windows/Edge の Microsoft Haruka があれば、リストの先頭かつ既定選択にする
+  const harukaIdx = list.findIndex(v=>/haruka/i.test(v.name));
+  if(harukaIdx > 0){ const h = list.splice(harukaIdx,1)[0]; list = [h, ...list]; }
+  document.querySelectorAll('.tts-voice').forEach(sel=>{
+    const current = sel.value;
+    sel.innerHTML = '';
+    list.forEach(v=>{
+      const o = document.createElement('option');
+      o.value = v.name;
+      const jpTag = (v.lang && v.lang.toLowerCase().startsWith('ja')) ? '' : `（${v.lang}）`;
+      o.textContent = v.name + jpTag;
+      sel.appendChild(o);
+    });
+    if(list.some(v=>v.name===current)){ sel.value = current; }
+    else { sel.value = list[0].name; }
+  });
+  if(!selectedVoice){
+    const harukaVoice = list.find(v=>/haruka/i.test(v.name));
+    selectedVoice = harukaVoice || list[0];
+    document.querySelectorAll('.tts-voice').forEach(sel=>{ sel.value = selectedVoice.name; });
+  }
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = populateVoiceSelects;
+  populateVoiceSelects();
+}
+/* 各項目カードに、単体再生用の小さなバーを追加する */
+document.querySelectorAll('details.topic').forEach(d=>{
+  const tid = d.getAttribute('data-tid');
+  const body = d.querySelector('.topic-body');
+  if(!tid || !body || !LECTURE_SCRIPTS.topics[tid]) return;
+  const bar = document.createElement('div');
+  bar.className = 'tts-controls tts-controls-mini';
+  bar.setAttribute('data-tts-id', 'topic-' + tid);
+  bar.innerHTML = `<button class="tts-btn tts-play">🔊 この項目を聞く</button><button class="tts-btn tts-stop">■</button><span class="tts-status"></span>`;
+  body.insertBefore(bar, body.firstChild);
+});
+
+document.querySelectorAll('.tts-controls').forEach(c=>{
+  const id = c.getAttribute('data-tts-id');
+  const isMini = c.classList.contains('tts-controls-mini');
+  const playBtn = c.querySelector('.tts-play');
+  playBtn.dataset.orig = playBtn.textContent;
+  playBtn.addEventListener('click', ()=>togglePlayPause(id));
+  c.querySelector('.tts-stop').addEventListener('click', ()=>{ if(player.id===id) hardStop(); });
+  if(isMini) return; // ミニバーは再生/停止のみ（戻る・進む・音声選択は付けない）
+  c.querySelector('.tts-back').addEventListener('click', ()=>back15(id));
+  const fwdBtn = document.createElement('button');
+  fwdBtn.className = 'tts-btn tts-fwd';
+  fwdBtn.textContent = '15秒 ▶';
+  fwdBtn.addEventListener('click', ()=>forward15(id));
+  c.querySelector('.tts-back').insertAdjacentElement('afterend', fwdBtn);
+  const voiceSel = document.createElement('select');
+  voiceSel.className = 'tts-voice';
+  voiceSel.title = '読み上げ音声を選択';
+  voiceSel.addEventListener('change', ()=>{
+    const voices = window.speechSynthesis.getVoices();
+    selectedVoice = voices.find(v=>v.name===voiceSel.value) || null;
+    document.querySelectorAll('.tts-voice').forEach(s=>{ if(s!==voiceSel) s.value = voiceSel.value; });
+  });
+  c.querySelector('.tts-stop').insertAdjacentElement('afterend', voiceSel);
+});
+populateVoiceSelects();
+document.querySelectorAll('.metar-examples button, .cb-stage-tabs button').forEach(b=>{
+  b.addEventListener('click', hardStop);
+});
+</script>
+</body>
+</html>

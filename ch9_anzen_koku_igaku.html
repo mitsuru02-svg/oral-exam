@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第9章 運航安全・航空医学 | AIM-J完全版リファレンス</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+  :root{
+    --navy-950:#070b14; --navy-900:#0c1220; --navy-800:#121a2c; --navy-700:#1a2540; --navy-600:#243458;
+    --line:#2a3a5c; --amber:#e8a33d; --amber-bright:#ffc25c; --amber-dim:#8a6a30; --sky:#5fb4d6;
+    --danger:#e0563f; --ok:#5fbf8c; --ink:#e8ecf4; --ink-dim:#9aa8c4; --ink-faint:#5c6a8a;
+    --mono:'Space Mono', monospace; --sans:'Noto Sans JP', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;background:var(--navy-950);color:var(--ink);font-family:var(--sans);}
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px 140px;}
+
+  /* HERO */
+  .hero{padding:44px 20px 26px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--navy-900),var(--navy-950));}
+  .hero-inner{max-width:980px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:0.12em;color:var(--amber);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .eyebrow::before{content:"AIM-J §8 完全版";border:1px solid var(--amber-dim);padding:2px 8px;border-radius:3px;color:var(--amber-bright);}
+  h1.title{font-size:clamp(24px,4.2vw,36px);margin:0 0 8px;line-height:1.3;font-weight:900;}
+  .hero-lede{color:var(--ink-dim);max-width:720px;line-height:1.85;font-size:14.5px;}
+  .stat-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .stat-row b{color:var(--amber-bright);font-size:15px;display:block;}
+
+  /* STICKY BLOCK NAV */
+  .block-nav{position:sticky;top:0;z-index:50;background:rgba(7,11,20,0.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;padding:10px 20px;}
+  .block-nav-inner{max-width:980px;margin:0 auto;display:flex;gap:6px;}
+  .block-nav a{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--line);padding:6px 10px;border-radius:16px;text-decoration:none;flex-shrink:0;transition:.15s;}
+  .block-nav a:hover{color:var(--amber-bright);border-color:var(--amber-dim);}
+
+  /* BLOCK SHELL */
+  .block{margin-top:52px;scroll-margin-top:60px;}
+  .block-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;flex-wrap:wrap;}
+  .block-head .blocknum{font-family:var(--mono);font-size:13px;color:var(--amber);border:1px solid var(--amber-dim);border-radius:4px;padding:2px 8px;}
+  .block-head h2{font-size:24px;margin:0;font-weight:900;}
+  .block-intro{color:var(--ink-dim);font-size:14px;line-height:1.9;max-width:760px;margin:8px 0 20px;}
+
+  .tts-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 20px;padding:10px 14px;background:var(--navy-900);border:1px solid var(--line);border-radius:8px;}
+  .tts-btn{font-family:var(--mono);font-size:11px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
+  .tts-btn:hover{background:rgba(95,180,214,0.12);}
+  .tts-btn.playing{background:var(--sky);color:var(--navy-950);}
+  .tts-btn.tts-stop{border-color:var(--danger);color:var(--danger);}
+  .tts-btn.tts-stop:hover{background:rgba(224,86,63,0.12);}
+  .tts-status{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
+  .tts-voice{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;max-width:180px;cursor:pointer;}
+  .tts-controls-mini{margin:0 0 14px;padding:0;background:none;border:none;gap:6px;}
+  .tts-controls-mini .tts-btn{font-size:10px;padding:4px 9px;}
+
+  /* ACCORDION TOPIC CARDS */
+  details.topic{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--navy-900);overflow:hidden;scroll-margin-top:70px;transition:border-color .3s, box-shadow .3s;}
+  details.topic.reading{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber);}
+  details.topic[open]{border-color:var(--amber-dim);}
+  details.topic summary{padding:12px 16px;cursor:pointer;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:baseline;gap:10px;}
+  details.topic summary::-webkit-details-marker{display:none;}
+  details.topic summary::before{content:"▸";color:var(--amber);font-size:11px;transition:.15s;flex-shrink:0;}
+  details.topic[open] summary::before{transform:rotate(90deg);}
+  details.topic summary .num{font-family:var(--mono);font-size:11px;color:var(--amber-bright);flex-shrink:0;}
+  .topic-body{padding:0 16px 16px 36px;color:var(--ink-dim);font-size:13.5px;line-height:1.95;}
+  .topic-body p{margin:0 0 10px;}
+  .topic-body ul, .topic-body ol{padding-left:18px;margin:0 0 10px;}
+  .topic-body li{margin-bottom:4px;}
+  .topic-body b{color:var(--ink);}
+  .topic-body table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+  .topic-body th,.topic-body td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;}
+  .topic-body th{background:var(--navy-800);color:var(--amber-bright);font-family:var(--mono);font-weight:400;font-size:11px;}
+  .example-box{font-family:var(--mono);font-size:12px;background:var(--navy-950);border:1px dashed var(--line);border-radius:6px;padding:10px 12px;margin:8px 0;color:var(--sky);white-space:pre-wrap;}
+  .callout{border-left:3px solid var(--danger);background:rgba(224,86,63,0.08);padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:12.5px;}
+  .callout.ok{border-color:var(--ok);background:rgba(95,191,140,0.08);}
+  .callout.info{border-color:var(--sky);background:rgba(95,180,214,0.08);}
+
+  /* METAR LAB (interactive) */
+  .metar-examples{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .metar-examples button{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:6px;padding:6px 9px;cursor:pointer;}
+  .metar-examples button.active{border-color:var(--amber);color:var(--amber-bright);}
+  .metar-raw{font-family:var(--mono);font-size:13.5px;background:var(--navy-950);border:1px solid var(--line);border-radius:8px;padding:14px;line-height:2.1;word-break:break-all;}
+  .tok{padding:2px 3px;border-radius:3px;cursor:pointer;transition:.12s;}
+  .tok:hover,.tok.sel{outline:2px solid var(--amber-bright);background:rgba(232,163,61,0.15);}
+  .tok.c-station{color:#bfe1ff;} .tok.c-time{color:#c9b8ff;} .tok.c-wind{color:var(--sky);}
+  .tok.c-vis{color:#a8e6b0;} .tok.c-wx{color:var(--danger);} .tok.c-cloud{color:#d7d2c4;}
+  .tok.c-temp{color:var(--amber-bright);} .tok.c-qnh{color:#ff9d9d;}
+  .metar-explain{margin-top:12px;min-height:56px;background:var(--navy-800);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--ink-dim);line-height:1.85;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;font-family:var(--mono);color:var(--ink-faint);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+
+  /* GRIDS */
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:10px 0;}
+  .info-card{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:14px;}
+  .info-card .t{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:6px;}
+  .info-card .d{font-size:12px;color:var(--ink-dim);line-height:1.8;}
+  .symbol-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:10px 0;}
+  .symbol-card{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:12px 8px;text-align:center;}
+  .symbol-card svg{width:38px;height:38px;margin-bottom:6px;}
+  .symbol-card .name{font-size:11.5px;font-weight:700;}
+  .symbol-card .en{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);}
+
+  /* CB / DOWNBURST reused blocks */
+  .cb-stage-tabs{display:flex;gap:8px;margin-bottom:12px;}
+  .cb-stage-tabs button{flex:1;font-family:var(--mono);font-size:11.5px;padding:8px 6px;background:var(--navy-800);border:1px solid var(--line);border-radius:6px;color:var(--ink-dim);cursor:pointer;}
+  .cb-stage-tabs button.active{background:var(--amber);color:var(--navy-950);border-color:var(--amber);font-weight:700;}
+  .cb-svg-wrap,.db-svg-wrap{background:var(--navy-950);border:1px solid var(--line);border-radius:8px;padding:10px;}
+  .cb-caption{margin-top:10px;font-size:13px;color:var(--ink-dim);line-height:1.85;min-height:40px;}
+  .hazard-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .hazard-tags span{font-family:var(--mono);font-size:10.5px;padding:4px 9px;border-radius:12px;border:1px solid;}
+  .hazard-tags .h1{color:var(--danger);border-color:var(--danger);}
+  .hazard-tags .h2{color:var(--amber-bright);border-color:var(--amber-dim);}
+  .hazard-tags .h3{color:var(--sky);border-color:var(--sky);}
+  .db-points{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .db-point{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11.5px;color:var(--ink-dim);line-height:1.6;}
+  .db-point b{color:var(--amber-bright);font-family:var(--mono);display:block;margin-bottom:4px;}
+
+  /* PIREP */
+  .pirep-box{background:var(--navy-950);border:1px solid var(--line);border-radius:8px;padding:14px;margin:8px 0;}
+  .pirep-line{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;}
+  .pirep-line .who{font-family:var(--mono);font-size:10.5px;color:var(--amber);width:58px;flex-shrink:0;padding-top:2px;}
+  .pirep-line .txt{font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.7;}
+
+  @media (max-width:640px){
+    .db-points{grid-template-columns:repeat(2,1fr);}
+    .topic-body{padding-left:20px;}
+  }
+
+  footer.note{text-align:center;margin-top:50px;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
+</style>
+
+</head>
+<body>
+<a href="./index.html" style="position:fixed;top:12px;left:12px;z-index:9999;display:flex;align-items:center;gap:6px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:6px 12px;color:#8b949e;font-size:13px;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.4);">‹ ホーム</a>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">第9章 運航の安全対策・航空医学</div>
+    <h1 class="title">AIM-J第9章。ウェイクタービュランスから低体温症まで。<br>運航安全と航空医学、全19項目。</h1>
+    <p class="hero-lede">
+      ウェイクタービュランス・空中衝突予防・VFR事故対策・山岳飛行から、IMSAFEチェックリスト・高高度の生理反応・飛行中の錯覚まで。
+      第8章と同じ形式（開閉式カード・音声読み上げ・図解）でまとめています。
+    </p>
+    <div class="stat-row">
+      <div><b>2</b>ブロック構成</div>
+      <div><b>19</b>項目（934・935・940-946・960-969）</div>
+      <div><b>5</b>つの図解</div>
+      <div><b>21</b>個の音声読み上げ（ブロック＋項目単位）</div>
+    </div>
+  </div>
+</div>
+
+<div class="block-nav">
+  <div class="block-nav-inner">
+    <a href="ch8_kokuu_kisho_full.html">§8 航空気象</a>
+    <a href="#bA">① 運航の安全対策(934-946)</a>
+    <a href="#bB">② 航空医学(960-969)</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ BLOCK A: 運航の安全対策 ============ -->
+<div class="block" id="bA">
+  <div class="block-head"><span class="blocknum">934-946</span><h2>① 運航の安全対策</h2></div>
+  <p class="block-intro">ウェイクタービュランス、空中衝突予防、VFR事故対策、そして山岳地帯の飛行まで。実際の運航判断に直結する内容です。</p>
+  <div class="tts-controls" data-tts-id="blockA">
+    <button class="tts-btn tts-play">▶ ブロック①を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" open data-tid="934">
+    <summary><span class="num">934</span>ウェイクタービュランス</summary>
+    <div class="topic-body">
+      <p>地上の先行機によるジェットブラストと、飛行中に翼端から発生する渦（翼端渦）は、いずれも後続機に重大な危険を及ぼします。</p>
+      <ul>
+        <li><b>ジェットブラスト</b>：噴出速度が56km/h以上になると、後方の小型機等に危険を及ぼす。大型機ほど危険域が長く、離陸出力時は1,000ft超に達することもある。</li>
+        <li><b>翼端渦の強さ</b>：機体が重く低速なほど強い。離着陸時は速度が遅く渦が強い。巡航中は高高度で空気密度が小さいほど渦が強く、先行機との時間間隔が短いと減衰前に遭遇することがある。</li>
+        <li><b>翼端渦の影響</b>：突入すると激しい揺れと共に急激なロールが発生し、エルロンをいっぱいに使っても操縦不能になった例が報告されている。</li>
+      </ul>
+      <svg viewBox="0 0 600 260" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <defs><marker id="wtArrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--danger)"/></marker></defs>
+        <line x1="0" y1="220" x2="600" y2="220" stroke="var(--ink-faint)" stroke-width="1"/>
+        <path d="M40 200 L200 160" stroke="var(--ink-dim)" stroke-width="2"/>
+        <text x="30" y="215" fill="var(--ink-faint)" font-size="9" font-family="monospace">先行機（大型）</text>
+        <path d="M150 165 q15 25 0 45 q-15 20 0 40" stroke="var(--danger)" stroke-width="2" fill="none" marker-end="url(#wtArrow)"/>
+        <path d="M170 165 q15 25 0 45 q-15 20 0 40" stroke="var(--danger)" stroke-width="2" fill="none" marker-end="url(#wtArrow)" opacity="0.6"/>
+        <text x="185" y="230" fill="var(--danger)" font-size="9" font-family="monospace">翼端渦（沈下）</text>
+        <path d="M260 130 L500 60" stroke="var(--amber-bright)" stroke-width="2.5"/>
+        <text x="480" y="50" fill="var(--amber-bright)" font-size="10" font-family="monospace">後続機の推奨パス</text>
+        <text x="270" y="150" fill="var(--ink-dim)" font-size="9" font-family="monospace">先行機のパスより高く</text>
+        <circle cx="150" cy="200" r="3" fill="var(--sky)"/>
+        <text x="130" y="245" fill="var(--sky)" font-size="9" font-family="monospace">先行機の接地点</text>
+        <circle cx="330" cy="220" r="3" fill="var(--amber-bright)"/>
+        <text x="340" y="245" fill="var(--amber-bright)" font-size="9" font-family="monospace">後続機はその先に接地</text>
+      </svg>
+      <p><b>回避の基本パターン</b>：大型機に続いて着陸する場合は先行機のパスより高く飛び、接地点より先に接地する。交差滑走路では先行機のパスの上方をクロスする。大型機に続いて離陸する場合は先行機の浮揚地点より手前で浮揚させ、そのパスの上方を風上に向けて上昇する。</p>
+      <div class="callout info">ヘリコプターの後方・低速飛行中も強い下降流（ダウンウォッシュ）を発生させる。ローター直径の3倍以内には近づかないこと。</div>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="935">
+    <summary><span class="num">935</span>空中衝突の予防</summary>
+    <div class="topic-body">
+      <p>最終的な空中衝突の回避は「See and avoid」に頼らざるを得ません。脅威機を発見し、動向を見極め、回避操作を終了するまでに<b>少なくとも12.5秒</b>が必要とされています。</p>
+      <svg viewBox="0 0 500 220" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <circle cx="120" cy="180" r="6" fill="var(--sky)"/>
+        <text x="90" y="205" fill="var(--sky)" font-size="10" font-family="monospace">自機</text>
+        <circle cx="380" cy="40" r="6" fill="var(--danger)"/>
+        <text x="390" y="35" fill="var(--danger)" font-size="10" font-family="monospace">相手機</text>
+        <line x1="120" y1="180" x2="380" y2="40" stroke="var(--amber-bright)" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <text x="200" y="100" fill="var(--amber-bright)" font-size="10" font-family="monospace" transform="rotate(-28 200 100)">相対方位が変わらない＝衝突コース</text>
+        <text x="150" y="215" fill="var(--ink-faint)" font-size="9" font-family="monospace">機影は「止まって見える」ため発見が遅れがち</text>
+      </svg>
+      <p><b>相対速度による見え方の変化</b>：ある時期まで小さく見えていた相手機が、衝突の寸前に急激に拡大して見え、次の瞬間に衝突する現象があります。TAS450ktの戦闘機と自機TAS150ktの正面接近の例では、衝突15秒前でも視角0.5°、3秒前で突然窓いっぱいに広がります。小さく見えても油断せず、コースを見定めて早めの回避操作を行うべきです。</p>
+      <div class="callout">たとえ法的な進路権があっても、相手が気づいて避けるのを待つより、自分から進路を譲る方が安全です。</div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="940">
+    <summary><span class="num">940</span>VFRフライトの事故原因と対策</summary>
+    <div class="topic-body">
+      <p>GA事故のうち、パイロットの判断・処置に関わる頻度の高い要因10項目は、過去数十年変わっていません。</p>
+      <ol>
+        <li>不十分な飛行準備または計画</li><li>方向コントロールの失敗</li><li>飛行速度の獲得・維持の失敗</li>
+        <li>不適切なレベルオフ</li><li>障害物の発見・回避の失敗</li><li>飛行距離と速度に関する誤判断</li>
+        <li>燃料制御の失敗</li><li>飛行中の判断ミス</li><li>不適当な地形の選定</li><li>不適当な操縦技術</li>
+      </ol>
+      <p>空中衝突はほとんど例外なく、良好な天候状態のもとで発生しています。良い視程はかえって安心感を助長するため、好天時ほど見張りを怠らないことが重要です。</p>
+      <div class="callout">気象状態悪化の兆候が見られたら、時機を逃さず飛行継続の可否を判断すること。VMCを維持できなくなった場合は、緊急事態の宣言をためらうべきではありません。</div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="941">
+    <summary><span class="num">941</span>プリフライトの注意事項</summary>
+    <div class="topic-body">
+      <ul>
+        <li>自分自身の体調確認（過労・二日酔い等の異常な体調では飛行を見合わせる）</li>
+        <li>精神的な安定（近親者の不幸やショッキングな出来事の後は脈拍・血圧に影響）</li>
+        <li>飛行前点検の確実な実施（燃料・滑油・整備記録・重量バランス・携行品）</li>
+        <li>フライト内容を地上の人に知らせておく（管制情報機関＋基地の運航管理者）</li>
+        <li>天候急変への備え（目的地悪化時の代替判断に必要な情報を事前準備）</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="942">
+    <summary><span class="num">942</span>チェックリストの活用</summary>
+    <div class="topic-body">
+      <p>人間は同時に複数の作業を行うことができません。ある操作の途中で別の作業のために中断すると、必要な項目を見落としがちになり、実施していない操作を実施済みと勘違いする傾向もあります。チェックリストの活用は、こうした人間の特性を補うためのものです。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="943">
+    <summary><span class="num">943</span>トラフィックの輻輳する空域でのVFR飛行</summary>
+    <div class="topic-body">
+      <div class="callout">異常接近・空中衝突は<b>8,000ft以下、かつ飛行場から30マイル以内</b>の空域で発生することが多い。</div>
+      <p>こうした空域では、より厳重な見張りが必要です。ストロボライトや着陸灯の点灯も視認性向上に有効。VHFの活用も重要で、レーダーがカバーする空域ではレーダーアドバイザリーを、タワー・レディオのある飛行場周辺ではVHF交信でトラフィック情報を入手します。通信施設のない飛行場・滑空場では、機相互間の共通周波数（122.6MHz）で位置・高度・意向を発信することが望ましいとされています。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="944">
+    <summary><span class="num">944</span>飛行障害物</summary>
+    <div class="topic-body">
+      <p>地上2,000ft未満を飛ぶときは、地上から突き出た障害物への警戒が必要です。</p>
+      <ul>
+        <li><b>アンテナ塔</b>：1,000ft以上突き出るものもあり、支持ワイヤーは水平500mも延びることがある。発見したら周辺600mの間隔を確保。</li>
+        <li><b>架線ワイヤー</b>：進入経路・湖・河川・峡谷を横断することがあり、障害灯が設置されていないことも多い。</li>
+        <li><b>浮遊気球</b>：付属物はよほど接近しないと視認できない。十分な間隔をとり、下側は絶対に飛ばないこと。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="945">
+    <summary><span class="num">945</span>山岳地帯の飛行</summary>
+    <div class="topic-body">
+      <p>滝川での運航にも直結する項目です。山岳地帯は不時着適地が少なく、積乱雲の急発達・視程低下・乱気流・強い上昇下降気流が発生しやすいため、常に退避経路を確保しておく必要があります。</p>
+      <svg viewBox="0 0 600 240" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <path d="M60 220 L220 60 L280 220 Z" fill="#2c3654" stroke="var(--line)"/>
+        <text x="220" y="50" fill="var(--ink-dim)" font-size="9" font-family="monospace">稜線</text>
+        <line x1="30" y1="30" x2="30" y2="60" stroke="var(--amber-bright)" stroke-width="2"/>
+        <path d="M30 30 h570" stroke="var(--amber-bright)" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="330" y="25" fill="var(--amber-bright)" font-size="10" font-family="monospace">頂上より最低1,000ft上の高度</text>
+        <path d="M420 220 L280 60" stroke="var(--sky)" stroke-width="2"/>
+        <text x="430" y="200" fill="var(--sky)" font-size="9" font-family="monospace">約45°の角度で接近</text>
+        <text x="400" y="215" fill="var(--ink-faint)" font-size="8" font-family="monospace">（乱気流時は90°旋回で離脱可）</text>
+        <line x1="120" y1="60" x2="220" y2="60" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="2 4"/>
+        <text x="90" y="55" fill="var(--ink-faint)" font-size="8" font-family="monospace">3NM手前から到達・維持</text>
+      </svg>
+      <ul>
+        <li>不時着不可能な区域を避け、民家のある地域やよく知られた山越えルートを選ぶ</li>
+        <li>午前中の方が条件良好（午後は積雲増加・風強まる）。夜間の山岳飛行は避ける</li>
+        <li>密度高度が高くなると航空機の性能が著しく低下する</li>
+        <li>山岳波は交角30°以上・風速15kt以上で発生しやすく、風下側に猛烈な下降流を生成</li>
+        <li>峡谷は行き止まりのことがあるため、常に180度ターンできるスペースを確保</li>
+      </ul>
+      <div class="callout info">関連項目：着氷（856）、山岳波（857）、高高度の影響（962）、飛行中の錯覚（965）</div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="946">
+    <summary><span class="num">946</span>無人航空機</summary>
+    <div class="topic-body">
+      <p>ドローン等は撮影・農薬散布・インフラ点検などで急速に普及。地表/水面から500ft以下の空域ではNOTAMが発行されないまま飛行していることがあり、サイズが小さいため視認・回避が困難です。</p>
+      <div class="callout">TCASとの関係：トランスポンダー非作動機にはTA/RAとも発出されない。概ね1,000ft AGL以下でRA抑止、概ね500ft AGL以下ではTA音声も抑止される。<b>TCASは離着陸の直前・直後の衝突防止には役立たない。</b></div>
+    </div>
+  </details>
+</div>
+
+<!-- ============ BLOCK B: 航空医学 ============ -->
+<div class="block" id="bB">
+  <div class="block-head"><span class="blocknum">960-969</span><h2>② 航空医学</h2></div>
+  <p class="block-intro">パイロット自身の心身の状態が操縦能力にどう影響するか。IMSAFEチェックリストから高高度の生理反応、飛行中の錯覚まで。</p>
+  <div class="tts-controls" data-tts-id="blockB">
+    <button class="tts-btn tts-play">▶ ブロック②を読み上げる</button>
+    <button class="tts-btn tts-back">⏪ 15秒</button>
+    <button class="tts-btn tts-stop">■ 終了</button>
+    <span class="tts-status"></span>
+  </div>
+
+  <details class="topic" data-tid="960">
+    <summary><span class="num">960</span>航空医学・総論</summary>
+    <div class="topic-body">
+      <p>WHO（世界保健機関）は「健康」を、単に身体的機能が正常なだけでなく、精神的・社会的にも正常であることと定義しています。健康でない状態での操縦は、パイロットインキャパシテーション（操縦不能状態）につながりかねません。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="961">
+    <summary><span class="num">961</span>飛行への適合性 ── IMSAFEチェックリスト</summary>
+    <div class="topic-body">
+      <p>航空身体検査証明の有効期限内であっても、身体検査基準に適合しない状態にある間は航空業務が禁止されています。頭文字をとった<b>IMSAFE</b>チェックリストが、飛行前の自己点検として推奨されています。</p>
+      <div class="info-grid">
+        <div class="info-card"><div class="t">I ー Illness（病気）</div><div class="d">軽い病気でも判断力・記憶力・警戒心を鈍らせる</div></div>
+        <div class="info-card"><div class="t">M ー Medication（服薬）</div><div class="d">処方薬・市販薬とも能力低下のおそれ。航空法でも規制あり</div></div>
+        <div class="info-card"><div class="t">S ー Stress（ストレス）</div><div class="d">警戒心を減退させ、危険な判断につながりやすい</div></div>
+        <div class="info-card"><div class="t">A ー Alcohol（アルコール）</div><div class="d">血中濃度0.2g/L未満・呼気0.09mg/L未満が必要</div></div>
+        <div class="info-card"><div class="t">F ー Fatigue（疲労）</div><div class="d">急性疲労は休養で回復。慢性疲労は長期休養が必要</div></div>
+        <div class="info-card"><div class="t">E ー Emotion（感情）</div><div class="d">近親者の死・離別・失業等が警戒心を著しく低下させる</div></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="962">
+    <summary><span class="num">962</span>高高度の影響</summary>
+    <div class="topic-body">
+      <p>低酸素症は、高度上昇（気圧低下）に伴って傾向が強まります。</p>
+      <svg viewBox="0 0 600 220" width="100%" style="background:var(--navy-950);border:1px solid var(--line);border-radius:8px;margin:10px 0;">
+        <line x1="60" y1="200" x2="580" y2="200" stroke="var(--ink-faint)" stroke-width="1"/>
+        <line x1="60" y1="20" x2="60" y2="200" stroke="var(--ink-faint)" stroke-width="1"/>
+        <text x="10" y="205" fill="var(--ink-faint)" font-size="9" font-family="monospace">0ft</text>
+        <text x="10" y="30" fill="var(--ink-faint)" font-size="9" font-family="monospace">高</text>
+        <rect x="60" y="170" width="150" height="30" fill="#1a2540"/>
+        <text x="65" y="190" fill="var(--ink-dim)" font-size="9" font-family="monospace">〜12,000ft：夜間視力以外は影響小</text>
+        <rect x="210" y="140" width="150" height="30" fill="#243458"/>
+        <text x="215" y="160" fill="var(--ink-dim)" font-size="9" font-family="monospace">12-15,000ft：判断力低下・頭痛</text>
+        <rect x="360" y="105" width="90" height="30" fill="var(--amber-dim)" opacity="0.6"/>
+        <text x="365" y="125" fill="var(--ink)" font-size="9" font-family="monospace">15,000ft：15分で重大低下</text>
+        <rect x="450" y="70" width="60" height="30" fill="var(--danger)" opacity="0.5"/>
+        <text x="455" y="65" fill="var(--danger)" font-size="9" font-family="monospace">18,000ft：20-30分で喪失</text>
+        <rect x="510" y="30" width="50" height="30" fill="var(--danger)" opacity="0.8"/>
+        <text x="440" y="25" fill="var(--danger)" font-size="9" font-family="monospace">20,000ft：5-12分で失神へ</text>
+      </svg>
+      <p><b>予防</b>：昼間10,000ft、夜間5,000ftを超えたら補助酸素の使用が推奨されます。</p>
+      <p><b>耳閉塞</b>：降下中は耳管を通じて空気が自然に入りにくいため、唾を飲み込む・あくびをするなどして自分で気圧を均等化する必要があります。風邪・鼻アレルギーは耳閉塞を悪化させます。</p>
+      <table>
+        <tr><th>状況</th><th>必要な地上待機時間</th></tr>
+        <tr><td>8,000ftまでの飛行・減圧浮上を要しない潜水後</td><td>最低12時間</td></tr>
+        <tr><td>8,000ftまでの飛行・減圧浮上を要する潜水後</td><td>最低24時間</td></tr>
+        <tr><td>8,000ftを超える飛行・いかなる潜水後</td><td>最低24時間</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="963">
+    <summary><span class="num">963</span>飛行中の過呼吸</summary>
+    <div class="topic-body">
+      <p>過呼吸は、緊迫した状況で無意識に起きる心身の状態です。実際には体内から二酸化炭素を過剰に排出してしまっている状態で、めまい・息苦しさ・耳鳴り・悪寒がさらに過呼吸を増幅させます。</p>
+      <div class="callout ok">対処：呼吸の速さと深さを意識的に調節し、ゆっくり呼吸すれば通常2〜3分で治まる。鼻から吸って口からゆっくり吐く腹式呼吸が効果的。低酸素症との判別が難しい場合は、酸素を100%にして大きく吸い一旦止めるとよい。</div>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="964">
+    <summary><span class="num">964</span>飛行中の一酸化炭素中毒</summary>
+    <div class="topic-body">
+      <p>一酸化炭素は無色・無味・無臭で排気ガスに含まれ、血液の酸素運搬能力を著しく低下させます。軽飛行機の暖房装置の多くは排気管周りの空気を利用しているため、マニフォールドのひびやシール不良で漏れる危険があります。排気臭・頭痛・眠気・めまいを感じたら、直ちにヒーターを停止し通気孔を開けて外気を導入すべきです。</p>
+    </div>
+  </details>
+
+  <details class="topic" open data-tid="965">
+    <summary><span class="num">965</span>飛行中の錯覚</summary>
+    <div class="topic-body">
+      <p>視覚や平衡感覚だけを信じて操縦を続けると、きりもみ・急降下・失速に陥る可能性があります。</p>
+      <div class="info-grid">
+        <div class="info-card"><div class="t">傾斜錯覚</div><div class="d">ゆっくりバンク→急な修正で逆バンクの錯覚</div></div>
+        <div class="info-card"><div class="t">コリオリ効果</div><div class="d">長時間旋回中に頭を動かすと別軸で回転している錯覚</div></div>
+        <div class="info-card"><div class="t">死の錐揉み</div><div class="d">錐揉み回復直後、逆錐揉みの錯覚→再び錐揉みへ</div></div>
+        <div class="info-card"><div class="t">死の螺旋降下</div><div class="d">高度低下に気づき操縦桿を引く→螺旋降下が悪化</div></div>
+        <div class="info-card"><div class="t">加速度錯覚</div><div class="d">急加速で機首上げの錯覚、急減速で失速姿勢へ誘導</div></div>
+        <div class="info-card"><div class="t">擬似水平線・自動運動</div><div class="d">不明瞭な地平線や暗闇の静止灯光が誤誘導する</div></div>
+      </div>
+      <p><b>着陸時の錯覚</b>：狭い滑走路・上り勾配・無物標地形（水面/積雪）は実際より高く見え、パスが低くなりがち。防止策は地上物標・計器の確実な視認、グライドスロープ/PAPIの活用です。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="966">
+    <summary><span class="num">966</span>飛行中の視覚</summary>
+    <div class="topic-body">
+      <p>暗順応は真っ暗闇で30分、赤色照明下でも20分以内に中程度得られますが、わずか2〜3秒の明るい光で失われます。効果的なスキャニングは、目の動きを10度以下にとどめ、1点に最低1秒視線を保持することです。</p>
+      <table>
+        <tr><th>灯火の色</th><th>意味</th></tr>
+        <tr><td>白</td><td>方向</td></tr><tr><td>赤</td><td>危険・停止・禁止</td></tr>
+        <tr><td>黄</td><td>注意・警告</td></tr><tr><td>緑</td><td>安全・進行・正常</td></tr>
+        <tr><td>青</td><td>用心・制限</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="967">
+    <summary><span class="num">967</span>曲技飛行</summary>
+    <div class="topic-body">
+      <p>プラスGフォースは血液を頭から脚へ移動させ、視野狭窄（グレイアウト）→ブラックアウト→失神に至ることがあります。急激なGフォースでは突然のG-LOC（Gフォースによる意識喪失）に陥ることも。マイナスGフォースでは逆に血液が頭に移動し、レッドアウトが起きます。耐性には個人差があり、体調不良時は低下するため、曲技飛行の訓練前は医師への相談が推奨されます。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="968">
+    <summary><span class="num">968</span>低血糖症候群</summary>
+    <div class="topic-body">
+      <p>血糖値の低下はイライラ感・判断力低下・注意力散漫を招き、重大なヒューマンエラーにつながります。悪化すると脱力感やけいれんが起き、パイロットインキャパシテーションの恐れも。空腹での飛行は、自覚のないまま低血糖症に陥ることがあるため注意が必要です。</p>
+    </div>
+  </details>
+
+  <details class="topic" data-tid="969">
+    <summary><span class="num">969</span>低体温症</summary>
+    <div class="topic-body">
+      <p>エンジンを装備しない航空機や、エンジンの余熱を利用できない小型機は低体温症になりやすいとされています。<b>特に冬季に滑空機で山岳飛行を行う場合は、冬山登山に準じた防寒対策が必要です。</b></p>
+    </div>
+  </details>
+</div>
+
+
+<footer class="note">FULL COVERAGE BUILD — CHAPTER 9 / SAFETY &amp; AVIATION MEDICINE — v1.0（934・935・940-946・960-969）</footer>
+</div>
+
+<script>
+const LECTURE_SCRIPTS = {"blockIntros": {"blockA": "ここからは、運航の安全対策のブロックです。ウェイクタービュランスや空中衝突の予防、そしてVFR飛行の事故原因と対策まで、実際の運航で直接使う知識を扱います。", "blockB": "ここからは、航空医学のブロックです。パイロット自身の心身の状態が、安全な操縦能力にどう影響するかを扱います。健康管理は、機体の点検と同じくらい重要な、飛行前点検の対象です。"}, "topics": {"934": "ウェイクタービュランスの話です。地上での先行機のジェットブラストと、飛行中に翼端から発生する渦、翼端渦、この2つが後続機に重大な危険を及ぼす可能性があります。まずジェットブラストについて。大型機のジェットエンジンの排気は、噴出速度が毎時56キロメートルを超えると、後方の小型機に危険を及ぼすとされています。次に翼端渦です。機体が重く、低速飛行状態にあるときほど、翼端渦は強くなります。離着陸時は速度が遅いため渦が強く、巡航中は高度が高いほど空気密度が小さくなるため、これも渦を強めます。翼端渦に突入すると、パイロットの意志に反して急激なロールが起きることがあり、エルロンを一杯に使っても操縦不能になった例が報告されています。渦の動きにも特徴があります。風がないとき、渦は地面に当たると左右に広がります。横風があると、風上側の広がりは減り、風下側の広がりは増えます。水平飛行中の渦は、機体の下方やや外側に、毎分数百フィートの速さで沈んでいきます。回避の基本は、先行機のフライトパスより高いパスを維持し、先行機の接地点や浮揚地点を注目して、その手前または向こう側に自機の接地点・浮揚地点を設定することです。ヘリコプターの後方にも、強い下降流や渦流が発生するため、ローター直径の3倍以内には近づかないようにします。", "935": "空中衝突の予防です。最終的な空中衝突の回避は、シーアンドアボイド、つまり自分の目で見て避けることに頼らざるを得ません。脅威となる航空機を発見し、動向を見極め、回避操作を終えるまでに、少なくとも12.5秒が必要とされています。衝突コースの見極め方について。自機と相手機がともに直線飛行をしている場合、2機の相対方位が変わらずに近づいてくるなら、両機は衝突コース上にあります。ここで注意が必要なのは、人間の目は動いている物体は見つけやすいのですが、止まっているものは見つけにくいということです。衝突コースにある相手機は、まさに機影が止まって見えるため、発見が遅れがちになります。もう一つ重要なのが、相対速度による見え方の変化です。ある時期までは非常に小さく見えていた相手機が、衝突の直前に急に大きく広がって見え、次の瞬間に衝突してしまう、という現象が起こります。正面から接近する戦闘機の例では、衝突の15秒前でもウィンドシールドに1円玉を貼り付けた程度の大きさにしか見えず、3秒前で初めて視角が0.5度になります。小さく見えていても油断せず、コースを見定めて早めの回避操作を行う必要があります。", "940": "VFRフライトの事故原因と対策です。ジェネラルアビエーションの事故のうち、パイロットの判断・処置に関わる頻度の高い要因が10項目挙げられています。不十分な飛行準備や計画、方向コントロールの失敗、飛行速度の獲得・維持の失敗、不適切なレベルオフ、障害物の発見・回避の失敗、飛行距離と速度に関する誤判断、燃料制御の失敗、飛行中の判断ミス、不適当な地形の選定、そして不適当な操縦技術です。このリストは、過去数十年にわたって変わっていません。見張りの必要性についても触れておきます。天気の良いときほど油断してはいけません。空中衝突は、ほとんど例外なく理想的な天候状態のもとで発生しています。非常に良い視程は、かえってパイロットの安心感を助長してしまうためです。最新の気象情報の入手と早期の判断も重要です。全ての飛行経路で有視界気象状態の維持が確認できない場合は出発しないこと、気象状態の悪化に備えて代替案を準備しておくこと、悪化の兆候が見られたら時機を逃さず飛行継続の可否を判断し、引き返すか最寄りの飛行場に着陸することです。VMCを維持できなくなった場合、緊急事態の宣言をためらうべきではありません。進路権についても、たとえ法的に自分に進路権があっても、相手がそれに気づいて避けるのを待つより、自分から進路を譲るべきとされています。", "941": "プリフライトの注意事項です。まず自分自身のコンディションを確認すること。体調不良はもちろん、過労や二日酔いなど異常な体調のときは飛行を見合わせる判断が必要です。精神的に安定していることも重要です。近親者の不幸やショッキングな出来事、激しい口論の後などは、脈拍や血圧に影響を及ぼすことがあります。飛行前点検を確実に実施すること。燃料や滑油の量、整備点検記録の確認、重要部分の点検、重量とバランス、携行物件などを確認します。フライトの内容を地上の人に知らせておくこと。飛行計画は管制情報機関に提出するだけでなく、基地の運航管理者にも残しておくことが望ましいとされています。VFRでは特に天候の急変に備えた心構えが必要です。目的地の天候が悪化した場合、計器飛行方式で着陸するか代替飛行場に向かうかの判断を迫られるため、必要な情報をあらかじめ準備しておきます。", "942": "チェックリストの活用です。フライトにあたって重要な操作の点検は、必ずチェックリストに従って実施すべきとされています。人間は同時に複数の仕事を行うことができません。ある操作の途中で別の作業のために中断すると、必要な項目を見落としがちになります。また、実施していない操作を実施済みと勘違いしやすい傾向もあります。チェックリストの活用は、こうした人間の特性を補うためのものです。", "943": "トラフィックの輻輳する空域でのVFR飛行です。異常接近や空中衝突は、8,000フィート以下、かつ飛行場から30マイル以内の空域で発生することが多いとされています。こうした空域を通過したり着陸しようとする場合は、より厳重な見張りが必要です。異常接近の防止は、最終的には目視による回避に頼らざるを得ないため、関連トラフィックがどこにいるかを見つけること、そして自機も相手から見つけやすくすることが大切です。ストロボライトや着陸灯の点灯も視認性向上に有効とされています。VHFの活用も重要です。レーダーでカバーされている空域ではレーダーアドバイザリーを、タワーやレディオのある飛行場周辺ではVHF交信でトラフィック情報を入手します。通信施設のない飛行場や滑空場では、航空機相互間の共通周波数で、位置・高度・意向を発信することが望ましいとされています。", "944": "飛行障害物です。地上2,000フィート未満の高度を飛ぶときは、地上から突き出した障害物に警戒が必要です。アンテナ塔の中には地上1,000フィート以上突き出しているものもあり、これを支えるワイヤーは水平距離で500メートルも延びていることがあります。ワイヤーは晴天時でも発見が難しく、鉄骨塔を見つけたら周辺600メートルは間隔を保つことが望ましいとされています。架線ワイヤーも、滑走路への進入経路や湖、河川、峡谷などの飛行コースにまたがって延びていることがあります。多くは航空法上の障害物認定基準から外れているため、障害灯が設置されていないこともあります。浮遊気球についても注意が必要です。気球の下に吊り下げられた物やワイヤーアンテナは、よほど接近しないと視認できないため、気球から十分な間隔をとり、決して下側を飛ぼうとしてはいけません。", "945": "山岳地帯の飛行です。滝川での運航にも直結する内容です。山岳地帯では不時着に適した平坦地を見つけることが難しく、気象も変わりやすいため、積乱雲の急速な発達や視程低下、乱気流、強い上昇・下降気流が発生しやすくなります。安全に飛行するには、適切な飛行計画、風や気象への十分な配慮、山岳地帯特有の知識、そして常に退避経路を確保しておくことが必要です。具体的な注意点を挙げます。不時着不可能な区域を避け、民家のある地域やよく知られた山越えルートを選び、地面から十分な高度を保つこと。一般に午前中の方が飛行条件は良く、午後は積雲が増えて風も強くなりやすいこと。夜間の山岳飛行は避けるべきこと。密度高度が高くなると航空機の性能が著しく低下すること。山岳波は、風が30度以上の交角、15ノット以上の速度で山脈に吹きつける場合に発生しやすく、風下側に猛烈な下降流を生成することがあります。風下側から山脈に接近する場合は、通常より最低でも1,000フィートは高い高度をとるべきとされています。稜線や峠の通過については、頂上から少なくとも1,000フィート離れた高度で、少なくとも3海里手前からその高度に到達し、3海里はその高度を維持することが推奨されています。風下から稜線に近づくときは、稜線に対して約45度の角度で近づくことで、強い乱気流や下降気流に遭遇した場合に90度旋回して安全に離脱できます。峡谷は行き止まりになっていることもあるため、常に180度ターンができるスペースを確保しておく必要があります。", "946": "無人航空機、ドローンの話です。近年、撮影や農薬散布、インフラ点検などで急速に普及しており、航空機への接近も報告されています。無人航空機は、空港等から離れた、地表または水面から500フィート以下の空域では、NOTAMが発行されないまま飛行していることがあります。サイズが小さいため、視認も回避も困難です。TCASとの関係にも触れておきます。トランスポンダーが作動していない機体に対しては、トラフィックアドバイザリーもレゾリューションアドバイザリーも発出されません。また、概ね1,000フィートAGL以下ではレゾリューションアドバイザリーの作動が抑止され、概ね500フィートAGL以下ではトラフィックアドバイザリーの音声も抑止されます。つまりTCASは、離着陸の直前・直後の衝突防止には役立たないという点を理解しておく必要があります。", "960": "航空医学のブロックに入ります。航空機を安全に操縦するには、パイロットが健康であることが大前提です。世界保健機関は、健康を、単に身体的機能が正常なだけでなく、精神的、社会的にも正常であることと定義しています。心身の機能が揃って正常なときのみ、人間は健康と言えます。健康でない状態で操縦することは、パイロットインキャパシテーション、つまり操縦不能状態に繋がりかねません。", "961": "飛行への適合性、IMSAFEチェックリストの話です。パイロットは有効な航空身体検査証明書を持っていても、身体検査基準に適合しない状態にある間は、航空業務を行うことが禁止されています。人的チェックリストとして、頭文字を取ってアイエムセーフと呼ばれるものがあります。アイは病気。日常生活では軽い病気とされるものでも、判断力や記憶力、警戒心を鈍らせることがあります。エムは服薬。処方薬でも市販薬でも、パイロットの能力を低下させることがあり、航空法でも、薬品の影響で正常な運航ができないおそれがある間の航空業務は禁止されています。エスはストレス。仕事上の行き詰まりなどは警戒心を減退させ、悪天候の中にかまわず飛び込むような危険な判断につながりがちです。エーはアルコール。中程度の飲酒量が体内から完全に消えた後でも、二日酔いの影響でかなりの時間、能力低下が続きます。国内では乗務開始前に血中アルコール濃度0.2グラムパーリットル未満、呼気検査で0.09ミリグラムパーリットル未満であることが求められています。エフは疲労。急性疲労は休養と睡眠で回復できますが、それが回復する前に次の疲労が重なる慢性疲労は、長期の休養が必要です。イーは感情。近親者の死や離別、失業などによる感情の高ぶりは、警戒心を著しく減退させます。この6項目を、飛行前に自分自身への点検として確認する習慣が推奨されています。", "962": "高高度の影響です。低酸素症は、脳などの機能に障害をきたすほど、体内の酸素が不足する状態を言います。大気中の酸素の割合は高度が上がっても一定なので、高度が上がり気圧が下がるほど、低酸素症の傾向は強まります。健康なパイロットであれば、12,000フィート未満では夜間視力以外に顕著な影響は出ないとされていますが、12,000から15,000フィートになると、判断力、記憶力、警戒心、身体運動の調和性、計算能力が低下し始め、頭痛やめまいが起こります。15,000フィートでは、15分以内に能力の重大な低下が起きることがあります。さらに高度が上がると、視野の外周が灰白化してトンネル視界になり、爪や唇が青くなるチアノーゼが進行します。18,000フィートでは20分から30分、20,000フィートでは5分から12分で、修正操作や回避操作を行う能力が失われ、間もなく失神します。喫煙や一酸化炭素、貧血、飲酒、服薬などがあると、より低い高度でも同様の影響が出ることがあります。予防には酸素吸入システムの活用が有効で、昼間は10,000フィート、夜間は5,000フィートを超えたら補助酸素の使用が推奨されています。耳閉塞についても触れます。降下中は、耳管を通じて空気が自然には入りにくいため、唾を飲み込んだりあくびをしたりして、自分で中耳内外の気圧を等しくする必要があります。風邪や鼻アレルギーがあると耳管周りが充血し、耳閉塞が起きやすくなります。スキューバダイビングの後の飛行にも注意が必要です。体内に吸収された窒素が血管内で気化すると、潜函病、減圧病を起こすことがあります。8,000フィートまでのフライトでも、減圧浮上を要しない潜水の後は少なくとも12時間、減圧浮上を要する潜水の後は少なくとも24時間の地上待機が必要です。8,000フィートを超えるフライトでは、いかなるダイビングの後も最低24時間の待機が必要です。", "963": "飛行中の過呼吸です。過呼吸は、飛行中に緊迫した状況に遭遇したときに、無意識に起きる心身の状態です。呼吸困難に見えますが、実際には体内から必要以上に二酸化炭素を排出してしまっている状態です。頭がふらふらしたり、息苦しくなったり、耳鳴りや悪寒が起き、それによってさらに過呼吸が増幅されてしまいます。兆候が現れたら、呼吸の速さと深さを意識的に調節し、ゆっくり呼吸することで、通常は2分から3分で治まります。鼻から吸って、唇を強めに締めて口からゆっくり吐き出す腹式呼吸が効果的です。過呼吸と低酸素症は初期の兆候がよく似ており、同時に発生することも多いため、どちらか判断がつかないときは、酸素を100パーセントにして大きく息を吸い込み、しばらく止めておくとよいとされています。", "964": "飛行中の一酸化炭素中毒です。一酸化炭素は無色、無味、無臭で、排気ガスにも含まれています。わずかな量でも吸い続けると、血液の酸素運搬能力が著しく低下し、低酸素症と同じ症状が出ます。軽飛行機の暖房装置の多くは、排気管を通り抜ける空気を利用しているため、マニフォールドにひびが入っていたり、シールに隙間があると、一酸化炭素が漏れ出す危険があります。ヒーター使用中に排気の臭いや、頭痛、眠気、めまいの兆候を感じたら、直ちにヒーターを停止し、通気孔を開けて外気を導入すべきです。", "965": "飛行中の錯覚です。飛行中は様々な錯覚に見舞われることがあり、空間識失調や着陸の失敗につながることがあります。視覚や平衡感覚だけを信じて操縦を続けると、きりもみや急降下、失速に陥る可能性があります。空間識失調に関わる錯覚は数多く報告されています。傾斜錯覚は、ゆっくりとバンクをつけたあと急激に修正すると、反対方向にバンクしているように感じる錯覚です。コリオリ効果による錯覚は、長時間の定常旋回中に頭を急に動かすと、まったく違う軸で旋回しているように感じるものです。死の錐揉みは、錐揉みから回復した直後に、反対方向の錐揉みに入ったような錯覚に陥り、実際にまた錐揉み状態に戻してしまうというものです。死の螺旋降下は、定常旋回中に高度低下に気づくと、水平に降下しているような錯覚から、操縦桿を引いてかえって螺旋降下を強めてしまう現象です。このほか、加速度による錯覚、転回性錯覚、上下錯覚、擬似水平線、自動運動といった錯覚も知られています。着陸時の錯覚も重要です。狭い滑走路は実際より高く見え、パスが低くなりがちです。上り勾配の滑走路や地形も同様に高く見えます。地上物標のない水面や積雪地帯では、実際より高く飛んでいるように錯覚しがちです。これらの錯覚を防ぐには、信頼できる地上の目標物や飛行計器を確実に視認すること、不慣れな飛行場では着陸前に空中から目視点検を行うこと、可能ならグライドスロープやPAPIを活用することが有効です。", "966": "飛行中の視覚です。視覚は安全飛行にとって最も重要な感覚です。暗順応について。真っ暗闇の中で暗順応を得るには少なくとも30分かかりますが、薄明かりの赤いコックピット照明のもとでは、20分以内に中程度の暗順応を得ることができます。わずか2、3秒明るい光を見るだけで、暗順応は失われてしまいます。げん惑、まぶしさについても注意が必要です。キャノピーや雲、水面、雪などからの反射光は、斜視状態や涙眼、一時的な盲目状態を引き起こすことがあります。他機の見張りについて。効果的なスキャニングは、目を規則正しく短い時間ごとに移動させることで行います。一回の目の動きは10度以下とし、視認のために少なくとも1秒間は同一点に視線を保持することが必要です。航空灯火の色にも意味があります。白は方向、赤は危険・停止・禁止、黄は注意・警告、緑は安全・進行・正常、青は用心・制限を示します。", "967": "曲技飛行です。運動中の加速度は身体的な緊張を生じさせます。脳は血液循環による酸素供給を絶え間なく必要とするため、パイロットが失神せずに耐えられるGフォースと継続時間には生理的な限界があります。プラスのGフォースがかかると、血液が頭から脚の方へ移動する力が働き、視野が狭まるグレイアウト、何も見えなくなるブラックアウト、そして失神に至ることがあります。急激にGフォースがかかると、突然のGロック、Gフォースによる意識喪失に陥ることもあります。マイナスのGフォースでは逆に、血液が頭の方へ移動し、頭痛や眼球の充血、視野が赤っぽくなるレッドアウトが起きることがあります。Gフォースへの耐性には個人差があり、健康状態がすぐれないときは耐性が低下します。曲技飛行の訓練を始める前には、担当医師に相談すべきとされています。", "968": "低血糖症候群です。血液中のブドウ糖、血糖値が低下すると、イライラ感がつのり、判断力と注意力が鈍って、重大なヒューマンエラーにつながることがあります。さらに悪化すると、脱力感やけいれんが起き、パイロットインキャパシテーションにつながりかねません。血糖値は空腹時に低下するため、食事を摂らずに飛行を行うと、自分でも気づかないうちに低血糖症に陥っていることがあるので、注意が必要です。", "969": "低体温症です。エンジンを装備しない航空機や、エンジンの余熱を利用できない小型機では、低体温症になりやすいとされています。特に冬季に滑空機で山岳飛行を行う場合は、冬山登山に準じた防寒対策が必要です。"}, "display": {"934": "ジェットブラスト＝噴出速度56km/h超で後方の小型機に危険\n\n翼端渦の強さ：機体が重い・低速ほど強い\n・離着陸時（低速）→強い\n・巡航中（高高度・低密度）→強い\n\n渦の動き：\n・無風時、地面で左右に拡散\n・水平飛行中は毎分数百ftで沈下\n\n回避の基本：\n先行機のパスより高く飛び、先行機の接地点/浮揚地点の手前(または先)に自機を設定\n\nヘリコプター：ローター直径の3倍以内に近づかない", "935": "See and avoidが最終防衛線。発見→判断→回避完了に最低12.5秒必要\n\n衝突コースの見極め：\n相対方位が変わらず接近＝衝突コース\n→人間の目は「止まって見える物体」を発見しにくい\n\n相対速度による見え方：\n小さく見えていた機が、衝突直前に急に大きく広がる\n（正面の戦闘機の例：3秒前でようやく視角0.5°）\n\n→小さく見えても油断せず早めに回避操作", "940": "GA事故で多い10要因（数十年変わらず）：\n①準備・計画不足 ②方向コントロール失敗 ③速度獲得/維持失敗\n④不適切なレベルオフ ⑤障害物発見/回避失敗 ⑥距離速度の誤判断\n⑦燃料制御失敗 ⑧判断ミス ⑨地形選定不適 ⑩操縦技術不適\n\n見張り：好天時ほど油断禁物（衝突は好天時に多発）\n\n気象悪化への対応：\n・全経路でVMC維持を確認できなければ出発しない\n・悪化の兆候→時機を逃さず引き返し/最寄りへ着陸判断\n・VMC維持不能なら緊急事態宣言をためらわない\n\n進路権：法的な権利があっても自分から譲る方が安全", "941": "自分自身の飛行前点検：\n①体調（過労・二日酔いなら飛行見合わせ）\n②精神的安定（ショッキングな出来事の後は要注意）\n③機体の点検（燃料/滑油/整備記録/重量バランス/携行品）\n④地上への飛行計画共有（管制機関＋運航管理者）\n⑤天候急変への備え（代替飛行場の情報を事前準備）", "942": "チェックリストが必要な理由：\n・人間は複数作業を同時にできない\n・作業中断時に項目を見落としがち\n・「やったつもり」の勘違いが起きやすい\n→人間の特性を補う仕組みとして必須", "943": "異常接近・空中衝突の多発条件：\n8,000ft以下 かつ 飛行場から30マイル以内\n\n対策：\n・より厳重な見張り\n・ストロボ/着陸灯で視認性向上\n・レーダーアドバイザリー活用（対応空域）\n・VHFでトラフィック情報を交換\n・通信施設なしの滑空場等→共通周波数で位置/高度/意向を発信", "944": "地上2,000ft未満飛行時の警戒対象：\n\n①アンテナ塔：1,000ft超えるものも。支持ワイヤーは水平500m延びることも\n→鉄骨塔発見時は周辺600mの間隔を確保\n\n②架線ワイヤー：進入経路/湖/河川/峡谷を横断することも。障害灯がないことも多い\n\n③浮遊気球：付属物は接近しないと見えない\n→十分な間隔、下側を飛ばない", "945": "山岳飛行の基本注意：\n①不時着不可能区域を避け、十分な高度を保つ\n②午前中の方が条件良好（午後は積雲・風増加）、夜間は避ける\n③密度高度上昇→機体性能が著しく低下\n\n山岳波の発生条件：交角30°以上・風速15kt以上で山脈に吹きつけ\n→風下側は通常より最低1,000ft高い高度を\n\n稜線・峠の通過：\n・頂上から最低1,000ft離れた高度\n・3NM手前からその高度に到達、3NM維持\n\n風下からの接近：稜線に対し約45度の角度\n→乱気流遭遇時、90度旋回で安全に離脱可能\n\n峡谷：常に180度ターンできるスペースを確保\n\n関連：着氷[856]・山岳波[857]・高高度の影響[962]・飛行中の錯覚[965]", "946": "無人航空機（ドローン）の特徴：\n・地表/水面から500ft以下の空域はNOTAMなしで飛行していることも\n・サイズが小さく視認・回避が困難\n\nTCASとの関係：\n・トランスポンダー非作動機にはTA/RA発出されない\n・1,000ft AGL以下→RA抑止\n・500ft AGL以下→TA音声も抑止\n→TCASは離着陸直前直後の衝突防止には役立たない", "960": "健康の定義（WHO）：身体的・精神的・社会的に正常であること\n\n不健康な状態での操縦→パイロットインキャパシテーションのリスク", "961": "IMSAFEチェックリスト（飛行前の自己点検）\n\nI = Illness 病気\nM = Medication 服薬（航空法で禁止規定あり）\nS = Stress ストレス\nA = Alcohol アルコール（血中濃度0.2g/L未満・呼気0.09mg/L未満が必要）\nF = Fatigue 疲労（急性は休養で回復、慢性は長期休養が必要）\nE = Emotion 感情\n\n→この6項目を飛行前に自己点検する習慣", "962": "低酸素症の進行（高度別）：\n12,000ft未満：夜間視力以外は顕著な影響なし\n12,000-15,000ft：判断力/記憶力/警戒心が低下開始、頭痛・めまい\n15,000ft：15分以内に能力の重大な低下\n18,000ft：20-30分で操作能力喪失\n20,000ft：5-12分で操作能力喪失→失神\n\n予防：昼間10,000ft・夜間5,000ft超で補助酸素を推奨\n\n耳閉塞：降下中は自分で耳抜きが必要（風邪・鼻アレルギーで悪化）\n\nダイビング後の待機時間：\n・8,000ftまでの飛行：減圧浮上なし12時間／減圧浮上あり24時間\n・8,000ft超の飛行：どのダイビングでも24時間", "963": "過呼吸の正体：体内の二酸化炭素の排出過多（酸素不足ではない）\n\n症状：めまい・息苦しさ・耳鳴り・悪寒→さらに過呼吸を増幅\n\n対処：意識的にゆっくり呼吸（鼻から吸い口からゆっくり吐く腹式呼吸）\n→通常2-3分で治まる\n\n低酸素症との判別が難しい場合：\n酸素100%にして大きく吸って一旦止める", "964": "一酸化炭素：無色・無味・無臭、排気ガスに含まれる\n→血液の酸素運搬能力を低下させる（低酸素症と同じ症状）\n\n原因：暖房装置がマニフォールド経由の空気を利用\n→ひび割れ/シール不良で漏れる危険\n\n対処：排気臭・頭痛・眠気・めまいを感じたら\n直ちにヒーター停止＋通気孔で外気導入", "965": "空間識失調をもたらす錯覚（一部）：\n・傾斜錯覚：ゆっくりバンク→急な修正で逆バンクの錯覚\n・コリオリ効果：長時間旋回中に頭を動かすと別軸で回転している錯覚\n・死の錐揉み：錐揉み回復直後、逆錐揉みの錯覚→再び錐揉みへ\n・死の螺旋降下：定常旋回中の高度低下に気づき操縦桿を引く→螺旋降下悪化\n・その他：加速度錯覚/転回性錯覚/上下錯覚/擬似水平線/自動運動\n\n着陸時の錯覚：\n・狭い滑走路/上り勾配→実際より高く見える→パスが低くなりがち\n・無物標地形（水面・積雪）→高く飛んでいる錯覚\n\n防止策：地上物標/計器の確実な視認、グライドスロープ/PAPI活用", "966": "暗順応：\n・真っ暗闇で30分必要／赤色照明下なら20分で中程度\n・わずか2-3秒の明るい光で失われる\n\nげん惑（まぶしさ）：キャノピー/雲/水面/雪の反射光に注意\n\n効果的なスキャニング：\n・目の動きは10度以下\n・1点に最低1秒視線を保持\n\n航空灯火の色の意味：\n白=方向／赤=危険・停止・禁止／黄=注意・警告／緑=安全・進行・正常／青=用心・制限", "967": "プラスGフォース：血液が頭から脚へ移動\n→視野狭窄(グレイアウト)→ブラックアウト→失神（G-LOC）\n\nマイナスGフォース：血液が頭へ移動\n→頭痛・眼球充血・視野が赤くなる(レッドアウト)\n\nGフォース耐性は個人差あり、体調不良時は低下\n→曲技飛行訓練前は医師に相談", "968": "低血糖の影響：判断力・注意力低下→重大なヒューマンエラー\n悪化すると脱力感・けいれん→パイロットインキャパシテーションの恐れ\n\n原因：空腹での飛行（自覚がないまま陥ることも）", "969": "低体温症のリスク：エンジンなし機（滑空機）は防寒対策が特に重要\n\n冬季の山岳飛行→冬山登山に準じた防寒が必須"}};
+
+const pronFix = (s) => s
+  .replace(/輻輳/g,'ふくそう').replace(/索道/g,'さくどう').replace(/潜函病/g,'せんかんびょう')
+  .replace(/減圧浮上/g,'げんあつふじょう').replace(/密度高度/g,'みつどこうど')
+  .replace(/航空測候所/g,'こうくうそっこうじょ').replace(/観測所/g,'かんそくじょ')
+  .replace(/時間毎/g,'じかんごと').replace(/分毎/g,'ふんごと')
+  .replace(/9か所/g,'きゅうかしょ').replace(/発出/g,'はっしゅつ').replace(/行う/g,'おこなう')
+  .replace(/積乱雲/g,'せきらんうん').replace(/積雲/g,'せきうん')
+  .replace(/中心示度/g,'ちゅうしんしど').replace(/雲頂高度/g,'うんちょうこうど')
+  .replace(/上方/g,'じょうほう').replace(/高層雲/g,'こうそううん')
+  .replace(/雲形/g,'うんけい').replace(/乱層雲/g,'らんそううん').replace(/層雲/g,'そううん')
+  .replace(/揚力/g,'ようりょく').replace(/機首/g,'きしゅ')
+  .replace(/METAR/g,'めたー').replace(/TAF/g,'たふ').replace(/VOLMET/g,'ぼるめっと')
+  .replace(/PIREP/g,'ぱいれっぷ').replace(/AIREP/g,'えあれっぷ').replace(/CAVOK/g,'きゃぶおーけー')
+  .replace(/NOSIG/g,'のーしぐ').replace(/BECMG/g,'びかみんぐ').replace(/TEMPO/g,'てんぽ')
+  .replace(/SIGMET/g,'しぐめっと').replace(/QNH/g,'きゅーえぬえいち').replace(/RVR/g,'あーるぶいあーる')
+  .replace(/IAS/g,'あいえーえす').replace(/VMC/g,'ぶいえむしー').replace(/IMC/g,'あいえむしー')
+  .replace(/着氷/g,'ちゃくひょう').replace(/露点/g,'ろてん').replace(/卓越/g,'たくえつ')
+  .replace(/突風/g,'とっぷう').replace(/乱気流/g,'らんきりゅう')
+  .replace(/雲底/g,'うんてい').replace(/雲量/g,'うんりょう').replace(/悪天/g,'あくてん')
+  .replace(/前線/g,'ぜんせん').replace(/滑走路/g,'かっそうろ').replace(/山岳波/g,'さんがくは')
+  .replace(/<[^>]+>/g,'');
+
+function stripHtml(html){ const tmp=document.createElement('div'); tmp.innerHTML=html; return tmp.textContent||tmp.innerText||''; }
+
+function splitToChunks(parts){
+  const chunks=[];
+  parts.forEach(p=>{
+    const sentences=p.text.replace(/([。！？])/g,'$1\u0000').split('\u0000').map(s=>s.trim()).filter(Boolean);
+    (sentences.length?sentences:[p.text]).forEach(sentence=>{
+      const msPerChar = (p.lang||'ja-JP').startsWith('en')?90:175;
+      chunks.push({text:sentence, lang:p.lang||'ja-JP', estMs:Math.max(400, sentence.length*msPerChar)});
+    });
+  });
+  return chunks;
+}
+
+
+function getTopicOrder(id){
+  const blockEl = document.getElementById(id.replace('block','b'));
+  if(!blockEl) return [];
+  const items = [];
+  const intro = LECTURE_SCRIPTS.blockIntros[id];
+  if(intro) items.push({tid:null, title:null, text:intro});
+  blockEl.querySelectorAll('details.topic').forEach(d=>{
+    const tid = d.getAttribute('data-tid');
+    const script = LECTURE_SCRIPTS.topics[tid];
+    if(script) items.push({tid, title:d.querySelector('summary').textContent.trim(), text:script});
+  });
+  return items;
+}
+function blockText(id){
+  // 手作りの講義調スクリプトを、ブロック導入文＋各トピックの順で連結する（読み上げ用）
+  return getTopicOrder(id).map(i=>i.text).join(' ');
+}
+
+let player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[] };
+
+function allControls(){ return document.querySelectorAll('.tts-controls'); }
+function updateButtons(){
+  allControls().forEach(c=>{
+    const id = c.getAttribute('data-tts-id');
+    const playBtn = c.querySelector('.tts-play');
+    const status = c.querySelector('.tts-status');
+    if(player.id===id && player.state!=='stopped'){
+      playBtn.textContent = player.state==='playing' ? '⏸ 一時停止' : '▶ 再開';
+      playBtn.classList.add('playing');
+      status.textContent = `${player.index+1} / ${player.chunks.length} 文`;
+    } else {
+      playBtn.textContent = playBtn.dataset.orig;
+      playBtn.classList.remove('playing');
+      status.textContent = '';
+    }
+  });
+}
+function hardStop(){
+  window.speechSynthesis.cancel();
+  player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[] };
+  updateButtons();
+  document.querySelectorAll('details.topic.reading').forEach(d=>{
+    d.classList.remove('reading');
+    if(d.dataset.autoOpened==='1'){ d.open = false; delete d.dataset.autoOpened; }
+  });
+}
+function highlightReadingTopic(){
+  const range = player.topicRanges.find(r=> player.index>=r.start && player.index<=r.end);
+  const activeTid = range ? range.tid : null;
+  document.querySelectorAll('details.topic').forEach(d=>{
+    const tid = d.getAttribute('data-tid');
+    if(activeTid && tid===activeTid){
+      d.classList.add('reading');
+      if(!d.open){ d.open = true; d.dataset.autoOpened = '1'; }
+      d.scrollIntoView({block:'center', behavior:'smooth'});
+    } else {
+      d.classList.remove('reading');
+      if(d.dataset.autoOpened==='1'){ d.open = false; delete d.dataset.autoOpened; }
+    }
+  });
+}
+function speakChunkFrom(index, charOffset){
+  window.speechSynthesis.cancel();
+  const chunk = player.chunks[index];
+  if(!chunk){ hardStop(); return; }
+  const text = pronFix(chunk.text.slice(charOffset));
+  const u = new SpeechSynthesisUtterance(text || '。');
+  if(selectedVoice){ u.voice = selectedVoice; u.lang = selectedVoice.lang; }
+  else { u.lang = chunk.lang; }
+  u.rate = 0.98;
+  player.index = index; player.offsetChars = charOffset; player.chunkStartedAt = Date.now(); player.state = 'playing';
+  u.onend = () => {
+    if(player.state !== 'playing') return;
+    if(index+1 < player.chunks.length){ speakChunkFrom(index+1, 0); updateButtons(); } else { hardStop(); }
+  };
+  window.speechSynthesis.speak(u);
+  updateButtons();
+  highlightReadingTopic();
+}
+function computeTopicRanges(topicOrder){
+  let cum = 0;
+  return topicOrder.map(item=>{
+    const count = splitToChunks([{text:item.text, lang:'ja-JP'}]).length;
+    const range = {tid:item.tid, start:cum, end:cum+count-1};
+    cum += count;
+    return range;
+  });
+}
+function startBlock(id){
+  const topicOrder = getTopicOrder(id);
+  const text = topicOrder.map(i=>i.text).join(' ');
+  if(!text) return;
+  hardStop();
+  player.id = id;
+  player.chunks = splitToChunks([{text, lang:'ja-JP'}]);
+  player.topicRanges = computeTopicRanges(topicOrder);
+  speakChunkFrom(0,0);
+}
+function startTopic(tid){
+  const script = LECTURE_SCRIPTS.topics[tid];
+  if(!script) return;
+  hardStop();
+  player.id = 'topic-' + tid;
+  player.chunks = splitToChunks([{text:script, lang:'ja-JP'}]);
+  player.topicRanges = [{tid, start:0, end:player.chunks.length-1}];
+  speakChunkFrom(0,0);
+}
+function startGeneric(id){
+  if(id.startsWith('topic-')){ startTopic(id.slice(6)); }
+  else { startBlock(id); }
+}
+function togglePlayPause(id){
+  if(player.id!==id || player.state==='stopped'){ startGeneric(id); return; }
+  if(player.state==='playing'){
+    try{ window.speechSynthesis.pause(); }catch(e){}
+    player.state='paused'; updateButtons();
+  } else if(player.state==='paused'){
+    try{ window.speechSynthesis.resume(); player.state='playing'; }
+    catch(e){ speakChunkFrom(player.index, player.offsetChars); }
+    updateButtons();
+  }
+}
+function seek(id, deltaMs){
+  if(player.id!==id || player.chunks.length===0) return;
+  const elapsedInChunk = player.state==='playing' ? (Date.now()-player.chunkStartedAt) : 0;
+  let totalMs = elapsedInChunk;
+  for(let i=0;i<player.index;i++) totalMs += player.chunks[i].estMs;
+  let totalAll = totalMs;
+  for(let i=player.index;i<player.chunks.length;i++) totalAll += (i===player.index ? (player.chunks[i].estMs-elapsedInChunk) : player.chunks[i].estMs);
+  let targetMs = Math.min(Math.max(0, totalMs+deltaMs), totalAll-100);
+  let i=0, acc=0;
+  while(i < player.chunks.length-1 && acc+player.chunks[i].estMs < targetMs){ acc += player.chunks[i].estMs; i++; }
+  const intoChunkMs = Math.max(0, targetMs-acc);
+  const chunk = player.chunks[i];
+  const msPerChar = chunk.lang.startsWith('en') ? 90 : 175;
+  const charOffset = Math.min(chunk.text.length, Math.floor(intoChunkMs/msPerChar));
+  speakChunkFrom(i, charOffset);
+}
+function back15(id){ seek(id, -15000); }
+function forward15(id){ seek(id, 15000); }
+
+/* ---- 読み上げ音声の選択 ---- */
+let selectedVoice = null;
+function populateVoiceSelects(){
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices || !voices.length) return;
+  const jaVoices = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('ja'));
+  let list = jaVoices.length ? jaVoices : voices;
+  // Windows/Edge の Microsoft Haruka があれば、リストの先頭かつ既定選択にする
+  const harukaIdx = list.findIndex(v=>/haruka/i.test(v.name));
+  if(harukaIdx > 0){ const h = list.splice(harukaIdx,1)[0]; list = [h, ...list]; }
+  document.querySelectorAll('.tts-voice').forEach(sel=>{
+    const current = sel.value;
+    sel.innerHTML = '';
+    list.forEach(v=>{
+      const o = document.createElement('option');
+      o.value = v.name;
+      const jpTag = (v.lang && v.lang.toLowerCase().startsWith('ja')) ? '' : `（${v.lang}）`;
+      o.textContent = v.name + jpTag;
+      sel.appendChild(o);
+    });
+    if(list.some(v=>v.name===current)){ sel.value = current; }
+    else { sel.value = list[0].name; }
+  });
+  if(!selectedVoice){
+    const harukaVoice = list.find(v=>/haruka/i.test(v.name));
+    selectedVoice = harukaVoice || list[0];
+    document.querySelectorAll('.tts-voice').forEach(sel=>{ sel.value = selectedVoice.name; });
+  }
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = populateVoiceSelects;
+  populateVoiceSelects();
+}
+/* 各項目カードに、単体再生用の小さなバーを追加する */
+document.querySelectorAll('details.topic').forEach(d=>{
+  const tid = d.getAttribute('data-tid');
+  const body = d.querySelector('.topic-body');
+  if(!tid || !body || !LECTURE_SCRIPTS.topics[tid]) return;
+  const bar = document.createElement('div');
+  bar.className = 'tts-controls tts-controls-mini';
+  bar.setAttribute('data-tts-id', 'topic-' + tid);
+  bar.innerHTML = `<button class="tts-btn tts-play">🔊 この項目を聞く</button><button class="tts-btn tts-stop">■</button><span class="tts-status"></span>`;
+  body.insertBefore(bar, body.firstChild);
+});
+
+document.querySelectorAll('.tts-controls').forEach(c=>{
+  const id = c.getAttribute('data-tts-id');
+  const isMini = c.classList.contains('tts-controls-mini');
+  const playBtn = c.querySelector('.tts-play');
+  playBtn.dataset.orig = playBtn.textContent;
+  playBtn.addEventListener('click', ()=>togglePlayPause(id));
+  c.querySelector('.tts-stop').addEventListener('click', ()=>{ if(player.id===id) hardStop(); });
+  if(isMini) return; // ミニバーは再生/停止のみ（戻る・進む・音声選択は付けない）
+  c.querySelector('.tts-back').addEventListener('click', ()=>back15(id));
+  const fwdBtn = document.createElement('button');
+  fwdBtn.className = 'tts-btn tts-fwd';
+  fwdBtn.textContent = '15秒 ▶';
+  fwdBtn.addEventListener('click', ()=>forward15(id));
+  c.querySelector('.tts-back').insertAdjacentElement('afterend', fwdBtn);
+  const voiceSel = document.createElement('select');
+  voiceSel.className = 'tts-voice';
+  voiceSel.title = '読み上げ音声を選択';
+  voiceSel.addEventListener('change', ()=>{
+    const voices = window.speechSynthesis.getVoices();
+    selectedVoice = voices.find(v=>v.name===voiceSel.value) || null;
+    document.querySelectorAll('.tts-voice').forEach(s=>{ if(s!==voiceSel) s.value = voiceSel.value; });
+  });
+  c.querySelector('.tts-stop').insertAdjacentElement('afterend', voiceSel);
+});
+populateVoiceSelects();
+document.querySelectorAll('.metar-examples button, .cb-stage-tabs button').forEach(b=>{
+  b.addEventListener('click', hardStop);
+});
+
+</script>
+</body>
+</html>

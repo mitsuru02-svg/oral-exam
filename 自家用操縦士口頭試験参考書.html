@@ -2282,6 +2282,46 @@ const CAT_QNUMS = {"ch1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 // ═══════════════════════════════════════════════════════════
 // TTS ENGINE
 // ═══════════════════════════════════════════════════════════
+
+// ── 読み上げ用テキスト整形（誤読しやすい語の読み仮名補正）───────────────
+function ttsClean(text) {
+  // 略語
+  [
+    ['ASK-21', 'エーエスケー21'], ['ASK21', 'エーエスケー21'],
+  ].forEach(([en, ja]) => {
+    text = text.replace(new RegExp('(?<![A-Za-z])' + en + '(?![A-Za-z])', 'g'), ja);
+  });
+
+  // 航空用語の読み仮名（TTSが誤読しやすい語。長い/具体的な語を先に処理）
+  const kanjiWords = [
+    ['滑空場',   'かっくうじょう'],
+    ['耐空証明', 'たいくうしょうめい'],
+    ['耐空',     'たいくう'],
+    ['場周経路', 'じょうしゅうけいろ'],
+    ['場周',     'じょうしゅう'],
+    ['低高度',   'ていこうど'],
+    ['高度',     'こうど'],
+    ['速度',     'そくど'],
+    ['規定値',   'きていち'],
+    ['規程値',   'きていち'],
+    ['滞空',     'たいくう'],
+    ['間隔',     'かんかく'],
+    ['雲底',     'うんてい'],
+    ['積載物',   'せきさいぶつ'],
+    ['搭載物',   'とうさいぶつ'],
+    ['後席',     'こうせき'],
+    ['機首',     'きしゅ'],
+    ['揚力',     'ようりょく'],
+    ['滝川',     'たきかわ'],
+    ['入りやすく', 'はいりやすく'],
+    ['入りやすい', 'はいりやすい'],
+  ];
+  kanjiWords.forEach(([kanji, yomi]) => {
+    text = text.replace(new RegExp(kanji, 'g'), yomi);
+  });
+  return text;
+}
+
 const synth = window.speechSynthesis;
 let currentUtterance = null;
 let currentQ = null;
@@ -2400,7 +2440,7 @@ function speak(text, qNum, onEnd) {
   function doSpeak() {
     if (myGen !== speakGeneration) return; // 既に新しい発話が来ていたら中止
 
-    const utter = new SpeechSynthesisUtterance(text);
+    const utter = new SpeechSynthesisUtterance(ttsClean(text));
     const voice = getVoice();
     if (voice) utter.voice = voice;
     utter.lang = 'ja-JP';
@@ -2603,7 +2643,7 @@ function runQuiz(n, onEnd) {
     if (myGen !== speakGeneration) return; // 既に次へ進んでいたら中止
 
     const qOnly = `第${n}問。${qText}`;
-    const utter = new SpeechSynthesisUtterance(qOnly);
+    const utter = new SpeechSynthesisUtterance(ttsClean(qOnly));
     if (voice) utter.voice = voice;
     utter.lang = 'ja-JP';
     utter.rate = playbackRate;
@@ -2622,7 +2662,7 @@ function runQuiz(n, onEnd) {
           if (aEl) aEl.style.display = 'block';
           // Speak answer
           const aOnly = `答え。${aText}`;
-          const a2 = new SpeechSynthesisUtterance(aOnly);
+          const a2 = new SpeechSynthesisUtterance(ttsClean(aOnly));
           if (voice) a2.voice = voice;
           a2.lang = 'ja-JP';
           a2.rate = playbackRate;

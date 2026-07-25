@@ -143,6 +143,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:#f4f6f9;color:#1a2332;line
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
   color:#c9d1d9;border-radius:8px;padding:5px 8px;font-size:.78rem;cursor:pointer;
 }
+.tts-voice-select{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:#c9d1d9;border-radius:8px;padding:5px 8px;font-size:.78rem;cursor:pointer;
+  max-width:160px;
+}
 #tts-close{
   position:absolute;top:8px;right:12px;
   background:none;border:none;color:#666;font-size:1.1rem;cursor:pointer;
@@ -2248,6 +2253,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
       <option value="1.5">速い 1.5×</option>
       <option value="2.0">最速 2.0×</option>
     </select>
+    <select class="tts-voice-select" id="tts-voice-select" onchange="setVoice(this.value)" title="読み上げ音声">
+      <option value="">自動（おすすめ）</option>
+    </select>
   </div>
 </div>
 
@@ -2284,11 +2292,76 @@ let quizPaused = false;
 let playbackRate = 1.0;
 let isPaused = false;
 
+// ── Screen Wake Lock（読み上げ中の画面スリープ防止）──────────────────
+// 画面がロックされるとJSが止まり、読み上げ・クイズモードが途中で止まってしまうため、
+// 再生中は画面スリープを止める。非対応環境では無視する。
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (e) { /* 非対応・拒否時は無視 */ }
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && document.getElementById('tts-bar').classList.contains('active')) {
+    requestWakeLock();
+  }
+});
+
+// ── 音声選択（ユーザーが手動で選んだ声。空文字なら自動選択）──────────────
+let userSelectedVoiceURI = localStorage.getItem('selectedVoiceURI') || '';
+
 function getVoice() {
   const voices = synth.getVoices();
+  if (userSelectedVoiceURI) {
+    const v = voices.find(v => v.voiceURI === userSelectedVoiceURI);
+    if (v) return v;
+  }
   return voices.find(v => v.lang === 'ja-JP') ||
          voices.find(v => v.lang.startsWith('ja')) ||
          voices[0] || null;
+}
+
+function populateVoiceSelect() {
+  const sel = document.getElementById('tts-voice-select');
+  if (!sel) return;
+  const voices = synth.getVoices();
+  const jaVoices = voices.filter(v => v.lang.startsWith('ja'));
+  const list = jaVoices.length > 0 ? jaVoices : voices;
+  sel.innerHTML = '<option value="">自動（おすすめ）</option>';
+  list.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = v.name + (v.localService ? '' : '（ネットワーク）');
+    sel.appendChild(opt);
+  });
+  sel.value = (userSelectedVoiceURI && list.some(v => v.voiceURI === userSelectedVoiceURI)) ? userSelectedVoiceURI : '';
+}
+
+function setVoice(uri) {
+  userSelectedVoiceURI = uri;
+  if (uri) localStorage.setItem('selectedVoiceURI', uri);
+  else localStorage.removeItem('selectedVoiceURI');
+  if (synth.speaking) {
+    // 再生中なら現在の問題を新しい声で再生し直す
+    const q = currentQ;
+    synth.cancel();
+    if (q && SPEECH[q]) {
+      setTimeout(() => speak(SPEECH[q], q, () => { playNext(); }), 100);
+    }
+  } else {
+    // プレビュー再生
+    const utter = new SpeechSynthesisUtterance('この声で読み上げます。');
+    const voice = getVoice();
+    if (voice) utter.voice = voice;
+    utter.lang = 'ja-JP';
+    synth.speak(utter);
+  }
 }
 
 function speak(text, qNum, onEnd) {
@@ -2357,6 +2430,7 @@ function speak(text, qNum, onEnd) {
   synth.speak(utter);
   showBar();
   updatePlayPauseBtn();
+  updateMediaSession(qNum);
 }
 
 // Play a single question
@@ -2410,6 +2484,7 @@ function togglePause() {
     synth.pause(); isPaused = true;
   }
   updatePlayPauseBtn();
+  updateMediaSessionState();
 }
 
 function updatePlayPauseBtn() {
@@ -2422,6 +2497,7 @@ function updatePlayPauseBtn() {
 function showBar() {
   document.getElementById('tts-bar').classList.add('active');
   document.body.style.paddingBottom = '110px';
+  requestWakeLock();
 }
 function hideBar() {
   synth.cancel();
@@ -2432,6 +2508,31 @@ function hideBar() {
     el.textContent = '▶'; el.classList.remove('playing');
   });
   updatePlayPauseBtn();
+  releaseWakeLock();
+}
+
+// ── Media Session（ロック画面・イヤホン/車載機の再生ボタン対応）─────────
+// speechSynthesisのみの再生では非対応環境もあるためベストエフォート
+function updateMediaSession(qNum) {
+  if (!('mediaSession' in navigator)) return;
+  const card = qNum ? document.getElementById('card-q' + qNum) : null;
+  const qtext = card ? card.querySelector('.qa-qtext') : null;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: qNum ? `Q${qNum}` : '口頭試験参考書',
+    artist: qtext ? qtext.textContent.trim().slice(0, 60) : '口頭試験 全問図解参考書',
+    album: '自家用操縦士（滑空機）口頭試験',
+  });
+  updateMediaSessionState();
+}
+function updateMediaSessionState() {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.playbackState = (synth.speaking && !synth.paused) ? 'playing' : 'paused';
+}
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play',  () => togglePause());
+  navigator.mediaSession.setActionHandler('pause', () => togglePause());
+  navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
+  navigator.mediaSession.setActionHandler('nexttrack',     () => skipNext());
 }
 
 // Speed control
@@ -2455,6 +2556,7 @@ function startQuizMode(chId) {
   playlistIdx = 0;
   quizMode = true;
   document.getElementById('quiz-overlay').classList.add('active');
+  requestWakeLock();
   playNext();
 }
 
@@ -2514,13 +2616,15 @@ function closeQuiz() {
   quizMode = false;
   document.getElementById('quiz-overlay').classList.remove('active');
   playlist = []; playlistIdx = 0;
+  releaseWakeLock();
 }
 
 // ═══ INIT ═══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure voices are loaded
+  populateVoiceSelect();
   if (synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = () => {};
+    synth.onvoiceschanged = populateVoiceSelect;
   }
 
   // Add per-card play buttons

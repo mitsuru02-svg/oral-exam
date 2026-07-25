@@ -250,6 +250,24 @@ body {
 }
 .btn-check:hover { border-color: #d29922; color: #d29922; }
 .btn-check.checked { border-color: #d29922; color: #d29922; background: #2d1d00; }
+
+/* アプリモード（試験／聞き流し）タブ */
+.app-mode-tabs { display: flex; gap: 8px; justify-content: center; margin: 14px 0 18px; }
+.app-mode-tab {
+  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
+  padding: 10px 16px; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer;
+  transition: all 0.2s;
+}
+.app-mode-tab.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
+
+/* 聞き流しモード：再生ボタン */
+.pb-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; }
+.pb-play-btn {
+  width: 64px; height: 64px; border-radius: 50%; background: #3b82f6; color: #fff;
+  border: none; font-size: 24px; cursor: pointer; transition: background 0.2s;
+}
+.pb-play-btn:hover { background: #2563eb; }
+.pb-phase-label { font-size: 12px; color: #8b949e; }
 </style>
 </head>
 <body>
@@ -277,12 +295,26 @@ body {
   <div id="startScreen" class="start-screen">
     <div class="start-title-row">
       <div class="start-icon">🛩</div>
-      <h2>口述模擬試験</h2>
+      <h2 id="modeTitle">口述模擬試験</h2>
     </div>
-    <p>問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
-    <div style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
+    <div class="app-mode-tabs">
+      <button class="app-mode-tab selected" id="tabExam" onclick="selectAppMode('exam')">📝 試験モード</button>
+      <button class="app-mode-tab" id="tabPlayback" onclick="selectAppMode('playback')">🎧 聞き流しモード</button>
+    </div>
+    <p id="modeDesc">問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
+    <div id="examInfoBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
       🤚 <strong style="color:#3fb950">ON</strong> にすることで、完全ハンズフリー。<br>
       「<strong>採点</strong>」と言うと結果表示、その後「<strong>次</strong>」と言うと次の問題に進みます。
+    </div>
+    <div id="playbackInfoBox" class="hidden" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
+      🎧 質問→間→模範解答を自動で読み上げ続けます。マイクは使いません。<br>
+      ロック画面やイヤホン・車載機の再生/停止ボタンでも操作できます。
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:13px;color:#8b949e;margin-right:8px">読み上げ音声：</label>
+      <select id="voiceSelect" onchange="onVoiceSelectChange()" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px;max-width:220px;">
+        <option value="">自動（おすすめ）</option>
+      </select>
     </div>
     <div class="stats-row">
       <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
@@ -339,7 +371,16 @@ body {
         <option value="187">全問 (187問)</option>
       </select>
     </div>
-    <button class="btn-primary" onclick="startExam()">試験開始</button>
+    <div id="thinkPauseRow" class="hidden" style="margin-bottom:20px">
+      <label style="font-size:13px;color:#8b949e;margin-right:8px">考える時間：</label>
+      <select id="thinkPauseSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
+        <option value="3">3秒</option>
+        <option value="5" selected>5秒</option>
+        <option value="8">8秒</option>
+        <option value="12">12秒</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="startExam()" id="startBtn">試験開始</button>
   </div>
 
   <!-- EXAM SCREEN -->
@@ -399,6 +440,40 @@ body {
     </div>
   </div>
 
+  <!-- PLAYBACK SCREEN (聞き流しモード) -->
+  <div id="playbackScreen" class="hidden">
+    <div class="exam-header">
+      <div class="progress-info">
+        <div>問題 <span id="pbNum">1</span> / <span id="pbTotal">10</span></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBarPb" style="width:0%"></div>
+        </div>
+      </div>
+      <button class="btn-abort" onclick="abortPlayback()">✕ 終了</button>
+    </div>
+
+    <div class="question-card">
+      <div class="q-label-row">
+        <div class="q-label">問 <span id="pbNumBadge">1</span></div>
+        <div class="pb-phase-label" id="pbPhaseLabel">🔊 読み上げ中</div>
+      </div>
+      <div class="question-text" id="pbQuestionText"></div>
+    </div>
+
+    <div class="model-answer hidden" id="pbAnswerBox">
+      <div class="model-answer-label-row">
+        <span class="model-answer-label">▼ 模範解答</span>
+      </div>
+      <div class="model-answer-text" id="pbAnswerText"></div>
+    </div>
+
+    <div class="pb-controls">
+      <button class="btn-secondary" onclick="pbPrev()" title="前の問題">⏮</button>
+      <button id="pbPlayBtn" class="pb-play-btn" onclick="pbTogglePause()">⏸️</button>
+      <button class="btn-secondary" onclick="pbNext()" title="次の問題">⏭</button>
+    </div>
+  </div>
+
   <!-- FINAL SCREEN -->
   <div id="finalScreen" class="hidden final-screen">
     <h2 style="margin-bottom:20px">試験結果</h2>
@@ -449,6 +524,22 @@ function toggleHandsFree() {
   }
 }
 
+// ── アプリモード（試験 / 聞き流し）─────────────────────────────
+let appMode = 'exam'; // 'exam' | 'playback'
+function selectAppMode(m) {
+  appMode = m;
+  document.getElementById('tabExam').classList.toggle('selected', m === 'exam');
+  document.getElementById('tabPlayback').classList.toggle('selected', m === 'playback');
+  document.getElementById('examInfoBox').classList.toggle('hidden', m !== 'exam');
+  document.getElementById('playbackInfoBox').classList.toggle('hidden', m !== 'playback');
+  document.getElementById('thinkPauseRow').classList.toggle('hidden', m !== 'playback');
+  document.getElementById('modeTitle').textContent = m === 'playback' ? '聞き流しモード' : '口述模擬試験';
+  document.getElementById('modeDesc').innerHTML = m === 'playback'
+    ? '問題と模範解答を自動で読み上げ続けます。<br>運転中など画面を見られないときの聞き流し学習に。'
+    : '問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。';
+  document.getElementById('startBtn').textContent = m === 'playback' ? '再生開始' : '試験開始';
+}
+
 // ── 設定 ────────────────────────────────────────────────────
 // Cloudflare WorkerのURLをデプロイ後にここへ貼る
 // ローカル(start.py)で使う場合は '/api/chat' のまま
@@ -461,6 +552,26 @@ const CONFIG = {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
+
+// ── Screen Wake Lock（運転中などの画面スリープ防止）──────────────────
+// 画面がロックされるとJSが一時停止し、ハンズフリー/聞き流しが止まってしまうため、
+// 試験・聞き流しの実行中は画面スリープを止める。非対応環境では無視する。
+let wakeLock = null;
+let sessionRunning = false;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (e) { /* 非対応・拒否時は無視 */ }
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && sessionRunning) requestWakeLock();
+});
 
 // ── Network badge ─────────────────────────────────────────────
 function updateNetworkBadge() {
@@ -492,35 +603,64 @@ let ttsVoice = null;
 let currentUtterance = null;
 let speakGeneration = 0;  // 世代番号：新しい speak() が呼ばれたら古い onend を無視
 
+// ── 音声選択（ユーザーが手動で選んだ声。空文字なら自動選択）──────────────
+let userSelectedVoiceURI = localStorage.getItem('selectedVoiceURI') || '';
+
+function computeAutoVoice(voices) {
+  // iOS/macOS で品質の高い日本語音声を優先順位順に探す
+  const preferred = [
+    'O-ren（拡張）',  // iOS 高品質
+    'O-ren',          // iOS 高品質
+    'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
+    'Hattori',        // iOS 高品質
+    'Otoya',          // iOS/macOS 高品質（男性）
+    'お-れん',
+    'はっとり',
+  ];
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name));
+    if (v) return v;
+  }
+  // 見つからなければローカルの日本語音声 → ネットワーク音声の順
+  return voices.find(v => v.lang === 'ja-JP' && v.localService)
+      || voices.find(v => v.lang === 'ja-JP')
+      || voices.find(v => v.lang.startsWith('ja'))
+      || null;
+}
+
+function populateVoiceSelect(voices) {
+  const sel = document.getElementById('voiceSelect');
+  if (!sel) return;
+  const jaVoices = voices.filter(v => v.lang.startsWith('ja'));
+  const list = jaVoices.length > 0 ? jaVoices : voices;
+  sel.innerHTML = '<option value="">自動（おすすめ）</option>';
+  list.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = v.name + (v.localService ? '' : '（ネットワーク）');
+    sel.appendChild(opt);
+  });
+  sel.value = (userSelectedVoiceURI && list.some(v => v.voiceURI === userSelectedVoiceURI)) ? userSelectedVoiceURI : '';
+}
+
+function onVoiceSelectChange() {
+  const sel = document.getElementById('voiceSelect');
+  const uri = sel.value;
+  userSelectedVoiceURI = uri;
+  if (uri) localStorage.setItem('selectedVoiceURI', uri);
+  else localStorage.removeItem('selectedVoiceURI');
+  const voices = speechSynthesis.getVoices();
+  ttsVoice = uri ? (voices.find(v => v.voiceURI === uri) || computeAutoVoice(voices)) : computeAutoVoice(voices);
+  speak('こんにちは。この声で読み上げます。');
+}
+
 function initVoices() {
   const load = () => {
     const voices = speechSynthesis.getVoices();
-
-    // iOS/macOS で品質の高い日本語音声を優先順位順に探す
-    const preferred = [
-      'O-ren（拡張）',          // iOS 高品質
-      'O-ren',          // iOS 高品質
-      'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
-      'Hattori',        // iOS 高品質
-      'Otoya',          // iOS/macOS 高品質（男性）
-      'お-れん',
-      'はっとり',
-    ];
-
-    // 名前で優先音声を探す
-    ttsVoice = null;
-    for (const name of preferred) {
-      const v = voices.find(v => v.name.includes(name));
-      if (v) { ttsVoice = v; break; }
-    }
-
-    // 見つからなければローカルの日本語音声 → ネットワーク音声の順
-    if (!ttsVoice) {
-      ttsVoice = voices.find(v => v.lang === 'ja-JP' && v.localService)
-              || voices.find(v => v.lang === 'ja-JP')
-              || voices.find(v => v.lang.startsWith('ja'))
-              || null;
-    }
+    populateVoiceSelect(voices);
+    ttsVoice = userSelectedVoiceURI
+      ? (voices.find(v => v.voiceURI === userSelectedVoiceURI) || computeAutoVoice(voices))
+      : computeAutoVoice(voices);
 
     // デバッグ用：使用する音声をコンソールに表示
     window._ttsVoice = ttsVoice;
@@ -671,6 +811,7 @@ function speak(text, onEnd) {
     utt.rate   = 0.88;
     utt.pitch  = 1.05;
     utt.volume = 1.0;
+    if (ttsVoice) utt.voice = ttsVoice;
 
     utt.onend = () => {
       if (myGen !== speakGeneration) return; // 古い世代は無視
@@ -939,12 +1080,14 @@ function updateCheckBtn() {
 function confirmAbort() {
   if (confirm('試験を終了して表紙に戻りますか？')) {
     stopSpeaking(); stopMic();
+    sessionRunning = false;
+    releaseWakeLock();
     document.getElementById('examScreen').classList.add('hidden');
     showStart();
   }
 }
 
-function startExam() {
+function buildExamPool() {
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
   if (mode === 'checked') {
@@ -952,7 +1095,7 @@ function startExam() {
     pool = checkedIndices.filter(i => pool.includes(i));
     if (pool.length === 0) {
       alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
-      return;
+      return null;
     }
   } else if (mode === 'wrong') {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
@@ -960,9 +1103,25 @@ function startExam() {
     else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
   }
   if (mode !== 'order') pool = pool.sort(() => Math.random() - 0.5);
-  examQuestions = pool.slice(0, Math.min(count, pool.length));
-  currentIdx = 0; correctCount = 0; partialCount = 0; wrongCount = 0; answered = 0; results = [];
+  return pool.slice(0, Math.min(count, pool.length));
+}
+
+function startExam() {
+  const pool = buildExamPool();
+  if (!pool) return;
+  examQuestions = pool;
   document.getElementById('startScreen').classList.add('hidden');
+  sessionRunning = true;
+  requestWakeLock();
+
+  if (appMode === 'playback') {
+    document.getElementById('playbackScreen').classList.remove('hidden');
+    document.getElementById('pbTotal').textContent = examQuestions.length;
+    startPlayback();
+    return;
+  }
+
+  currentIdx = 0; correctCount = 0; partialCount = 0; wrongCount = 0; answered = 0; results = [];
   document.getElementById('examScreen').classList.remove('hidden');
   document.getElementById('qTotal').textContent = examQuestions.length;
   showQuestion();
@@ -1176,6 +1335,8 @@ function nextQuestion() {
 
 function showFinalScreen() {
   stopSpeaking();
+  sessionRunning = false;
+  releaseWakeLock();
   sessionCorrect += correctCount; sessionTotal += answered;
   localStorage.setItem('totalCorrect',   sessionCorrect);
   localStorage.setItem('totalAnswered',  sessionTotal);
@@ -1192,6 +1353,158 @@ function showFinalScreen() {
   speak(`試験終了。正答率${pct}パーセント。${grade}`);
 }
 
+// ══════════════════════════════════════════════════════════════
+// 聞き流しモード（PLAYBACK） — 採点なし、質問→間→模範解答を自動再生
+// ══════════════════════════════════════════════════════════════
+let pbIdx = 0;
+let pbPaused = false;
+let pbGeneration = 0; // 世代番号：古いタイマー/speak完了を無効化
+let pbTimer = null;
+
+function thinkPauseSeconds() {
+  return parseInt(document.getElementById('thinkPauseSelect').value) || 5;
+}
+
+function currentPbQA() { return QA_DATA[examQuestions[pbIdx]]; }
+
+function setPbPhaseLabel(text) {
+  const el = document.getElementById('pbPhaseLabel');
+  if (el) el.textContent = text;
+}
+
+function updatePlaybackUI() {
+  const qa = currentPbQA();
+  document.getElementById('pbNum').textContent = pbIdx + 1;
+  document.getElementById('pbNumBadge').textContent = examQuestions[pbIdx] + 1;
+  document.getElementById('pbQuestionText').textContent = qa.q;
+  document.getElementById('pbAnswerBox').classList.add('hidden');
+  document.getElementById('pbAnswerText').textContent = qa.a;
+  document.getElementById('progressBarPb').style.width = (pbIdx / examQuestions.length * 100) + '%';
+  updateMediaSessionMeta(qa);
+}
+
+function startPlayback() {
+  pbIdx = 0; pbPaused = false;
+  document.getElementById('pbPlayBtn').textContent = '⏸️';
+  runPlaybackStep();
+}
+
+function runPlaybackStep() {
+  if (pbPaused) return;
+  pbGeneration++;
+  const myGen = pbGeneration;
+  updatePlaybackUI();
+  setPbPhaseLabel('🔊 問題を読み上げ中');
+  speak(currentPbQA().q, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    pbCountdown(thinkPauseSeconds(), myGen, () => {
+      if (myGen !== pbGeneration || pbPaused) return;
+      document.getElementById('pbAnswerBox').classList.remove('hidden');
+      setPbPhaseLabel('🔊 模範解答を読み上げ中');
+      speak(currentPbQA().a, () => {
+        if (myGen !== pbGeneration || pbPaused) return;
+        pbCountdown(2, myGen, () => {
+          if (myGen !== pbGeneration || pbPaused) return;
+          pbAdvance();
+        });
+      });
+    });
+  });
+}
+
+function pbCountdown(seconds, myGen, cb) {
+  let remain = seconds;
+  setPbPhaseLabel(`🤔 考え中…（${remain}）`);
+  const tick = () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    remain--;
+    if (remain <= 0) { cb(); return; }
+    setPbPhaseLabel(`🤔 考え中…（${remain}）`);
+    pbTimer = setTimeout(tick, 1000);
+  };
+  pbTimer = setTimeout(tick, 1000);
+}
+
+function pbAdvance() {
+  pbIdx++;
+  if (pbIdx >= examQuestions.length) { finishPlayback(); return; }
+  runPlaybackStep();
+}
+
+function pbNext() {
+  pbGeneration++;
+  stopSpeaking(); clearTimeout(pbTimer);
+  if (pbIdx < examQuestions.length - 1) pbIdx++;
+  if (pbPaused) updatePlaybackUI(); else runPlaybackStep();
+}
+
+function pbPrev() {
+  pbGeneration++;
+  stopSpeaking(); clearTimeout(pbTimer);
+  pbIdx = Math.max(0, pbIdx - 1);
+  if (pbPaused) updatePlaybackUI(); else runPlaybackStep();
+}
+
+function pbTogglePause() {
+  pbPaused = !pbPaused;
+  const btn = document.getElementById('pbPlayBtn');
+  if (pbPaused) {
+    btn.textContent = '▶️';
+    pbGeneration++;
+    stopSpeaking(); clearTimeout(pbTimer);
+    setPbPhaseLabel('⏸ 一時停止中');
+  } else {
+    btn.textContent = '⏸️';
+    runPlaybackStep();
+  }
+  updateMediaSessionState();
+}
+
+function finishPlayback() {
+  stopSpeaking();
+  sessionRunning = false;
+  releaseWakeLock();
+  setPbPhaseLabel('✅ 終了');
+  speak('聞き流し終了です。お疲れ様でした。', () => {
+    document.getElementById('playbackScreen').classList.add('hidden');
+    showStart();
+  });
+}
+
+function abortPlayback() {
+  if (confirm('聞き流しを終了して表紙に戻りますか？')) {
+    pbGeneration++;
+    stopSpeaking(); clearTimeout(pbTimer);
+    pbPaused = true;
+    sessionRunning = false;
+    releaseWakeLock();
+    document.getElementById('playbackScreen').classList.add('hidden');
+    showStart();
+  }
+}
+
+// ── Media Session（ロック画面・イヤホン/車載機の再生ボタン対応）─────────
+// speechSynthesisのみの再生では非対応環境もあるためベストエフォート
+function updateMediaSessionMeta(qa) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: `問 ${pbIdx + 1} / ${examQuestions.length}`,
+    artist: qa.q.length > 60 ? qa.q.slice(0, 60) + '…' : qa.q,
+    album: '口述試験 聞き流しモード',
+  });
+  updateMediaSessionState();
+}
+function updateMediaSessionState() {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.playbackState = pbPaused ? 'paused' : 'playing';
+}
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play',  () => { if (appMode === 'playback' && pbPaused)  pbTogglePause(); });
+  navigator.mediaSession.setActionHandler('pause', () => { if (appMode === 'playback' && !pbPaused) pbTogglePause(); });
+  navigator.mediaSession.setActionHandler('previoustrack', () => { if (appMode === 'playback') pbPrev(); });
+  navigator.mediaSession.setActionHandler('nexttrack',     () => { if (appMode === 'playback') pbNext(); });
+}
+
 function reviewWrong() {
   if (!wrongIndices.length) { alert('間違えた問題はありません！'); return; }
   mode = 'wrong'; document.getElementById('countSelect').value = Math.min(wrongIndices.length,10);
@@ -1200,8 +1513,11 @@ function reviewWrong() {
 
 function showStart() {
   stopSpeaking(); stopMic();
+  sessionRunning = false;
+  releaseWakeLock();
   document.getElementById('finalScreen').classList.add('hidden');
   document.getElementById('examScreen').classList.add('hidden');
+  document.getElementById('playbackScreen').classList.add('hidden');
   document.getElementById('startScreen').classList.remove('hidden');
   document.getElementById('savedCorrect').textContent = sessionCorrect;
   document.getElementById('savedTotal').textContent   = sessionTotal;

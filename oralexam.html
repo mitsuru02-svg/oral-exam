@@ -310,6 +310,12 @@ body {
       🎧 質問→間→模範解答を自動で読み上げ続けます。マイクは使いません。<br>
       ロック画面やイヤホン・車載機の再生/停止ボタンでも操作できます。
     </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:13px;color:#8b949e;margin-right:8px">読み上げ音声：</label>
+      <select id="voiceSelect" onchange="onVoiceSelectChange()" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px;max-width:220px;">
+        <option value="">自動（おすすめ）</option>
+      </select>
+    </div>
     <div class="stats-row">
       <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
       <div class="stat-box"><div class="num" id="savedCorrect">0</div><div class="label">正解数</div></div>
@@ -597,35 +603,64 @@ let ttsVoice = null;
 let currentUtterance = null;
 let speakGeneration = 0;  // 世代番号：新しい speak() が呼ばれたら古い onend を無視
 
+// ── 音声選択（ユーザーが手動で選んだ声。空文字なら自動選択）──────────────
+let userSelectedVoiceURI = localStorage.getItem('selectedVoiceURI') || '';
+
+function computeAutoVoice(voices) {
+  // iOS/macOS で品質の高い日本語音声を優先順位順に探す
+  const preferred = [
+    'O-ren（拡張）',  // iOS 高品質
+    'O-ren',          // iOS 高品質
+    'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
+    'Hattori',        // iOS 高品質
+    'Otoya',          // iOS/macOS 高品質（男性）
+    'お-れん',
+    'はっとり',
+  ];
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name));
+    if (v) return v;
+  }
+  // 見つからなければローカルの日本語音声 → ネットワーク音声の順
+  return voices.find(v => v.lang === 'ja-JP' && v.localService)
+      || voices.find(v => v.lang === 'ja-JP')
+      || voices.find(v => v.lang.startsWith('ja'))
+      || null;
+}
+
+function populateVoiceSelect(voices) {
+  const sel = document.getElementById('voiceSelect');
+  if (!sel) return;
+  const jaVoices = voices.filter(v => v.lang.startsWith('ja'));
+  const list = jaVoices.length > 0 ? jaVoices : voices;
+  sel.innerHTML = '<option value="">自動（おすすめ）</option>';
+  list.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = v.name + (v.localService ? '' : '（ネットワーク）');
+    sel.appendChild(opt);
+  });
+  sel.value = (userSelectedVoiceURI && list.some(v => v.voiceURI === userSelectedVoiceURI)) ? userSelectedVoiceURI : '';
+}
+
+function onVoiceSelectChange() {
+  const sel = document.getElementById('voiceSelect');
+  const uri = sel.value;
+  userSelectedVoiceURI = uri;
+  if (uri) localStorage.setItem('selectedVoiceURI', uri);
+  else localStorage.removeItem('selectedVoiceURI');
+  const voices = speechSynthesis.getVoices();
+  ttsVoice = uri ? (voices.find(v => v.voiceURI === uri) || computeAutoVoice(voices)) : computeAutoVoice(voices);
+  speak('こんにちは。この声で読み上げます。');
+}
+
 function initVoices() {
   const load = () => {
     const voices = speechSynthesis.getVoices();
-
-    // iOS/macOS で品質の高い日本語音声を優先順位順に探す
-    const preferred = [
-      'O-ren（拡張）',          // iOS 高品質
-      'O-ren',          // iOS 高品質
-      'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
-      'Hattori',        // iOS 高品質
-      'Otoya',          // iOS/macOS 高品質（男性）
-      'お-れん',
-      'はっとり',
-    ];
-
-    // 名前で優先音声を探す
-    ttsVoice = null;
-    for (const name of preferred) {
-      const v = voices.find(v => v.name.includes(name));
-      if (v) { ttsVoice = v; break; }
-    }
-
-    // 見つからなければローカルの日本語音声 → ネットワーク音声の順
-    if (!ttsVoice) {
-      ttsVoice = voices.find(v => v.lang === 'ja-JP' && v.localService)
-              || voices.find(v => v.lang === 'ja-JP')
-              || voices.find(v => v.lang.startsWith('ja'))
-              || null;
-    }
+    populateVoiceSelect(voices);
+    ttsVoice = userSelectedVoiceURI
+      ? (voices.find(v => v.voiceURI === userSelectedVoiceURI) || computeAutoVoice(voices))
+      : computeAutoVoice(voices);
 
     // デバッグ用：使用する音声をコンソールに表示
     window._ttsVoice = ttsVoice;

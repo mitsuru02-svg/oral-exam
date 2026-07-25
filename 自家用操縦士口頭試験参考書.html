@@ -2350,10 +2350,7 @@ function setVoice(uri) {
   if (synth.speaking) {
     // 再生中なら現在の問題を新しい声で再生し直す
     const q = currentQ;
-    synth.cancel();
-    if (q && SPEECH[q]) {
-      setTimeout(() => speak(SPEECH[q], q, () => { playNext(); }), 100);
-    }
+    if (q && SPEECH[q]) speak(SPEECH[q], q, () => { playNext(); });
   } else {
     // プレビュー再生
     const utter = new SpeechSynthesisUtterance('この声で読み上げます。');
@@ -2364,8 +2361,11 @@ function setVoice(uri) {
   }
 }
 
+let speakGeneration = 0; // 世代番号：cancel()由来の古いonend/onerrorを無視して二重送りを防ぐ
+
 function speak(text, qNum, onEnd) {
-  synth.cancel();
+  speakGeneration++;
+  const myGen = speakGeneration;
   isPaused = false;
   currentQ = qNum;
 
@@ -2397,40 +2397,60 @@ function speak(text, qNum, onEnd) {
     }
   }
 
-  const utter = new SpeechSynthesisUtterance(text);
-  const voice = getVoice();
-  if (voice) utter.voice = voice;
-  utter.lang = 'ja-JP';
-  utter.rate = playbackRate;
-  utter.pitch = 1.0;
+  function doSpeak() {
+    if (myGen !== speakGeneration) return; // 既に新しい発話が来ていたら中止
 
-  // Progress simulation
-  let startTime = Date.now();
-  const estimatedDuration = text.length * 80 / playbackRate;
-  const progressEl = document.getElementById('tts-progress');
-  const progressTimer = setInterval(() => {
-    const elapsed = Date.now() - startTime;
-    const pct = Math.min(100, (elapsed / estimatedDuration) * 100);
-    if (progressEl) progressEl.style.width = pct + '%';
-  }, 200);
+    const utter = new SpeechSynthesisUtterance(text);
+    const voice = getVoice();
+    if (voice) utter.voice = voice;
+    utter.lang = 'ja-JP';
+    utter.rate = playbackRate;
+    utter.pitch = 1.0;
 
-  utter.onend = () => {
-    clearInterval(progressTimer);
-    if (progressEl) progressEl.style.width = '100%';
-    // Reset card
-    const card = qNum ? document.getElementById('card-q' + qNum) : null;
-    const btn = qNum ? document.getElementById('play-btn-' + qNum) : null;
-    if (card) card.classList.remove('tts-playing');
-    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
-    if (onEnd) onEnd();
-  };
-  utter.onerror = () => { clearInterval(progressTimer); if (onEnd) onEnd(); };
+    // Progress simulation
+    let startTime = Date.now();
+    const estimatedDuration = text.length * 80 / playbackRate;
+    const progressEl = document.getElementById('tts-progress');
+    const progressTimer = setInterval(() => {
+      if (myGen !== speakGeneration) { clearInterval(progressTimer); return; }
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, (elapsed / estimatedDuration) * 100);
+      if (progressEl) progressEl.style.width = pct + '%';
+    }, 200);
 
-  currentUtterance = utter;
-  synth.speak(utter);
-  showBar();
-  updatePlayPauseBtn();
-  updateMediaSession(qNum);
+    utter.onend = () => {
+      clearInterval(progressTimer);
+      if (myGen !== speakGeneration) return; // 古い世代（cancel由来）は無視、二重送り防止
+      if (progressEl) progressEl.style.width = '100%';
+      // Reset card
+      const card = qNum ? document.getElementById('card-q' + qNum) : null;
+      const btn = qNum ? document.getElementById('play-btn-' + qNum) : null;
+      if (card) card.classList.remove('tts-playing');
+      if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+      if (onEnd) onEnd();
+    };
+    utter.onerror = (e) => {
+      clearInterval(progressTimer);
+      if (myGen !== speakGeneration) return; // 古い世代は無視
+      if (e.error === 'interrupted' || e.error === 'canceled') return; // 意図的なcancel()由来は無視
+      if (onEnd) onEnd();
+    };
+
+    currentUtterance = utter;
+    synth.speak(utter);
+    showBar();
+    updatePlayPauseBtn();
+    updateMediaSession(qNum);
+  }
+
+  // 再生中に途中でcancel()した直後にspeak()すると、ブラウザによっては
+  // 新しい発話が無視される/即座にonendが発火することがあるため少し待つ
+  if (synth.speaking) {
+    synth.cancel();
+    setTimeout(doSpeak, 300);
+  } else {
+    doSpeak();
+  }
 }
 
 // Play a single question
@@ -2467,12 +2487,10 @@ function playNext() {
 
 function playPrev() {
   playlistIdx = Math.max(0, playlistIdx - 2);
-  synth.cancel();
   playNext();
 }
 
 function skipNext() {
-  synth.cancel();
   playNext();
 }
 
@@ -2500,6 +2518,7 @@ function showBar() {
   requestWakeLock();
 }
 function hideBar() {
+  speakGeneration++;
   synth.cancel();
   document.getElementById('tts-bar').classList.remove('active');
   document.body.style.paddingBottom = '';
@@ -2541,10 +2560,7 @@ function setSpeed(val) {
   if (synth.speaking) {
     // Restart current Q at new speed
     const q = currentQ;
-    synth.cancel();
-    if (q && SPEECH[q]) {
-      setTimeout(() => speak(SPEECH[q], q, () => { playNext(); }), 100);
-    }
+    if (q && SPEECH[q]) speak(SPEECH[q], q, () => { playNext(); });
   }
 }
 
@@ -2561,6 +2577,9 @@ function startQuizMode(chId) {
 }
 
 function runQuiz(n, onEnd) {
+  speakGeneration++;
+  const myGen = speakGeneration;
+
   const card = document.getElementById('card-q' + n);
   const qEl = document.getElementById('quiz-q');
   const aEl = document.getElementById('quiz-a');
@@ -2578,40 +2597,63 @@ function runQuiz(n, onEnd) {
   if (aEl) { aEl.textContent = aText; aEl.style.display = 'none'; }
   if (countdown) { countdown.textContent = '3'; countdown.style.display = 'flex'; }
 
-  // Speak question only
-  const qOnly = `第${n}問。${qText}`;
-  const utter = new SpeechSynthesisUtterance(qOnly);
   const voice = getVoice();
-  if (voice) utter.voice = voice;
-  utter.lang = 'ja-JP';
-  utter.rate = playbackRate;
-  synth.cancel();
-  synth.speak(utter);
 
-  utter.onend = () => {
-    // Countdown 3-2-1 then reveal
-    let cnt = 3;
-    const timer = setInterval(() => {
-      cnt--;
-      if (countdown) countdown.textContent = cnt;
-      if (cnt <= 0) {
-        clearInterval(timer);
-        if (countdown) countdown.style.display = 'none';
-        if (aEl) aEl.style.display = 'block';
-        // Speak answer
-        const aOnly = `答え。${aText}`;
-        const a2 = new SpeechSynthesisUtterance(aOnly);
-        if (voice) a2.voice = voice;
-        a2.lang = 'ja-JP';
-        a2.rate = playbackRate;
-        a2.onend = () => { setTimeout(onEnd, 1000); };
-        synth.speak(a2);
-      }
-    }, 1000);
-  };
+  function doSpeakQuestion() {
+    if (myGen !== speakGeneration) return; // 既に次へ進んでいたら中止
+
+    const qOnly = `第${n}問。${qText}`;
+    const utter = new SpeechSynthesisUtterance(qOnly);
+    if (voice) utter.voice = voice;
+    utter.lang = 'ja-JP';
+    utter.rate = playbackRate;
+
+    utter.onend = () => {
+      if (myGen !== speakGeneration) return; // 古い世代（cancel由来）は無視
+      // Countdown 3-2-1 then reveal
+      let cnt = 3;
+      const timer = setInterval(() => {
+        if (myGen !== speakGeneration) { clearInterval(timer); return; }
+        cnt--;
+        if (countdown) countdown.textContent = cnt;
+        if (cnt <= 0) {
+          clearInterval(timer);
+          if (countdown) countdown.style.display = 'none';
+          if (aEl) aEl.style.display = 'block';
+          // Speak answer
+          const aOnly = `答え。${aText}`;
+          const a2 = new SpeechSynthesisUtterance(aOnly);
+          if (voice) a2.voice = voice;
+          a2.lang = 'ja-JP';
+          a2.rate = playbackRate;
+          a2.onend = () => { if (myGen !== speakGeneration) return; setTimeout(onEnd, 1000); };
+          a2.onerror = (e) => {
+            if (myGen !== speakGeneration) return;
+            if (e.error === 'interrupted' || e.error === 'canceled') return;
+            setTimeout(onEnd, 1000);
+          };
+          synth.speak(a2);
+        }
+      }, 1000);
+    };
+    utter.onerror = (e) => {
+      if (myGen !== speakGeneration) return;
+      if (e.error === 'interrupted' || e.error === 'canceled') return;
+    };
+
+    synth.speak(utter);
+  }
+
+  if (synth.speaking) {
+    synth.cancel();
+    setTimeout(doSpeakQuestion, 300);
+  } else {
+    doSpeakQuestion();
+  }
 }
 
 function closeQuiz() {
+  speakGeneration++;
   synth.cancel();
   quizMode = false;
   document.getElementById('quiz-overlay').classList.remove('active');

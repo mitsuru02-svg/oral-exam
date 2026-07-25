@@ -811,6 +811,7 @@ function speak(text, onEnd) {
     utt.rate   = 0.88;
     utt.pitch  = 1.05;
     utt.volume = 1.0;
+    if (ttsVoice) utt.voice = ttsVoice;
 
     utt.onend = () => {
       if (myGen !== speakGeneration) return; // 古い世代は無視

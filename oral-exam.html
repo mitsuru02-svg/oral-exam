@@ -793,6 +793,11 @@ function ttsClean(text) {
     ['機首',    'きしゅ'],
     ['揚力',    'ようりょく'],
     ['滝川',    'たきかわ'],
+    ['有効期限外','ゆうこうきげんがい'],
+    ['落下傘',    'らっかさん'],
+    ['非常信号灯','ひじょうしんごうとう'],
+    ['携帯灯',    'けいたいとう'],
+    ['救命胴衣',  'きゅうめいどうい'],
     ['入りやすく','はいりやすく'],
     ['入りやすい','はいりやすい'],
   ];
@@ -1380,6 +1385,8 @@ let pbIdx = 0;
 let pbPaused = false;
 let pbGeneration = 0; // 世代番号：古いタイマー/speak完了を無効化
 let pbTimer = null;
+let pbPhase = 'question'; // 'question' | 'thinking' | 'answer' | 'gap' — 一時停止からの再開位置を覚えておく
+let pbCountdownRemain = 0;
 
 function thinkPauseSeconds() {
   return parseInt(document.getElementById('thinkPauseSelect').value) || 5;
@@ -1414,30 +1421,58 @@ function runPlaybackStep() {
   pbGeneration++;
   const myGen = pbGeneration;
   updatePlaybackUI();
+  pbPhase = 'question';
   setPbPhaseLabel('🔊 問題を読み上げ中');
   speak(currentPbQA().q, () => {
     if (myGen !== pbGeneration || pbPaused) return;
-    pbCountdown(thinkPauseSeconds(), myGen, () => {
-      if (myGen !== pbGeneration || pbPaused) return;
-      document.getElementById('pbAnswerBox').classList.remove('hidden');
-      setPbPhaseLabel('🔊 模範解答を読み上げ中');
-      speak(currentPbQA().a, () => {
-        if (myGen !== pbGeneration || pbPaused) return;
-        pbCountdown(2, myGen, () => {
-          if (myGen !== pbGeneration || pbPaused) return;
-          pbAdvance();
-        });
-      });
-    });
+    startThinkingPhase(myGen);
   });
 }
 
+function startThinkingPhase(myGen) {
+  pbPhase = 'thinking';
+  pbCountdownRemain = thinkPauseSeconds();
+  runThinkingCountdown(myGen);
+}
+
+function runThinkingCountdown(myGen) {
+  pbCountdown(pbCountdownRemain, myGen, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    startAnswerPhase(myGen);
+  });
+}
+
+function startAnswerPhase(myGen) {
+  pbPhase = 'answer';
+  document.getElementById('pbAnswerBox').classList.remove('hidden');
+  setPbPhaseLabel('🔊 模範解答を読み上げ中');
+  speak(currentPbQA().a, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    startGapPhase(myGen);
+  });
+}
+
+function startGapPhase(myGen) {
+  pbPhase = 'gap';
+  pbCountdownRemain = 2;
+  runGapCountdown(myGen);
+}
+
+function runGapCountdown(myGen) {
+  pbCountdown(pbCountdownRemain, myGen, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    pbAdvance();
+  });
+}
+
+// 残り秒数(pbCountdownRemain)から数え上げ、一時停止からの再開でも続きから数えられるようにする
 function pbCountdown(seconds, myGen, cb) {
   let remain = seconds;
   setPbPhaseLabel(`🤔 考え中…（${remain}）`);
   const tick = () => {
     if (myGen !== pbGeneration || pbPaused) return;
     remain--;
+    pbCountdownRemain = remain;
     if (remain <= 0) { cb(); return; }
     setPbPhaseLabel(`🤔 考え中…（${remain}）`);
     pbTimer = setTimeout(tick, 1000);
@@ -1475,9 +1510,27 @@ function pbTogglePause() {
     setPbPhaseLabel('⏸ 一時停止中');
   } else {
     btn.textContent = '⏸️';
-    runPlaybackStep();
+    resumeFromPause();
   }
   updateMediaSessionState();
+}
+
+// 一時停止した地点（質問読み上げ中／考え中／解答読み上げ中／次の問題への間）に応じて再開する。
+// 発話の途中から音声だけ再開することはできないため、質問中に停止した場合のみ質問から読み直す。
+function resumeFromPause() {
+  pbGeneration++;
+  const myGen = pbGeneration;
+  if (pbPhase === 'thinking') {
+    setPbPhaseLabel(`🤔 考え中…（${pbCountdownRemain}）`);
+    runThinkingCountdown(myGen);
+  } else if (pbPhase === 'answer') {
+    startAnswerPhase(myGen);
+  } else if (pbPhase === 'gap') {
+    setPbPhaseLabel(`🤔 考え中…（${pbCountdownRemain}）`);
+    runGapCountdown(myGen);
+  } else {
+    runPlaybackStep();
+  }
 }
 
 function finishPlayback() {

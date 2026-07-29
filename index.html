@@ -89,6 +89,7 @@ body {
 .card-icon.amber  { background: #2d1d00; }
 .card-icon.purple { background: #1a0a3d; }
 .card-icon.teal   { background: #042d28; }
+.card-icon.sky    { background: #062338; }
 
 .card-body { flex: 1; min-width: 0; }
 .card-name {
@@ -114,6 +115,7 @@ body {
 .badge-amber  { background: #2d1d00; color: #d29922; border: 1px solid #5c3d00; }
 .badge-purple { background: #1a0a3d; color: #a78bfa; border: 1px solid #3d1a7a; }
 .badge-teal   { background: #042d28; color: #2dd4bf; border: 1px solid #0a5c54; }
+.badge-sky    { background: #062338; color: #7dd3fc; border: 1px solid #0e4a6e; }
 
 .card-arrow {
   color: #484f58;
@@ -201,6 +203,38 @@ body {
       <div class="card-desc">ウェイクタービュランス〜低体温症まで</div>
     </div>
     <span class="card-badge" style="background:#2d0a1a;color:#f472b6;border:1px solid #6e1a3a;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;">医学</span>
+    <span class="card-arrow">›</span>
+  </a>
+
+  <div class="section-label">天気確認</div>
+
+  <a class="card" href="https://www.data.jma.go.jp/yoho/data/wxchart/quick/ASAS_COLOR.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="card-icon sky">🗺️</div>
+    <div class="card-body">
+      <div class="card-name">ASAS地上天気図</div>
+      <div class="card-desc">気象庁発行・アジア地上実況天気図（PDF）</div>
+    </div>
+    <span class="card-badge badge-sky">天気図</span>
+    <span class="card-arrow">›</span>
+  </a>
+
+  <a class="card" href="https://www.ikki.org/wx/wx.php" target="_blank" rel="noopener noreferrer">
+    <div class="card-icon sky">📡</div>
+    <div class="card-body">
+      <div class="card-name">TAFとMETAR</div>
+      <div class="card-desc">空港ごとの実況・予報を確認</div>
+    </div>
+    <span class="card-badge badge-sky">実況</span>
+    <span class="card-arrow">›</span>
+  </a>
+
+  <a class="card" href="https://top.swim.mlit.go.jp/swim/login" target="_blank" rel="noopener noreferrer">
+    <div class="card-icon sky">🔑</div>
+    <div class="card-body">
+      <div class="card-name">SWIMシステム</div>
+      <div class="card-desc">AIP・NOTAM等の航空情報（要ログイン）</div>
+    </div>
+    <span class="card-badge badge-sky">航空情報</span>
     <span class="card-arrow">›</span>
   </a>
 

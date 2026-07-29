@@ -267,6 +267,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   <a href="#ch11" data-ch="ch11"><span class="chnum">11</span>諸手続・法規</a>
   <a href="#ch12" data-ch="ch12"><span class="chnum">12</span>出発前確認・地上安全</a>
   <a href="#ch13" data-ch="ch13"><span class="chnum">13</span>実技科目の実施要領と採点基準</a>
+  <a href="#ch14" data-ch="ch14"><span class="chnum">14</span>航空気象2：METAR/TAFの解読とVMCの実践</a>
 </nav>
 
 <div class="main" id="main">
@@ -2796,7 +2797,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 
   <div class="pagenav">
     <a href="#ch12" onclick="showCh('ch12')">← 第12章　出発前確認・地上安全</a>
-    <span></span>
+    <a href="#ch14" onclick="showCh('ch14')">第14章　航空気象2：METAR/TAFの解読とVMCの実践 →</a>
   </div>
 </section>
 
@@ -2907,7 +2908,311 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
     },
     {
       "anchor": "tts-13-25",
-      "text": "最後にまとめです。実技試験は通常の飛行と離着陸、特別なエアワークの2つの課目群からなります。特別な練習が必要なのは低速飛行、失速と回復、急旋回、最良滑空比速度による滑空の4つだけです。各課目は宣言のセリフとセットで身体で覚えてください。低速飛行と急旋回は円滑で釣り合いの取れた操作、つまり大舵を使わず滑らせないことが最大の採点基準です。失速回復はニュートラルに戻すだけ。二次失速は絶対に避けてください。ランディングストールはダイブブレーキを即座に閉じ、機首は下げません。実施細則の項目名はお役所言葉ですので、文字通りに捉えず、結局何を聞きたいのかを翻訳して理解してください。アルコールは前夜2ドリンク以上禁止、救急用具の点検期限は60日です。滑空場の標識規定は航空法にはなく、鍵カッコが飛行場のフェンスに相当する目印です。これで全13章の内容は終わりです。お疲れ様でした。"
+      "text": "最後にまとめです。実技試験は通常の飛行と離着陸、特別なエアワークの2つの課目群からなります。特別な練習が必要なのは低速飛行、失速と回復、急旋回、最良滑空比速度による滑空の4つだけです。各課目は宣言のセリフとセットで身体で覚えてください。低速飛行と急旋回は円滑で釣り合いの取れた操作、つまり大舵を使わず滑らせないことが最大の採点基準です。失速回復はニュートラルに戻すだけ。二次失速は絶対に避けてください。ランディングストールはダイブブレーキを即座に閉じ、機首は下げません。実施細則の項目名はお役所言葉ですので、文字通りに捉えず、結局何を聞きたいのかを翻訳して理解してください。アルコールは前夜2ドリンク以上禁止、救急用具の点検期限は60日です。滑空場の標識規定は航空法にはなく、鍵カッコが飛行場のフェンスに相当する目印です。次の第14章では、航空気象の2回目として、メターとタフの解読方法やブイエムシーの実践的な使い方を見ていきます。"
+    }
+  ]
+}
+</script>
+
+<section class="chapter" id="ch14">
+  <div class="chapter-head">
+    <div class="eyebrow">CHAPTER 14 ／ 実地・通信知識</div>
+    <h1>航空気象2：METAR/TAFの解読とVMCの実践</h1>
+    <p class="lead">第7章で「必須（マスト）」とされたMETAR・TAFを実際に解読できるようにする。VMCの数値基準、卓越視程の計算方法、風向の真方位／磁方位の落とし穴など、試験で問われる実務知識をAIM第8章・ch8_kokuu_kisho_full.htmlと対応させながら整理する。</p>
+  </div>
+
+  <div class="tts-bar" data-tts-target="tts-data-14"></div>
+
+  <h2 class="sec">14-1　出発前確認における気象情報の使い方</h2>
+  <div class="card" id="tts-14-0">
+    <div class="card-title">📋 出発前の確認で利用する気象情報</div>
+    <ul style="margin:0;">
+      <li>アジア地上天気図（ASAS）、850／700hPa高層天気図</li>
+      <li>METAR、SPECI、TAF</li>
+      <li>気象庁の航空気象ページ（下層悪天予想図など）</li>
+      <li>BLIPMAPS（滑空気象）</li>
+    </ul>
+  </div>
+  <div class="callout warn" id="tts-14-1">
+    <div class="ttl">安全に飛べるかどうかを判断する4つの視点</div>
+    <ol style="margin:6px 0 0;">
+      <li><b>法定の飛行条件</b>：離陸・エンルート・着陸を通じてVMCが保たれるか？</li>
+      <li><b>機体性能面</b>＝飛行規程の制限事項：離着陸で横風制限を超えないか？（ASK21は横風4m/s・約8kt）</li>
+      <li><b>技量の範囲内での安全な飛行</b>：法的にはOKでも慎重に判断（例：視程5kmちょうどでよいか？）</li>
+      <li><b>着陸までの全経路の気象条件の把握</b>：クロスカントリー先の天候予測は？</li>
+    </ol>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">4つ目は特に、ローカルのフライトしか想定していないと試験官から「クロスカントリーに出る可能性はないのですか」と突っ込まれることがある。ライセンス取得後は自分の責任で飛ぶことになるため、いずれクロスカントリーに出ることも見据えて経路全体の気象を考える姿勢を示すとよい。</p>
+  </div>
+
+  <h2 class="sec">14-2　VMC（有視界気象状態）の基準</h2>
+  <div class="card" id="tts-14-2">
+    <div class="card-title">📋 高度・空域ごとのVMC基準</div>
+    <table class="datatbl">
+      <tr><th>状況</th><th>雲からの距離</th><th>視程</th></tr>
+      <tr><td><b>3,000m以上</b></td><td>上下300m・水平1,500m</td><td>8,000m以上</td></tr>
+      <tr><td><b>3,000m未満（管制区・管制圏・情報圏外）</b></td><td>上150m・下300m・水平600m</td><td>1,500m以上</td></tr>
+      <tr><td><b>3,000m未満（管制区・管制圏・情報圏内）</b></td><td>同上</td><td>5,000m以上</td></tr>
+      <tr><td><b>管制圏・情報圏の飛行場</b></td><td>雲高300m以上</td><td>5,000m以上</td></tr>
+      <tr><td><b>クラスG空域・300m以下</b></td><td>雲から離れて飛行</td><td>1,500m以上（ヘリコプター除く）</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">※視程はいずれも飛行視程。クラスG空域・300m以下では、水面上を引き続き飛行する場合の規定もある。</p>
+  </div>
+  <div class="callout tip" id="tts-14-3">
+    <div class="ttl">「差分」で覚える</div>
+    VMCは自家用のオーラルで最も問われやすい項目のひとつで、覚え間違いが許されない。おすすめの覚え方は<b>3,000m以上の基準を基本形として覚え、そこからの「差分」で残りを整理する</b>こと。<br>
+    3,000m以上：雲との距離は上下300m・水平1,500m、視程8,000m。→ 3,000m未満に下がると、雲高は上150m・水平は600mに縮まり、視程は5,000m（管制区・管制圏・情報圏内）または1,500m（それ以外）に縮まる、という順で差分をたどると覚えやすい。
+  </div>
+
+  <h2 class="sec">14-3　視程・視程障害現象</h2>
+  <div class="card" id="tts-14-4">
+    <div class="card-title">📋 視程とは何か</div>
+    <p style="margin:0;">視程とは<b>「どこまで遠くまで見えるか」</b>であり、「視界」とは異なる概念である。気象通報（METAR・SPECI・TAF）に出てくる視程は<b>卓越視程</b>で、地上での視程にのみ用いられる。</p>
+  </div>
+  <div class="diagram-box">
+    <img src="data:image/jpeg;base64,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" alt="卓越視程の求め方（円グラフ）">
+    <div class="cap"><b>卓越視程の求め方</b>：観測点の周囲360°の視程を観測し、視程が良い方から順に角度を足し算していき、合計が180°を超えたところの視程が卓越視程となる。</div>
+  </div>
+  <div class="card" id="tts-14-5">
+    <div class="card-title">📋 計算例</div>
+    <p style="margin:0;">図の例（15km＝50°、8km＝120°、6km＝70°、5km＝70°、3km＝50°）で、視程の良い方から角度を積算すると：</p>
+    <table class="datatbl">
+      <tr><th>視程</th><th>累積角度</th></tr>
+      <tr><td>15km</td><td>50°</td></tr>
+      <tr><td>8km</td><td>170°（50＋120）</td></tr>
+      <tr><td>6km</td><td>240°（170＋70）← ここで180°を突破</td></tr>
+      <tr><td>5km</td><td>310°</td></tr>
+      <tr><td>3km</td><td>360°</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">180°を最初に超えたのは<b>6km</b>の時点なので、この場合の卓越視程は<b>6km</b>となる。</p>
+  </div>
+  <div class="card" id="tts-14-6">
+    <div class="card-title">📋 視程障害現象</div>
+    <table class="datatbl">
+      <tr><th>現象</th><th>略号</th><th>内容</th></tr>
+      <tr><td>もや</td><td>BR</td><td>空気中の水蒸気量が多く、一部凝結により微細な水滴が空気中に漂っている状態</td></tr>
+      <tr><td>霧</td><td>FG</td><td>もやと同様の状態だが、水滴密度がもやよりさらに高い状態</td></tr>
+      <tr><td>煙霧（ヘイズ）</td><td>HZ</td><td>工場からの排出ガスや森林火災の煙などにより、空気中に微細粒子が漂っている状態（特に春によく見られる）</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">そのほか、砂や塵、火山灰、煙などによる視程障害もある。滝川周辺で実際によく見かけるのは、もや（BR）・霧（FG）・煙霧（HZ）程度で、その他は覚える優先度が低い。</p>
+  </div>
+
+  <h2 class="sec">14-4　METAR/SPECI/TAFのコード解読</h2>
+  <div class="card" id="tts-14-7">
+    <div class="card-title">📋 METAR/SPECIの構成要素</div>
+    <p style="margin:0;">種別 → 空港名（ICAO4レターコード）→ 日付時刻 → 風向風速 → 視程 → 雲量雲高（3群）→ 気温／露点 → QNH → 補足事項（RMK）の順に並ぶ。</p>
+    <div class="callout note" style="margin-top:10px;">
+      <div class="ttl">解読例</div>
+      <code style="display:block;font-size:13px;line-height:1.8;word-break:break-all;">METAR RJCC 281300Z 15007KT 9999 FEW005 SCT030 BKN060 19/18 Q1010 RMK 1ST005 4CU030 7SC060 A2984=</code>
+      <ul style="margin:8px 0 0;font-size:13.5px;">
+        <li><b>METAR</b>：種別（定時飛行場実況気象通報式）</li>
+        <li><b>RJCC</b>：新千歳空港（ICAO4レターコード）</li>
+        <li><b>281300Z</b>：28日13時00分（UTC＝Zuluタイム。日本時間はこれに9時間を加える）</li>
+        <li><b>15007KT</b>：風向150°（観測時刻前10分間の平均・真方位）、風速7kt</li>
+        <li><b>9999</b>：視程10km以上（METARでは10kmまでしか観測しないため「以上」を意味する）</li>
+        <li><b>FEW005 SCT030 BKN060</b>：500ft・3,000ft・6,000ftに、少ない（FEW）・散在（SCT）・多い（BKN）雲。雲の種類はここには書かれない</li>
+        <li><b>19/18</b>：気温19℃・露点18℃</li>
+        <li><b>Q1010</b>：QNH 1010hPa</li>
+        <li><b>RMK以降</b>：補足事項。<b>1ST005</b>＝層雲が8分雲量1（500ft）、<b>4CU030</b>＝積雲が8分雲量4（3,000ft）、<b>7SC060</b>＝層積雲が8分雲量7（6,000ft）、<b>A2984</b>＝QNHをインチ表示（29.84inHg＝1010hPa相当）</li>
+      </ul>
+    </div>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">RMKの雲の記述を読むには、10種雲形（層雲ST・積雲CU・層積雲SCなど）を解読できる必要がある。写真つきで覚えるなら『雲と風』などの参考書と併用するとよい。SPECI（特別飛行場実況気象通報式）は種別が変わるだけで、記述方式はMETARと同じ。空港周辺にCBが発生した場合など、飛行の安全に直接影響する状況が生じた際に発出される。</p>
+  </div>
+  <div class="card" id="tts-14-8">
+    <div class="card-title">📋 METAR・TAFの発出頻度</div>
+    <p style="margin:0;">METARは主要な空港では<b>30分ごと</b>（例：新千歳）、それ以外の空港では<b>1時間ごと</b>（例：旭川）に発出される。TAF（飛行場予報式）は決まった時刻ではなく、METARと同時に朝・夜の1日数回程度発出される空港がある。</p>
+  </div>
+
+  <h2 class="sec">14-5　風向の落とし穴：真方位と磁方位</h2>
+  <div class="callout danger" id="tts-14-9" style="border-left-color:#b3413a;background:#fbe9e7;">
+    <div class="ttl" style="color:#b3413a;">試験官が好んで突く違い</div>
+    <b>METAR・SPECI・TAFに書かれる風向は「真方位」</b>である（観測時刻前10分間の平均を10°単位に丸めたもの）。<br>
+    一方で、<b>タワーやレディオが飛行中の機体に通報する風向は「磁方位」</b>であり、<b>滑走路の方向（例：滝川の「01」など）も磁方位</b>で決められている。<br>
+    つまり、この辺りで真方位が使われるのはMETAR・SPECI・TAFの風向だけで、それ以外は基本的にすべて磁方位だと考えてよい。この違いは試験官が好んで質問するポイントなので、明確に説明できるようにしておくこと。
+  </div>
+  <div class="card" id="tts-14-10">
+    <div class="card-title">📋 磁方位のズレの原因（関連知識：コンパス誤差）</div>
+    <ul style="margin:0;">
+      <li><b>自差</b>：コンパスそのものが持つ誤差、および機体（周囲の鉄分など）から受ける誤差。操縦席には10°刻みの自差修正表が備え付けられており、機体ごとに異なる（耐空検査の際などに数年ごとに再測定される）</li>
+      <li><b>偏差</b>：地球上の磁場のズレによる誤差で、航空図に「7°W」「8°W」のように記載される（この地域はおよそ7〜8°西にコンパスがずれる）</li>
+    </ul>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">実際にコンパスで飛ぶ場合は、これらの誤差をすべて考慮して読む必要がある。</p>
+  </div>
+
+  <h2 class="sec">14-6　バリアブル・ガスト・欠測の書き方</h2>
+  <div class="card" id="tts-14-11">
+    <div class="card-title">📋 風のコードの細かい規則</div>
+    <ul style="margin:0;">
+      <li><b>風速0.4kt以下（ウインドカーム）</b>：00000KTと表示される</li>
+      <li><b>バリアブル（風向が一定しない）</b>：平均風速<b>3kt未満</b>のとき「VRB03KT」のように風向をVRBと表記。平均風速<b>3kt以上</b>のときは「11010KT 070V150」のように、平均風向＋風速のあとに変動幅（この例では070°から150°の間で変動）を付け足す</li>
+      <li><b>ガスト</b>：平均風速を10kt以上上回る最大瞬間風速があった場合に表記。例：「03020G40KT」＝風向30°、風速20kt、ガスト（最大瞬間風速）40kt</li>
+      <li><b>欠測</b>：風の観測が欠測の場合は「/////KT」（スラッシュ5本）のように表される</li>
+    </ul>
+  </div>
+
+  <h2 class="sec">14-7　現在天気コードとCAVOK</h2>
+  <div class="card" id="tts-14-12">
+    <div class="card-title">📋 現在天気コード（現在天気）</div>
+    <p style="margin:0;">強度記号（<b>−</b>＝light「ライト」、記号なし＝moderate、<b>＋</b>＝heavy「ヘビー」）に続けて現象コードを読む。「マイナス」「プラス」とは読まず、「ライト」「ヘビー」と読む。</p>
+    <table class="datatbl">
+      <tr><th>コード</th><th>意味</th><th>備考</th></tr>
+      <tr><td>TS</td><td>雷電（サンダーストーム）</td><td>「TS」＝雷を伴う嵐。頻出</td></tr>
+      <tr><td>SHRA</td><td>にわか雨（シャワー・オブ・レイン）</td><td>「−SHRA」＝弱いにわか雨、のように使う</td></tr>
+      <tr><td>BR</td><td>もや</td><td>頻出</td></tr>
+      <tr><td>FG</td><td>霧</td><td>頻出</td></tr>
+      <tr><td>HZ</td><td>煙霧</td><td>春によく見られる</td></tr>
+      <tr><td>DZ</td><td>霧雨（ドリズル）</td><td></td></tr>
+      <tr><td>SN</td><td>雪</td><td></td></tr>
+      <tr><td>BC</td><td>（霧などの）パッチ状</td><td>特性を表す記号として時々見る</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">AIM第8章の天気略号表には他にも多数のコードが載っているが、この地域でまず出ないもの（PO・SQ・FC・SS・DS・FU・VA・DUなど）まで無理に暗記する必要はない。実際によく出るものに絞って押さえておけば十分。</p>
+  </div>
+  <div class="callout info" id="tts-14-13">
+    <div class="ttl">CAVOK（キャブオーケー）</div>
+    Cloud And Visibility OK の略。<b>視程10km以上・雲が5,000ft以下にない・積乱雲（CB）と雄大積雲（TCU）がない</b>状態のときに使われる。滅多に出ないが、たまに見かける。<br>
+    「最低扇形別高度」まで踏み込む必要はない（山が近い空港特有の話で、我々には直接関係しない）。要は「雲がほとんどない良好な状態」と理解しておけば十分。
+  </div>
+
+  <h2 class="sec">14-8　TAFの「TEMPO」と「BECMG」の違い</h2>
+  <div class="card" id="tts-14-14">
+    <div class="card-title">📋 TAFに特有の要素</div>
+    <p style="margin:0;">TAFにはMETARにない要素として、<b>発出日時</b>（TAFはMETARと同時ではなく朝・夜など決まったタイミングで出る）、<b>予報対象期間</b>（日付2桁＋時刻2桁で表記。METAR等の6桁と桁数が違う点に注意）、そして変化を表す<b>TEMPO</b>と<b>BECMG</b>がある。</p>
+  </div>
+  <div class="callout tip" id="tts-14-15">
+    <div class="ttl">BECMG（ビカミング）＝状態が推移して定着する変化</div>
+    一般に「ビカミング」という言葉から想像するのは、ある時刻から変化が始まり、しばらくして変化後の状態で落ち着く、というパターン。ただし実際には、変化が戻ったりまた変化したりを繰り返しながら最終的にある状態に落ち着く場合もBECMGで表される。また、変化が予報されている期間のうちどこかで始まり、期間内のどこかで終わる（必ずしも期間の開始時刻ちょうどに変化が始まるとは限らない）という点も理解しておくこと。
+  </div>
+  <div class="callout tip" id="tts-14-16">
+    <div class="ttl">TEMPO（テンポラリー）＝一時的な変化</div>
+    一般的なイメージ通り、変化が起きてまた元に戻る、という一時的な変化を表す。加えて、予報期間内に<b>1時間未満の変化が複数回起こる</b>場合もTEMPOで表される点がBECMGとの違い。BECMGは「変化して定着する」、TEMPOは「一時的に変化して戻る」と対比させて覚えるとよい。
+  </div>
+
+  <h2 class="sec">14-9　ASAS天気図の実践的な読み方</h2>
+  <div class="card" id="tts-14-17">
+    <div class="card-title">📋 ASASとは</div>
+    <p style="margin:0;">ASAS＝<b>A</b>sia <b>S</b>urface <b>A</b>nalysis <b>S</b>urface（アジア地上実況天気図）。「地上の実況」を「アジア」域で解析した天気図という意味。気象庁が発行し、高気圧・低気圧の位置に加えて<b>移動方向と速度</b>、台風の情報などが明示され、色分けで分かりやすいのが特長（第10章「天気図の読み方（ASAS）」も参照）。天気図の時刻はUTC（Zuluタイム）表記なので、日本時間に直すには<b>9時間を加える</b>。</p>
+  </div>
+  <div class="card" id="tts-14-18">
+    <div class="card-title">📋 距離と到達時刻の見積もり方</div>
+    <p style="margin:0;">緯度によって経線の間隔（＝距離のスケール）が異なるため、天気図には緯度ごとのスケールバーが示されている（例：赤道付近では ある幅＝100海里、北緯40°付近ではそれより広い幅＝100海里、というように）。低気圧の位置から自分の滑空場までの距離をこのスケールバーで測り、天気図に記載されている<b>移動速度（kt）</b>で割れば、およそ何時間後に低気圧が到達するかを見積もることができる。</p>
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">用語：「SLOW」＝10kt以下のゆっくりした移動、「ALMOST STATIONARY」＝ほとんど停滞。黄色い縁取りの内側は霧・雨・雪などがある範囲を示す。</p>
+  </div>
+  <div class="callout tip" id="tts-14-19">
+    <div class="ttl">試験官への説明フレーズ</div>
+    この技術は口述試験で高く評価されやすい。単に「天気予報に雨と書いてあったので」ではなく、天気図から悪天の到達時刻を見積もって説明できると説得力が増す。<br>
+    例：「現状は高気圧に覆われており、低気圧による天候悪化までおよそ10時間の余裕があると見込まれます。したがって本日午前中のフライトには影響ありません」<br>
+    このレベルの読み取りができれば、自家用の口述試験としては十分（気象予報士になるわけではないので、それ以上の精密さは不要）。風の予測についてはBlipMapsのサーフェスウィンドが経験上よく当たるため、根拠として使ってよい。
+  </div>
+
+  <h2 class="sec">14-10　まとめ</h2>
+  <div class="callout tip" id="tts-14-20">
+    <div class="ttl">この章のポイント</div>
+    <ul style="margin:6px 0 0;">
+      <li>安全に飛べるかは、VMC・機体性能（横風制限）・技量・全経路の気象、の4段階で判断する</li>
+      <li>VMCの基準は3,000m以上を基本形として、そこからの「差分」で覚える</li>
+      <li>卓越視程は、視程の良い方から角度を積算して180°を超えた時点の視程</li>
+      <li>METAR・SPECI・TAFの風向は真方位。タワー通報の風向と滑走路方向は磁方位</li>
+      <li>ガスト・バリアブル・欠測の表記ルールを押さえておく</li>
+      <li>現在天気コードの強度記号は「ライト／ヘビー」と読む。CAVOKは雲と視程に問題がない状態</li>
+      <li>BECMGは「変化して定着」、TEMPOは「一時的な変化（1時間未満の複数回変化も含む）」</li>
+      <li>ASAS天気図はスケールバーで距離を測り、移動速度から悪天の到達時刻を見積もって説明できると評価が高い</li>
+      <li>より詳しいMETAR/TAF/SIGMETの解読やAIM第8章の全項目は、教本（音声付き）ch8_kokuu_kisho_full.htmlも参照のこと</li>
+    </ul>
+  </div>
+
+  <div class="pagenav">
+    <a href="#ch13" onclick="showCh('ch13')">← 第13章　実技科目の実施要領と採点基準</a>
+    <span></span>
+  </div>
+</section>
+
+
+<script type="application/json" id="tts-data-14">
+{
+  "title": "航空気象2：METAR/TAFの解読とVMCの実践",
+  "blocks": [
+    {
+      "anchor": "tts-14-0",
+      "text": "第14章、航空気象2、メターとタフの解読とブイエムシーの実践です。出発前の確認で利用する気象情報は、アジア地上天気図エーサス、850、700ヘクトパスカル高層天気図、メター、スペシー、タフ、気象庁の航空気象ページ、下層悪天予想図など、そしてブリップマップスです。"
+    },
+    {
+      "anchor": "tts-14-1",
+      "text": "安全に飛べるかどうかを判断する4つの視点があります。1つ目、法定の飛行条件。離陸、エンルート、着陸を通じてブイエムシーが保たれるか。2つ目、機体性能面、つまり飛行規程の制限事項。離着陸で横風制限を超えないか。ASK21は横風4メートル毎秒、約8ノットです。3つ目、技量の範囲内での安全な飛行。法的にはOKでも慎重に判断します。例えば視程5キロメートルちょうどでよいかということです。4つ目、着陸までの全経路の気象条件の把握。クロスカントリー先の天候予測はどうかということです。この4つ目は特に、ローカルのフライトしか想定していないと、試験官からクロスカントリーに出る可能性はないのですかと突っ込まれることがあります。ライセンス取得後は自分の責任で飛ぶことになるため、いずれクロスカントリーに出ることも見据えて、経路全体の気象を考える姿勢を示すとよいでしょう。"
+    },
+    {
+      "anchor": "tts-14-2",
+      "text": "ブイエムシー、有視界気象状態の基準です。3000メートル以上では、雲との距離が上下300メートル、水平1500メートル、視程8000メートル以上です。3000メートル未満で管制区、管制圏、情報圏の外では、雲との距離が上150メートル、下300メートル、水平600メートル、視程1500メートル以上です。同じ3000メートル未満でも管制区、管制圏、情報圏の内側では、視程5000メートル以上が必要です。管制圏、情報圏の飛行場では雲高300メートル以上、視程5000メートル以上。クラスジー空域、300メートル以下では、雲から離れて飛行し、視程1500メートル以上、ヘリコプターを除く、となっています。"
+    },
+    {
+      "anchor": "tts-14-3",
+      "text": "ブイエムシーは自家用のオーラルで最も問われやすい項目のひとつで、覚え間違いが許されません。おすすめの覚え方は、3000メートル以上の基準を基本形として覚え、そこからの差分で残りを整理することです。3000メートル以上では、雲との距離は上下300メートル、水平1500メートル、視程8000メートル。3000メートル未満に下がると、雲高は上150メートル、水平は600メートルに縮まり、視程は5000メートル、管制区、管制圏、情報圏内、または1500メートル、それ以外、に縮まる、という順で差分をたどると覚えやすいです。"
+    },
+    {
+      "anchor": "tts-14-4",
+      "text": "視程とは何かです。視程とは、どこまで遠くまで見えるかということであり、視界とは異なる概念です。気象通報、メター、スペシー、タフに出てくる視程は卓越視程で、地上での視程にのみ用いられます。"
+    },
+    {
+      "anchor": "tts-14-5",
+      "text": "卓越視程の求め方です。観測点の周囲360度の視程を観測し、視程が良い方から順に角度を足し算していき、合計が180度を超えたところの視程が卓越視程となります。計算例です。15キロメートルが50度、8キロメートルが120度、6キロメートルが70度、5キロメートルが70度、3キロメートルが50度という図の例で、視程の良い方から角度を積算すると、15キロメートルで50度、8キロメートルを加えて170度、6キロメートルを加えて240度、ここで180度を突破します。180度を最初に超えたのは6キロメートルの時点なので、この場合の卓越視程は6キロメートルとなります。"
+    },
+    {
+      "anchor": "tts-14-6",
+      "text": "視程障害現象です。もや、略号ビーアールは、空気中の水蒸気量が多く、一部凝結により微細な水滴が空気中に漂っている状態です。霧、略号エフジーは、もやと同様の状態ですが、水滴密度がもやよりさらに高い状態です。煙霧、ヘイズ、略号エイチゼットは、工場からの排出ガスや森林火災の煙などにより、空気中に微細粒子が漂っている状態で、特に春によく見られます。そのほか、砂や塵、火山灰、煙などによる視程障害もあります。滝川周辺で実際によく見かけるのは、もや、霧、煙霧程度で、その他は覚える優先度が低いです。"
+    },
+    {
+      "anchor": "tts-14-7",
+      "text": "メター、スペシーの構成要素です。種別、空港名、アイカオ4レターコード、日付時刻、風向風速、視程、雲量雲高3群、気温、露点、キューエヌエイチ、補足事項の順に並びます。解読例です。METAR RJCC 281300Z 15007KT 9999 FEW005 SCT030 BKN060 19スラッシュ18 Q1010 RMK 1ST005 4CU030 7SC060 A2984。METARは種別で定時飛行場実況気象通報式、RJCCは新千歳空港、281300Zは28日13時00分、UTC、ズールタイムで、日本時間はこれに9時間を加えます。15007KTは風向150度、観測時刻前10分間の平均、真方位で、風速7ノット。9999は視程10キロメートル以上。FEW005、SCT030、BKN060は、500フィート、3000フィート、6000フィートに、少ない、散在、多い、の雲があるという意味で、雲の種類はここには書かれません。19スラッシュ18は気温19度、露点18度。Q1010はキューエヌエイチ1010ヘクトパスカル。RMK以降は補足事項で、1ST005は層雲が8分雲量1で500フィート、4CU030は積雲が8分雲量4で3000フィート、7SC060は層積雲が8分雲量7で6000フィート、A2984はキューエヌエイチをインチ表示したものです。"
+    },
+    {
+      "anchor": "tts-14-8",
+      "text": "メター、タフの発出頻度です。メターは主要な空港では30分ごと、例えば新千歳、それ以外の空港では1時間ごと、例えば旭川、に発出されます。タフ、飛行場予報式は決まった時刻ではなく、メターと同時に朝、夜の1日数回程度発出される空港があります。"
+    },
+    {
+      "anchor": "tts-14-9",
+      "text": "風向の落とし穴、真方位と磁方位です。メター、スペシー、タフに書かれる風向は真方位です。観測時刻前10分間の平均を10度単位に丸めたものです。一方で、タワーやレディオが飛行中の機体に通報する風向は磁方位であり、滑走路の方向、例えば滝川の01なども磁方位で決められています。つまり、この辺りで真方位が使われるのはメター、スペシー、タフの風向だけで、それ以外は基本的にすべて磁方位だと考えてよいです。この違いは試験官が好んで質問するポイントなので、明確に説明できるようにしておいてください。"
+    },
+    {
+      "anchor": "tts-14-10",
+      "text": "磁方位のズレの原因、関連知識としてのコンパス誤差です。自差は、コンパスそのものが持つ誤差、および機体、周囲の鉄分などから受ける誤差です。操縦席には10度刻みの自差修正表が備え付けられており、機体ごとに異なります。偏差は、地球上の磁場のズレによる誤差で、航空図に7度ウエスト、8度ウエストのように記載されます。実際にコンパスで飛ぶ場合は、これらの誤差をすべて考慮して読む必要があります。"
+    },
+    {
+      "anchor": "tts-14-11",
+      "text": "風のコードの細かい規則です。風速0.4ノット以下、ウインドカームの場合は、00000ノットと表示されます。バリアブル、風向が一定しない場合、平均風速3ノット未満のときは風向をVRBと表記します。平均風速3ノット以上のときは、平均風向、風速のあとに変動幅を付け足します。ガストは、平均風速を10ノット以上上回る最大瞬間風速があった場合に表記されます。欠測は、風の観測が欠測の場合、スラッシュ5本で表されます。"
+    },
+    {
+      "anchor": "tts-14-12",
+      "text": "現在天気コードです。強度記号、マイナスはライト、記号なしはモデレート、プラスはヘビー、に続けて現象コードを読みます。マイナス、プラスとは読まず、ライト、ヘビーと読みます。TSは雷電、サンダーストーム。SHRAはにわか雨。BRはもや。FGは霧。HZは煙霧。DZは霧雨、ドリズル。SNは雪。BCはパッチ状を表す特性の記号です。AIM第8章の天気略号表には他にも多数のコードが載っていますが、この地域でまず出ないものまで無理に暗記する必要はありません。実際によく出るものに絞って押さえておけば十分です。"
+    },
+    {
+      "anchor": "tts-14-13",
+      "text": "キャブオーケーです。クラウドアンドビジビリティオーケーの略で、視程10キロメートル以上、雲が5000フィート以下にない、積乱雲と雄大積雲がない状態のときに使われます。滅多に出ませんが、たまに見かけます。要は、雲がほとんどない良好な状態と理解しておけば十分です。"
+    },
+    {
+      "anchor": "tts-14-14",
+      "text": "タフに特有の要素です。タフにはメターにない要素として、発出日時、タフはメターと同時ではなく朝、夜など決まったタイミングで出ます、予報対象期間、日付2桁、時刻2桁で表記され、メター等の6桁と桁数が違う点に注意が必要です、そして変化を表すテンポとビカミングがあります。"
+    },
+    {
+      "anchor": "tts-14-15",
+      "text": "ビカミングは、状態が推移して定着する変化です。一般にビカミングという言葉から想像するのは、ある時刻から変化が始まり、しばらくして変化後の状態で落ち着くというパターンです。ただし実際には、変化が戻ったりまた変化したりを繰り返しながら最終的にある状態に落ち着く場合もビカミングで表されます。また、変化が予報されている期間のうちどこかで始まり、期間内のどこかで終わる、必ずしも期間の開始時刻ちょうどに変化が始まるとは限らない、という点も理解しておいてください。"
+    },
+    {
+      "anchor": "tts-14-16",
+      "text": "テンポラリーは、一時的な変化です。一般的なイメージ通り、変化が起きてまた元に戻る、という一時的な変化を表します。加えて、予報期間内に1時間未満の変化が複数回起こる場合もテンポで表される点が、ビカミングとの違いです。ビカミングは変化して定着、テンポは一時的に変化して戻る、と対比させて覚えるとよいでしょう。"
+    },
+    {
+      "anchor": "tts-14-17",
+      "text": "エーサスとは何かです。エーサスは、アジア地上実況天気図の意味で、地上の実況をアジア域で解析した天気図という意味です。気象庁が発行し、高気圧、低気圧の位置に加えて移動方向と速度、台風の情報などが明示され、色分けで分かりやすいのが特長です。天気図の時刻はUTC、ズールタイム表記なので、日本時間に直すには9時間を加えます。"
+    },
+    {
+      "anchor": "tts-14-18",
+      "text": "距離と到達時刻の見積もり方です。緯度によって経線の間隔、つまり距離のスケールが異なるため、天気図には緯度ごとのスケールバーが示されています。低気圧の位置から自分の滑空場までの距離をこのスケールバーで測り、天気図に記載されている移動速度、ノットで割れば、およそ何時間後に低気圧が到達するかを見積もることができます。用語として、スローは10ノット以下のゆっくりした移動、オールモストステーショナリーはほとんど停滞している状態を指します。黄色い縁取りの内側は霧、雨、雪などがある範囲を示します。"
+    },
+    {
+      "anchor": "tts-14-19",
+      "text": "この技術は口述試験で高く評価されやすいです。単に、天気予報に雨と書いてあったので、ではなく、天気図から悪天の到達時刻を見積もって説明できると説得力が増します。例えば、現状は高気圧に覆われており、低気圧による天候悪化までおよそ10時間の余裕があると見込まれます、したがって本日午前中のフライトには影響ありません、というように言えばよいです。このレベルの読み取りができれば、自家用の口述試験としては十分です。風の予測についてはブリップマップスのサーフェスウィンドが経験上よく当たるため、根拠として使ってよいです。"
+    },
+    {
+      "anchor": "tts-14-20",
+      "text": "最後にまとめです。安全に飛べるかは、ブイエムシー、機体性能の横風制限、技量、全経路の気象、の4段階で判断します。ブイエムシーの基準は3000メートル以上を基本形として、そこからの差分で覚えます。卓越視程は、視程の良い方から角度を積算して180度を超えた時点の視程です。メター、スペシー、タフの風向は真方位、タワー通報の風向と滑走路方向は磁方位です。ガスト、バリアブル、欠測の表記ルールを押さえておいてください。現在天気コードの強度記号はライト、ヘビーと読みます。キャブオーケーは雲と視程に問題がない状態です。ビカミングは変化して定着、テンポは一時的な変化です。エーサス天気図はスケールバーで距離を測り、移動速度から悪天の到達時刻を見積もって説明できると評価が高いです。これで全14章の内容は終わりです。お疲れ様でした。"
     }
   ]
 }
@@ -3030,6 +3335,14 @@ var wakeLock = {
 
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  // The native Wake Lock is automatically released by the browser whenever the
+  // tab/page loses visibility (app switch, screen lock, etc). Re-acquire it when
+  // the page becomes visible again if a chapter is still playing/paused, otherwise
+  // the screen could go back to sleep after any brief interruption.
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible' && state.playing) wakeLock.acquire();
+  });
 
   function pickJapaneseVoice(){
     var voices = synth.getVoices() || [];

@@ -1,7 +1,8 @@
-const CACHE_NAME = 'oral-exam-v1';
+const CACHE_NAME = 'oral-exam-v2';
 const ASSETS = [
   './index.html',
   './qa_data.js',
+  './fuka_qa_data.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'

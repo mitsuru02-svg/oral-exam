@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="実地試験問答">
+<meta name="theme-color" content="#161b22">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>実地試験 口述問答練習（試験官別）</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+  background: #0d1117; color: #e6edf3; min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.header {
+  background: #161b22; border-bottom: 1px solid #21262d;
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  border-radius: 7px; display: flex; align-items: center;
+  justify-content: center; font-size: 15px; flex-shrink: 0;
+}
+.header-titles { flex: 1; min-width: 0; }
+.header-titles h1 { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-titles .sub { font-size: 10px; color: #8b949e; margin-top: 1px; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.header-btns { display: flex; gap: 5px; align-items: center; }
+.header-badge { background: #21262d; border: 1px solid #30363d; border-radius: 20px; padding: 2px 8px; font-size: 10px; color: #8b949e; }
+#networkBadge { font-size: 10px; color: #8b949e; }
+
+/* voice toggle in header */
+.voice-toggle {
+  background: #21262d; border: 1px solid #30363d; border-radius: 6px;
+  padding: 5px 8px; font-size: 14px; color: #8b949e; cursor: pointer;
+  display: flex; align-items: center; line-height: 1;
+}
+.voice-toggle.on { background: #0d2044; border-color: #3b82f6; color: #93c5fd; }
+.voice-toggle.hf-on { background: #0a2e1a; border-color: #1a7f37; color: #3fb950; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+
+/* ── START SCREEN ── */
+.start-screen { text-align: center; padding: 40px 12px; }
+.start-icon { font-size: 56px; }
+.start-title-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+.start-screen h2 { font-size: 22px; font-weight: 700; }
+.mode-card .mode-inner { display: flex; align-items: center; gap: 10px; }
+.mode-card .mode-icon { font-size: 20px; margin-bottom: 0; flex-shrink: 0; }
+.mode-card .mode-text { text-align: left; }
+.start-screen p { color: #8b949e; font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+.stats-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
+.stat-box { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 14px 20px; text-align: center; min-width: 100px; }
+.stat-box .num { font-size: 26px; font-weight: 700; color: #3b82f6; }
+.stat-box .label { font-size: 11px; color: #8b949e; margin-top: 3px; }
+.mode-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.mode-card {
+  background: #161b22; border: 2px solid #21262d; border-radius: 12px;
+  padding: 16px 18px; cursor: pointer; transition: all 0.2s; text-align: left; min-width: 140px;
+}
+.mode-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+.mode-card.selected { border-color: #3b82f6; background: #0d2044; }
+.mode-card .mode-icon { font-size: 22px; margin-bottom: 6px; }
+.mode-card .mode-name { font-size: 14px; font-weight: 600; }
+.mode-card .mode-desc { font-size: 11px; color: #8b949e; margin-top: 3px; }
+
+.btn-primary {
+  background: #3b82f6; color: white; border: none; border-radius: 10px;
+  padding: 14px 36px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.btn-primary:hover { background: #2563eb; }
+.btn-primary:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+.btn-secondary {
+  background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+  border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.btn-secondary:hover { background: #30363d; }
+
+/* ── EXAM SCREEN ── */
+.exam-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #21262d;
+}
+.progress-info { font-size: 13px; color: #8b949e; }
+.progress-bar-wrap { background: #21262d; border-radius: 4px; height: 4px; width: 160px; margin-top: 6px; }
+.progress-bar { background: #3b82f6; border-radius: 4px; height: 4px; transition: width 0.4s; }
+.score-display { text-align: right; font-size: 13px; color: #8b949e; }
+.score-display span { color: #e6edf3; font-weight: 600; }
+
+.question-card {
+  background: #161b22; border: 1px solid #21262d; border-radius: 14px;
+  padding: 22px 20px; margin-bottom: 16px; position: relative;
+}
+.q-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.q-label {
+  display: inline-block; background: #0d2044; color: #3b82f6;
+  border: 1px solid #1e40af; border-radius: 6px; padding: 3px 10px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+}
+/* speak question button */
+.btn-speak-q {
+  background: transparent; border: 1px solid #30363d; border-radius: 20px;
+  padding: 4px 12px; font-size: 12px; color: #8b949e; cursor: pointer;
+  display: flex; align-items: center; gap: 5px; transition: all 0.2s;
+}
+.btn-speak-q:hover { border-color: #3b82f6; color: #93c5fd; }
+.btn-speak-q.speaking { border-color: #3b82f6; color: #3b82f6; animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+
+.question-text { font-size: 16px; line-height: 1.8; font-weight: 500; }
+
+.answer-area { margin-bottom: 14px; }
+.answer-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.answer-area label { font-size: 13px; color: #8b949e; }
+
+/* MIC button */
+.btn-mic {
+  width: 42px; height: 42px; border-radius: 50%; border: 2px solid #30363d;
+  background: #161b22; color: #8b949e; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;
+}
+.btn-mic:hover { border-color: #3b82f6; color: #3b82f6; }
+.btn-mic.recording {
+  border-color: #f85149; background: #2d0f0f; color: #f85149;
+  animation: mic-pulse 1s infinite;
+}
+.btn-mic.unsupported { opacity: 0.3; cursor: not-allowed; }
+@keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(248,81,73,.4);} 50%{box-shadow:0 0 0 8px rgba(248,81,73,0);} }
+
+.answer-area textarea {
+  width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 10px;
+  padding: 14px 16px; font-size: 16px; color: #e6edf3; line-height: 1.7;
+  resize: vertical; min-height: 120px; font-family: inherit; transition: border-color 0.2s;
+}
+.answer-area textarea:focus { outline: none; border-color: #3b82f6; }
+
+/* mic hint */
+.mic-hint { font-size: 11px; color: #484f58; margin-top: 6px; text-align: center; }
+
+.action-row { display: flex; gap: 10px; align-items: center; }
+.btn-judge {
+  background: #1a7f37; color: white; border: none; border-radius: 10px;
+  padding: 13px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: background 0.2s; flex: 1;
+}
+.btn-judge:hover { background: #15692e; }
+.btn-judge:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+.btn-skip {
+  background: transparent; color: #8b949e; border: 1px solid #30363d;
+  border-radius: 10px; padding: 13px 16px; font-size: 14px; cursor: pointer; transition: all 0.2s;
+}
+.btn-skip:hover { color: #e6edf3; border-color: #484f58; }
+
+/* RESULT */
+.result-box { border-radius: 12px; padding: 20px; margin-top: 16px; border: 1px solid; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+.result-box.correct { background: #0a2e1a; border-color: #1a7f37; }
+.result-box.incorrect { background: #2d0f0f; border-color: #b91c1c; }
+.result-box.partial { background: #2d1d00; border-color: #b45309; }
+.result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.result-badge { font-size: 22px; }
+.result-title { font-size: 17px; font-weight: 700; }
+.result-title.correct { color: #3fb950; }
+.result-title.incorrect { color: #f85149; }
+.result-title.partial { color: #d29922; }
+.result-body { font-size: 14px; line-height: 1.8; color: #c9d1d9; }
+.model-answer { margin-top: 14px; background: rgba(255,255,255,.04); border-radius: 8px; padding: 14px 16px; }
+.model-answer-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.model-answer-label { font-size: 11px; color: #8b949e; font-weight: 700; letter-spacing: .08em; }
+.btn-speak-ans {
+  background: transparent; border: 1px solid #30363d; border-radius: 20px;
+  padding: 3px 10px; font-size: 11px; color: #8b949e; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-speak-ans:hover { border-color: #3b82f6; color: #93c5fd; }
+.btn-speak-ans.speaking { border-color: #3b82f6; color: #3b82f6; animation: pulse 1.2s infinite; }
+.model-answer-text { font-size: 14px; line-height: 1.8; color: #c9d1d9; }
+
+.next-row { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
+
+/* LOADING */
+.loading-box { display: flex; align-items: center; gap: 12px; padding: 18px; color: #8b949e; font-size: 14px; }
+.spinner { width: 20px; height: 20px; border: 2px solid #30363d; border-top-color: #3b82f6; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+/* FINAL */
+.final-screen { text-align: center; padding: 36px 16px; }
+.final-score-ring {
+  width: 130px; height: 130px; border-radius: 50%; margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800;
+}
+.final-score-ring.pass { background: radial-gradient(circle,#0a2e1a,#0d1117); border: 3px solid #3fb950; color: #3fb950; }
+.final-score-ring.fail { background: radial-gradient(circle,#2d0f0f,#0d1117); border: 3px solid #f85149; color: #f85149; }
+.final-grade { font-size: 14px; color: #8b949e; margin-top: 4px; }
+.final-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+.final-stat { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 12px 18px; min-width: 90px; }
+.final-stat .fs-num { font-size: 20px; font-weight: 700; }
+.final-stat .fs-label { font-size: 11px; color: #8b949e; margin-top: 2px; }
+.final-stat.green .fs-num { color: #3fb950; }
+.final-stat.yellow .fs-num { color: #d29922; }
+.final-stat.red .fs-num { color: #f85149; }
+
+.hidden { display: none !important; }
+
+/* install banner */
+.install-banner {
+  display: none; background: #0d2044; border: 1px solid #1e40af; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: #93c5fd;
+  align-items: center; gap: 8px;
+}
+.install-banner.visible { display: flex; }
+.install-banner button { background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+
+/* カテゴリ選択 */
+.cat-section { margin-bottom: 20px; }
+.cat-section-title { font-size: 12px; color: #8b949e; margin-bottom: 8px; letter-spacing: 0.05em; text-align:left; }
+.cat-cards { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.cat-card {
+  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
+  padding: 8px 12px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px; font-size: 13px;
+}
+.cat-card:hover { border-color: #3b82f6; }
+.cat-card.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
+.cat-card .cat-icon { font-size: 16px; }
+.cat-card .cat-count { font-size: 10px; color: #8b949e; margin-left: 2px; }
+.cat-card.selected .cat-count { color: #60a5fa; }
+
+/* 中断ボタン */
+.btn-abort {
+  background: transparent; border: 1px solid #30363d; border-radius: 6px;
+  padding: 4px 10px; font-size: 12px; color: #8b949e; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-abort:hover { border-color: #f85149; color: #f85149; }
+
+/* チェックボタン */
+.btn-check {
+  background: transparent; border: 1px solid #30363d; border-radius: 6px;
+  padding: 4px 10px; font-size: 13px; color: #8b949e; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+}
+.btn-check:hover { border-color: #d29922; color: #d29922; }
+.btn-check.checked { border-color: #d29922; color: #d29922; background: #2d1d00; }
+
+/* アプリモード（試験／聞き流し）タブ */
+.app-mode-tabs { display: flex; gap: 8px; justify-content: center; margin: 14px 0 18px; }
+.app-mode-tab {
+  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
+  padding: 10px 16px; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer;
+  transition: all 0.2s;
+}
+.app-mode-tab.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
+
+/* 問題集切り替え（標準 / Fuka先生） */
+.bank-tabs { display: flex; gap: 8px; justify-content: center; margin: 0 0 18px; }
+.bank-tab {
+  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
+  padding: 8px 14px; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer;
+  transition: all 0.2s;
+}
+.bank-tab.selected { border-color: #d29922; background: #2d1d00; color: #e3b341; }
+
+/* 重要度バッジ */
+.imp-badge {
+  font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 12px;
+  white-space: nowrap;
+}
+.imp-badge.imp3 { background: #2d0f0f; color: #f85149; border: 1px solid #6e1a1a; }
+.imp-badge.imp2 { background: #2d1d00; color: #d29922; border: 1px solid #5c3d00; }
+.imp-badge.imp1 { background: #161b22; color: #8b949e; border: 1px solid #30363d; }
+
+/* 聞き流しモード：再生ボタン */
+.pb-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; }
+.pb-play-btn {
+  width: 64px; height: 64px; border-radius: 50%; background: #3b82f6; color: #fff;
+  border: none; font-size: 24px; cursor: pointer; transition: background 0.2s;
+}
+.pb-play-btn:hover { background: #2563eb; }
+.pb-phase-label { font-size: 12px; color: #8b949e; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;" title="ホームへ戻る">‹</a>
+  <div class="header-icon">🛬</div>
+  <div class="header-titles">
+    <h1>実地試験 口述問答練習</h1>
+    <div class="sub">過去の実地試験報告書から・試験官別</div>
+  </div>
+  <div class="header-right">
+    <div class="header-btns">
+      <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊</button>
+      <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚 HF</button>
+      <div class="header-badge" id="headerBadge">74問</div>
+    </div>
+    <div id="networkBadge">確認中...</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="start-screen">
+    <div class="start-title-row">
+      <div class="start-icon">🛩</div>
+      <h2 id="modeTitle">口述模擬試験</h2>
+    </div>
+    <div class="app-mode-tabs">
+      <button class="app-mode-tab selected" id="tabExam" onclick="selectAppMode('exam')">📝 試験モード</button>
+      <button class="app-mode-tab" id="tabPlayback" onclick="selectAppMode('playback')">🎧 聞き流しモード</button>
+    </div>
+    <p id="modeDesc">問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#8b949e;text-align:left;line-height:1.7;">
+      滝川滑空場での過去の実地試験報告書（上級滑空機の受験者分のみ）から作成した、実際に出た質問の練習問題集です。試験官ごとに質問の傾向が異なるため、下で試験官を絞り込んで練習できます。
+    </div>
+    <div id="examInfoBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
+      🤚 <strong style="color:#3fb950">ON</strong> にすることで、完全ハンズフリー。<br>
+      「<strong>採点</strong>」と言うと結果表示、その後「<strong>次</strong>」と言うと次の問題に進みます。
+    </div>
+    <div id="playbackInfoBox" class="hidden" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
+      🎧 質問→間→模範解答を自動で読み上げ続けます。マイクは使いません。<br>
+      ロック画面やイヤホン・車載機の再生/停止ボタンでも操作できます。
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:13px;color:#8b949e;margin-right:8px">読み上げ音声：</label>
+      <select id="voiceSelect" onchange="onVoiceSelectChange()" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px;max-width:220px;">
+        <option value="">自動（おすすめ）</option>
+      </select>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
+      <div class="stat-box"><div class="num" id="savedCorrect">0</div><div class="label">正解数</div></div>
+      <div class="stat-box"><div class="num" id="savedTotal">0</div><div class="label">解答数</div></div>
+      <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
+    </div>
+    <div class="mode-cards">
+      <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
+        <div class="mode-inner">
+          <div class="mode-icon">🔀</div>
+          <div class="mode-text">
+            <div class="mode-name">ランダム</div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-card" onclick="selectMode('wrong')" id="modeWrong">
+        <div class="mode-inner">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-text">
+            <div class="mode-name">苦手問題</div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
+        <div class="mode-inner">
+          <div class="mode-icon">⭐</div>
+          <div class="mode-text">
+            <div class="mode-name">チェック</div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
+        <div class="mode-inner">
+          <div class="mode-icon">📋</div>
+          <div class="mode-text">
+            <div class="mode-name">順番通り</div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-card" onclick="selectMode('importance')" id="modeImportance">
+        <div class="mode-inner">
+          <div class="mode-icon">🔥</div>
+          <div class="mode-text">
+            <div class="mode-name">頻出順</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 試験官で絞り込み -->
+    <div class="cat-section">
+      <div class="cat-section-title">🧑‍✈️ 試験官で絞り込み（実際にその試験官が出した質問のみ）</div>
+      <div class="cat-cards" id="examinerCards"></div>
+    </div>
+    <!-- カテゴリ選択 -->
+    <div class="cat-section">
+      <div class="cat-section-title">📂 カテゴリ（タップで絞り込み）</div>
+      <div class="cat-cards" id="catCards"></div>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <label style="font-size:13px;color:#8b949e;margin-right:8px">出題数：</label>
+      <select id="countSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
+        <option value="5">5問</option>
+        <option value="10" selected>10問</option>
+        <option value="20">20問</option>
+        <option value="74">全問 (74問)</option>
+      </select>
+    </div>
+    <div id="thinkPauseRow" class="hidden" style="margin-bottom:20px">
+      <label style="font-size:13px;color:#8b949e;margin-right:8px">考える時間：</label>
+      <select id="thinkPauseSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
+        <option value="3">3秒</option>
+        <option value="5" selected>5秒</option>
+        <option value="8">8秒</option>
+        <option value="12">12秒</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="startExam()" id="startBtn">試験開始</button>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div id="examScreen" class="hidden">
+    <div class="exam-header">
+      <div class="progress-info">
+        <div>問題 <span id="qNum">1</span> / <span id="qTotal">10</span></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBar" style="width:0%"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="score-display">
+          正解 <span id="scoreDisplay">0</span> / <span id="answeredDisplay">0</span>
+        </div>
+        <button class="btn-abort" onclick="confirmAbort()">✕ 終了</button>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="q-label-row">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="q-label">問 <span id="qNumBadge">1</span></div>
+          <span id="impBadge" class="imp-badge hidden"></span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn-check" id="btnCheck" onclick="toggleCheck()">☆</button>
+          <button class="btn-speak-q" id="btnSpeakQ" onclick="speakQuestion()">
+            <span>🔊</span><span>問題を聞く</span>
+          </button>
+        </div>
+      </div>
+      <div class="question-text" id="questionText"></div>
+    </div>
+
+    <div class="answer-area" id="answerArea">
+      <div class="answer-label-row">
+        <label>あなたの解答：</label>
+        <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="マイクで解答">🎤</button>
+      </div>
+      <textarea id="userAnswer" placeholder="ここに解答を入力、またはマイクボタンで話してください..." onkeydown="handleKeydown(event)"></textarea>
+      <div class="mic-hint" id="micHint">🎤 マイクボタンを押して話すと自動入力されます</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-judge" id="judgeBtn" onclick="submitAnswer()">採点する</button>
+      <button class="btn-skip" onclick="skipQuestion()">スキップ</button>
+    </div>
+
+    <div id="loadingBox" class="loading-box hidden">
+      <div class="spinner"></div>
+      <span id="loadingText">採点中...</span>
+    </div>
+
+    <div id="resultBox" class="hidden"></div>
+
+    <div id="nextRow" class="next-row hidden">
+      <button class="btn-secondary" id="btnShowAns" onclick="showAnswer()">模範解答を見る</button>
+      <button class="btn-primary" onclick="nextQuestion()">次の問題 →</button>
+    </div>
+  </div>
+
+  <!-- PLAYBACK SCREEN (聞き流しモード) -->
+  <div id="playbackScreen" class="hidden">
+    <div class="exam-header">
+      <div class="progress-info">
+        <div>問題 <span id="pbNum">1</span> / <span id="pbTotal">10</span></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBarPb" style="width:0%"></div>
+        </div>
+      </div>
+      <button class="btn-abort" onclick="abortPlayback()">✕ 終了</button>
+    </div>
+
+    <div class="question-card">
+      <div class="q-label-row">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="q-label">問 <span id="pbNumBadge">1</span></div>
+          <span id="pbImpBadge" class="imp-badge hidden"></span>
+        </div>
+        <div class="pb-phase-label" id="pbPhaseLabel">🔊 読み上げ中</div>
+      </div>
+      <div class="question-text" id="pbQuestionText"></div>
+    </div>
+
+    <div class="model-answer hidden" id="pbAnswerBox">
+      <div class="model-answer-label-row">
+        <span class="model-answer-label">▼ 模範解答</span>
+      </div>
+      <div class="model-answer-text" id="pbAnswerText"></div>
+    </div>
+
+    <div class="pb-controls">
+      <button class="btn-secondary" onclick="pbPrev()" title="前の問題">⏮</button>
+      <button id="pbPlayBtn" class="pb-play-btn" onclick="pbTogglePause()">⏸️</button>
+      <button class="btn-secondary" onclick="pbNext()" title="次の問題">⏭</button>
+    </div>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div id="finalScreen" class="hidden final-screen">
+    <h2 style="margin-bottom:20px">試験結果</h2>
+    <div class="final-score-ring" id="finalRing"><span id="finalPct">0%</span></div>
+    <div class="final-grade" id="finalGrade"></div>
+    <div class="final-stats">
+      <div class="final-stat green"><div class="fs-num" id="fsCorrect">0</div><div class="fs-label">正解</div></div>
+      <div class="final-stat yellow"><div class="fs-num" id="fsPartial">0</div><div class="fs-label">部分正解</div></div>
+      <div class="final-stat red"><div class="fs-num" id="fsWrong">0</div><div class="fs-label">不正解</div></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-secondary" onclick="reviewWrong()">間違えた問題を復習</button>
+      <button class="btn-primary" onclick="showStart()">トップへ戻る</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Install banner -->
+<div class="install-banner" id="installBanner">
+  <span>📲</span>
+  <span style="flex:1">ホーム画面に追加してオフラインで使えます</span>
+  <button onclick="installApp()">追加</button>
+  <button onclick="document.getElementById('installBanner').classList.remove('visible')" style="background:#21262d">✕</button>
+</div>
+
+<script src="./jitchi_qa_data.js"></script>
+<script>
+'use strict';
+
+// ── データソース（本アプリは実地試験Q&A問題集のみを扱う）──────────────
+// 学習履歴（チェック・苦手）はローカルストレージのキーを 'jitchi_' で名前空間化し、
+// 同一オリジンで動く他の問題集アプリ（oral-exam.html等）の保存データと混ざらないようにする。
+function activeQA()    { return JITCHI_QA_DATA; }
+function activeCats()  { return JITCHI_CATEGORIES; }
+function bankKey(name) { return 'jitchi_' + name; }
+
+let selectedExaminer = null; // null = 全員
+
+function impLabel(qa) {
+  const stars = qa.imp === 3 ? '★★★ 定番' : qa.imp === 2 ? '★★ 頻出' : '★ 標準';
+  return stars;
+}
+function setImpBadge(elId, qa) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (qa && qa.imp) {
+    el.textContent = impLabel(qa);
+    el.className = 'imp-badge imp' + qa.imp;
+  } else {
+    el.className = 'imp-badge hidden';
+  }
+}
+
+function initExaminerCards() {
+  const container = document.getElementById('examinerCards');
+  if (!container) return;
+  container.innerHTML = '';
+  const allBtn = document.createElement('div');
+  allBtn.className = 'cat-card selected';
+  allBtn.id = 'ex-all';
+  allBtn.innerHTML = `<span class="cat-icon">🔄</span><span>全員</span><span class="cat-count">${JITCHI_QA_DATA.length}</span>`;
+  allBtn.onclick = () => selectExaminer(null);
+  container.appendChild(allBtn);
+  JITCHI_EXAMINER_GROUPS.forEach(ex => {
+    const btn = document.createElement('div');
+    btn.className = 'cat-card';
+    btn.id = 'ex-' + ex.id;
+    btn.title = ex.note;
+    btn.innerHTML = `<span class="cat-icon">${ex.icon}</span><span>${ex.name}</span><span class="cat-count">${ex.indices.length}</span>`;
+    btn.onclick = () => selectExaminer(ex.id);
+    container.appendChild(btn);
+  });
+}
+
+function selectExaminer(id) {
+  selectedExaminer = id;
+  document.querySelectorAll('#examinerCards .cat-card').forEach(c => c.classList.remove('selected'));
+  const target = id ? document.getElementById('ex-' + id) : document.getElementById('ex-all');
+  if (target) target.classList.add('selected');
+  updateCountMax();
+}
+
+function initApp() {
+  selectedCategory = null;
+  selectedExaminer = null;
+  checkedIndices = JSON.parse(localStorage.getItem(bankKey('checkedIndices')) || '[]');
+  wrongIndices   = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))   || '[]');
+  initCatCards();
+  initExaminerCards();
+  const totalEl = document.getElementById('totalQCount');
+  if (totalEl) totalEl.textContent = activeQA().length;
+  const headerBadge = document.querySelector('.header-badge');
+  if (headerBadge) headerBadge.textContent = activeQA().length + '問';
+  updateCountMax();
+  updateCheckedCount();
+}
+
+function updateCountMax() {
+  const pool = getCategoryPool();
+  const sel = document.getElementById('countSelect');
+  sel.options[3].value = pool.length;
+  sel.options[3].text  = `全問 (${pool.length}問)`;
+  if (parseInt(sel.value) > pool.length) sel.value = Math.min(pool.length, 10);
+}
+
+// ── ハンズフリーモード ────────────────────────────────────────
+let handsFreeMode = false;
+function toggleHandsFree() {
+  handsFreeMode = !handsFreeMode;
+  const btn = document.getElementById('handsFreeBtn');
+  if (handsFreeMode) {
+    btn.textContent = '🤚 ON'; btn.title = 'ハンズフリーON';
+    btn.classList.remove('on'); btn.classList.add('hf-on');
+    document.getElementById('micHint').textContent = '🟢 ハンズフリー: 問題後に自動録音、「採点して」で採点、「次へ」で次の問題';
+  } else {
+    btn.textContent = '🤚'; btn.title = 'ハンズフリーOFF';
+    btn.classList.remove('on');
+    document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
+    stopMic();
+  }
+}
+
+// ── アプリモード（試験 / 聞き流し）─────────────────────────────
+let appMode = 'exam'; // 'exam' | 'playback'
+function selectAppMode(m) {
+  appMode = m;
+  document.getElementById('tabExam').classList.toggle('selected', m === 'exam');
+  document.getElementById('tabPlayback').classList.toggle('selected', m === 'playback');
+  document.getElementById('examInfoBox').classList.toggle('hidden', m !== 'exam');
+  document.getElementById('playbackInfoBox').classList.toggle('hidden', m !== 'playback');
+  document.getElementById('thinkPauseRow').classList.toggle('hidden', m !== 'playback');
+  document.getElementById('modeTitle').textContent = m === 'playback' ? '聞き流しモード' : '口述模擬試験';
+  document.getElementById('modeDesc').innerHTML = m === 'playback'
+    ? '問題と模範解答を自動で読み上げ続けます。<br>運転中など画面を見られないときの聞き流し学習に。'
+    : '問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。';
+  document.getElementById('startBtn').textContent = m === 'playback' ? '再生開始' : '試験開始';
+}
+
+// ── 設定 ────────────────────────────────────────────────────
+// Cloudflare WorkerのURLをデプロイ後にここへ貼る
+// ローカル(start.py)で使う場合は '/api/chat' のまま
+const CONFIG = {
+  API_ENDPOINT: 'https://oral-exam-proxy.mitsuru02.workers.dev',
+};
+// ────────────────────────────────────────────────────────────
+
+// ── PWA ──────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+
+// ── Screen Wake Lock（運転中などの画面スリープ防止）──────────────────
+// 画面がロックされるとJSが一時停止し、ハンズフリー/聞き流しが止まってしまうため、
+// 試験・聞き流しの実行中は画面スリープを止める。非対応環境では無視する。
+let wakeLock = null;
+let sessionRunning = false;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (e) { /* 非対応・拒否時は無視 */ }
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && sessionRunning) requestWakeLock();
+});
+
+// ── Network badge ─────────────────────────────────────────────
+function updateNetworkBadge() {
+  const b = document.getElementById('networkBadge');
+  if (!b) return;
+  if (navigator.onLine) { b.textContent = '🟢 AI採点'; b.style.color = '#3fb950'; }
+  else                  { b.textContent = '🟡 KW採点'; b.style.color = '#d29922'; }
+}
+window.addEventListener('online',  updateNetworkBadge);
+window.addEventListener('offline', updateNetworkBadge);
+
+// ── Offline keyword scoring ───────────────────────────────────
+function scoreOffline(userAns, modelAns) {
+  if (!userAns.trim()) return { verdict:'不正解', comment:'解答が入力されていません。', score:0 };
+  const kws = modelAns.replace(/[。、！？「」『』【】（）…]/g,' ').split(/[\s　]+/).filter(w=>w.length>=2);
+  let hits=0, missed=[];
+  for (const kw of kws) { if (userAns.includes(kw)) hits++; else missed.push(kw); }
+  const r = kws.length>0 ? hits/kws.length : 0;
+  if (r>=0.75) return { verdict:'正解',   comment:'主要なキーワードを含んでいます。（オフライン採点）', score:100 };
+  if (r>=0.40) return { verdict:'部分正解', comment:`一部不足。キーワード例：「${missed.slice(0,5).join('、')}」（オフライン採点）`, score:50 };
+  return { verdict:'不正解', comment:`主要な内容が不足。キーワード例：「${missed.slice(0,5).join('、')}」（オフライン採点）`, score:0 };
+}
+
+// ══════════════════════════════════════════════════════════════
+// VOICE — TTS (読み上げ)
+// ══════════════════════════════════════════════════════════════
+let voiceEnabled = true;
+let ttsVoice = null;
+let currentUtterance = null;
+let speakGeneration = 0;  // 世代番号：新しい speak() が呼ばれたら古い onend を無視
+
+// ── 音声選択（ユーザーが手動で選んだ声。空文字なら自動選択）──────────────
+let userSelectedVoiceURI = localStorage.getItem('selectedVoiceURI') || '';
+
+function computeAutoVoice(voices) {
+  // iOS/macOS で品質の高い日本語音声を優先順位順に探す
+  const preferred = [
+    'O-ren（拡張）',  // iOS 高品質
+    'O-ren',          // iOS 高品質
+    'Kyoko',          // iOS/macOS 高品質（要ダウンロード）
+    'Hattori',        // iOS 高品質
+    'Otoya',          // iOS/macOS 高品質（男性）
+    'お-れん',
+    'はっとり',
+  ];
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name));
+    if (v) return v;
+  }
+  // 見つからなければローカルの日本語音声 → ネットワーク音声の順
+  return voices.find(v => v.lang === 'ja-JP' && v.localService)
+      || voices.find(v => v.lang === 'ja-JP')
+      || voices.find(v => v.lang.startsWith('ja'))
+      || null;
+}
+
+function populateVoiceSelect(voices) {
+  const sel = document.getElementById('voiceSelect');
+  if (!sel) return;
+  const jaVoices = voices.filter(v => v.lang.startsWith('ja'));
+  const list = jaVoices.length > 0 ? jaVoices : voices;
+  sel.innerHTML = '<option value="">自動（おすすめ）</option>';
+  list.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = v.name + (v.localService ? '' : '（ネットワーク）');
+    sel.appendChild(opt);
+  });
+  sel.value = (userSelectedVoiceURI && list.some(v => v.voiceURI === userSelectedVoiceURI)) ? userSelectedVoiceURI : '';
+}
+
+function onVoiceSelectChange() {
+  const sel = document.getElementById('voiceSelect');
+  const uri = sel.value;
+  userSelectedVoiceURI = uri;
+  if (uri) localStorage.setItem('selectedVoiceURI', uri);
+  else localStorage.removeItem('selectedVoiceURI');
+  const voices = speechSynthesis.getVoices();
+  ttsVoice = uri ? (voices.find(v => v.voiceURI === uri) || computeAutoVoice(voices)) : computeAutoVoice(voices);
+  speak('こんにちは。この声で読み上げます。');
+}
+
+function initVoices() {
+  const load = () => {
+    const voices = speechSynthesis.getVoices();
+    populateVoiceSelect(voices);
+    ttsVoice = userSelectedVoiceURI
+      ? (voices.find(v => v.voiceURI === userSelectedVoiceURI) || computeAutoVoice(voices))
+      : computeAutoVoice(voices);
+
+    // デバッグ用：使用する音声をコンソールに表示
+    window._ttsVoice = ttsVoice;
+    if (ttsVoice) console.log('TTS voice:', ttsVoice.name, ttsVoice.lang);
+    else console.log('TTS voice: browser default');
+  };
+  load();
+  speechSynthesis.onvoiceschanged = load;
+}
+if ('speechSynthesis' in window) initVoices();
+
+
+// ══ TTS前処理：日本語の読み上げを改善 ══════════════════════════════
+function ttsClean(text) {
+  // 1. 全角 → 半角
+  text = text.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+  text = text.replace(/\u3000/g, ' ');
+
+  // 2. 数字→日本語読みヘルパー
+  function numJp(s) {
+    s = String(s);
+    if (s.includes('.')) {
+      const [i, d] = s.split('.');
+      return numJpInt(parseInt(i)) + '点' + d.split('').map(x => '零一二三四五六七八九'[x]).join('');
+    }
+    return numJpInt(parseInt(s));
+  }
+  function numJpInt(n) {
+    if (n === 0) return 'ゼロ';
+    const d = ['','一','二','三','四','五','六','七','八','九'];
+    function four(n) {
+      let s = '';
+      if (Math.floor(n/1000))     s += (Math.floor(n/1000)===1?'':d[Math.floor(n/1000)])+'千';
+      if (Math.floor(n%1000/100)) s += (Math.floor(n%1000/100)===1?'':d[Math.floor(n%1000/100)])+'百';
+      if (Math.floor(n%100/10))   s += (Math.floor(n%100/10)===1?'':d[Math.floor(n%100/10)])+'十';
+      if (n%10) s += d[n%10];
+      return s;
+    }
+    const parts = [], units = ['','万','億'];
+    let tmp = n, i = 0;
+    while (tmp > 0) { parts.push([tmp%10000, units[i++]]); tmp = Math.floor(tmp/10000); }
+    let res = '';
+    parts.reverse().forEach(([v,u]) => { if(v) res += four(v)+u; });
+    return res;
+  }
+
+  // 3. 略語辞書（長い順）
+  [
+    ['ASK-21','えーえすけー21'], ['ASK21','えーえすけー21'],
+    ['IMSAFE','アイムセーフ'], ['CAVOK','キャボック'], ['VORMET','ブイオーアールメット'],
+    ['METAR','メター'], ['BECMG','ビカミング'], ['SPECI','スペシー'],
+    ['TEMPO','テンポ'], ['INTER','インター'], ['SPECIAL','スペシャル'],
+    ['AEIS','エーイーアイエス'], ['ATIS','エーティーアイエス'],
+    ['VFR','ブイエフアール'], ['IFR','アイエフアール'],
+    ['VMC','ブイエムシー'],   ['IMC','アイエムシー'],
+    ['VHF','ブイエイチエフ'], ['UHF','ユーエイチエフ'],
+    ['VNE','ブイエヌイー'], ['VBS','ブイビーエス'], ['VRA','ブイアールエー'],
+    ['TAF','たふ'], ['VRB','バリアブル'], ['SAR','サーチアンドレスキュー'],
+    ['QNH','キューエヌエイチ'], ['QFE','キューエフイー'],
+    ['AGL','エージーエル'], ['MSL','エムエスエル'],
+    ['IAS','アイエーエス'], ['TAS','ティーエーエス'], ['TBO','ティービーオー'],
+    ['GS','グラウンドスピード'], ['HF','エイチエフ'],
+    ['VT','ブイティー'], ['VW','ブイダブリュー'], ['VA','ブイエー'],
+    ['DA','ドリフトアングル'], ['WCA','ウインドコレクションアングル'],
+    ['HZ','ヘイズ'], ['BR','ミスト'], ['FG','フォグ'], ['CB','積乱雲'],
+    ['NO.1','なんばーわん'], ['NO.2','なんばーに'],
+    ['NO','ナンバー'], ['CODE','コード'],
+  ].forEach(([en, ja]) => {
+    text = text.replace(new RegExp('(?<![A-Za-z])' + en + '(?![A-Za-z])', 'g'), ja);
+  });
+
+  // 4. 単位付き数値（長いパターン優先）
+  text = text.replace(/(\d+(?:\.\d+)?)\s*(?:ft|FT)/g,  (_, n) => numJp(n)+'フィート');
+  text = text.replace(/(\d+)\s*km\/h/g,                 (_, n) => '時速'+numJp(n)+'キロメートル');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*kt/g,          (_, n) => numJp(n)+'ノット');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*kg/g,          (_, n) => numJp(n)+'キログラム');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*daN/g,         (_, n) => numJp(n)+'デカニュートン');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*km(?!\/)/g,    (_, n) => numJp(n)+'キロメートル');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*(?:MHz|MHZ)/g, (_, n) => numJp(n)+'メガヘルツ');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*m(?![ghHz\/A-Za-z])/g, (_, n) => numJp(n)+'メートル');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*%/g,           (_, n) => numJp(n)+'パーセント');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*℃/g,          (_, n) => numJp(n)+'度');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*°/g,           (_, n) => numJp(n)+'度');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*W(?![A-Za-z])/g, (_, n) => numJp(n)+'ワット');
+  text = text.replace(/mg\/dL\/H/g, 'ミリグラムパーデシリットルパーアワー');
+
+  // 5. 数字の範囲（16～20 → 十六から二十）
+  text = text.replace(/(\d+)\s*[~〜～]\s*(\d+)/g, (_, a, b) => numJp(a)+'から'+numJp(b));
+
+  // 6. 残りの数字（単位なし）—— \b は CJK 前後で効かないため lookahead/behind を使う
+  text = text.replace(/(?<![.\d])(\d{2,})(?![.\d])/g, (_, n) => numJp(n));
+  text = text.replace(/(?<![.\d])(\d)(?![.\d])/g,     (_, n) => '零一二三四五六七八九'[n]);
+
+  // 6.5 「時」の読み方（〜る時・〜た時などの「とき」用法のみをひらがな化）
+  // 時間・時刻・日時・同時・定時・不時着などの複合語は元の漢字のまま残す。
+  // 下の「飛行」→「ひこう」等の変換より前に行うことで、「飛行時」のような
+  // 複合語が誤って「ひこうとき」になってしまうのを防ぐ。
+  text = text.replace(/(?<=[ぁ-んー])時(?![一-鿿])/g, 'とき');
+
+  // 7. 航空用語の読み仮名（TTSが誤読しやすい語）
+  const kanjiWords = [
+    ['第四旋回','だいよんせんかい'],
+    ['尾翼',    'びよく'],
+    ['昇降舵',  'しょうこうだ'],
+    ['補助翼',  'ほじょよく'],
+    ['方向舵',  'ほうこうだ'],
+    ['主翼',    'しゅよく'],
+    ['翼端',    'よくたん'],
+    ['操縦桿',  'そうじゅうかん'],
+    ['曳航索',  'えいこうさく'],
+    ['曳航機',  'えいこうき'],
+    ['曳航中',  'えいこうちゅう'],
+    ['曳航',    'えいこう'],
+    ['滑空機',  'かっくうき'],
+    ['滑空場',  'かっくうじょう'],
+    ['耐空証明','たいくうしょうめい'],
+    ['耐空類別','たいくうるいべつ'],
+    ['耐空性',  'たいくうせい'],
+    ['耐空',    'たいくう'],
+    ['場周経路','じょうしゅうけいろ'],
+    ['場周',    'じょうしゅう'],
+    ['不時着',  'ふじちゃく'],
+    ['着陸帯',  'ちゃくりくたい'],
+    ['繋留',    'けいりゅう'],
+    ['誘導抵抗','ゆうどうていこう'],
+    ['地面効果','じめんこうか'],
+    ['失速',    'しっそく'],
+    ['旋回',    'せんかい'],
+    ['離脱',    'りだつ'],
+    ['高高度',  'こうこうど'],
+    ['低高度',  'ていこうど'],
+    ['高度',    'こうど'],
+    ['加速度',  'かそくど'],
+    ['速度',    'そくど'],
+    ['規定値',  'きていち'],
+    ['規程値',  'きていち'],
+    ['滞空',    'たいくう'],
+    ['間隔',    'かんかく'],
+    ['雲底',    'うんてい'],
+    ['積載物',  'せきさいぶつ'],
+    ['搭載物',  'とうさいぶつ'],
+    ['後席',    'こうせき'],
+    ['機首',    'きしゅ'],
+    ['揚力',    'ようりょく'],
+    ['滝川',    'たきかわ'],
+    ['有効期限外','ゆうこうきげんがい'],
+    ['落下傘',    'らっかさん'],
+    ['非常信号灯','ひじょうしんごうとう'],
+    ['携帯灯',    'けいたいとう'],
+    ['救命胴衣',  'きゅうめいどうい'],
+    ['入りやすく','はいりやすく'],
+    ['入りやすい','はいりやすい'],
+    ['滑油',    'かつゆ'],
+    ['装備品',  'そうびひん'],
+    ['滅失',    'めっしつ'],
+    ['行って',  'おこなって'],
+    ['汚損',    'おそん'],
+    ['訂正印',  'ていせいいん'],
+    ['空中線',  'くうちゅうせん'],
+    ['曲技',    'きょくぎ'],
+    ['高々度',  'こうこうど'],
+    ['前席',    'ぜんせき'],
+    ['上昇風帯','じょうしょうふうたい'],
+    ['気流中',  'きりゅうちゅう'],
+    ['乱される','みだされる'],
+    ['経路上',  'けいろじょう'],
+    ['風防',    'ふうぼう'],
+    ['積乱雲',  'せきらんうん'],
+    ['積雲',    'せきうん'],
+    ['熱雷',    'ねつらい'],
+    ['界雷',    'かいらい'],
+    ['層雲',    'そううん'],
+    ['悪天',    'あくてん'],
+    ['空地通信','くうちつうしん'],
+    ['空地',    'くうち'],
+    ['滑翔',    'かっしょう'],
+    ['陸海風',  'りくかいふう'],
+    ['海風',    'かいふう'],
+    ['高層風',  'こうそうふう'],
+    ['風向',    'ふうこう'],
+    ['風速',    'ふうそく'],
+    ['風力',    'ふうりょく'],
+    ['強風',    'きょうふう'],
+    ['横風',    'よこかぜ'],
+    ['風上',    'かざかみ'],
+    ['風下',    'かざしも'],
+    ['風邪',    'かぜ'],
+    ['上昇風',  'じょうしょうふう'],
+    ['山岳波',  'さんがくは'],
+    ['飛行場',  'ひこうじょう'],
+    ['飛行船',  'ひこうせん'],
+    ['飛行中',  'ひこうちゅう'],
+    ['飛行方式','ひこうほうしき'],
+    ['飛行',    'ひこう'],
+    ['長ズボン','ながずぼん'],
+    ['入りました','はいりました'],
+    ['協定世界時','きょうていせかいじ'],
+    ['世界時',  'せかいじ'],
+    ['日本標準時','にほんひょうじゅんじ'],
+    ['軟鉄',    'なんてつ'],
+    ['低圧帯',  'ていあつたい'],
+    ['高圧帯',  'こうあつたい'],
+    ['滑走路上','かっそうろじょう'],
+    ['航程線',  'こうていせん'],
+    ['中緯度',  'ちゅういど'],
+    ['日射病',  'にっしゃびょう'],
+    ['血中',    'けっちゅう'],
+    ['破傷風',  'はしょうふう'],
+    ['保命法',  'ほめいほう'],
+    ['保命',    'ほめい'],
+    ['主用',    'しゅよう'],
+    ['判断力',  'はんだんりょく'],
+    ['記憶力',  'きおくりょく'],
+    ['警戒心',  'けいかいしん'],
+    ['犯され',  'おかされ'],
+    ['吐いた',  'はいた'],
+    ['備付',    'びふ'],
+    ['平方根倍','へいほうこんばい'],
+    ['目標物',  'もくひょうぶつ'],
+    ['振動数',  'しんどうすう'],
+    ['雲頂',    'うんちょう'],
+    ['前問',    'ぜんもん'],
+    ['吸汗性',  'きゅうかんせい'],
+    ['環境下',  'かんきょうか'],
+    ['の下で',  'のもとで'],
+    ['諸手続き','しょてつづき'],
+    ['諸手続',  'しょてつづき'],
+    ['通信術',  'つうしんじゅつ'],
+    ['六十日',  'ろくじゅうにち'],
+    ['雲高',    'うんこう'],
+    ['翼根',    'よくこん'],
+    ['後縁端',  'こうえんたん'],
+    ['発航',    'はっこう'],
+    ['管理下',  'かんりか'],
+    ['原簿',    'げんぼ'],
+    ['剥がして','はがして'],
+    ['大舵',    'おおかじ'],
+    ['針路',    'しんろ'],
+    ['滑り',    'すべり'],
+    ['引き込み脚','ひきこみきゃく'],
+    ['下方',    'かほう'],
+    ['バンク角','バンクかく'],
+    ['不調時',  'ふちょうじ'],
+    ['目安表',  'めやすひょう'],
+    ['修正表',  'しゅうせいひょう'],
+    ['略号表',  'りゃくごうひょう'],
+    ['風',      'かぜ'],
+  ];
+  kanjiWords.forEach(([kanji, yomi]) => {
+    text = text.replace(new RegExp(kanji, 'g'), yomi);
+  });
+
+  // 8. 記号
+  text = text.replace(/…/g, '。');
+  text = text.replace(/±/g, 'プラスマイナス');
+  text = text.replace(/[~〜～]/g, 'から');
+  text = text.replace(/[①②③④⑤⑥⑦⑧⑨⑩]/g,
+    c => ['一','二','三','四','五','六','七','八','九','十'][c.codePointAt(0)-0x2460] + '、');
+  text = text.replace(/・/g, '、');
+  text = text.replace(/\//g, 'スラッシュ');
+
+  return text;
+}
+
+function speak(text, onEnd) {
+  if (!voiceEnabled || !('speechSynthesis' in window)) { if (onEnd) onEnd(); return; }
+
+  // 世代番号を進めて古い発話のコールバックを無効化
+  speakGeneration++;
+  const myGen = speakGeneration;
+
+  // iOSでは cancel() を呼ばず、paused状態だけ解除する
+  if (speechSynthesis.paused) speechSynthesis.resume();
+
+  const clean = ttsClean(text).replace(/（/g,'(').replace(/）/g,')');
+
+  function doSpeak() {
+    if (myGen !== speakGeneration) return; // 既に新しい発話が来ていたら中止
+    const utt = new SpeechSynthesisUtterance(clean);
+    utt.lang   = 'ja-JP';
+    utt.rate   = 0.88;
+    utt.pitch  = 1.05;
+    utt.volume = 1.0;
+    if (ttsVoice) utt.voice = ttsVoice;
+
+    utt.onend = () => {
+      if (myGen !== speakGeneration) return; // 古い世代は無視
+      currentUtterance = null;
+      if (onEnd) onEnd();
+    };
+    utt.onerror = (e) => {
+      if (myGen !== speakGeneration) return;
+      if (e.error === 'interrupted') return; // cancel()によるものは無視
+      currentUtterance = null;
+      if (onEnd) onEnd();
+    };
+    currentUtterance = utt;
+    speechSynthesis.speak(utt);
+  }
+
+  // 現在再生中なら cancel() してから少し待って発話
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    setTimeout(doSpeak, 400);
+  } else {
+    doSpeak();
+  }
+}
+
+function stopSpeaking() {
+  speakGeneration++; // 古い世代のコールバックを無効化
+  currentUtterance = null;
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
+}
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  const btn = document.getElementById('voiceToggle');
+  if (voiceEnabled) { btn.textContent = '🔊'; btn.classList.add('on'); btn.title = '音声ON'; }
+  else              { btn.textContent = '🔇'; btn.classList.remove('on'); btn.title = '音声OFF'; stopSpeaking(); }
+}
+
+// Speak the current question
+function speakQuestion() {
+  const btn = document.getElementById('btnSpeakQ');
+  const text = document.getElementById('questionText').textContent;
+  if (btn.classList.contains('speaking')) { stopSpeaking(); btn.classList.remove('speaking'); return; }
+  btn.classList.add('speaking');
+  speak(text, () => btn.classList.remove('speaking'));
+}
+
+// Speak result + model answer
+function speakResult(verdict, comment, modelAnswer) {
+  if (!voiceEnabled) return;
+  let msg = '';
+  if (verdict==='正解')    msg = '正解です。' + comment;
+  else if (verdict==='部分正解') msg = '部分正解です。' + comment + '。模範解答は次の通りです。' + modelAnswer;
+  else                     msg = '不正解です。' + comment + '。模範解答は次の通りです。' + modelAnswer;
+  speak(msg);
+}
+
+// ══════════════════════════════════════════════════════════════
+// VOICE — STT (音声入力)
+// ══════════════════════════════════════════════════════════════
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isRecording = false;
+let accumulatedText = '';
+
+function initRecognition() {
+  if (!SpeechRecognition) {
+    document.getElementById('micBtn').classList.add('unsupported');
+    document.getElementById('micHint').textContent = 'このブラウザは音声入力に対応していません';
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = true;       // keep listening
+  recognition.interimResults = true;   // show partial results
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        accumulatedText += e.results[i][0].transcript;
+      } else {
+        interim = e.results[i][0].transcript;
+      }
+    }
+
+    const fullText = accumulatedText + interim;
+
+    // ── 音声コマンド検出 ──────────────────────────────────────
+    // 「採点して」「採点」→ 採点実行
+    if (/採点(して)?/.test(fullText)) {
+      accumulatedText = fullText.replace(/採点(して)?/g, '').trim();
+      document.getElementById('userAnswer').value = accumulatedText;
+      stopMic();
+      setTimeout(() => submitAnswer(), 300);
+      return;
+    }
+    // 「次」「次へ」「Next」「ネクスト」→ 次の問題へ
+    if (/(次(の問題)?(へ)?|[Nn]ext|ネクスト)/.test(fullText.trim()) && !document.getElementById("nextRow").classList.contains("hidden")) {
+      accumulatedText = '';
+      document.getElementById('userAnswer').value = '';
+      stopMic();
+      const nextBtn = document.querySelector('#nextRow .btn-primary');
+      if (nextBtn && !document.getElementById('nextRow').classList.contains('hidden')) {
+        setTimeout(() => nextQuestion(), 300);
+      }
+      return;
+    }
+    // ────────────────────────────────────────────────────────
+
+    document.getElementById('userAnswer').value = fullText;
+  };
+
+  recognition.onend = () => {
+    if (isRecording) {
+      // iOS Safari sometimes stops; restart if still recording
+      try { recognition.start(); } catch(e) { stopMic(); }
+    }
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error !== 'aborted') stopMic();
+  };
+}
+initRecognition();
+
+function toggleMic() {
+  const micBtn = document.getElementById('micBtn');
+  if (micBtn.classList.contains('unsupported')) return;
+  if (isRecording) stopMic(); else startMic();
+}
+
+function startMic() {
+  if (!recognition) return;
+  stopSpeaking(); // stop TTS before listening
+  accumulatedText = document.getElementById('userAnswer').value;
+  isRecording = true;
+  document.getElementById('micBtn').classList.add('recording');
+  document.getElementById('micHint').textContent = handsFreeMode ? '🔴 録音中…「採点して」で採点、「次へ」で次の問題' : '🔴 録音中… もう一度ボタンを押すと停止';
+  try { recognition.start(); } catch(e) { stopMic(); }
+}
+
+function stopMic() {
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
+  try { recognition.stop(); } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════════════════
+let mode = 'random';
+let selectedCategory = null;
+let checkedIndices = JSON.parse(localStorage.getItem(bankKey('checkedIndices')) || '[]');
+let examQuestions = [];
+let currentIdx = 0;
+let correctCount = 0, partialCount = 0, wrongCount = 0, answered = 0;
+let results = [];
+let wrongIndices   = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))  || '[]');
+let sessionCorrect = parseInt(localStorage.getItem(bankKey('totalCorrect'))    || '0');
+let sessionTotal   = parseInt(localStorage.getItem(bankKey('totalAnswered'))   || '0');
+
+document.getElementById('savedCorrect').textContent = sessionCorrect;
+document.getElementById('savedTotal').textContent   = sessionTotal;
+
+function selectMode(m) {
+  if (m === 'checked' && checkedIndices.length === 0) {
+    alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
+    return;
+  }
+  mode = m;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  const el = document.getElementById('mode' + m[0].toUpperCase() + m.slice(1));
+  if (el) el.classList.add('selected');
+}
+
+function initCatCards() {
+  const container = document.getElementById('catCards');
+  if (!container) return;
+  container.innerHTML = '';
+  const allBtn = document.createElement('div');
+  allBtn.className = 'cat-card selected';
+  allBtn.id = 'cat-all';
+  allBtn.innerHTML = `<span class="cat-icon">🔄</span><span>全問</span><span class="cat-count">${activeQA().length}</span>`;
+  allBtn.onclick = () => selectCategory(null);
+  container.appendChild(allBtn);
+  activeCats().forEach(cat => {
+    const btn = document.createElement('div');
+    btn.className = 'cat-card';
+    btn.id = 'cat-' + cat.id;
+    btn.innerHTML = `<span class="cat-icon">${cat.icon}</span><span>${cat.name}</span><span class="cat-count">${cat.indices.length}</span>`;
+    btn.onclick = () => selectCategory(cat.id);
+    container.appendChild(btn);
+  });
+}
+
+function selectCategory(catId) {
+  selectedCategory = catId;
+  document.querySelectorAll('#catCards .cat-card').forEach(c => c.classList.remove('selected'));
+  const target = catId ? document.getElementById('cat-' + catId) : document.getElementById('cat-all');
+  if (target) target.classList.add('selected');
+  const pool = getCategoryPool();
+  if (catId === 'checked' && pool.length === 0) {
+    alert('チェック問題がありません。問題画面の ☆ ボタンでチェックできます。');
+    selectCategory(null);
+    return;
+  }
+  updateCountMax();
+}
+
+function getCategoryPool() {
+  // カテゴリ絞り込み（checkedモードはstartExamで処理）
+  let pool = !selectedCategory
+    ? [...Array(activeQA().length).keys()]
+    : (activeCats().find(c => c.id === selectedCategory)?.indices.slice() || [...Array(activeQA().length).keys()]);
+  // 試験官絞り込み（併用可能）
+  if (selectedExaminer) {
+    const exGroup = JITCHI_EXAMINER_GROUPS.find(e => e.id === selectedExaminer);
+    const exSet = new Set(exGroup ? exGroup.indices : []);
+    pool = pool.filter(i => exSet.has(i));
+  }
+  return pool;
+}
+
+// チェックボタンのトグル
+function toggleCheck() {
+  const qIdx = examQuestions[currentIdx];
+  const btn = document.getElementById('btnCheck');
+  if (checkedIndices.includes(qIdx)) {
+    checkedIndices = checkedIndices.filter(i => i !== qIdx);
+    btn.textContent = '☆';
+    btn.classList.remove('checked');
+  } else {
+    checkedIndices.push(qIdx);
+    btn.textContent = '⭐';
+    btn.classList.add('checked');
+  }
+  localStorage.setItem(bankKey('checkedIndices'), JSON.stringify(checkedIndices));
+  // チェック数を各所に反映
+  updateCheckedCount();
+}
+
+// チェック状態を反映
+function updateCheckedCount() {
+  const n = checkedIndices.length;
+  const el = document.getElementById('checkedCount');
+  if (el) el.textContent = n;
+  // モードカードの表示も更新
+  const modeEl = document.getElementById('modeChecked');
+  if (modeEl) {
+    const nameEl = modeEl.querySelector('.mode-name');
+    if (nameEl) nameEl.textContent = n > 0 ? `チェック(${n})` : 'チェック';
+  }
+}
+
+function updateCheckBtn() {
+  const qIdx = examQuestions[currentIdx];
+  const btn = document.getElementById('btnCheck');
+  if (!btn) return;
+  if (checkedIndices.includes(qIdx)) {
+    btn.textContent = '⭐'; btn.classList.add('checked');
+  } else {
+    btn.textContent = '☆'; btn.classList.remove('checked');
+  }
+}
+
+// 中断確認
+function confirmAbort() {
+  if (confirm('試験を終了して表紙に戻りますか？')) {
+    stopSpeaking(); stopMic();
+    sessionRunning = false;
+    releaseWakeLock();
+    document.getElementById('examScreen').classList.add('hidden');
+    showStart();
+  }
+}
+
+function buildExamPool() {
+  const count = parseInt(document.getElementById('countSelect').value);
+  let pool = getCategoryPool();
+  if (mode === 'checked') {
+    // カテゴリ絞り込みがある場合はその中のチェック問題、なければ全チェック問題
+    pool = checkedIndices.filter(i => pool.includes(i));
+    if (pool.length === 0) {
+      alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
+      return null;
+    }
+  } else if (mode === 'wrong') {
+    const wrongInCat = wrongIndices.filter(i => pool.includes(i));
+    if (wrongInCat.length > 0) pool = wrongInCat;
+    else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
+  }
+  if (mode === 'importance') {
+    // ★★★→★★→★の順。同じ重要度の中はシャッフル（sortは安定なので順序が保たれる）
+    pool = pool.sort(() => Math.random() - 0.5)
+               .sort((a, b) => (activeQA()[b].imp || 1) - (activeQA()[a].imp || 1));
+  } else if (mode !== 'order') {
+    // 重み付きランダム：重要度が高い問題ほど前に出やすい（A-Res法）
+    pool = pool.map(i => ({ i, k: Math.pow(Math.random(), 1 / (activeQA()[i].imp || 1)) }))
+               .sort((a, b) => b.k - a.k).map(o => o.i);
+  }
+  return pool.slice(0, Math.min(count, pool.length));
+}
+
+function startExam() {
+  const pool = buildExamPool();
+  if (!pool) return;
+  examQuestions = pool;
+  document.getElementById('startScreen').classList.add('hidden');
+  sessionRunning = true;
+  requestWakeLock();
+
+  if (appMode === 'playback') {
+    document.getElementById('playbackScreen').classList.remove('hidden');
+    document.getElementById('pbTotal').textContent = examQuestions.length;
+    startPlayback();
+    return;
+  }
+
+  currentIdx = 0; correctCount = 0; partialCount = 0; wrongCount = 0; answered = 0; results = [];
+  document.getElementById('examScreen').classList.remove('hidden');
+  document.getElementById('qTotal').textContent = examQuestions.length;
+  showQuestion();
+}
+
+function showQuestion() {
+  stopSpeaking(); stopMic();
+  const qIdx = examQuestions[currentIdx];
+  const qa   = activeQA()[qIdx];
+
+  document.getElementById('qNum').textContent       = currentIdx + 1;
+  document.getElementById('qNumBadge').textContent  = qIdx + 1;
+  setImpBadge('impBadge', qa);
+  document.getElementById('questionText').textContent = qa.q;
+  document.getElementById('userAnswer').value = '';
+  document.getElementById('userAnswer').disabled = false;
+  document.getElementById('resultBox').classList.add('hidden');
+  document.getElementById('resultBox').innerHTML = '';
+  document.getElementById('nextRow').classList.add('hidden');
+  document.getElementById('loadingBox').classList.add('hidden');
+  document.getElementById('judgeBtn').disabled = false;
+  document.getElementById('btnSpeakQ').classList.remove('speaking');
+  updateCheckBtn();
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micHint').textContent = '🎤 マイクボタンを押して話すと自動入力されます';
+
+  const progress = (currentIdx / examQuestions.length) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+  document.getElementById('scoreDisplay').textContent   = correctCount + partialCount;
+  document.getElementById('answeredDisplay').textContent = answered;
+
+  // Auto-read question if voice is on → 読み上げ完了後に自動マイクON
+  // iOSは cancel() 直後の speak() を無視するため 350ms 待つ
+  if (voiceEnabled) {
+    document.getElementById('btnSpeakQ').classList.add('speaking');
+    setTimeout(() => {
+      speak(qa.q, () => {
+        document.getElementById('btnSpeakQ').classList.remove('speaking');
+        // ハンズフリーモードONなら自動でマイク開始
+        if (handsFreeMode && recognition) {
+          setTimeout(() => startMic(), 400);
+        }
+      });
+    }, 350);
+  } else if (handsFreeMode && recognition) {
+    // 音声OFFでもハンズフリーならマイクON
+    setTimeout(() => startMic(), 400);
+  }
+}
+
+function handleKeydown(e) {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submitAnswer();
+}
+
+async function submitAnswer() {
+  const userAns = document.getElementById('userAnswer').value.trim();
+  if (!userAns) {
+    document.getElementById('userAnswer').style.borderColor = '#b91c1c';
+    setTimeout(() => document.getElementById('userAnswer').style.borderColor = '', 1000);
+    return;
+  }
+  stopMic(); stopSpeaking();
+  const qIdx = examQuestions[currentIdx];
+  const qa   = activeQA()[qIdx];
+  document.getElementById('judgeBtn').disabled = true;
+  document.getElementById('userAnswer').disabled = true;
+  document.getElementById('loadingBox').classList.remove('hidden');
+
+  // Offline
+  if (!navigator.onLine) {
+    setTimeout(() => {
+      document.getElementById('loadingBox').classList.add('hidden');
+      handleResult(scoreOffline(userAns, qa.a), qa, qIdx, userAns);
+    }, 300);
+    return;
+  }
+
+  // Online AI scoring
+  try {
+    document.getElementById('loadingText').textContent = 'AI採点中...';
+    const prompt = `あなたは自家用操縦士（上級滑空機）実地試験の口述問答の採点官です。
+
+【問題】${qa.q}
+【模範解答】${qa.a}
+${qa.hint ? '【採点観点】' + qa.hint + '\n' : ''}【受験者の解答】${userAns}
+
+採点基準：
+- 「正解」：主要なポイントを正しく含んでいる
+- 「部分正解」：一部正しいが重要な要素が欠けている
+- 「不正解」：主要なポイントが誤っているか欠けている
+
+JSON形式のみで回答（前後のテキスト不要）：
+{"verdict":"正解"|"部分正解"|"不正解","comment":"採点コメント","score":100|50|0}`;
+
+    // プロキシ経由でAnthropic APIへ（CONFIG.API_ENDPOINTで切り替え）
+    const res  = await fetch(CONFIG.API_ENDPOINT, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:800,
+        messages:[{role:'user', content:prompt}] })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const result = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+    document.getElementById('loadingBox').classList.add('hidden');
+    handleResult(result, qa, qIdx, userAns);
+  } catch(e) {
+    document.getElementById('loadingBox').classList.add('hidden');
+    const r = scoreOffline(userAns, qa.a);
+    r.comment = '（AI接続エラー・自動採点）' + r.comment;
+    handleResult(r, qa, qIdx, userAns);
+  }
+}
+
+function handleResult(result, qa, qIdx, userAns) {
+  const isCorrect = result.verdict === '正解';
+  const isPartial = result.verdict === '部分正解';
+  answered++;
+  if (isCorrect) { correctCount++; wrongIndices = wrongIndices.filter(i=>i!==qIdx); }
+  else { if (isPartial) partialCount++; else wrongCount++; if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx); }
+  localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  results.push({qIdx, verdict:result.verdict, userAns});
+
+  const cls   = isCorrect ? 'correct' : isPartial ? 'partial' : 'incorrect';
+  const icon  = isCorrect ? '✅' : isPartial ? '⚠️' : '❌';
+  const title = isCorrect ? '正解！' : isPartial ? '部分正解' : '不正解';
+
+  const box = document.getElementById('resultBox');
+  box.className = `result-box ${cls}`;
+  box.innerHTML = `
+    <div class="result-header">
+      <span class="result-badge">${icon}</span>
+      <span class="result-title ${cls}">${title}</span>
+    </div>
+    <div class="result-body">${result.comment || (isCorrect ? 'よくできました！' : '')}</div>
+    ${!isCorrect ? `
+    <div class="model-answer">
+      <div class="model-answer-label-row">
+        <span class="model-answer-label">▼ 模範解答</span>
+        <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
+      </div>
+      <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
+    </div>` : ''}
+  `;
+  box.classList.remove('hidden');
+  document.getElementById('scoreDisplay').textContent    = correctCount + partialCount;
+  document.getElementById('answeredDisplay').textContent = answered;
+
+  const nextRow = document.getElementById('nextRow');
+  nextRow.classList.remove('hidden');
+  const showAnsBtn = document.getElementById('btnShowAns');
+  showAnsBtn.style.display = isCorrect ? 'none' : '';
+
+  // Auto-speak result → 読み上げ完了後にハンズフリーならマイク再開
+  if (handsFreeMode) {
+    const textToSpeak = (() => {
+      let msg = '';
+      if (result.verdict==='正解')         msg = '正解です。' + (result.comment||'');
+      else if (result.verdict==='部分正解') msg = '部分正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
+      else                                 msg = '不正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
+      return msg;
+    })();
+    speak(textToSpeak, () => {
+      // 読み上げ完了後にマイクON → 「次へ」コマンド待ち
+      if (handsFreeMode) setTimeout(() => startMic(), 400);
+    });
+  } else {
+    speakResult(result.verdict, result.comment || '', isCorrect ? '' : qa.a);
+  }
+}
+
+function speakModelAnswer() {
+  const btn  = document.getElementById('btnSpeakAns');
+  const text = document.getElementById('modelAnswerText').textContent;
+  if (btn.classList.contains('speaking')) { stopSpeaking(); btn.classList.remove('speaking'); return; }
+  btn.classList.add('speaking');
+  speak(text, () => btn.classList.remove('speaking'));
+}
+
+function showAnswer() {
+  const qIdx = examQuestions[currentIdx];
+  const qa   = activeQA()[qIdx];
+  const box  = document.getElementById('resultBox');
+  if (!box.querySelector('.model-answer')) {
+    box.innerHTML += `
+      <div class="model-answer">
+        <div class="model-answer-label-row">
+          <span class="model-answer-label">▼ 模範解答</span>
+          <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
+        </div>
+        <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
+      </div>`;
+  }
+  document.getElementById('btnShowAns').style.display = 'none';
+  if (voiceEnabled) speakModelAnswer();
+}
+
+function skipQuestion() {
+  answered++; wrongCount++;
+  const qIdx = examQuestions[currentIdx];
+  if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
+  localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  results.push({qIdx, verdict:'スキップ', userAns:''});
+  nextQuestion();
+}
+
+function nextQuestion() {
+  stopSpeaking();
+  currentIdx++;
+  if (currentIdx >= examQuestions.length) showFinalScreen();
+  else showQuestion();
+}
+
+function showFinalScreen() {
+  stopSpeaking();
+  sessionRunning = false;
+  releaseWakeLock();
+  sessionCorrect += correctCount; sessionTotal += answered;
+  localStorage.setItem(bankKey('totalCorrect'),   sessionCorrect);
+  localStorage.setItem(bankKey('totalAnswered'),  sessionTotal);
+  document.getElementById('examScreen').classList.add('hidden');
+  document.getElementById('finalScreen').classList.remove('hidden');
+  const pct = answered>0 ? Math.round((correctCount/answered)*100) : 0;
+  document.getElementById('finalPct').textContent   = pct + '%';
+  document.getElementById('finalRing').className    = 'final-score-ring ' + (pct>=70?'pass':'fail');
+  document.getElementById('finalGrade').textContent = pct>=80 ? '合格圏内！' : pct>=60 ? 'もう少し練習が必要です' : '要復習';
+  document.getElementById('fsCorrect').textContent  = correctCount;
+  document.getElementById('fsPartial').textContent  = partialCount;
+  document.getElementById('fsWrong').textContent    = wrongCount;
+  const grade = pct>=80 ? '合格圏内！よくできました。' : pct>=60 ? 'あと少しです。苦手問題を復習しましょう。' : '要復習です。もう一度練習しましょう。';
+  speak(`試験終了。正答率${pct}パーセント。${grade}`);
+}
+
+// ══════════════════════════════════════════════════════════════
+// 聞き流しモード（PLAYBACK） — 採点なし、質問→間→模範解答を自動再生
+// ══════════════════════════════════════════════════════════════
+let pbIdx = 0;
+let pbPaused = false;
+let pbGeneration = 0; // 世代番号：古いタイマー/speak完了を無効化
+let pbTimer = null;
+let pbPhase = 'question'; // 'question' | 'thinking' | 'answer' | 'gap' — 一時停止からの再開位置を覚えておく
+let pbCountdownRemain = 0;
+
+function thinkPauseSeconds() {
+  return parseInt(document.getElementById('thinkPauseSelect').value) || 5;
+}
+
+function currentPbQA() { return activeQA()[examQuestions[pbIdx]]; }
+
+function setPbPhaseLabel(text) {
+  const el = document.getElementById('pbPhaseLabel');
+  if (el) el.textContent = text;
+}
+
+function updatePlaybackUI() {
+  const qa = currentPbQA();
+  document.getElementById('pbNum').textContent = pbIdx + 1;
+  document.getElementById('pbNumBadge').textContent = examQuestions[pbIdx] + 1;
+  setImpBadge('pbImpBadge', qa);
+  document.getElementById('pbQuestionText').textContent = qa.q;
+  document.getElementById('pbAnswerBox').classList.add('hidden');
+  document.getElementById('pbAnswerText').textContent = qa.a;
+  document.getElementById('progressBarPb').style.width = (pbIdx / examQuestions.length * 100) + '%';
+  updateMediaSessionMeta(qa);
+}
+
+function startPlayback() {
+  pbIdx = 0; pbPaused = false;
+  document.getElementById('pbPlayBtn').textContent = '⏸️';
+  runPlaybackStep();
+}
+
+function runPlaybackStep() {
+  if (pbPaused) return;
+  pbGeneration++;
+  const myGen = pbGeneration;
+  updatePlaybackUI();
+  pbPhase = 'question';
+  setPbPhaseLabel('🔊 問題を読み上げ中');
+  speak(currentPbQA().q, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    startThinkingPhase(myGen);
+  });
+}
+
+function startThinkingPhase(myGen) {
+  pbPhase = 'thinking';
+  pbCountdownRemain = thinkPauseSeconds();
+  runThinkingCountdown(myGen);
+}
+
+function runThinkingCountdown(myGen) {
+  pbCountdown(pbCountdownRemain, myGen, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    startAnswerPhase(myGen);
+  });
+}
+
+function startAnswerPhase(myGen) {
+  pbPhase = 'answer';
+  document.getElementById('pbAnswerBox').classList.remove('hidden');
+  setPbPhaseLabel('🔊 模範解答を読み上げ中');
+  speak(currentPbQA().a, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    startGapPhase(myGen);
+  });
+}
+
+function startGapPhase(myGen) {
+  pbPhase = 'gap';
+  pbCountdownRemain = 2;
+  runGapCountdown(myGen);
+}
+
+function runGapCountdown(myGen) {
+  pbCountdown(pbCountdownRemain, myGen, () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    pbAdvance();
+  });
+}
+
+// 残り秒数(pbCountdownRemain)から数え上げ、一時停止からの再開でも続きから数えられるようにする
+function pbCountdown(seconds, myGen, cb) {
+  let remain = seconds;
+  setPbPhaseLabel(`🤔 考え中…（${remain}）`);
+  const tick = () => {
+    if (myGen !== pbGeneration || pbPaused) return;
+    remain--;
+    pbCountdownRemain = remain;
+    if (remain <= 0) { cb(); return; }
+    setPbPhaseLabel(`🤔 考え中…（${remain}）`);
+    pbTimer = setTimeout(tick, 1000);
+  };
+  pbTimer = setTimeout(tick, 1000);
+}
+
+function pbAdvance() {
+  pbIdx++;
+  if (pbIdx >= examQuestions.length) { finishPlayback(); return; }
+  runPlaybackStep();
+}
+
+function pbNext() {
+  pbGeneration++;
+  stopSpeaking(); clearTimeout(pbTimer);
+  if (pbIdx < examQuestions.length - 1) pbIdx++;
+  if (pbPaused) updatePlaybackUI(); else runPlaybackStep();
+}
+
+function pbPrev() {
+  pbGeneration++;
+  stopSpeaking(); clearTimeout(pbTimer);
+  pbIdx = Math.max(0, pbIdx - 1);
+  if (pbPaused) updatePlaybackUI(); else runPlaybackStep();
+}
+
+function pbTogglePause() {
+  pbPaused = !pbPaused;
+  const btn = document.getElementById('pbPlayBtn');
+  if (pbPaused) {
+    btn.textContent = '▶️';
+    pbGeneration++;
+    stopSpeaking(); clearTimeout(pbTimer);
+    setPbPhaseLabel('⏸ 一時停止中');
+  } else {
+    btn.textContent = '⏸️';
+    resumeFromPause();
+  }
+  updateMediaSessionState();
+}
+
+// 一時停止した地点（質問読み上げ中／考え中／解答読み上げ中／次の問題への間）に応じて再開する。
+// 発話の途中から音声だけ再開することはできないため、質問中に停止した場合のみ質問から読み直す。
+function resumeFromPause() {
+  pbGeneration++;
+  const myGen = pbGeneration;
+  if (pbPhase === 'thinking') {
+    setPbPhaseLabel(`🤔 考え中…（${pbCountdownRemain}）`);
+    runThinkingCountdown(myGen);
+  } else if (pbPhase === 'answer') {
+    startAnswerPhase(myGen);
+  } else if (pbPhase === 'gap') {
+    setPbPhaseLabel(`🤔 考え中…（${pbCountdownRemain}）`);
+    runGapCountdown(myGen);
+  } else {
+    runPlaybackStep();
+  }
+}
+
+function finishPlayback() {
+  stopSpeaking();
+  sessionRunning = false;
+  releaseWakeLock();
+  setPbPhaseLabel('✅ 終了');
+  speak('聞き流し終了です。お疲れ様でした。', () => {
+    document.getElementById('playbackScreen').classList.add('hidden');
+    showStart();
+  });
+}
+
+function abortPlayback() {
+  if (confirm('聞き流しを終了して表紙に戻りますか？')) {
+    pbGeneration++;
+    stopSpeaking(); clearTimeout(pbTimer);
+    pbPaused = true;
+    sessionRunning = false;
+    releaseWakeLock();
+    document.getElementById('playbackScreen').classList.add('hidden');
+    showStart();
+  }
+}
+
+// ── Media Session（ロック画面・イヤホン/車載機の再生ボタン対応）─────────
+// speechSynthesisのみの再生では非対応環境もあるためベストエフォート
+function updateMediaSessionMeta(qa) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: `問 ${pbIdx + 1} / ${examQuestions.length}`,
+    artist: qa.q.length > 60 ? qa.q.slice(0, 60) + '…' : qa.q,
+    album: '実地試験 口述問答 聞き流しモード',
+  });
+  updateMediaSessionState();
+}
+function updateMediaSessionState() {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.playbackState = pbPaused ? 'paused' : 'playing';
+}
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('play',  () => { if (appMode === 'playback' && pbPaused)  pbTogglePause(); });
+  navigator.mediaSession.setActionHandler('pause', () => { if (appMode === 'playback' && !pbPaused) pbTogglePause(); });
+  navigator.mediaSession.setActionHandler('previoustrack', () => { if (appMode === 'playback') pbPrev(); });
+  navigator.mediaSession.setActionHandler('nexttrack',     () => { if (appMode === 'playback') pbNext(); });
+}
+
+function reviewWrong() {
+  if (!wrongIndices.length) { alert('間違えた問題はありません！'); return; }
+  mode = 'wrong'; document.getElementById('countSelect').value = Math.min(wrongIndices.length,10);
+  showStart(); setTimeout(()=>selectMode('wrong'), 50);
+}
+
+function showStart() {
+  stopSpeaking(); stopMic();
+  sessionRunning = false;
+  releaseWakeLock();
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('examScreen').classList.add('hidden');
+  document.getElementById('playbackScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+  document.getElementById('savedCorrect').textContent = sessionCorrect;
+  document.getElementById('savedTotal').textContent   = sessionTotal;
+  updateNetworkBadge();
+  updateCheckedCount();
+}
+
+// ── PWA install prompt ─────────────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('visible');
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('visible'); deferredPrompt = null;
+});
+function installApp() {
+  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; }); }
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  updateNetworkBadge();
+  initApp();
+});
+</script>
+</body>
+</html>

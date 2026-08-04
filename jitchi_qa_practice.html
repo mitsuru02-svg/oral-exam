@@ -301,7 +301,7 @@ body {
     <div class="header-btns">
       <button class="voice-toggle on" id="voiceToggle" onclick="toggleVoice()">🔊</button>
       <button class="voice-toggle" id="handsFreeBtn" onclick="toggleHandsFree()">🤚 HF</button>
-      <div class="header-badge" id="headerBadge">156問</div>
+      <div class="header-badge" id="headerBadge">155問</div>
     </div>
     <div id="networkBadge">確認中...</div>
   </div>
@@ -402,7 +402,7 @@ body {
         <option value="5">5問</option>
         <option value="10" selected>10問</option>
         <option value="20">20問</option>
-        <option value="156">全問 (156問)</option>
+        <option value="155">全問 (155問)</option>
       </select>
     </div>
     <div id="thinkPauseRow" class="hidden" style="margin-bottom:20px">
@@ -792,6 +792,10 @@ function ttsClean(text) {
   text = text.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
   text = text.replace(/\u3000/g, ' ');
 
+  // 1.5 桁区切りのカンマを除去（1,500 → 1500）。以降の数値変換が桁区切りカンマ入りの
+  // 数字（1,500m や 20,000ft 等）にマッチできず未変換のまま残ってしまうのを防ぐ。
+  text = text.replace(/\d{1,3}(,\d{3})+/g, m => m.replace(/,/g, ''));
+
   // 2. 数字→日本語読みヘルパー
   function numJp(s) {
     s = String(s);
@@ -901,6 +905,7 @@ function ttsClean(text) {
     ['誘導抵抗','ゆうどうていこう'],
     ['地面効果','じめんこうか'],
     ['失速',    'しっそく'],
+    ['旋回中',  'せんかいちゅう'],
     ['旋回',    'せんかい'],
     ['離脱',    'りだつ'],
     ['高高度',  'こうこうど'],
@@ -963,6 +968,7 @@ function ttsClean(text) {
     ['風邪',    'かぜ'],
     ['上昇風',  'じょうしょうふう'],
     ['山岳波',  'さんがくは'],
+    ['飛行視程','ひこうしてい'],
     ['飛行場',  'ひこうじょう'],
     ['飛行船',  'ひこうせん'],
     ['飛行中',  'ひこうちゅう'],
@@ -1020,7 +1026,45 @@ function ttsClean(text) {
     ['目安表',  'めやすひょう'],
     ['修正表',  'しゅうせいひょう'],
     ['略号表',  'りゃくごうひょう'],
+    ['背風',    'はいふう'],
+    ['正対風',  'せいたいふう'],
     ['風',      'かぜ'],
+    ['見え方',  'みえかた'],
+    ['高度帯',  'こうどたい'],
+    ['見える',  'みえる'],
+    ['回転翼',  'かいてんよく'],
+    ['構造物',  'こうぞうぶつ'],
+    ['赤赤白白','あかあかしろしろ'],
+    ['諸元',    'しょげん'],
+    ['何人',    'なんにん'],
+    ['主ピン',  'しゅぴん'],
+    ['正対気流','せいたいきりゅう'],
+    ['機速感',  'きそくかん'],
+    ['破断',    'はだん'],
+    ['悪気流',  'あくきりゅう'],
+    ['現れ',    'あらわれ'],
+    ['無物標地帯','むぶつひょうちたい'],
+    ['疑似水平線','ぎじすいへいせん'],
+    ['体の中心部','からだのちゅうしんぶ'],
+    ['上空',    'じょうくう'],
+    ['地物',    'ちぶつ'],
+    ['止まったら','とまったら'],
+    ['止まり',  'とまり'],
+    ['止める',  'とめる'],
+    ['実技中',  'じつぎちゅう'],
+    ['発生時',  'はっせいじ'],
+    ['離着陸場','りちゃくりくじょう'],
+    ['吹き流し','ふきながし'],
+    ['下がり方','さがりかた'],
+    ['任せず',  'まかせず'],
+    ['良否',    'りょうひ'],
+    ['指示',    'しじ'],
+    ['後流',    'こうりゅう'],
+    ['増速',    'ぞうそく'],
+    ['管轄外',  'かんかつがい'],
+    ['要否',    'ようひ'],
+    ['情報源',  'じょうほうげん'],
+    ['静圧口',  'せいあつこう'],
   ];
   kanjiWords.forEach(([kanji, yomi]) => {
     text = text.replace(new RegExp(kanji, 'g'), yomi);

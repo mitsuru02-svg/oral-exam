@@ -234,6 +234,24 @@ body {
 .cat-card .cat-count { font-size: 10px; color: #8b949e; margin-left: 2px; }
 .cat-card.selected .cat-count { color: #60a5fa; }
 
+/* 苦手問題の内訳 */
+.wb-details {
+  background: #161b22; border: 1px solid #21262d; border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 20px; text-align: left;
+}
+.wb-details summary { cursor: pointer; font-size: 13px; color: #c9d1d9; list-style: none; }
+.wb-details summary::-webkit-details-marker { display: none; }
+.wb-details summary::before { content: '▸ '; color: #8b949e; }
+.wb-details[open] summary::before { content: '▾ '; }
+.wb-details[open] summary { margin-bottom: 10px; }
+.wb-section-title { font-size: 11px; color: #8b949e; letter-spacing: 0.05em; margin-bottom: 6px; }
+.wb-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12.5px; }
+.wb-icon { flex-shrink: 0; width: 18px; text-align: center; }
+.wb-name { flex-shrink: 0; width: 112px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9d1d9; }
+.wb-bar-wrap { flex: 1; background: #0d1117; border-radius: 3px; height: 6px; overflow: hidden; }
+.wb-bar { display: block; height: 100%; border-radius: 3px; transition: width 0.3s; }
+.wb-count { flex-shrink: 0; width: 42px; text-align: right; font-family: monospace; font-size: 12px; }
+
 /* 中断ボタン */
 .btn-abort {
   background: transparent; border: 1px solid #30363d; border-radius: 6px;
@@ -389,6 +407,12 @@ body {
         </div>
       </div>
     </div>
+
+    <details class="wb-details">
+      <summary>🎯 苦手問題の内訳（カテゴリ別・試験官別）</summary>
+      <div id="wrongBreakdownWrap"></div>
+    </details>
+
     <!-- 試験官で絞り込み -->
     <div class="cat-section">
       <div class="cat-section-title">🧑‍✈️ 試験官で絞り込み（実際にその試験官が出した質問のみ）</div>
@@ -1442,6 +1466,54 @@ function updateCheckedCount() {
     const nameEl = modeEl.querySelector('.mode-name');
     if (nameEl) nameEl.textContent = n > 0 ? `チェック(${n})` : 'チェック';
   }
+  updateWrongModeLabel();
+  renderWrongBreakdown();
+}
+
+// ── 苦手問題の内訳（カテゴリ別・試験官別）─────────────────────────
+function updateWrongModeLabel() {
+  const n = wrongIndices.length;
+  const modeEl = document.getElementById('modeWrong');
+  if (!modeEl) return;
+  const nameEl = modeEl.querySelector('.mode-name');
+  if (nameEl) nameEl.textContent = n > 0 ? `苦手問題(${n})` : '苦手問題';
+}
+
+function renderWrongBreakdown() {
+  const wrapEl = document.getElementById('wrongBreakdownWrap');
+  if (!wrapEl) return;
+  const wrongSet = new Set(wrongIndices);
+  if (wrongSet.size === 0) {
+    wrapEl.innerHTML = `<div style="font-size:12.5px;color:#8b949e;text-align:center;padding:6px 0;">まだ苦手問題はありません。練習を進めると、ここにカテゴリ別・試験官別の内訳が表示されます。</div>`;
+    return;
+  }
+  const countIn = indices => indices.reduce((n, i) => n + (wrongSet.has(i) ? 1 : 0), 0);
+
+  const buildRows = groups => groups
+    .map(g => ({ icon: g.icon, name: g.name, wrong: countIn(g.indices), total: g.indices.length }))
+    .filter(g => g.total > 0)
+    .sort((a, b) => b.wrong - a.wrong || b.wrong / b.total - a.wrong / a.total)
+    .map(g => {
+      const pct = g.total > 0 ? Math.round((g.wrong / g.total) * 100) : 0;
+      const color = g.wrong === 0 ? '#3fb950' : pct >= 50 ? '#f85149' : '#d29922';
+      return `
+        <div class="wb-row">
+          <span class="wb-icon">${g.icon}</span>
+          <span class="wb-name">${g.name}</span>
+          <span class="wb-bar-wrap"><span class="wb-bar" style="width:${pct}%;background:${color};"></span></span>
+          <span class="wb-count" style="color:${color};">${g.wrong}/${g.total}</span>
+        </div>`;
+    }).join('');
+
+  const catRows = buildRows(activeCats());
+  const exRows  = buildRows(JITCHI_EXAMINER_GROUPS);
+
+  wrapEl.innerHTML = `
+    <div class="wb-section-title">📂 カテゴリ別</div>
+    ${catRows || '<div style="font-size:12px;color:#8b949e;">データなし</div>'}
+    <div class="wb-section-title" style="margin-top:14px;">🧑‍✈️ 試験官別</div>
+    ${exRows || '<div style="font-size:12px;color:#8b949e;">データなし</div>'}
+  `;
 }
 
 function updateCheckBtn() {

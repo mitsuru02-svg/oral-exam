@@ -252,6 +252,15 @@ body {
 .wb-bar { display: block; height: 100%; border-radius: 3px; transition: width 0.3s; }
 .wb-count { flex-shrink: 0; width: 42px; text-align: right; font-family: monospace; font-size: 12px; }
 
+/* 登録済みID一覧 */
+.sl-msg { font-size: 12.5px; color: #8b949e; text-align: center; padding: 6px 0; }
+.sl-row { padding: 8px 0; border-bottom: 1px solid #21262d; }
+.sl-row:last-child { border-bottom: none; }
+.sl-row-me { background: #0d2044; margin: 0 -16px; padding: 8px 16px; border-radius: 6px; }
+.sl-id { font-size: 13px; font-weight: 600; color: #e6edf3; }
+.sl-stats { font-size: 12px; color: #8b949e; margin-top: 2px; }
+.sl-time { font-size: 10.5px; color: #6e7681; margin-top: 2px; }
+
 /* 中断ボタン */
 .btn-abort {
   background: transparent; border: 1px solid #30363d; border-radius: 6px;
@@ -459,6 +468,11 @@ body {
       </select>
     </div>
     <button class="btn-primary" onclick="startExam()" id="startBtn">試験開始</button>
+
+    <details class="wb-details" id="syncListDetails" ontoggle="if(this.open) loadSyncList()">
+      <summary>📋 登録済みIDの進捗一覧</summary>
+      <div id="syncListWrap"><div style="font-size:12.5px;color:#8b949e;text-align:center;padding:6px 0;">開くと読み込みます...</div></div>
+    </details>
   </div>
 
   <!-- EXAM SCREEN -->
@@ -1409,6 +1423,41 @@ async function saveSyncId() {
   localStorage.setItem('jitchi_syncId', syncId);
   await syncPull(false);
   await syncPush(true);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadSyncList() {
+  const wrap = document.getElementById('syncListWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="sl-msg">読み込み中...</div>';
+  try {
+    const res = await fetch(CONFIG.API_ENDPOINT + '/sync-list');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const ids = data.ids || [];
+    if (ids.length === 0) {
+      wrap.innerHTML = '<div class="sl-msg">まだ登録されたIDはありません。</div>';
+      return;
+    }
+    wrap.innerHTML = ids.map(row => {
+      const pct = row.totalAnswered > 0 ? Math.round(row.totalCorrect / row.totalAnswered * 100) : 0;
+      const when = row.updatedAt
+        ? new Date(row.updatedAt).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})
+        : '-';
+      const isMe = row.id === syncId;
+      return `
+        <div class="sl-row${isMe ? ' sl-row-me' : ''}">
+          <div class="sl-id">${isMe ? '👤 ' : ''}${escapeHtml(row.id)}</div>
+          <div class="sl-stats">正解 ${row.totalCorrect}/${row.totalAnswered}（${pct}%）・苦手 ${row.wrongCount}・⭐ ${row.checkedCount}</div>
+          <div class="sl-time">${when}</div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    wrap.innerHTML = '<div class="sl-msg" style="color:#f85149;">読み込みに失敗しました（オフライン、またはWorker未対応）</div>';
+  }
 }
 
 function selectMode(m) {

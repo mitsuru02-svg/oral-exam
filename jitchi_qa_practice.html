@@ -390,6 +390,14 @@ body {
           </div>
         </div>
       </div>
+      <div class="mode-card" onclick="selectMode('unmastered')" id="modeUnmastered" title="不正解・部分正解・スキップのまま残っている問題に加え、一度も解答していない問題も含みます">
+        <div class="mode-inner">
+          <div class="mode-icon">🆕</div>
+          <div class="mode-text">
+            <div class="mode-name">未正解</div>
+          </div>
+        </div>
+      </div>
       <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
         <div class="mode-inner">
           <div class="mode-icon">⭐</div>
@@ -636,8 +644,9 @@ function selectExaminer(id) {
 function initApp() {
   selectedCategory = null;
   selectedExaminer = null;
-  checkedIndices = JSON.parse(localStorage.getItem(bankKey('checkedIndices')) || '[]');
-  wrongIndices   = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))   || '[]');
+  checkedIndices  = JSON.parse(localStorage.getItem(bankKey('checkedIndices'))  || '[]');
+  wrongIndices    = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))    || '[]');
+  answeredIndices = JSON.parse(localStorage.getItem(bankKey('answeredIndices')) || '[]');
   initCatCards();
   initExaminerCards();
   const totalEl = document.getElementById('totalQCount');
@@ -1323,6 +1332,7 @@ let currentIdx = 0;
 let correctCount = 0, partialCount = 0, wrongCount = 0, answered = 0;
 let results = [];
 let wrongIndices   = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))  || '[]');
+let answeredIndices = JSON.parse(localStorage.getItem(bankKey('answeredIndices')) || '[]'); // 一度でも解答した問題（端末内のみ、同期はしない）
 let sessionCorrect = parseInt(localStorage.getItem(bankKey('totalCorrect'))    || '0');
 let sessionTotal   = parseInt(localStorage.getItem(bankKey('totalAnswered'))   || '0');
 
@@ -1404,6 +1414,10 @@ async function saveSyncId() {
 function selectMode(m) {
   if (m === 'checked' && checkedIndices.length === 0) {
     alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
+    return;
+  }
+  if (m === 'unmastered' && getUnmasteredIndices().length === 0) {
+    alert('未正解の問題はありません。全問正解済みです！');
     return;
   }
   mode = m;
@@ -1501,6 +1515,21 @@ function updateWrongModeLabel() {
   if (!modeEl) return;
   const nameEl = modeEl.querySelector('.mode-name');
   if (nameEl) nameEl.textContent = n > 0 ? `苦手問題(${n})` : '苦手問題';
+
+  // 未正解（苦手＋未回答）
+  const unmasteredN = getUnmasteredIndices().length;
+  const umEl = document.getElementById('modeUnmastered');
+  if (umEl) {
+    const umNameEl = umEl.querySelector('.mode-name');
+    if (umNameEl) umNameEl.textContent = `未正解(${unmasteredN})`;
+  }
+}
+
+// 苦手（不正解・部分正解・スキップのまま）＋一度も解答していない問題
+function getUnmasteredIndices() {
+  const answeredSet = new Set(answeredIndices);
+  const never = [...Array(activeQA().length).keys()].filter(i => !answeredSet.has(i));
+  return [...new Set([...wrongIndices, ...never])];
 }
 
 function renderWrongBreakdown() {
@@ -1583,6 +1612,10 @@ function buildExamPool() {
     const wrongInCat = wrongIndices.filter(i => pool.includes(i));
     if (wrongInCat.length > 0) pool = wrongInCat;
     else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
+  } else if (mode === 'unmastered') {
+    const unmasteredInCat = getUnmasteredIndices().filter(i => pool.includes(i));
+    if (unmasteredInCat.length > 0) pool = unmasteredInCat;
+    else { alert('このカテゴリに未正解の問題がありません。全問から始めます。'); }
   }
   if (mode === 'importance') {
     // ★★★→★★→★の順。同じ重要度の中はシャッフル（sortは安定なので順序が保たれる）
@@ -1732,6 +1765,7 @@ function handleResult(result, qa, qIdx, userAns) {
   if (isCorrect) { correctCount++; wrongIndices = wrongIndices.filter(i=>i!==qIdx); }
   else { if (isPartial) partialCount++; else wrongCount++; if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx); }
   localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:result.verdict, userAns});
 
   const cls   = isCorrect ? 'correct' : isPartial ? 'partial' : 'incorrect';
@@ -1813,6 +1847,7 @@ function skipQuestion() {
   const qIdx = examQuestions[currentIdx];
   if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
   localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:'スキップ', userAns:''});
   nextQuestion();
 }

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>機長の出発前確認｜自家用上級滑空機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#05080c;
+    --panel:#0e151d;
+    --panel-raised:#152030;
+    --panel-hi:#1c2938;
+    --line:#213041;
+    --line-soft:#182230;
+    --text:#dbe6ef;
+    --text-dim:#8195a8;
+    --text-faint:#4d5f70;
+    --amber:#ffb020;
+    --amber-dim:#7a5a20;
+    --cyan:#4fd9e8;
+    --cyan-dim:#1f5f68;
+    --green:#4ade80;
+    --red:#ff5f56;
+    --serif-jp:'Noto Sans JP',sans-serif;
+    --disp:'Rajdhani',sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--void);
+    color:var(--text);
+    font-family:var(--serif-jp);
+    font-weight:400;
+    line-height:1.9;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---------- background horizon texture ---------- */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(79,217,232,0.06), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 20%, rgba(255,176,32,0.05), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+  /* ---------- layout ---------- */
+  .app{display:flex; min-height:100vh; position:relative; z-index:1;}
+  /* Sidebar */
+  #sidebar{
+    width:290px; flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--line);
+    position:fixed; top:0; left:0; bottom:0;
+    overflow-y:auto;
+    z-index:50;
+    transition:transform .25s ease;
+  }
+  #sidebar::-webkit-scrollbar{width:6px;}
+  #sidebar::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+  .sb-header{
+    padding:22px 20px 16px;
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; background:var(--panel); z-index:5;
+  }
+  .sb-header .tag{
+    font-family:var(--disp); font-size:11px; letter-spacing:.28em; color:var(--amber);
+    font-weight:600;
+  }
+  .sb-header h1{
+    font-size:16px; font-weight:700; margin-top:6px; line-height:1.5; color:var(--text);
+  }
+  .sb-header .sub{font-size:11px; color:var(--text-dim); margin-top:6px; letter-spacing:.05em;}
+  .sb-nav{padding:10px 0 40px;}
+  .sb-part{
+    padding:14px 20px 6px; font-family:var(--disp); font-size:11px; letter-spacing:.18em;
+    color:var(--cyan); font-weight:600; opacity:.85;
+  }
+  .sb-link{
+    display:block; padding:7px 20px 7px 26px; font-size:13px; color:var(--text-dim);
+    text-decoration:none; border-left:2px solid transparent; cursor:pointer;
+  }
+  .sb-link:hover{color:var(--text); background:var(--panel-raised);}
+  .sb-link.active{color:var(--amber); border-left-color:var(--amber); background:var(--panel-raised);}
+  #menu-toggle{
+    display:none; position:fixed; top:14px; left:14px; z-index:60;
+    background:var(--panel-hi); border:1px solid var(--line); color:var(--text);
+    width:40px; height:40px; border-radius:6px; font-size:18px;
+  }
+  /* Main */
+  #main{margin-left:290px; flex:1; min-width:0; position:relative; z-index:1;}
+  .content{max-width:820px; margin:0 auto; padding:56px 48px 140px;}
+
+  /* Cover */
+  .cover{padding:90px 0 60px; border-bottom:1px solid var(--line); margin-bottom:50px; text-align:left;}
+  .cover .eyebrow{font-family:var(--disp); letter-spacing:.3em; color:var(--amber); font-size:13px; font-weight:600;}
+  .cover h1{font-size:38px; line-height:1.4; margin:18px 0 10px; font-weight:900;}
+  .cover h2{font-size:17px; color:var(--cyan); font-weight:500; margin-bottom:26px;}
+  .cover p{color:var(--text-dim); font-size:14.5px; max-width:600px;}
+  .horizon-line{
+    height:2px; margin:30px 0; border-radius:2px;
+    background:linear-gradient(90deg, var(--cyan) 0%, transparent 100%);
+    opacity:.6; width:120px;
+  }
+
+  /* Chapter blocks */
+  .part-divider{
+    margin:70px 0 34px; padding-top:30px; border-top:1px solid var(--line);
+  }
+  .part-divider .pd-num{font-family:var(--disp); font-size:13px; color:var(--amber); letter-spacing:.2em; font-weight:600;}
+  .part-divider h2{font-size:24px; margin-top:8px; font-weight:800;}
+
+  .chapter{margin:44px 0; scroll-margin-top:24px;}
+  .chapter h3{
+    font-size:20px; font-weight:700; margin-bottom:16px; padding-bottom:10px;
+    border-bottom:1px solid var(--line-soft); display:flex; align-items:center; gap:10px;
+  }
+  .chapter h3 .ch-num{
+    font-family:var(--disp); font-size:13px; color:var(--void); background:var(--amber);
+    padding:2px 9px; border-radius:3px; font-weight:700; flex-shrink:0;
+  }
+  .chapter p{margin-bottom:14px; color:var(--text); font-size:15.5px;}
+  .chapter p.lead{color:var(--text-dim); font-size:14.5px;}
+
+  .callout{
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--cyan);
+    border-radius:6px; padding:16px 20px; margin:18px 0; font-size:14.5px; color:var(--text);
+  }
+  .callout.amber{border-left-color:var(--amber);}
+  .callout.red{border-left-color:var(--red);}
+  .callout .cal-label{
+    font-family:var(--disp); font-size:11px; letter-spacing:.15em; color:var(--cyan);
+    font-weight:600; display:block; margin-bottom:8px;
+  }
+  .callout.amber .cal-label{color:var(--amber);}
+  .callout.red .cal-label{color:var(--red);}
+
+  .model-answer{
+    background:linear-gradient(180deg, rgba(79,217,232,0.06), rgba(79,217,232,0.02));
+    border:1px solid var(--cyan-dim); border-radius:8px; padding:18px 22px; margin:20px 0;
+    position:relative;
+  }
+  .model-answer::before{
+    content:"模範解答"; position:absolute; top:-11px; left:16px; background:var(--void);
+    padding:0 8px; font-family:var(--disp); font-size:11px; letter-spacing:.15em; color:var(--cyan); font-weight:700;
+  }
+  .model-answer p{color:var(--text); font-size:15px; font-style:normal;}
+
+  .call-block{
+    background:var(--panel-raised); border:1px solid var(--line); border-radius:6px;
+    padding:14px 18px; margin:16px 0; font-family:var(--disp); font-size:15px; color:var(--amber);
+    letter-spacing:.02em; line-height:1.8;
+  }
+
+  ul.plist{list-style:none; margin:14px 0;}
+  ul.plist li{padding:5px 0 5px 22px; position:relative; color:var(--text); font-size:15px;}
+  ul.plist li::before{content:"▸"; position:absolute; left:0; color:var(--amber);}
+
+  /* Q&A */
+  .qa{border:1px solid var(--line); border-radius:6px; margin:10px 0; overflow:hidden;}
+  .qa .q{padding:12px 16px; background:var(--panel-raised); font-weight:700; font-size:14.5px; color:var(--text); display:flex; gap:10px;}
+  .qa .q .qtag{color:var(--amber); font-family:var(--disp); flex-shrink:0;}
+  .qa .a{padding:12px 16px; font-size:14.5px; color:var(--text-dim); border-top:1px solid var(--line-soft);}
+  .qa .a .atag{color:var(--cyan); font-family:var(--disp); margin-right:6px;}
+
+  /* checklist */
+  .checklist{margin:14px 0;}
+  .checklist .cl-title{font-family:var(--disp); font-size:13px; letter-spacing:.15em; color:var(--cyan); margin:22px 0 8px; font-weight:600;}
+  .checklist label{
+    display:flex; align-items:flex-start; gap:10px; padding:6px 0; font-size:14.5px; color:var(--text); cursor:pointer;
+  }
+  .checklist input[type=checkbox]{
+    appearance:none; width:16px; height:16px; border:1px solid var(--text-faint); border-radius:3px;
+    margin-top:3px; flex-shrink:0; cursor:pointer; position:relative;
+  }
+  .checklist input[type=checkbox]:checked{background:var(--amber); border-color:var(--amber);}
+  .checklist input[type=checkbox]:checked::after{
+    content:"✓"; position:absolute; top:-3px; left:2px; font-size:12px; color:var(--void); font-weight:900;
+  }
+
+  /* figure/diagram */
+  figure{margin:26px 0; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px;}
+  figure svg{width:100%; height:auto; display:block;}
+  figcaption{font-size:12.5px; color:var(--text-dim); margin-top:10px; text-align:center; letter-spacing:.02em;}
+  figcaption .fig-num{color:var(--amber); font-family:var(--disp); font-weight:700; margin-right:6px;}
+
+  /* TTS controls */
+  .tts-bar{
+    position:sticky; top:0; z-index:20; background:rgba(14,21,29,.92); backdrop-filter:blur(6px);
+    border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin:0 0 26px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  .tts-bar button{
+    background:var(--panel-hi); border:1px solid var(--line); color:var(--text);
+    padding:7px 14px; border-radius:6px; font-family:var(--serif-jp); font-size:13px; cursor:pointer;
+  }
+  .tts-bar button:hover{border-color:var(--cyan); color:var(--cyan);}
+  .tts-bar button.active{background:var(--amber); color:var(--void); border-color:var(--amber);}
+  .tts-bar select.tts-rate{
+    background:var(--panel-hi); border:1px solid var(--line); color:var(--text);
+    padding:6px 8px; border-radius:6px; font-family:var(--serif-jp); font-size:13px; cursor:pointer;
+  }
+  .tts-bar select.tts-voice{
+    background:var(--panel-hi); border:1px solid var(--line); color:var(--text);
+    padding:6px 8px; border-radius:6px; font-family:var(--serif-jp); font-size:12.5px; cursor:pointer;
+    max-width:180px;
+  }
+  .tts-bar .tts-back, .tts-bar .tts-fwd{font-family:var(--disp); letter-spacing:.02em;}
+  @media (max-width:600px){
+    .tts-bar{gap:8px; padding:8px 10px;}
+    .tts-bar button{padding:6px 10px; font-size:12px;}
+    .tts-bar .tts-status{width:100%; margin-left:0; order:99;}
+  }
+  .tts-bar .tts-status{font-size:12px; color:var(--text-dim); margin-left:auto;}
+  .tts-hl{background:rgba(255,176,32,0.16); border-radius:3px; box-shadow:0 0 0 2px rgba(255,176,32,0.16);}
+
+  footer{
+    margin-top:80px; padding-top:26px; border-top:1px solid var(--line); color:var(--text-faint); font-size:12.5px;
+  }
+
+  @media (max-width:900px){
+    #sidebar{transform:translateX(-100%);}
+    #sidebar.open{transform:translateX(0);}
+    #main{margin-left:0;}
+    #menu-toggle{display:block;}
+    .content{padding:80px 22px 100px;}
+    .cover{padding:60px 0 40px;}
+    .cover h1{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;">
+  <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;">‹</a>
+  <div style="width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#1e40af);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✈</div>
+  <div>
+    <div style="font-size:13px;font-weight:600;color:#e6edf3;">機長の出発前確認</div>
+    <div style="font-size:10px;color:#8b949e;margin-top:1px;">自家用操縦士（上級滑空機）</div>
+  </div>
+</div>
+<button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div class="app">
+  <nav id="sidebar">
+    <div class="sb-header">
+      <div class="tag">TAKIKAWA GLIDING FIELD</div>
+      <h1>機長の出発前確認<br>実地資料集</h1>
+      <div class="sub">ASK-21（JA20HC）／法73条の2 対応版</div>
+    </div>
+    <div class="sb-nav" id="sb-nav">
+      <a class="sb-link" href="#cover">はじめに</a>
+
+      <div class="sb-part">第1部｜法律上の確認事項（6項目）</div>
+      <a class="sb-link" href="#ch1">第1章 6項目の全体像</a>
+      <a class="sb-link" href="#ch2">第2章 整備状況（書類）の確認</a>
+      <a class="sb-link" href="#ch3">第3章 離陸重量・重心位置の確認</a>
+      <a class="sb-link" href="#ch4">第4章 航空情報・気象情報の確認</a>
+      <a class="sb-link" href="#ch5">第5章 積載物の安全性・その他</a>
+
+      <div class="sb-part">第2部｜飛行前点検（機体）</div>
+      <a class="sb-link" href="#ch6">第6章 点検の全体順序</a>
+      <a class="sb-link" href="#ch7">第7章 各点検項目の詳細</a>
+
+      <div class="sb-part">第3部｜曳航前の打ち合わせ</div>
+      <a class="sb-link" href="#ch8">第8章 合図とその意味</a>
+      <a class="sb-link" href="#ch9">第9章 出発及び曳航の方法</a>
+      <a class="sb-link" href="#ch10">第10章 離脱の時期・場所と緊急時の処置</a>
+      <a class="sb-link" href="#ch11">第11章 実際の口頭ブリーフィング例</a>
+
+      <div class="sb-part">第4部｜地上取扱い・翼端保持</div>
+      <a class="sb-link" href="#ch12">第12章 翼端保持者の注意事項</a>
+      <a class="sb-link" href="#ch13">第13章 横風時の地上滑走・離陸滑走時の緊急時</a>
+
+      <div class="sb-part">第5部｜重量・速度の参考データ</div>
+      <a class="sb-link" href="#ch14">第14章 重量別速度早見表</a>
+      <a class="sb-link" href="#ch15">第15章 最良滑空比速度の設定</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <div class="content" id="content">
+      <section id="cover" class="cover">
+        <div class="eyebrow">自家用滑空機 実地試験 学習教材</div>
+        <h1>機長の出発前確認<br>実地資料集</h1>
+        <h2>滝川滑空場・ASK21（JA20HC）の実際の書式にもとづく確認手順</h2>
+        <div class="horizon-line"></div>
+        <p data-tts data-text="このページは、機長の出発前確認について、実際に滝川滑空場で使われているチェックリストや記入例をもとに作成しています。航空法第73条の2、および航空法施行規則第164条の14に定められた6項目を中心に、飛行前点検、曳航前の打ち合わせ、翼端保持者へのチェック項目までをまとめています。">
+          このページは、機長の出発前確認について、実際に滝川滑空場で使われているチェックリストや記入例をもとに作成しています。
+          <strong>航空法第73条の2、および航空法施行規則第164条の14</strong>に定められた6項目を中心に、飛行前点検、曳航前の打ち合わせ、翼端保持者へのチェック項目までをまとめています。
+        </p>
+        <div class="callout amber">
+          <span class="cal-label">ご利用にあたって</span>
+          <p style="margin-bottom:0;">本ページに登場する登録番号・証明書番号・整備記録・有効期限等の数値は、過去のある時点の記入例をそのまま掲載した参考データです。<strong>試験当日は、必ずその日の実際の書類・航空日誌で数値を確認してください。</strong>数値そのものを暗記する必要はなく、「どの書類の、どの項目を、どう確認するか」という手順を身につけることが目的です。</p>
+        </div>
+      </section>
+      <!--COVER-->
+
+      <section id="part1" class="part-section">
+      <div class="part-divider">
+        <div class="pd-num">PART 01</div>
+        <h2>法律上の確認事項（6項目）</h2>
+      </div>
+      <div class="tts-bar" id="bar-part1">
+        <button class="tts-play">▶ この部を読み上げ</button>
+        <button class="tts-stop">■ 停止</button>
+        <span class="tts-status">待機中</span>
+      </div>
+
+      <div class="chapter" id="ch1">
+        <h3><span class="ch-num">01</span>6項目の全体像</h3>
+        <p data-tts data-text="機長の出発前確認事項は、航空法第73条の2に定められています。この6項目を確認しなければ、航空機を出発させてはなりません。">
+          機長の出発前確認事項は、<strong>航空法第73条の2</strong>に定められています。この6項目を確認しなければ、航空機を出発させてはなりません。
+        </p>
+        <ul class="plist">
+          <li data-tts data-text="1つ目、当該航空機及びこれに装備すべきものの整備状況。">1．当該航空機及びこれに装備すべきものの整備状況</li>
+          <li data-tts data-text="2つ目、離陸重量、着陸重量、重心位置及び重量分布。">2．離陸重量、着陸重量、重心位置及び重量分布</li>
+          <li data-tts data-text="3つ目、航空法第99条第1項の規定により国土交通大臣が提供する航空情報。">3．国土交通大臣が提供する航空情報（航空法第99条第1項）</li>
+          <li data-tts data-text="4つ目、当該航行に必要な気象情報。">4．当該航行に必要な気象情報</li>
+          <li data-tts data-text="5つ目、燃料及び滑油の搭載量及びその品質。上級滑空機には該当しません。">5．燃料及び滑油の搭載量及びその品質（上級滑空機には該当しません）</li>
+          <li data-tts data-text="6つ目、積載物の安全性。">6．積載物の安全性</li>
+        </ul>
+        <div class="callout">
+          <span class="cal-label">確認が完了するタイミング</span>
+          <p data-tts data-text="出発前確認が完了するのは、乗り込んでコントロールフリーチェックを行った時点です。座席に乗り込み、操縦装置の作動点検を含むすべての確認を終えて、初めて出発前確認が完了したことになります。" style="margin-bottom:0;">
+            乗り込んで<strong>コントロールフリーチェック</strong>を行った時点で、出発前確認が完了したことになります。作動点検を含むすべての確認を終えるまでは、出発の準備が整っていません。
+          </p>
+        </div>
+        <div class="model-answer">
+          <p data-tts data-text="機長の出発前確認事項として、整備状況、離陸重量と重心位置、航空情報、気象情報、積載物の安全性を確認します。これらは航空法第73条の2に定められており、確認が完了するのはコントロールフリーチェックの時点です。">
+            「機長の出発前確認事項として、整備状況、離陸重量と重心位置、航空情報、気象情報、積載物の安全性を確認します。これらは航空法第73条の2に定められており、確認が完了するのはコントロールフリーチェックの時点です。」
+          </p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch2">
+        <h3><span class="ch-num">02</span>整備状況（書類）の確認</h3>
+        <p data-tts data-text="1項目め、整備状況の確認です。書類があるかどうかをチェックし、内容は簡単に述べる程度でかまいません。必要書類は7種類です。">
+          1項目め、整備状況の確認です。<strong>書類があるかどうかをチェックし、内容は簡単に述べる程度</strong>でかまいません。必要書類は次の7種類です。
+        </p>
+        <ul class="plist">
+          <li>航空機登録証明書（法59条）</li>
+          <li>耐空証明書（法59条）</li>
+          <li>運用限界等指定書（令144条）</li>
+          <li>飛行規程（令144条）── 承認されていることを、ページ上部の記載で確認</li>
+          <li>航空日誌（法59条）</li>
+          <li>飛行区間・飛行方式等に応じた適切な航空図（令144条）</li>
+          <li>無線局免許状 ── あるかどうかのチェックでよい</li>
+        </ul>
+        <div class="callout amber">
+          <span class="cal-label">記入例（ASK-21／JA20HC）</span>
+          <p style="margin-bottom:8px;">登録記号：JA20HC／型式：アレキサンダー・シュライハー式ASK21型／製造番号：21740／耐空類別：滑空機 実用U／運用限界：飛行規程の第2章</p>
+          <p style="margin-bottom:0; color:var(--text-dim); font-size:13px;">※証明書番号・発行日・有効期間などの具体的な数値は、実際の書類でその日の値を確認してください。</p>
+        </div>
+        <p data-tts data-text="整備状況の確認では、有資格整備士による確認が航空日誌に記録されているか、耐空検査後の飛行時間・回数、前回整備後の履歴、大きな修理の履歴、TCD（耐空性改善通報）による点検履歴、朝の始業点検で異常がなかったかも確認します。装備品については、高度計、トランスポンダー、レリーズ、縛帯、無線機など、使用期限のある装備品の検査日と有効期限を確認します。">
+          さらに、耐空検査後の飛行時間・回数、前回整備後の整備履歴（例：AT・WTレリーズ交換）、大きな修理の履歴、TCD（耐空性改善通報）による定期点検の実施履歴、朝の始業点検での異常の有無も確認します。装備品については、高度計・トランスポンダー・レリーズ・縛帯・無線機など、使用期限のある装備品の検査日と有効期限を確認します。救急用具は60日点検が基準です。
+        </p>
+        <div class="model-answer">
+          <p data-tts data-text="航空機登録証明書、耐空証明書、運用限界等指定書、飛行規程、航空日誌、航空図、無線局免許状の7点をチェックしました。航空日誌を確認したところ、耐空検査後の整備記録に問題なく、大きな修理の履歴もありません。使用期限のある装備品もすべて有効期限内です。したがって、この機体は本日の飛行に使用可能と判断します。">
+            「航空機登録証明書、耐空証明書、運用限界等指定書、飛行規程、航空日誌、航空図、無線局免許状の7点をチェックしました。航空日誌を確認したところ、耐空検査後の整備記録に問題なく、大きな修理の履歴もありません。使用期限のある装備品もすべて有効期限内です。したがって、この機体は本日の飛行に使用可能と判断します。」
+          </p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch3">
+        <h3><span class="ch-num">03</span>離陸重量・重心位置の確認</h3>
+        <p data-tts data-text="2項目め、離陸重量、着陸重量、重心位置及び重量分布の確認です。滑空機は離陸重量イコール着陸重量です。空虚重量に、固定バラスト、前席重量、後席重量、パラシュート、搭載物を加えて合計重量を求め、最大重量を超えていないことを確認します。">
+          2項目め、離陸重量・着陸重量・重心位置及び重量分布の確認です。滑空機は<strong>離陸重量＝着陸重量</strong>です。空虚重量に、固定バラスト・前席重量・後席重量・パラシュート・搭載物を加えて合計重量を求め、最大重量を超えていないことを確認します。
+        </p>
+        <div class="callout amber">
+          <span class="cal-label">記入例（ASK-21／JA20HC・複座）</span>
+          <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin-top:4px;">
+            <tr style="border-bottom:1px solid var(--line);">
+              <th style="text-align:left; padding:5px; color:var(--cyan);">項目</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">重量(kg)</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">アーム(mm)</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">備考</th>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">空虚重量</td><td style="padding:5px;">384</td><td style="padding:5px;">-757</td><td style="padding:5px; color:var(--text-dim);">バッテリー・無線機・計器等を含む</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">前席重量</td><td style="padding:5px;">80</td><td style="padding:5px;">1180</td><td style="padding:5px; color:var(--text-dim);">パラシュート(5kg)を含む</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">後席重量</td><td style="padding:5px;">75</td><td style="padding:5px;">80</td><td style="padding:5px; color:var(--text-dim);">パラシュート(5kg)を含む</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">固定錘</td><td style="padding:5px;">4</td><td style="padding:5px;">1250</td><td style="padding:5px; color:var(--text-dim);">前席足元に固定</td></tr>
+            <tr><td style="padding:5px; font-weight:700;">合計</td><td style="padding:5px; font-weight:700;">543</td><td style="padding:5px;" colspan="2">最大重量600kg未満</td></tr>
+          </table>
+          <p style="margin-top:8px; margin-bottom:0;">重心位置：-341mm（許容重心位置範囲 -234〜-469mm、中央 -351.5mm）</p>
+        </div>
+        <p data-tts data-text="重心位置は、重量とアームの積であるモーメントアームを項目ごとに求め、その合計を合計重量で割ることで計算します。試験ではウェイト・アンド・バランスシートを実際に取り出し、その場で数字を当てはめて示す必要があるので、見方を事前に確認しておきます。">
+          重心位置は、重量とアームの積である<strong>モーメントアーム</strong>を項目ごとに求め、その合計を合計重量で割ることで計算します。試験では<strong>ウェイト・アンド・バランスシートを実際に取り出し、その場で数字を当てはめて示す</strong>必要があるので、見方を事前に何度も確認しておきます。
+        </p>
+        <div class="model-answer">
+          <p data-tts data-text="空虚重量に、固定バラスト、前席、後席、搭載物を加え、離陸重量は543キログラムで、最大重量600キログラム未満です。ウェイト・アンド・バランスシートから重心位置を求めたところマイナス341ミリメートルで、許容重心位置範囲マイナス234からマイナス469ミリメートルの範囲内です。">
+            「空虚重量に固定バラスト・前席・後席・搭載物を加え、離陸重量は543kgで、最大重量600kg未満です。ウェイト・アンド・バランスシートから重心位置を求めたところ-341mmで、許容重心位置範囲-234〜-469mmの範囲内です。」
+          </p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch4">
+        <h3><span class="ch-num">04</span>航空情報・気象情報の確認</h3>
+        <p data-tts data-text="3項目め、航空法第99条第1項の規定により国土交通大臣が提供する航空情報の確認です。航空路誌、航空路誌改訂版、航空路誌補足版、ノータム、航空情報サーキュラーの5種類があり、いずれもAIS Japanによって提供されます。">
+          3項目め、<strong>航空法第99条第1項</strong>の規定により国土交通大臣が提供する航空情報の確認です。次の5種類があり、いずれもAIS Japanによって提供されます。
+        </p>
+        <ul class="plist">
+          <li>航空路誌（AIP）</li>
+          <li>航空路誌改訂版（AIP Amendments）</li>
+          <li>航空路誌補足版（AIP Supplements）</li>
+          <li>ノータム（NOTAM）</li>
+          <li>航空情報サーキュラー（AIC）</li>
+        </ul>
+        <p data-tts data-text="あわせて、訓練空域内の飛行情報や、使用滑空場周辺の位置・障害物も確認します。滝川滑空場では、南側に滝新橋、南東側にゴミ焼却場の煙突といった具体的な障害物を、空域チャートを使って説明できるようにしておきます。">
+          あわせて、訓練空域内の飛行情報や、使用滑空場周辺の位置・障害物も確認します。滝川滑空場周辺では、南側に橋、南東側に焼却施設の煙突といった具体的な障害物があり、空域チャートを使って説明できるようにしておきます。障害物の正確な位置・高さは、その日のノータムや周辺図で必ず確認してください。
+        </p>
+        <p data-tts data-text="4項目め、当該航行に必要な気象情報の確認です。地上天気図、高層天気図（850、700、500、300ヘクトパスカル）と悪天天気図、そしてメターとタフを確認します。">
+          4項目め、当該航行に必要な気象情報の確認です。
+        </p>
+        <ul class="plist">
+          <li>地上天気図</li>
+          <li>高層天気図（850／700／500／300hPa）、悪天天気図</li>
+          <li>METAR、TAF</li>
+        </ul>
+        <div class="callout">
+          <span class="cal-label">口述での説明のコツ</span>
+          <p style="margin-bottom:0;">「確認しました」だけでなく、「高気圧に覆われており、悪天の接近まで余裕がある」「本日の障害物はここと、ここ」のように、根拠と具体的な位置を添えて説明すると、機長としての判断力が伝わります。</p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch5">
+        <h3><span class="ch-num">05</span>積載物の安全性・その他</h3>
+        <p data-tts data-text="6項目め、積載物の安全性の確認です。無線機用バッテリー、固定バラスト、酸素ボンベ、救急用具など、機体に積み込まれているものの固定状況を確認します。目視だけでなく、実際に手で触れて揺するなどして確認します。">
+          6項目め、積載物の安全性の確認です。無線機用バッテリー、固定バラスト、酸素ボンベ、救急用具など、機体に積み込まれているものの固定状況を確認します。<strong>目視だけでなく、実際に手で触れて揺するなどして確認</strong>します。
+        </p>
+        <div class="callout amber">
+          <span class="cal-label">記入例</span>
+          <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin-top:4px;">
+            <tr style="border-bottom:1px solid var(--line);">
+              <th style="text-align:left; padding:5px; color:var(--cyan);">積載物</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">重量</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">場所</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">固定状況</th>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">無線機バッテリー</td><td style="padding:5px;">1.0kg</td><td style="padding:5px;">左翼根貨物室</td><td style="padding:5px; color:var(--text-dim);">専用ケース、ベルト</td></tr>
+            <tr><td style="padding:5px;">固定バラスト</td><td style="padding:5px;">4.0kg</td><td style="padding:5px;">前席足元</td><td style="padding:5px; color:var(--text-dim);">固定ネジ</td></tr>
+          </table>
+        </div>
+        <p data-tts data-text="5項目めの燃料及び滑油の搭載量及びその品質は、上級滑空機には該当しません。パラシュートは、義務づけられた装備ではないため、口述で詳しく説明する必要はありませんが、搭載している場合は60日点検の対象です。">
+          5項目めの燃料及び滑油の搭載量・品質は、上級滑空機には<strong>該当しません</strong>。パラシュートは義務づけられた装備ではないため口述での詳しい説明は不要ですが、搭載している場合は救急用具と同様に60日点検の対象です。
+        </p>
+      </div>
+      </section>
+
+      <section id="part2" class="part-section">
+      <div class="part-divider">
+        <div class="pd-num">PART 02</div>
+        <h2>飛行前点検（機体）</h2>
+      </div>
+      <div class="tts-bar" id="bar-part2">
+        <button class="tts-play">▶ この部を読み上げ</button>
+        <button class="tts-stop">■ 停止</button>
+        <span class="tts-status">待機中</span>
+      </div>
+
+      <div class="chapter" id="ch6">
+        <h3><span class="ch-num">06</span>点検の全体順序</h3>
+        <p data-tts data-text="飛行前点検は、アレキサンダー・シュライハー式ASK21型飛行規程4-7頁、4-26頁に定められた手順に従って実施します。キャノピーを開けて機内から点検を始め、主翼、胴体、尾翼と機体を一周する順序で、抜けなく点検します。">
+          飛行前点検は、<strong>アレキサンダー・シュライハー式ASK21型 飛行規程 4-7頁・4-26頁</strong>に定められた手順に従って実施します。キャノピーを開けて機内から点検を始め、主翼・胴体・尾翼と機体を一周する順序で、抜けなく点検します。
+        </p>
+        <div class="callout">
+          <span class="cal-label">実技試験で特に見られるポイント</span>
+          <p style="margin-bottom:0;">実技試験では、普段は省略しがちな「後席後方の点検口を開けてリンケージを確認する」作業も必ず実施します。点検口はビニールテープで留めてあることが多いですが、試験時は剥がして中を確認してかまいません。</p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch7">
+        <h3><span class="ch-num">07</span>各点検項目の詳細</h3>
+        <p class="lead">以下は実際のチェックリストの構成に沿った点検項目です。</p>
+
+        <div class="checklist">
+          <div class="cl-title">1．キャノピー・操縦系統・タイヤ・レリーズ</div>
+          <p data-tts data-text="キャノピーを開け、メインピンの正しい装着を確認します。エルロン及びエアブレーキの接続を、左翼上部の点検窓から確認します。クイックコネクタにスプリングクリップ（安全ピン）がかけられているかを見ます。異物が無いことを確認します。操縦装置の作動点検では、作動が重くないか、ひっかかりがなく最後まで操作できるかを、各操縦舵面とエアブレーキを手で固定し荷重をかけた状態で点検します。ラダーペダルのS字型操縦索ガイド内側のプラスチックチューブの取付にも異状がないか点検します。タイヤの空気圧は、前輪2.0バール、主輪2.7バール、尾輪2.5バールです。レリーズは、操作した戻りがスムーズかつ完全か、ダブルリングの装着・離脱に支障はないかを点検し、CGレリーズにダブルリングを装着して後方にリングを引き、自然離脱機構の点検を行います。車輪ブレーキは、エアブレーキレバーをいっぱいに引いたところで抵抗が大きくなり、作動が確認できます。">
+            キャノピーを開け、メインピンの正しい装着を確認します。エルロン及びエアブレーキの接続を、左翼上部の点検窓から確認します（クイックコネクタにスプリングクリップ＝安全ピンがかけられているか）。異物が無いことを確認します。操縦装置の作動点検では、作動が重くないか、ひっかかりがなく最後まで操作できるかを、各操縦舵面とエアブレーキを手で固定し荷重をかけた状態で点検します。ラダーペダルのS字型操縦索ガイド内側のプラスチックチューブの取付にも異状がないか点検します。
+          </p>
+          <ul class="plist">
+            <li>タイヤの空気圧：前輪 2.0bar／主輪 2.7bar／尾輪 2.5bar（スキッド装着の場合を除く）</li>
+            <li>レリーズ：戻りがスムーズかつ完全か、ダブルリングの装着・離脱に支障はないか。CGレリーズにダブルリングを装着し、後方にリングを引いて自然離脱機構を点検</li>
+            <li>車輪ブレーキ：エアブレーキレバーをいっぱいに引き、抵抗の増大で作動を確認</li>
+          </ul>
+        </div>
+
+        <div class="checklist">
+          <div class="cl-title">2．主翼・エアブレーキ／3〜6．胴体・組立・尾部</div>
+          <p data-tts data-text="主翼上下面に損傷がないかを点検します。エルロンは外観、円滑な作動、遊びの有無、プッシュロッド結合部を点検します。エアブレーキは外観、閉まり具合い、ロックの状態を点検します。胴体は損傷がないか、特に胴体下面を点検します。組立が正しく行われ、すべてのセーフティーがかけられているか、操縦系統の接続及び接続部のセーフティーを点検します。テールスキッドまたは尾輪、ピトー管及びベンチュリー管の状態、静圧孔の点検も行います。">
+            主翼上下面に損傷がないかを点検します。エルロンは外観・円滑な作動・遊びの有無・プッシュロッド結合部を点検します。エアブレーキは外観・閉まり具合い・ロックの状態を点検します。胴体は損傷がないか、特に胴体下面を点検します。組立が正しく行われ、すべてのセーフティーがかけられているか、操縦系統の接続及び接続部のセーフティーを点検します。テールスキッド（または尾輪）、ピトー管及びベンチュリー管の状態、静圧孔の点検も行います。
+          </p>
+        </div>
+
+        <div class="model-answer">
+          <p data-tts data-text="飛行前点検では、キャノピーとメインピン、エルロンとエアブレーキの接続、操縦装置の作動、タイヤ空気圧、レリーズの作動、車輪ブレーキ、主翼と胴体の損傷、組立とセーフティー、ピトー管とベンチュリー管、静圧孔を、機体を一周する順序で点検しました。異常はありません。">
+            「飛行前点検では、キャノピーとメインピン、エルロンとエアブレーキの接続、操縦装置の作動、タイヤ空気圧、レリーズの作動、車輪ブレーキ、主翼と胴体の損傷、組立とセーフティー、ピトー管とベンチュリー管、静圧孔を、機体を一周する順序で点検しました。異常はありません。」
+          </p>
+        </div>
+      </div>
+      </section>
+
+      <section id="part3" class="part-section">
+      <div class="part-divider">
+        <div class="pd-num">PART 03</div>
+        <h2>曳航前の打ち合わせ</h2>
+      </div>
+      <div class="tts-bar" id="bar-part3">
+        <button class="tts-play">▶ この部を読み上げ</button>
+        <button class="tts-stop">■ 停止</button>
+        <span class="tts-status">待機中</span>
+      </div>
+
+      <div class="chapter" id="ch8">
+        <h3><span class="ch-num">08</span>合図とその意味</h3>
+        <p data-tts data-text="曳航前の打ち合わせは、航空法第88条、施行規則第195条に基づいて行います。合図には、翼端係が行う発航開始の信号と、曳航機が行う曳航中の信号があります。">
+          曳航前の打ち合わせは、<strong>航空法第88条、施行規則第195条</strong>に基づいて行います。合図には、翼端係が行う発航開始の信号と、曳航機が行う曳航中の信号があります。
+        </p>
+        <ul class="plist">
+          <li data-tts data-text="張り合わせ開始は、翼端係が腕を下で振ります。">張り合わせ開始（翼端係）：腕を下で振る</li>
+          <li data-tts data-text="張り合わせ完了は、翼端係が腕を上げます。">張り合わせ完了（翼端係）：腕を上げる</li>
+          <li data-tts data-text="直ちに離脱は、曳航機が翼を振ります。">直ちに離脱（曳航機）：翼を振る</li>
+        </ul>
+        <p data-tts data-text="曳航中の代表的な標準信号としては、旋回の合図（機首を左右に振る）、増速（翼を左右に振る）、減速（機体を左右に振る、フィッシュテール）、離脱してほしい（曳航機が翼を振る）などがあります。滝川では、旋回の合図はグライダーの見え方を基準にとらえにくいため使用しないなど、クラブごとの運用に注意します。">
+          その他の標準信号（速度増減、離脱要求など）はクラブや運用ごとに使用の有無が異なる場合があるため、実際の運用ルールを事前に確認しておきます。
+        </p>
+      </div>
+
+      <div class="chapter" id="ch9">
+        <h3><span class="ch-num">09</span>出発及び曳航の方法</h3>
+        <ul class="plist">
+          <li data-tts data-text="離陸前点検完了後に、離脱高度、離脱場所を無線で曳航機へ連絡します。">離陸前点検完了後に、離脱高度・離脱場所を無線で曳航機へ連絡</li>
+          <li data-tts data-text="発航準備が完了したら、翼端係へ親指を立て、準備良しを合図します。">発航準備が完了したら、翼端係へ親指を立て「準備良し」を合図</li>
+          <li data-tts data-text="翼端係が翼を持ち上げ水平に保持し、腕を下で振り始めたら、曳航機は索の張り合わせを開始します。">翼端係が翼を水平に保持し腕を下で振り始めたら、曳航機は索の張り合わせを開始</li>
+          <li data-tts data-text="翼端係が保持していた翼を下ろした場合、離陸は中止とします。">翼端係が保持していた翼を下ろした場合、離陸は中止</li>
+          <li data-tts data-text="張り合わせ完了で翼端係は腕を上げるので、曳航機はパワーを上げ離陸を開始します。">張り合わせ完了で翼端係が腕を上げたら、曳航機はパワーを上げ離陸を開始</li>
+          <li data-tts data-text="曳航中はレベルトゥーで、VMCにも注意します。">曳航中はレベルトゥーで、VMCにも注意</li>
+        </ul>
+        <div class="callout">
+          <span class="cal-label">曳航中のポジション</span>
+          <p style="margin-bottom:0;">曳航機の見え方は「曳航機の車輪と地平線を合わせる」位置を基準とします。曳航機の出力や機種によって適切な見え方は変わるため、その日の曳航機に応じた基準を事前に確認します。</p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch10">
+        <h3><span class="ch-num">10</span>離脱の時期・場所と緊急時の処置</h3>
+        <p data-tts data-text="離脱の時期と場所を指定し、離脱は曳航機が翼を振り合図、グライダーがレリーズを操作し離脱します。索の離脱を確認後、曳航機は左に下降旋回、グライダーは右に旋回（ブレイク）します。離脱高度を無線でフライトサービスへ連絡します。">
+          離脱の時期（高度）と場所を指定します。離脱は曳航機が翼を振り合図し、グライダーがレリーズを操作して離脱します。<strong>索の離脱を確認後、曳航機は左に下降旋回、グライダーは右に旋回（ブレイク）</strong>します。離脱高度を無線でフライトサービスへ連絡します。
+        </p>
+        <div class="callout red">
+          <span class="cal-label">緊急時の処置</span>
+          <p style="margin-bottom:8px;"><strong>①離陸滑走中の曳航機トラブル：</strong>直ちに索を離脱し、曳航機に衝突しないよう避ける。</p>
+          <p style="margin-bottom:8px;"><strong>②曳航機の吊り上げ、曳航機のロスト：</strong>直ちに索を離脱する。</p>
+          <p style="margin-bottom:8px;"><strong>③曳航機のENG FAIL：</strong>無線で連絡または翼を振る（曳航機）。グライダーは索を離脱し、右へブレイク。</p>
+          <p style="margin-bottom:0;"><strong>④離脱不可：</strong>無線で連絡または翼を振る（グライダー）。曳航機側で索を離脱する。</p>
+        </div>
+        <p data-tts data-text="離脱時の吊り上げを避けようとするあまり、索が離れていくことを確認してから右旋回するタイミングが遅れる例が見られます。確認せず右旋回に移るのは危険ですが、確認が遅れると曳航索に接触するおそれもあるため、両方のバランスを意識します。">
+          離脱時のタイミングには注意が必要です。索が離れていくことを確認せずに右旋回するのは危険ですが、確認と旋回が遅れすぎると、今度は曳航索に接触するおそれがあります。「確認したら、間をおかず右旋回する」という感覚を身につけておきます。
+        </p>
+      </div>
+
+      <div class="chapter" id="ch11">
+        <h3><span class="ch-num">11</span>実際の口頭ブリーフィング例</h3>
+        <p class="lead">曳航機のパイロットに対して、出発前に口頭で行う打ち合わせの実例です。そのまま覚えて使える形になっています。</p>
+        <div class="call-block" data-tts data-text="目的：実地試験のためのフライトを行います。出発の合図：グライダーの準備が出来た場合に、翼端保持者にサムアップで知らせます。翼端保持者は翼を水平にした後、腕を下で振りますので、曳航機は徐行で発進してください。ロープの貼り合わせのタイミングで、翼端保持者は手を上に上げます。中止の場合：ロープの貼り合わせまでの間は、翼端者に対してサムダウンで知らせます。中止の合図があった場合には、翼端者は腕を振ることを中止し翼を下げます。翼端者が気づかない場合には直ちに無線で知らせます。ロープが既に貼り合わされていた場合には、無線で知らせるとともに、グライダー側から直ちに離脱します。曳航機は、そのまま直進し、離陸あるいは停止をお願いいたします。グライダーはグラスランウェイ側にずらして停止します。曳航中の合図：離脱高度になった際には、曳航機の翼を振って知らせてください。グライダー側から離脱をリクエストする際には、無線で知らせます。無線が使えない場合には、グライダー側の翼を振ります。ロープ切り離し後は、左下降旋回をして高度を下げて離脱してください。グライダーは離脱の確認後、右上昇旋回にて離脱します。曳航はレベルトーで行います。VMCを厳守して曳航をお願いいたします。本日の離脱高度は2500フィート。曳航して欲しい空域を言う。">
+            目的：実地試験のためのフライトを行います。<br><br>
+            出発の合図：グライダーの準備が出来た場合に、翼端保持者にサムアップで知らせます。翼端保持者は翼を水平にした後、腕を下で振りますので、曳航機は徐行で発進してください。ロープの貼り合わせのタイミングで、翼端保持者は手を上に上げます。<br><br>
+            中止の場合：ロープの貼り合わせまでの間は、翼端者に対してサムダウンで知らせます。中止の合図があった場合には、翼端者は腕を振ることを中止し翼を下げます。翼端者が気づかない場合には直ちに無線で知らせます。ロープが既に貼り合わされていた場合には、無線で知らせるとともに、グライダー側から直ちに離脱します。曳航機はそのまま直進し、離陸あるいは停止をお願いします。グライダーはグラスランウェイ側にずらして停止します。<br><br>
+            曳航中の合図：離脱高度になった際には、曳航機の翼を振って知らせてください。グライダー側から離脱をリクエストする際には無線で知らせます。無線が使えない場合には、グライダー側の翼を振ります。<br><br>
+            ロープ切り離し後は、左下降旋回をして高度を下げて離脱してください。グライダーは離脱の確認後、右上昇旋回にて離脱します。<br><br>
+            曳航はレベルトーで行います。VMCを厳守して曳航をお願いいたします。本日の離脱高度は2,500フィート。（曳航して欲しい空域を言う）
+        </div>
+        <div class="callout amber">
+          <span class="cal-label">使い方のポイント</span>
+          <p style="margin-bottom:0;">この台詞をそのまま丸暗記するのではなく、「目的」「出発の合図」「中止の場合」「曳航中の合図」「離脱高度・空域」という5つの見出しの順序を覚えておくと、その日の状況に合わせて自分の言葉で組み立てられます。</p>
+        </div>
+      </div>
+      </section>
+
+      <section id="part4" class="part-section">
+      <div class="part-divider">
+        <div class="pd-num">PART 04</div>
+        <h2>地上取扱い・翼端保持</h2>
+      </div>
+      <div class="tts-bar" id="bar-part4">
+        <button class="tts-play">▶ この部を読み上げ</button>
+        <button class="tts-stop">■ 停止</button>
+        <span class="tts-status">待機中</span>
+      </div>
+
+      <div class="chapter" id="ch12">
+        <h3><span class="ch-num">12</span>翼端保持者の注意事項</h3>
+        <p data-tts data-text="離陸前点検はパイロットの責任で実施しますが、離陸時の翼端保持者も、下記の注意を払うことにより安全性を高めることができます。">
+          離陸前点検はパイロットの責任で実施しますが、離陸時の<strong>翼端保持者</strong>も、次の点に注意することで安全性を高めることができます。
+        </p>
+        <ul class="plist">
+          <li data-tts data-text="曳航索のついている場所は正しいか。飛行機曳航用のフックがあるのにCGフックについていないか。">曳航索のついている場所は正しいか（飛行機曳航用のフックがあるのにCGフックについていないか）</li>
+          <li data-tts data-text="キャノピーがロックされているか。外側から見て不自然ではないか、ベルト等が挟まっていないか。">キャノピーがロックされているか（外側から見て不自然でないか、ベルト等の挟まりがないか）</li>
+          <li data-tts data-text="ダイブブレーキはロックされているか。外側から見て浮き上がっていないか。">ダイブブレーキはロックされているか（外側から見て浮き上がっていないか）</li>
+          <li>テールドーリーは取り外されているか</li>
+          <li>動翼にガストロックがついていないか</li>
+          <li>尾翼等カバーがかかったままになっていないか</li>
+          <li>曳航索にキンクはないか</li>
+          <li>曳航索が、ノーズホイール等に絡まっていないか</li>
+        </ul>
+        <div class="callout">
+          <span class="cal-label">口述で聞かれたら</span>
+          <p style="margin-bottom:0;">「翼端保持者としても、フックの掛け間違いやキャノピーロックの不完全、動翼のガストロック残りなど、外側から見て気づける点は積極的に確認します」と答えられるようにしておきます。</p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch13">
+        <h3><span class="ch-num">13</span>横風時の地上滑走・離陸滑走時の緊急時</h3>
+        <p data-tts data-text="横風時の地上滑走では、翼端保持者は風上側の翼端を少し下げます。横風時は風上側の翼端があおられないよう注意が必要ですが、風に流されたプロペラ交流が風下側の翼に当たることにより風下側の翼の揚力が増し、風上側の翼端が下がることがあることも考慮に入れておきます。">
+          横風時の地上滑走では、翼端保持者は<strong>風上側の翼端を少し下げます。</strong>横風時は風上側の翼端があおられないよう注意が必要ですが、風に流されたプロペラ交流が風下側の翼に当たることで風下側の翼の揚力が増し、逆に風上側の翼端が下がることがある点も考慮しておきます。
+        </p>
+        <p data-tts data-text="離陸滑走時のエマージェンシーで最も多いのが、翼端を落とす、そしてグランドループというパターンです。この際、一番の対処方法はグランドループする前に離脱することです。離陸滑走開始時にダイブブレーキをオープンしていると、翼端を落としてしまった際に即座にレリーズを操作できません。よって離陸時のダイブブレーキオープンは推奨しません。">
+          離陸滑走時のエマージェンシーで最も多いのが、<strong>翼端を落とす→グランドループ</strong>というパターンです。この際、最優先の対処方法は、グランドループする前に索を離脱することです。離陸滑走開始時にダイブブレーキをオープンしていると、翼端を落としてしまった際に即座にレリーズを操作できないため、離陸時のダイブブレーキオープンは推奨しません。
+        </p>
+        <div class="callout red">
+          <span class="cal-label">離陸滑走中に曳航機側にトラブルが生じた場合</span>
+          <p style="margin-bottom:0;">まず曳航機側で索を離脱します。グライダー側も異常に気付いた場合は索を離脱します。曳航機は前方に安全に停止できる場所を探し、急ブレーキをかけないようにして停止を試みます。グライダーは曳航機に衝突しないよう避けます。</p>
+        </div>
+      </div>
+      </section>
+
+      <section id="part5" class="part-section">
+      <div class="part-divider">
+        <div class="pd-num">PART 05</div>
+        <h2>重量・速度の参考データ</h2>
+      </div>
+      <div class="tts-bar" id="bar-part5">
+        <button class="tts-play">▶ この部を読み上げ</button>
+        <button class="tts-stop">■ 停止</button>
+        <span class="tts-status">待機中</span>
+      </div>
+
+      <div class="chapter" id="ch14">
+        <h3><span class="ch-num">14</span>重量別速度早見表</h3>
+        <p data-tts data-text="失速速度や最小沈下速度は、機体の全備重量によって変化します。飛行規程に記載された基準重量での速度に、当日の重量との比の平方根をかけて計算します。">
+          失速速度や最小沈下速度は、機体の<strong>全備重量</strong>によって変化します。飛行規程に記載された基準重量での速度に、当日の重量との比の平方根をかけて計算します。
+        </p>
+        <div class="callout amber">
+          <span class="cal-label">計算式（飛行規程より）</span>
+          <p style="margin-bottom:6px;">失速速度 ＝ 74km/h × √n　（n ＝ 当該機の全備重量 ÷ 600kg）</p>
+          <p style="margin-bottom:0;">最小沈下速度 ＝ 80km/h × √n　（n ＝ 当該機の全備重量 ÷ 570kg）</p>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px;">
+          <tr style="border-bottom:1px solid var(--line);">
+            <th style="text-align:left; padding:5px; color:var(--cyan);">全備重量(kg)</th>
+            <th style="text-align:left; padding:5px; color:var(--cyan);">失速速度(kt)</th>
+            <th style="text-align:left; padding:5px; color:var(--cyan);">最小沈下速度(kt)</th>
+            <th style="text-align:left; padding:5px; color:var(--cyan);">B45度最沈下速度(kt)</th>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">500</td><td style="padding:5px;">37</td><td style="padding:5px;">40</td><td style="padding:5px;">48</td></tr>
+          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">540</td><td style="padding:5px;">38</td><td style="padding:5px;">42</td><td style="padding:5px;">50</td></tr>
+          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">570</td><td style="padding:5px;">39</td><td style="padding:5px;">43</td><td style="padding:5px;">51</td></tr>
+          <tr><td style="padding:5px;">600</td><td style="padding:5px;">40</td><td style="padding:5px;">44</td><td style="padding:5px;">53</td></tr>
+        </table>
+        <p style="margin-top:8px; color:var(--text-dim); font-size:13px;">※全表は搭載重量450〜600kgの範囲で作成されています。旋回時の必要速度指数はバンク0度＝1.0倍、30度＝1.07倍、45度＝1.19倍、60度＝1.41倍です。数値は必ずその日の実際の飛行規程・重量計算で確認してください。</p>
+      </div>
+
+      <div class="chapter" id="ch15">
+        <h3><span class="ch-num">15</span>最良滑空比速度の設定</h3>
+        <p data-tts data-text="最良滑空比速度は、ポーラーカーブをもとに、正対風・背風の風速と、上昇流・沈下流の値を読み取って設定します。ASK21は無風・無上昇下降で約49ノットが基準ですが、正対風が強い場合や沈下流の中では速度を増します。">
+          最良滑空比速度は、<strong>ポーラーカーブ</strong>をもとに、正対風・背風の風速（気象情報、ウインドソック）と、上昇流・沈下流の値（バリオメータ）を読み取って設定します。ASK21は無風・無上昇下降でおよそ49kt（48.5〜49kt程度）が基準ですが、正対風が強い場合や沈下流の中では速度を増します。
+        </p>
+        <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:10px;">
+          <tr style="border-bottom:1px solid var(--line);">
+            <th style="text-align:left; padding:5px; color:var(--cyan);">沈下(kt)</th>
+            <th style="text-align:left; padding:5px; color:var(--cyan);">無風(0kt)</th>
+            <th style="text-align:left; padding:5px; color:var(--cyan);">正対風10kt</th>
+            <th style="text-align:left; padding:5px; color:var(--cyan);">正対風20kt</th>
+          </tr>
+          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">0</td><td style="padding:5px;">48.5</td><td style="padding:5px;">50</td><td style="padding:5px;">53</td></tr>
+          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">-1</td><td style="padding:5px;">55</td><td style="padding:5px;">58</td><td style="padding:5px;">62</td></tr>
+          <tr><td style="padding:5px;">-2</td><td style="padding:5px;">61</td><td style="padding:5px;">65</td><td style="padding:5px;">69</td></tr>
+        </table>
+        <p data-tts data-text="速度を上げる根拠を聞かれたら、ポーラーカーブを検討して、この程度の増速幅が最も合理的で、これ以上増速するとかえって沈下が大きくなると判断しました、と答えます。">
+          速度を上げる根拠を聞かれたら、「ポーラーカーブを検討して、この程度の増速幅が最も合理的で、これ以上増速するとかえって沈下が大きくなると判断しました」と答えます。
+        </p>
+        <div class="model-answer">
+          <p data-tts data-text="正対風が強いので、速度を毎時100キロメートルとしました。無風無上昇下降であれば約90キロメートル毎時ですが、ポーラーカーブから、この程度の増速幅が最も合理的と判断しました。">
+            「正対風が強いので、速度を100km/hとしました。無風・無上昇下降であれば約90km/hですが、ポーラーカーブから、この程度の増速幅が最も合理的と判断しました。」
+          </p>
+        </div>
+      </div>
+      </section>
+
+      <footer>
+        <div>機長の出発前確認 実地資料集｜滝川滑空場 ASK-21（JA20HC）対応版</div>
+        <div style="margin-top:6px;">本ページは、実際に使われているチェックリスト・記入例をもとに作成した学習補助資料であり、公式の審査基準に代わるものではありません。登録番号・証明書番号・整備記録・有効期限等の数値は参考データです。最新の実施要領・審査細則・機体の実際の状態は、必ず一次資料と当日の書類で確認してください。</div>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ============ Scroll spy for nav ============ */
+(function(){
+  const links = document.querySelectorAll('.sb-link');
+  const map = new Map();
+  links.forEach(l=>{
+    const id = l.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if(el) map.set(el, l);
+  });
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      const link = map.get(e.target);
+      if(!link) return;
+      if(e.isIntersecting){
+        links.forEach(l=>l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-15% 0px -70% 0px'});
+  map.forEach((link, el)=> io.observe(el));
+
+  links.forEach(l=>l.addEventListener('click', ()=>{
+    if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
+  }));
+})();
+
+/* ============ TTS Engine v2 ============
+   Web Speech APIは時間シーク非対応のため、文字位置ベースで再生位置を管理し、
+   一時停止・±15秒スキップ・速度変更を「キャンセル→途中から再発話」方式で実現する。
+   読み上げ速度(文字/秒)は実測で自動キャリブレーションし、15秒→文字数に換算する。 */
+const TTS = (function(){
+  const synth = window.speechSynthesis;
+  let voices = [];
+  let voiceListeners = [];
+  function loadVoices(){
+    voices = synth.getVoices();
+    voiceListeners.forEach(fn => { try{ fn(voices); }catch(e){} });
+  }
+  loadVoices();
+  if(speechSynthesis.onvoiceschanged !== undefined){ speechSynthesis.onvoiceschanged = loadVoices; }
+  function onVoicesReady(fn){ voiceListeners.push(fn); if(voices.length) fn(voices); }
+  function listVoices(){
+    // 日本語音声を優先して並べ、それ以外も選択肢として残す
+    const jp = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('ja'));
+    const other = voices.filter(v=>!(v.lang && v.lang.toLowerCase().startsWith('ja')));
+    return jp.concat(other);
+  }
+  let preferredVoiceName = null; // ユーザーが選択した音声名（セッション内のみ保持）
+  function pickVoice(){
+    if(preferredVoiceName){
+      const found = voices.find(v => v.name === preferredVoiceName);
+      if(found) return found;
+    }
+    const jp = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('ja'));
+    return jp[0] || voices[0] || null;
+  }
+  function setVoiceByName(name){ preferredVoiceName = name || null; }
+
+  /* ============ 読み上げ用テキスト正規化 ============
+     画面表示用の文章をそのまま音声合成に渡すと、専門用語の誤読や
+     記号・単位の棒読みで聞き取りにくくなるため、読み上げ直前に変換する。 */
+  const KANJI_READING_FIX = [
+    [/耐空/g, 'たいくう'],
+    [/滑空場/g, 'かっくうじょう'],
+    [/滑空機/g, 'かっくうき'],
+    [/場周/g, 'じょうしゅう'],
+    [/航空日誌上/g, 'こうくうにっしじょう'],
+    [/未処置事項/g, 'みしょちじこう'],
+    [/滝川/g, 'たきかわ'],
+    [/ASK21/g, 'えーえすけー21'],
+    [/ASK-21/g, 'えーえすけー21'],
+    [/JA20HC/g, 'じぇいえーにーぜろえいちしー'],
+    [/入らない/g, 'はいらない'],
+    [/機首/g, 'きしゅ'],
+    [/片翼/g, 'かたよく'],
+    [/滞空/g, 'たいくう'],
+    [/等距離/g, 'とうきょり'],
+    [/抗力/g, 'こうりょく'],
+    [/故障時/g, 'こしょうじ'],
+    [/曳航索/g, 'えいこうさく'],
+    [/曳航機/g, 'えいこうき'],
+    [/曳航中/g, 'えいこうちゅう'],
+    [/曳航/g, 'えいこう'],
+    [/翼端/g, 'よくたん'],
+    [/主翼/g, 'しゅよく'],
+    [/尾翼/g, 'びよく'],
+    [/水平尾翼/g, 'すいへいびよく'],
+    [/垂直尾翼/g, 'すいちょくびよく'],
+    [/重心/g, 'じゅうしん'],
+    [/積載物/g, 'せきさいぶつ'],
+    [/搭載物/g, 'とうさいぶつ'],
+    [/静圧孔/g, 'せいあつこう'],
+    [/離脱/g, 'りだつ'],
+    [/離陸/g, 'りりく'],
+    [/着陸/g, 'ちゃくりく'],
+    [/前席/g, 'ぜんせき'],
+    [/後席/g, 'こうせき'],
+    // 「風」関連：複合語を先に置換してから、最後に単独の「風」を置換する
+    [/横風/g, 'よこかぜ'],
+    [/背風/g, 'はいふう'],
+    [/風上/g, 'かざかみ'],
+    [/風下/g, 'かざしも'],
+    [/風速/g, 'ふうそく'],
+    [/風向/g, 'ふうこう'],
+    [/正対風/g, 'せいたいふう'],
+    [/風/g, 'かぜ'],
+  ];
+  function normalizeForSpeech(raw){
+    let t = raw;
+    // 1. 誤読しやすい専門用語をかな読みに置換
+    KANJI_READING_FIX.forEach(([re, rep]) => { t = t.replace(re, rep); });
+    // 2. 記号を自然な話し言葉に
+    t = t.replace(/±\s*(\d+(?:\.\d+)?)/g, 'プラスマイナス$1');
+    t = t.replace(/(\d)(?:〜|～)(\d)/g, '$1から$2');
+    t = t.replace(/(\d),(\d{3})/g, '$1$2');
+    t = t.replace(/→/g, '、');
+    // 3. 単位記号を読みに展開（長い単位から先に処理し誤変換を防ぐ）
+    const unitFix = [
+      [/(\d)\s*km\/h/g, '$1キロメートル毎時'],
+      [/(\d)\s*kt\b/g, '$1ノット'],
+      [/(\d)\s*ft\b/g, '$1フィート'],
+      [/(\d)\s*mm\b/g, '$1ミリメートル'],
+      [/(\d)\s*kg\b/g, '$1キログラム'],
+      [/(\d)\s*bar\b/g, '$1バール'],
+      [/(\d)\s*psi\b/g, '$1ピーエスアイ'],
+      [/(\d)\s*hPa\b/g, '$1ヘクトパスカル'],
+      [/(\d)\s*m\b(?!m)/g, '$1メートル'],
+    ];
+    unitFix.forEach(([re, rep]) => { t = t.replace(re, rep); });
+    return t;
+  }
+
+  const S = {
+    section:null, status:null, playBtn:null, pauseBtn:null,
+    nodes:[], texts:[], cum:[], total:0,
+    idx:0, offset:0,
+    playing:false, paused:false, gen:0,
+    rate:1.0,
+    cps:7.5   // 文字/秒（rate=1.0時）初期推定値。再生しながら実測で補正。
+  };
+  let live = { base:0, boundary:false, start:0 };
+
+  function clearHL(){ document.querySelectorAll('.tts-hl').forEach(n=>n.classList.remove('tts-hl')); }
+  function setStatus(t){ if(S.status) S.status.textContent = t; }
+  function setPauseLabel(){ if(S.pauseBtn) S.pauseBtn.textContent = S.paused ? '▶ 再開' : '⏸ 一時停止'; }
+
+  function buildQueue(section){
+    S.nodes = Array.from(section.querySelectorAll('[data-tts]'));
+    S.texts = S.nodes.map(n => normalizeForSpeech(((n.getAttribute('data-text')||n.textContent)||'').trim()));
+    S.cum = []; let acc = 0;
+    for(const t of S.texts){ S.cum.push(acc); acc += t.length; }
+    S.total = acc;
+  }
+
+  /* 現在の再生位置（ノード内文字オフセット）を推定して S.offset に反映 */
+  function capturePos(){
+    if(S.playing && !S.paused && !live.boundary && live.start){
+      const elapsed = (Date.now() - live.start) / 1000;
+      const est = live.base + elapsed * S.cps * S.rate;
+      S.offset = Math.min(est, (S.texts[S.idx]||'').length);
+    }
+  }
+
+  /* 文の途中から再開すると不自然なので、直前の「。」まで戻して読み直す */
+  function snapToSentence(){
+    const t = S.texts[S.idx] || '';
+    let off = Math.floor(S.offset);
+    if(off <= 0){ S.offset = 0; return; }
+    const p = t.lastIndexOf('。', Math.max(0, off - 1));
+    S.offset = (p >= 0) ? p + 1 : 0;
+    if(S.offset >= t.length) S.offset = Math.max(0, t.length - 1);
+  }
+
+  function speakCurrent(){
+    const myGen = S.gen;
+    if(S.idx >= S.nodes.length){
+      S.playing = false; S.paused = false; clearHL();
+      setStatus('再生終了'); setPauseLabel();
+      if(S.playBtn) S.playBtn.classList.remove('active');
+      return;
+    }
+    const node = S.nodes[S.idx];
+    const full = S.texts[S.idx];
+    const startOff = Math.floor(S.offset);
+    const text = full.slice(startOff);
+    if(!text){ S.idx++; S.offset = 0; speakCurrent(); return; }
+
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice();
+    if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = 'ja-JP'; }
+    u.rate = S.rate;
+    live = { base:startOff, boundary:false, start:0 };
+
+    u.onstart = ()=>{
+      if(myGen !== S.gen) return;
+      live.start = Date.now();
+      clearHL(); node.classList.add('tts-hl');
+      node.scrollIntoView({behavior:'smooth', block:'center'});
+      setStatus('再生中 ' + (S.idx+1) + '/' + S.nodes.length + '　×' + S.rate);
+    };
+    /* onboundaryが使える環境(PC Chrome等)では正確な文字位置を取得。iOSは未対応→時間推定 */
+    u.onboundary = (e)=>{
+      if(myGen !== S.gen) return;
+      live.boundary = true;
+      S.offset = live.base + (e.charIndex || 0);
+    };
+    u.onend = ()=>{
+      if(myGen !== S.gen) return;
+      const el = (Date.now() - live.start) / 1000;
+      if(el > 1.5 && text.length > 15){
+        const measured = text.length / el / S.rate;
+        if(measured > 2 && measured < 20) S.cps = S.cps * 0.7 + measured * 0.3;
+      }
+      S.idx++; S.offset = 0; speakCurrent();
+    };
+    u.onerror = ()=>{ if(myGen !== S.gen) return; S.idx++; S.offset = 0; speakCurrent(); };
+    synth.speak(u);
+  }
+
+  function bind(section, bar){
+    S.section = section;
+    S.status = bar.querySelector('.tts-status');
+    S.playBtn = bar.querySelector('.tts-play');
+    S.pauseBtn = bar.querySelector('.tts-pause');
+    document.querySelectorAll('.tts-play.active').forEach(b=>{ if(b!==S.playBtn) b.classList.remove('active'); });
+  }
+
+  function playSection(section, bar){
+    stop();
+    bind(section, bar);
+    buildQueue(section);
+    S.idx = 0; S.offset = 0;
+    S.playing = true; S.paused = false; S.gen++;
+    if(S.playBtn) S.playBtn.classList.add('active');
+    setPauseLabel();
+    speakCurrent();
+  }
+
+  function playFromIndex(i){
+    S.idx = Math.max(0, Math.min(i, S.nodes.length - 1));
+    S.offset = 0;
+    S.playing = true; S.paused = false; S.gen++;
+    synth.cancel();
+    setPauseLabel();
+    speakCurrent();
+  }
+
+  function togglePause(){
+    if(!S.playing) return;
+    if(!S.paused){
+      capturePos();
+      S.gen++; synth.cancel();
+      S.paused = true;
+      setStatus('一時停止 ' + (S.idx+1) + '/' + S.nodes.length);
+      setPauseLabel();
+    } else {
+      snapToSentence();
+      S.paused = false; S.gen++;
+      setPauseLabel();
+      speakCurrent();
+    }
+  }
+
+  function skip(sec){
+    if(!S.playing) return;
+    capturePos();
+    const deltaChars = Math.abs(sec) * S.cps * S.rate;
+    let pos = (S.cum[S.idx] || 0) + S.offset + (sec > 0 ? deltaChars : -deltaChars);
+    pos = Math.max(0, Math.min(pos, S.total - 1));
+    let i = 0;
+    while(i + 1 < S.cum.length && S.cum[i+1] <= pos) i++;
+    S.idx = i;
+    S.offset = pos - S.cum[i];
+    snapToSentence();
+    S.gen++; synth.cancel();
+    S.paused = false;
+    setPauseLabel();
+    speakCurrent();
+  }
+
+  function stop(){
+    S.gen++; synth.cancel();
+    S.playing = false; S.paused = false;
+    S.idx = 0; S.offset = 0;
+    clearHL(); setPauseLabel();
+    if(S.playBtn) S.playBtn.classList.remove('active');
+  }
+
+  function setRate(r){
+    S.rate = r;
+    if(S.playing && !S.paused){
+      capturePos(); snapToSentence();
+      S.gen++; synth.cancel();
+      speakCurrent();
+    }
+  }
+
+  /* PC Chromeで長い発話が途中停止する既知バグへのキープアライブ */
+  setInterval(()=>{ if(S.playing && !S.paused){ try{ synth.resume(); }catch(e){} } }, 8000);
+
+  function seekToNode(section, node){
+    if(S.section !== section) return false;
+    if(!S.playing && !S.paused) return false;
+    const i = S.nodes.indexOf(node);
+    if(i < 0) return false;
+    playFromIndex(i);
+    return true;
+  }
+
+  return { playSection, togglePause, skip, stop, setRate, seekToNode, state:S, listVoices, onVoicesReady, setVoiceByName };
+})();
+
+const allVoiceSelects = [];
+function refreshVoiceSelects(voices){
+  const list = TTS.listVoices();
+  allVoiceSelects.forEach(sel=>{
+    const current = sel.value;
+    sel.innerHTML = '';
+    if(list.length === 0){
+      const o = document.createElement('option');
+      o.textContent = '音声を読み込み中…';
+      sel.appendChild(o);
+      return;
+    }
+    list.forEach(v=>{
+      const o = document.createElement('option');
+      o.value = v.name;
+      const jpTag = (v.lang && v.lang.toLowerCase().startsWith('ja')) ? '' : '（' + v.lang + '）';
+      o.textContent = v.name + jpTag;
+      sel.appendChild(o);
+    });
+    if(list.some(v=>v.name === current)){
+      sel.value = current;
+    } else {
+      sel.value = list[0].name;
+      TTS.setVoiceByName(list[0].name);
+    }
+  });
+}
+TTS.onVoicesReady(refreshVoiceSelects);
+
+['part1','part2','part3','part4','part5'].forEach(id=>{
+  initTTSBar(id, 'bar-'+id);
+});
+/* 初期化後、既に読み込み済みの音声リストがあれば即座にドロップダウンへ反映 */
+refreshVoiceSelects();
+
+function initTTSBar(sectionId, barId){
+  const bar = document.getElementById(barId);
+  const section = document.getElementById(sectionId);
+  if(!bar || !section) return;
+  const playBtn = bar.querySelector('.tts-play');
+  const stopBtn = bar.querySelector('.tts-stop');
+  const status = bar.querySelector('.tts-status');
+
+  /* 追加コントロールをJSで挿入（一時停止・±15秒・速度・音声選択） */
+  const pauseBtn = document.createElement('button');
+  pauseBtn.className = 'tts-pause';
+  pauseBtn.textContent = '⏸ 一時停止';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'tts-back';
+  backBtn.textContent = '◀ 15秒';
+  const fwdBtn = document.createElement('button');
+  fwdBtn.className = 'tts-fwd';
+  fwdBtn.textContent = '15秒 ▶';
+  const rateSel = document.createElement('select');
+  rateSel.className = 'tts-rate';
+  [['0.8','×0.8'],['1','×1.0'],['1.25','×1.25'],['1.5','×1.5']].forEach(([v,l])=>{
+    const o = document.createElement('option');
+    o.value = v; o.textContent = l;
+    if(v === '1') o.selected = true;
+    rateSel.appendChild(o);
+  });
+  const voiceSel = document.createElement('select');
+  voiceSel.className = 'tts-voice';
+  voiceSel.title = '読み上げ音声を選択';
+  allVoiceSelects.push(voiceSel);
+  playBtn.after(pauseBtn, backBtn, fwdBtn, rateSel, voiceSel);
+
+  playBtn.addEventListener('click', ()=>{ TTS.playSection(section, bar); });
+  pauseBtn.addEventListener('click', ()=>{ TTS.togglePause(); });
+  backBtn.addEventListener('click', ()=>{ TTS.skip(-15); });
+  fwdBtn.addEventListener('click', ()=>{ TTS.skip(15); });
+  stopBtn.addEventListener('click', ()=>{
+    TTS.stop();
+    if(status) status.textContent = '停止';
+  });
+  rateSel.addEventListener('change', ()=>{ TTS.setRate(parseFloat(rateSel.value)); });
+  voiceSel.addEventListener('change', ()=>{
+    TTS.setVoiceByName(voiceSel.value);
+    allVoiceSelects.forEach(sel=>{ if(sel !== voiceSel) sel.value = voiceSel.value; });
+    /* 再生中に音声を切り替えた場合、直前の文頭から新しい声で読み直す */
+    if(TTS.state.playing){
+      TTS.skip(0.0001);
+    }
+  });
+
+  /* 再生中・一時停止中に段落をタップするとその段落頭から再生（シーク） */
+  section.addEventListener('click', (e)=>{
+    if(e.target.closest('.tts-bar')) return;
+    const sel = window.getSelection && window.getSelection();
+    if(sel && !sel.isCollapsed) return; /* テキスト選択中は無視 */
+    const node = e.target.closest('[data-tts]');
+    if(!node) return;
+    TTS.seekToNode(section, node);
+  });
+}
+</script>
+</body>
+</html>

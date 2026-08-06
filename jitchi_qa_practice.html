@@ -1398,6 +1398,12 @@ function confirmAbort() {
     stopSpeaking(); stopMic();
     sessionRunning = false;
     releaseWakeLock();
+    // 全問終了せず途中で終了した場合も、ここまでの正解を累計に反映する
+    if (answered > 0) {
+      sessionCorrect += correctCount; sessionTotal += answered;
+      localStorage.setItem(bankKey('totalCorrect'),  sessionCorrect);
+      localStorage.setItem(bankKey('totalAnswered'), sessionTotal);
+    }
     document.getElementById('examScreen').classList.add('hidden');
     showStart();
   }

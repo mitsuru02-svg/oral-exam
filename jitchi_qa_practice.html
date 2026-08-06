@@ -343,6 +343,18 @@ body {
       <div class="stat-box"><div class="num" id="savedTotal">0</div><div class="label">解答数</div></div>
       <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
     </div>
+
+    <div id="syncBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+        <span style="font-size:13px;color:#8b949e;">🔄 端末間同期ID：</span>
+        <input id="syncIdInput" type="text" placeholder="例：taro-glider" maxlength="40"
+               style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 10px;font-size:13px;width:160px;">
+        <button class="btn-secondary" style="padding:6px 14px;font-size:13px;" onclick="saveSyncId()">設定して同期</button>
+      </div>
+      <div id="syncStatus" style="font-size:11px;color:#8b949e;text-align:center;margin-top:8px;">
+        同じIDを別の端末でも入力すると、正解数・苦手問題・チェックを引き継げます。
+      </div>
+    </div>
     <div class="mode-cards">
       <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
         <div class="mode-inner">
@@ -610,6 +622,8 @@ function initApp() {
   if (headerBadge) headerBadge.textContent = activeQA().length + '問';
   updateCountMax();
   updateCheckedCount();
+  const syncInput = document.getElementById('syncIdInput');
+  if (syncInput && syncId) { syncInput.value = syncId; syncPull(false); }
 }
 
 function updateCountMax() {
@@ -1291,6 +1305,78 @@ let sessionTotal   = parseInt(localStorage.getItem(bankKey('totalAnswered'))   |
 document.getElementById('savedCorrect').textContent = sessionCorrect;
 document.getElementById('savedTotal').textContent   = sessionTotal;
 
+// ══════════════════════════════════════════════════════════════
+// 端末間同期（同じ同期IDなら正解数・苦手問題・チェックを共有）
+// Cloudflare Worker（CONFIG.API_ENDPOINT）の /sync/<ID> エンドポイントを使用。
+// 厳密な排他制御はせず「カウンターは大きい方／リストは和集合」で簡易マージする。
+// ══════════════════════════════════════════════════════════════
+let syncId = localStorage.getItem('jitchi_syncId') || '';
+function syncEndpoint(id) { return CONFIG.API_ENDPOINT + '/sync/' + encodeURIComponent(id); }
+
+function setSyncStatus(text, color) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = color || '#8b949e';
+}
+
+function applyMergedSyncState(data) {
+  if (!data) return;
+  sessionCorrect = Math.max(sessionCorrect, data.totalCorrect  || 0);
+  sessionTotal   = Math.max(sessionTotal,   data.totalAnswered || 0);
+  wrongIndices   = [...new Set([...wrongIndices,   ...(data.wrongIndices   || [])])];
+  checkedIndices = [...new Set([...checkedIndices, ...(data.checkedIndices || [])])];
+  localStorage.setItem(bankKey('totalCorrect'),   sessionCorrect);
+  localStorage.setItem(bankKey('totalAnswered'),  sessionTotal);
+  localStorage.setItem(bankKey('wrongIndices'),   JSON.stringify(wrongIndices));
+  localStorage.setItem(bankKey('checkedIndices'), JSON.stringify(checkedIndices));
+  const sc = document.getElementById('savedCorrect'); if (sc) sc.textContent = sessionCorrect;
+  const st = document.getElementById('savedTotal');   if (st) st.textContent = sessionTotal;
+  updateCheckedCount();
+}
+
+async function syncPull(showStatus) {
+  if (!syncId) return;
+  if (showStatus) setSyncStatus('同期中...');
+  try {
+    const res = await fetch(syncEndpoint(syncId));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    applyMergedSyncState(await res.json());
+    if (showStatus) setSyncStatus(`「${syncId}」と同期しました（${new Date().toLocaleTimeString()}）`, '#3fb950');
+  } catch (e) {
+    if (showStatus) setSyncStatus('同期に失敗しました（オフライン、またはWorker未対応）', '#f85149');
+  }
+}
+
+async function syncPush(showStatus) {
+  if (!syncId) return;
+  try {
+    const res = await fetch(syncEndpoint(syncId), {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ totalCorrect: sessionCorrect, totalAnswered: sessionTotal, wrongIndices, checkedIndices }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    applyMergedSyncState(await res.json());
+    if (showStatus) setSyncStatus(`「${syncId}」と同期しました（${new Date().toLocaleTimeString()}）`, '#3fb950');
+  } catch (e) {
+    if (showStatus) setSyncStatus('同期に失敗しました（オフライン、またはWorker未対応）', '#f85149');
+  }
+}
+
+async function saveSyncId() {
+  const input = document.getElementById('syncIdInput');
+  const id = (input.value || '').trim();
+  if (!id) { setSyncStatus('IDを入力してください。', '#f85149'); return; }
+  if (!/^[a-zA-Z0-9_-]{1,40}$/.test(id)) {
+    setSyncStatus('IDは英数字・ハイフン・アンダースコアのみ、40文字以内で入力してください。', '#f85149');
+    return;
+  }
+  syncId = id;
+  localStorage.setItem('jitchi_syncId', syncId);
+  await syncPull(false);
+  await syncPush(true);
+}
+
 function selectMode(m) {
   if (m === 'checked' && checkedIndices.length === 0) {
     alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
@@ -1366,6 +1452,7 @@ function toggleCheck() {
   localStorage.setItem(bankKey('checkedIndices'), JSON.stringify(checkedIndices));
   // チェック数を各所に反映
   updateCheckedCount();
+  syncPush(false);
 }
 
 // チェック状態を反映
@@ -1403,6 +1490,7 @@ function confirmAbort() {
       sessionCorrect += correctCount; sessionTotal += answered;
       localStorage.setItem(bankKey('totalCorrect'),  sessionCorrect);
       localStorage.setItem(bankKey('totalAnswered'), sessionTotal);
+      syncPush(false);
     }
     document.getElementById('examScreen').classList.add('hidden');
     showStart();
@@ -1671,6 +1759,7 @@ function showFinalScreen() {
   sessionCorrect += correctCount; sessionTotal += answered;
   localStorage.setItem(bankKey('totalCorrect'),   sessionCorrect);
   localStorage.setItem(bankKey('totalAnswered'),  sessionTotal);
+  syncPush(false);
   document.getElementById('examScreen').classList.add('hidden');
   document.getElementById('finalScreen').classList.remove('hidden');
   const pct = answered>0 ? Math.round((correctCount/answered)*100) : 0;

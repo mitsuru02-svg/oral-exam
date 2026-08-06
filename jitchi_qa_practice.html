@@ -329,6 +329,17 @@ body {
 
   <!-- START SCREEN -->
   <div id="startScreen" class="start-screen">
+    <div id="syncBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+        <span style="font-size:13px;color:#8b949e;">🔄 端末間同期ID：</span>
+        <input id="syncIdInput" type="text" placeholder="例：taro-glider" maxlength="40"
+               style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 10px;font-size:13px;width:160px;">
+        <button class="btn-secondary" style="padding:6px 14px;font-size:13px;" onclick="saveSyncId()">設定して同期</button>
+      </div>
+      <div id="syncStatus" style="font-size:11px;color:#8b949e;text-align:center;margin-top:8px;">
+        同じIDを別の端末でも入力すると、正解数・苦手問題・チェックを引き継げます。
+      </div>
+    </div>
     <div class="start-title-row">
       <div class="start-icon">🛩</div>
       <h2 id="modeTitle">口述模擬試験</h2>
@@ -362,9 +373,6 @@ body {
       <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
     </div>
 
-    <div id="syncStatus" style="font-size:11px;color:#8b949e;text-align:center;margin-bottom:20px;">
-      🔄 端末間で自動的にデータを共有します
-    </div>
     <div class="mode-cards">
       <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
         <div class="mode-inner">
@@ -638,7 +646,8 @@ function initApp() {
   if (headerBadge) headerBadge.textContent = activeQA().length + '問';
   updateCountMax();
   updateCheckedCount();
-  syncPull(false);
+  const syncInput = document.getElementById('syncIdInput');
+  if (syncInput && syncId) { syncInput.value = syncId; syncPull(false); }
 }
 
 function updateCountMax() {
@@ -1321,12 +1330,11 @@ document.getElementById('savedCorrect').textContent = sessionCorrect;
 document.getElementById('savedTotal').textContent   = sessionTotal;
 
 // ══════════════════════════════════════════════════════════════
-// 端末間同期（正解数・苦手問題・チェックを自動的に共有）
+// 端末間同期（同じ同期IDなら正解数・苦手問題・チェックを共有）
 // Cloudflare Worker（CONFIG.API_ENDPOINT）の /sync/<ID> エンドポイントを使用。
-// IDはユーザー操作なしの固定値（このアプリ専用の共有キー）。
 // 厳密な排他制御はせず「カウンターは大きい方／リストは和集合」で簡易マージする。
 // ══════════════════════════════════════════════════════════════
-const syncId = 'jitchi-qa-shared-v1';
+let syncId = localStorage.getItem('jitchi_syncId') || '';
 function syncEndpoint(id) { return CONFIG.API_ENDPOINT + '/sync/' + encodeURIComponent(id); }
 
 function setSyncStatus(text, color) {
@@ -1352,18 +1360,20 @@ function applyMergedSyncState(data) {
 }
 
 async function syncPull(showStatus) {
+  if (!syncId) return;
   if (showStatus) setSyncStatus('同期中...');
   try {
     const res = await fetch(syncEndpoint(syncId));
     if (!res.ok) throw new Error('HTTP ' + res.status);
     applyMergedSyncState(await res.json());
-    if (showStatus) setSyncStatus('🔄 端末間で自動的にデータを共有します（同期済み）', '#3fb950');
+    if (showStatus) setSyncStatus(`「${syncId}」と同期しました（${new Date().toLocaleTimeString()}）`, '#3fb950');
   } catch (e) {
-    // オフライン・Worker未対応時は静かに諦める（次回の同期で反映される）
+    if (showStatus) setSyncStatus('同期に失敗しました（オフライン、またはWorker未対応）', '#f85149');
   }
 }
 
 async function syncPush(showStatus) {
+  if (!syncId) return;
   try {
     const res = await fetch(syncEndpoint(syncId), {
       method: 'PUT', headers: {'Content-Type':'application/json'},
@@ -1371,10 +1381,24 @@ async function syncPush(showStatus) {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     applyMergedSyncState(await res.json());
-    if (showStatus) setSyncStatus('🔄 端末間で自動的にデータを共有します（同期済み）', '#3fb950');
+    if (showStatus) setSyncStatus(`「${syncId}」と同期しました（${new Date().toLocaleTimeString()}）`, '#3fb950');
   } catch (e) {
-    // オフライン・Worker未対応時は静かに諦める（次回の同期で反映される）
+    if (showStatus) setSyncStatus('同期に失敗しました（オフライン、またはWorker未対応）', '#f85149');
   }
+}
+
+async function saveSyncId() {
+  const input = document.getElementById('syncIdInput');
+  const id = (input.value || '').trim();
+  if (!id) { setSyncStatus('IDを入力してください。', '#f85149'); return; }
+  if (!/^[a-zA-Z0-9_-]{1,40}$/.test(id)) {
+    setSyncStatus('IDは英数字・ハイフン・アンダースコアのみ、40文字以内で入力してください。', '#f85149');
+    return;
+  }
+  syncId = id;
+  localStorage.setItem('jitchi_syncId', syncId);
+  await syncPull(false);
+  await syncPush(true);
 }
 
 function selectMode(m) {

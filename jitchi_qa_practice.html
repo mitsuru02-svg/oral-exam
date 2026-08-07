@@ -261,6 +261,28 @@ body {
 .sl-stats { font-size: 12px; color: #8b949e; margin-top: 2px; }
 .sl-time { font-size: 10.5px; color: #6e7681; margin-top: 2px; }
 
+/* 全問題ステータス一覧 */
+.st-summary { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0 20px; }
+.st-sum-box { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 10px 16px; text-align: center; min-width: 78px; }
+.st-sum-box .num { font-size: 20px; font-weight: 700; }
+.st-sum-box .lbl { font-size: 10.5px; color: #8b949e; margin-top: 2px; }
+.st-row {
+  background: #161b22; border: 1px solid #21262d; border-radius: 8px;
+  padding: 10px 12px; margin-bottom: 8px; cursor: pointer;
+}
+.st-row-head { display: flex; align-items: center; gap: 8px; }
+.st-qnum { font-family: var(--disp,inherit); font-size: 11px; color: #6e7681; flex-shrink: 0; width: 28px; }
+.st-qtext { flex: 1; font-size: 13px; color: #e6edf3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-badge { flex-shrink: 0; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.st-badge.correct    { background: #0a2e1a; color: #3fb950; }
+.st-badge.partial    { background: #2d2410; color: #d29922; }
+.st-badge.wrong      { background: #2d0f0f; color: #f85149; }
+.st-badge.unanswered { background: #21262d; color: #8b949e; }
+.st-answer { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262d; font-size: 12.5px; color: #8b949e; line-height: 1.6; }
+.st-row.open .st-answer { display: block; }
+.st-row.open .st-qtext { white-space: normal; }
+.st-empty { text-align: center; color: #8b949e; font-size: 13px; padding: 24px 0; }
+
 /* 中断ボタン */
 .btn-abort {
   background: transparent; border: 1px solid #30363d; border-radius: 6px;
@@ -468,11 +490,36 @@ body {
       </select>
     </div>
     <button class="btn-primary" onclick="startExam()" id="startBtn">試験開始</button>
+    <div style="margin-top:12px;">
+      <button class="btn-secondary" onclick="showStatusScreen()">📊 全問題ステータス一覧を見る</button>
+    </div>
 
     <details class="wb-details" id="syncListDetails" ontoggle="if(this.open) loadSyncList()">
       <summary>📋 登録済みIDの進捗一覧</summary>
       <div id="syncListWrap"><div style="font-size:12.5px;color:#8b949e;text-align:center;padding:6px 0;">開くと読み込みます...</div></div>
     </details>
+  </div>
+
+  <!-- STATUS SCREEN -->
+  <div id="statusScreen" class="hidden">
+    <div class="exam-header">
+      <button class="btn-secondary" onclick="showStart()">‹ 戻る</button>
+      <div style="font-size:14px;font-weight:600;">📊 全問題ステータス一覧</div>
+      <div style="width:60px;"></div>
+    </div>
+
+    <div class="st-summary" id="stSummary"></div>
+
+    <div class="cat-section">
+      <div class="cat-section-title">ステータスで絞り込み</div>
+      <div class="cat-cards" id="stStatusFilter"></div>
+    </div>
+    <div class="cat-section">
+      <div class="cat-section-title">カテゴリで絞り込み</div>
+      <div class="cat-cards" id="stCatFilter"></div>
+    </div>
+
+    <div id="stList"></div>
   </div>
 
   <!-- EXAM SCREEN -->
@@ -1351,16 +1398,24 @@ let answeredIndices = JSON.parse(localStorage.getItem(bankKey('answeredIndices')
 let sessionCorrect = parseInt(localStorage.getItem(bankKey('totalCorrect'))    || '0');
 let sessionTotal   = parseInt(localStorage.getItem(bankKey('totalAnswered'))   || '0');
 
-// 問題ごとの状態（苦手／チェック）＋最終更新時刻。端末間同期のマージに使う。
+// 問題ごとの状態（直近の採点結果／チェック）＋最終更新時刻。端末間同期のマージに使う。
+// verdict: '正解' | '部分正解' | '不正解' | 'スキップ' | undefined（未回答）
 // 「配列の和集合」でマージすると、一度サーバーに載った「不正解」は後で
 // 正解しても和集合の性質上消えず復活してしまうため、問題ごとに
 // タイムスタンプを持たせて「新しい方を採用」する方式にしている。
 let syncMeta = JSON.parse(localStorage.getItem(bankKey('syncMeta')) || '{}');
 
 function touchSyncMeta(qIdx, patch) {
-  const prev = syncMeta[qIdx] || { wrong: false, checked: false, t: 0 };
-  syncMeta[qIdx] = { wrong: prev.wrong, checked: prev.checked, ...patch, t: Date.now() };
+  const prev = syncMeta[qIdx] || { verdict: undefined, checked: false, t: 0 };
+  syncMeta[qIdx] = { verdict: prev.verdict, checked: prev.checked, ...patch, t: Date.now() };
   localStorage.setItem(bankKey('syncMeta'), JSON.stringify(syncMeta));
+}
+
+// qIdx単位の「今の状態」：正解／部分正解／不正解／未回答
+function questionStatus(qIdx) {
+  const m = syncMeta[qIdx];
+  if (m && m.verdict) return m.verdict === '正解' ? 'correct' : m.verdict === '部分正解' ? 'partial' : 'wrong';
+  return 'unanswered';
 }
 
 document.getElementById('savedCorrect').textContent = sessionCorrect;
@@ -1395,7 +1450,7 @@ function applyMergedSyncState(data) {
     const local  = syncMeta[key];
     if (!local || (remote.t || 0) > (local.t || 0)) syncMeta[key] = remote;
   }
-  wrongIndices   = Object.keys(syncMeta).filter(k => syncMeta[k].wrong).map(Number);
+  wrongIndices   = Object.keys(syncMeta).filter(k => syncMeta[k].verdict && syncMeta[k].verdict !== '正解').map(Number);
   checkedIndices = Object.keys(syncMeta).filter(k => syncMeta[k].checked).map(Number);
 
   localStorage.setItem(bankKey('totalCorrect'),   sessionCorrect);
@@ -1608,6 +1663,81 @@ function getUnmasteredIndices() {
   const answeredSet = new Set(answeredIndices);
   const never = [...Array(activeQA().length).keys()].filter(i => !answeredSet.has(i));
   return [...new Set([...wrongIndices, ...never])];
+}
+
+// ══════════════════════════════════════════════════════════════
+// 全問題ステータス一覧（正解／部分正解／不正解／未回答をカテゴリ別に確認）
+// ══════════════════════════════════════════════════════════════
+const ST_STATUS_LABELS = {
+  correct:    { label: '正解',   icon: '✅' },
+  partial:    { label: '部分正解', icon: '⚠️' },
+  wrong:      { label: '不正解', icon: '❌' },
+  unanswered: { label: '未回答', icon: '⚪' },
+};
+let stStatusFilter = 'all';
+let stCatFilter = null;
+
+function showStatusScreen() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('statusScreen').classList.remove('hidden');
+  stStatusFilter = 'all';
+  stCatFilter = null;
+  renderStatusFilters();
+  renderStatusSummary();
+  renderStatusList();
+}
+
+function renderStatusSummary() {
+  const counts = { correct: 0, partial: 0, wrong: 0, unanswered: 0 };
+  for (let i = 0; i < activeQA().length; i++) counts[questionStatus(i)]++;
+  const el = document.getElementById('stSummary');
+  el.innerHTML = ['correct', 'partial', 'wrong', 'unanswered'].map(s => `
+    <div class="st-sum-box">
+      <div class="num" style="color:${s==='correct'?'#3fb950':s==='partial'?'#d29922':s==='wrong'?'#f85149':'#8b949e'};">${counts[s]}</div>
+      <div class="lbl">${ST_STATUS_LABELS[s].icon} ${ST_STATUS_LABELS[s].label}</div>
+    </div>`).join('');
+}
+
+function renderStatusFilters() {
+  const statusEl = document.getElementById('stStatusFilter');
+  const items = [{ id: 'all', label: '全て', icon: '🔀' }, ...Object.entries(ST_STATUS_LABELS).map(([id, v]) => ({ id, label: v.label, icon: v.icon }))];
+  statusEl.innerHTML = items.map(it => `<div class="cat-card${stStatusFilter===it.id?' selected':''}" data-status="${it.id}"><span class="cat-icon">${it.icon}</span><span>${it.label}</span></div>`).join('');
+  statusEl.querySelectorAll('.cat-card').forEach(el => el.onclick = () => { stStatusFilter = el.dataset.status; renderStatusFilters(); renderStatusList(); });
+
+  const catEl = document.getElementById('stCatFilter');
+  const catItems = [{ id: null, name: '全カテゴリ', icon: '🔀', indices: [...Array(activeQA().length).keys()] }, ...activeCats()];
+  catEl.innerHTML = catItems.map(c => `<div class="cat-card${stCatFilter===c.id?' selected':''}" data-cat="${c.id ?? ''}"><span class="cat-icon">${c.icon}</span><span>${c.name}</span><span class="cat-count">${c.indices.length}</span></div>`).join('');
+  catEl.querySelectorAll('.cat-card').forEach((el, i) => el.onclick = () => { stCatFilter = catItems[i].id; renderStatusFilters(); renderStatusList(); });
+}
+
+function renderStatusList() {
+  const wrap = document.getElementById('stList');
+  const catPool = stCatFilter ? new Set(activeCats().find(c => c.id === stCatFilter)?.indices || []) : null;
+  const rows = [];
+  for (let i = 0; i < activeQA().length; i++) {
+    if (catPool && !catPool.has(i)) continue;
+    const status = questionStatus(i);
+    if (stStatusFilter !== 'all' && status !== stStatusFilter) continue;
+    rows.push(i);
+  }
+  if (rows.length === 0) {
+    wrap.innerHTML = '<div class="st-empty">該当する問題がありません。</div>';
+    return;
+  }
+  wrap.innerHTML = rows.map(i => {
+    const qa = activeQA()[i];
+    const status = questionStatus(i);
+    const st = ST_STATUS_LABELS[status];
+    return `
+      <div class="st-row" onclick="this.classList.toggle('open')">
+        <div class="st-row-head">
+          <span class="st-qnum">#${i+1}</span>
+          <span class="st-qtext">${escapeHtml(qa.q)}</span>
+          <span class="st-badge ${status}">${st.icon} ${st.label}</span>
+        </div>
+        <div class="st-answer">${escapeHtml(qa.a)}</div>
+      </div>`;
+  }).join('');
 }
 
 function renderWrongBreakdown() {
@@ -1843,7 +1973,7 @@ function handleResult(result, qa, qIdx, userAns) {
   if (isCorrect) { correctCount++; wrongIndices = wrongIndices.filter(i=>i!==qIdx); }
   else { if (isPartial) partialCount++; else wrongCount++; if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx); }
   localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
-  touchSyncMeta(qIdx, { wrong: !isCorrect });
+  touchSyncMeta(qIdx, { verdict: result.verdict });
   if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:result.verdict, userAns});
 
@@ -1926,7 +2056,7 @@ function skipQuestion() {
   const qIdx = examQuestions[currentIdx];
   if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
   localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
-  touchSyncMeta(qIdx, { wrong: true });
+  touchSyncMeta(qIdx, { verdict: 'スキップ' });
   if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:'スキップ', userAns:''});
   nextQuestion();
@@ -2174,6 +2304,7 @@ function showStart() {
   document.getElementById('finalScreen').classList.add('hidden');
   document.getElementById('examScreen').classList.add('hidden');
   document.getElementById('playbackScreen').classList.add('hidden');
+  document.getElementById('statusScreen').classList.add('hidden');
   document.getElementById('startScreen').classList.remove('hidden');
   document.getElementById('savedCorrect').textContent = sessionCorrect;
   document.getElementById('savedTotal').textContent   = sessionTotal;

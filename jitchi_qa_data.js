@@ -60,8 +60,8 @@ const JITCHI_QA_DATA = [
 
 {cat:"departure", imp:1, examiner:["nonaka"],
  q:"ノータム（NOTAM）はどこで確認しますか。",
- a:"AIS Japanのウェブサイトなどで、飛行場や空域に関する最新のノータムを確認します。",
- hint:"AIS Japan等、公式な情報源を確認する点が言えているか。"},
+ a:"SWIM（航空情報共有システム）のウェブサイトなどで、飛行場や空域に関する最新のノータムを確認します。かつてのAIS Japanは廃止され、現在はSWIMに一本化されています。",
+ hint:"SWIM（旧AIS Japan）等、公式な情報源を確認する点が言えているか。"},
 
 {cat:"departure", imp:1, examiner:["nonaka"],
  q:"航空図（航空路図・チャート）が最新かどうかはどのように判断しますか。",

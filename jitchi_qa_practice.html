@@ -661,6 +661,7 @@ function initApp() {
   checkedIndices  = JSON.parse(localStorage.getItem(bankKey('checkedIndices'))  || '[]');
   wrongIndices    = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))    || '[]');
   answeredIndices = JSON.parse(localStorage.getItem(bankKey('answeredIndices')) || '[]');
+  syncMeta        = JSON.parse(localStorage.getItem(bankKey('syncMeta'))        || '{}');
   initCatCards();
   initExaminerCards();
   const totalEl = document.getElementById('totalQCount');
@@ -1350,6 +1351,18 @@ let answeredIndices = JSON.parse(localStorage.getItem(bankKey('answeredIndices')
 let sessionCorrect = parseInt(localStorage.getItem(bankKey('totalCorrect'))    || '0');
 let sessionTotal   = parseInt(localStorage.getItem(bankKey('totalAnswered'))   || '0');
 
+// 問題ごとの状態（苦手／チェック）＋最終更新時刻。端末間同期のマージに使う。
+// 「配列の和集合」でマージすると、一度サーバーに載った「不正解」は後で
+// 正解しても和集合の性質上消えず復活してしまうため、問題ごとに
+// タイムスタンプを持たせて「新しい方を採用」する方式にしている。
+let syncMeta = JSON.parse(localStorage.getItem(bankKey('syncMeta')) || '{}');
+
+function touchSyncMeta(qIdx, patch) {
+  const prev = syncMeta[qIdx] || { wrong: false, checked: false, t: 0 };
+  syncMeta[qIdx] = { wrong: prev.wrong, checked: prev.checked, ...patch, t: Date.now() };
+  localStorage.setItem(bankKey('syncMeta'), JSON.stringify(syncMeta));
+}
+
 document.getElementById('savedCorrect').textContent = sessionCorrect;
 document.getElementById('savedTotal').textContent   = sessionTotal;
 
@@ -1372,12 +1385,24 @@ function applyMergedSyncState(data) {
   if (!data) return;
   sessionCorrect = Math.max(sessionCorrect, data.totalCorrect  || 0);
   sessionTotal   = Math.max(sessionTotal,   data.totalAnswered || 0);
-  wrongIndices   = [...new Set([...wrongIndices,   ...(data.wrongIndices   || [])])];
-  checkedIndices = [...new Set([...checkedIndices, ...(data.checkedIndices || [])])];
+
+  // 問題ごとに、タイムスタンプが新しい方を採用してマージする
+  // （配列の和集合ではないので、正解にした問題がサーバーの古い記録で
+  // 復活することはない）
+  const remoteMeta = data.syncMeta || {};
+  for (const key of Object.keys(remoteMeta)) {
+    const remote = remoteMeta[key];
+    const local  = syncMeta[key];
+    if (!local || (remote.t || 0) > (local.t || 0)) syncMeta[key] = remote;
+  }
+  wrongIndices   = Object.keys(syncMeta).filter(k => syncMeta[k].wrong).map(Number);
+  checkedIndices = Object.keys(syncMeta).filter(k => syncMeta[k].checked).map(Number);
+
   localStorage.setItem(bankKey('totalCorrect'),   sessionCorrect);
   localStorage.setItem(bankKey('totalAnswered'),  sessionTotal);
   localStorage.setItem(bankKey('wrongIndices'),   JSON.stringify(wrongIndices));
   localStorage.setItem(bankKey('checkedIndices'), JSON.stringify(checkedIndices));
+  localStorage.setItem(bankKey('syncMeta'),       JSON.stringify(syncMeta));
   const sc = document.getElementById('savedCorrect'); if (sc) sc.textContent = sessionCorrect;
   const st = document.getElementById('savedTotal');   if (st) st.textContent = sessionTotal;
   updateCheckedCount();
@@ -1401,7 +1426,7 @@ async function syncPush(showStatus) {
   try {
     const res = await fetch(syncEndpoint(syncId), {
       method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ totalCorrect: sessionCorrect, totalAnswered: sessionTotal, wrongIndices, checkedIndices }),
+      body: JSON.stringify({ totalCorrect: sessionCorrect, totalAnswered: sessionTotal, syncMeta }),
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     applyMergedSyncState(await res.json());
@@ -1527,16 +1552,20 @@ function getCategoryPool() {
 function toggleCheck() {
   const qIdx = examQuestions[currentIdx];
   const btn = document.getElementById('btnCheck');
+  let nowChecked;
   if (checkedIndices.includes(qIdx)) {
     checkedIndices = checkedIndices.filter(i => i !== qIdx);
     btn.textContent = '☆';
     btn.classList.remove('checked');
+    nowChecked = false;
   } else {
     checkedIndices.push(qIdx);
     btn.textContent = '⭐';
     btn.classList.add('checked');
+    nowChecked = true;
   }
   localStorage.setItem(bankKey('checkedIndices'), JSON.stringify(checkedIndices));
+  touchSyncMeta(qIdx, { checked: nowChecked });
   // チェック数を各所に反映
   updateCheckedCount();
   syncPush(false);
@@ -1814,6 +1843,7 @@ function handleResult(result, qa, qIdx, userAns) {
   if (isCorrect) { correctCount++; wrongIndices = wrongIndices.filter(i=>i!==qIdx); }
   else { if (isPartial) partialCount++; else wrongCount++; if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx); }
   localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  touchSyncMeta(qIdx, { wrong: !isCorrect });
   if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:result.verdict, userAns});
 
@@ -1896,6 +1926,7 @@ function skipQuestion() {
   const qIdx = examQuestions[currentIdx];
   if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
   localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  touchSyncMeta(qIdx, { wrong: true });
   if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:'スキップ', userAns:''});
   nextQuestion();

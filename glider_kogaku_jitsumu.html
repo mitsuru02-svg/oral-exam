@@ -3682,8 +3682,39 @@ var wakeLock = {
     stopBtn.disabled = !(state.playing || state.paused);
   }
 
+  /* ============ 読み上げ用テキスト正規化 ============
+     画面表示用の文章をそのまま音声合成に渡すと、専門用語の誤読で
+     聞き取りにくくなるため、読み上げ直前にかな読みへ変換する。
+     ここで直せば全章・既存文の再チェックなしに一括で反映される。 */
+  var KANJI_READING_FIX = [
+    [/ASK-21/g, 'えーえすけー21'],
+    [/ASK21/g, 'えーえすけー21'],
+    [/耐空/g, 'たいくう'],
+    [/調べ方/g, 'しらべかた'],
+    [/重み付け/g, 'おもみづけ'],
+    [/開け/g, 'ひらけ'],
+    [/雑則/g, 'ざっそく'],
+    [/備え付ける/g, 'そなえつける'],
+    [/曲技/g, 'きょくぎ'],
+    [/年(\d+)回/g, 'ねん$1かい'],
+    [/(\d+)日ごと/g, '$1にちごと'],
+    [/滑空場/g, 'かっくうじょう'],
+    [/滑空機/g, 'かっくうき'],
+    [/試験官/g, 'しけんかん'],
+    // 「曳航」関連：複合語を先に置換してから、最後に単独の「曳航」を置換する
+    [/曳航索/g, 'えいこうさく'],
+    [/曳航機/g, 'えいこうき'],
+    [/曳航中/g, 'えいこうちゅう'],
+    [/曳航/g, 'えいこう']
+  ];
+  function normalizeForSpeech(raw){
+    var t = raw;
+    KANJI_READING_FIX.forEach(function(pair){ t = t.replace(pair[0], pair[1]); });
+    return t;
+  }
+
   function makeUtterance(text){
-    var utter = new SpeechSynthesisUtterance(text);
+    var utter = new SpeechSynthesisUtterance(normalizeForSpeech(text));
     // Use the chosen voice's own language tag rather than forcing 'ja-JP'.
     // Forcing a fixed lang can make iOS pick a different built-in voice than
     // the one the person selected in Settings > Accessibility > Spoken Content.

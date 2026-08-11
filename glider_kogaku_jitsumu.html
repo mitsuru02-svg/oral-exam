@@ -72,7 +72,7 @@ img,svg{max-width:100%;}
 /* ===== Main ===== */
 .main{
   margin-left:var(--sidebar-w);margin-top:var(--header-h);
-  padding:28px 38px 80px;max-width:880px;
+  padding:28px 38px 110px;max-width:880px; /* 下端は固定ミニプレーヤーのぶん余白を確保 */
 }
 .chapter{display:none;}
 .chapter.active{display:block;animation:fadeIn .25s ease;}
@@ -134,7 +134,7 @@ table.datatbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0
 table.datatbl th{background:var(--navy);color:#fff;padding:9px 12px;text-align:left;font-weight:700;}
 table.datatbl td{padding:8px 12px;border-bottom:1px solid var(--line);}
 table.datatbl tr:nth-child(even) td{background:#f8f9fb;}
-table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-variant-numeric:tabular-nums;}
+table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
 
 .tag{
   display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;
@@ -193,7 +193,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
     left:-100%;transition:left .25s ease;box-shadow:4px 0 14px rgba(0,0,0,.3);
   }
   .sidebar.open{left:0;}
-  .main{margin-left:0;padding:22px 18px 70px;}
+  .main{margin-left:0;padding:22px 18px 96px;} /* 下端は固定ミニプレーヤーのぶん余白を確保 */
   .overlay{display:none;position:fixed;inset:0;top:var(--header-h);background:rgba(0,0,0,.4);z-index:80;}
   .overlay.show{display:block;}
 }
@@ -224,6 +224,38 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   max-width:180px;
 }
 .tts-bar .tts-icon{font-size:14px;line-height:1;}
+
+/* ===== 画面に固定される読み上げミニプレーヤー ===== */
+.tts-dock{
+  position:fixed;right:18px;bottom:18px;z-index:120;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.97);
+  border:1px solid #c9dde6;border-radius:999px;
+  padding:8px 12px;
+  box-shadow:0 6px 22px rgba(20,40,60,.22);
+  backdrop-filter:blur(6px);
+  font-size:13px;
+}
+.tts-dock[hidden]{display:none;}
+.tts-dock button{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  border:none;border-radius:999px;cursor:pointer;
+  font-size:13px;font-weight:700;line-height:1;
+  padding:8px 13px;transition:.15s;
+  background:var(--accent);color:#fff;
+}
+.tts-dock button:hover{background:var(--navy2);}
+.tts-dock button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent);}
+.tts-dock button.ghost:hover{background:#eef5f8;}
+.tts-dock button:disabled{background:#b9c4cc;color:#fff;border-color:#b9c4cc;cursor:default;}
+.tts-dock .tts-dock-info{
+  color:var(--ink-soft);white-space:nowrap;
+  max-width:170px;overflow:hidden;text-overflow:ellipsis;
+}
+@media(max-width:900px){
+  .tts-dock{right:10px;left:10px;bottom:10px;justify-content:center;border-radius:14px;}
+  .tts-dock .tts-dock-info{max-width:none;flex:1;min-width:0;}
+}
 
 .tts-reading{
   outline:3px solid var(--amber) !important;
@@ -3598,11 +3630,17 @@ var wakeLock = {
     if (document.visibilityState === 'visible' && state.playing) wakeLock.acquire();
   });
 
+  function isHaruka(v){ return /haruka|はるか/i.test(v.name || ''); }
+
   function pickJapaneseVoice(){
     var voices = synth.getVoices() || [];
     if (!voices.length) return null;
     var ja = voices.filter(function(v){ return /^ja/i.test(v.lang); });
     if (!ja.length) return null;
+    // Windows PCでは Microsoft Haruka を既定にする。Harukaは Windows にしか存在しないため、
+    // iPhone/Mac ではこの分岐は素通りし、従来どおりOSの既定の声が選ばれる。
+    var haruka = ja.find(isHaruka);
+    if (haruka) return haruka;
     // Prefer the voice the OS/browser marks as default for its language —
     // on iPhone this tends to track the voice chosen in Settings > Accessibility > Spoken Content.
     var def = ja.find(function(v){ return v.default; });
@@ -3666,9 +3704,52 @@ var wakeLock = {
     }
   }
 
+  /* ---- 画面下に固定するミニプレーヤー（本文をスクロールしても操作できるようにする）----
+     再生ロジックは既存のバーがすべて持っているので、ここは「今表示中の章のバーの
+     ボタンを代わりに押す」だけのリモコンとして実装する。状態は updateButtons /
+     updateStatus から同期されるため、二重管理にならない。 */
+  var dock = document.createElement('div');
+  dock.className = 'tts-dock';
+  dock.innerHTML =
+    '<button class="tts-dock-play"><span class="tts-icon">▶</span><span class="tts-dock-label">読み上げ</span></button>' +
+    '<button class="ghost tts-dock-stop" disabled><span class="tts-icon">■</span>停止</button>' +
+    '<span class="tts-dock-info"></span>';
+  document.body.appendChild(dock);
+
+  var dockPlay  = dock.querySelector('.tts-dock-play');
+  var dockLabel = dock.querySelector('.tts-dock-label');
+  var dockIcon  = dock.querySelector('.tts-dock-play .tts-icon');
+  var dockStop  = dock.querySelector('.tts-dock-stop');
+  var dockInfo  = dock.querySelector('.tts-dock-info');
+
+  function activeBar(){ return document.querySelector('.chapter.active .tts-bar'); }
+
+  dockPlay.addEventListener('click', function(){
+    var bar = activeBar();
+    if (bar) bar.querySelector('.tts-play').click();
+  });
+  dockStop.addEventListener('click', function(){
+    var bar = activeBar();
+    if (bar) bar.querySelector('.tts-stop').click();
+  });
+
+  function syncDock(){
+    if (state.playing && !state.paused){
+      dockIcon.textContent = '⏸'; dockLabel.textContent = '一時停止';
+    } else if (state.paused){
+      dockIcon.textContent = '▶'; dockLabel.textContent = '再開';
+    } else {
+      dockIcon.textContent = '▶'; dockLabel.textContent = '読み上げ';
+      // 待機中はバー側に同じ案内が出ているので、ドックは小さいままにしておく
+      dockInfo.textContent = '';
+    }
+    dockStop.disabled = !(state.playing || state.paused);
+  }
+
   function updateStatus(bar, text){
     var statusEl = bar.querySelector('.tts-status');
     if (statusEl) statusEl.textContent = text;
+    if (bar === activeBar() && (state.playing || state.paused)) dockInfo.textContent = text;
   }
 
   function updateButtons(bar){
@@ -3687,6 +3768,7 @@ var wakeLock = {
       playBtn.dataset.mode = 'play';
     }
     stopBtn.disabled = !(state.playing || state.paused);
+    syncDock();
   }
 
   /* ============ 読み上げ用テキスト正規化 ============
@@ -3795,7 +3877,8 @@ var wakeLock = {
     voices.forEach(function(v, i){
       var opt = document.createElement('option');
       opt.value = String(i);
-      opt.textContent = v.name + (v.default ? '（標準）' : '');
+      var tag = isHaruka(v) ? '（推奨）' : (v.default ? '（標準）' : '');
+      opt.textContent = v.name + tag;
       selectEl.appendChild(opt);
     });
     // select the voice matching current state.voice, defaulting to index 0
@@ -3896,6 +3979,8 @@ var wakeLock = {
   document.querySelectorAll('.tts-bar').forEach(setupBar);
 
   // Stop speech when switching chapters via sidebar/pagenav to avoid reading the hidden chapter
+  var IDLE_MSG = 'このページを音声で聞けます（要点を整理した解説文を読み上げます）。';
+
   var originalShowCh = window.showCh;
   window.showCh = function(id){
     synth.cancel();
@@ -3903,12 +3988,17 @@ var wakeLock = {
     state.paused = false;
     state.index = -1;
     clearHighlight();
+    // 先に章を切り替えてから各バーを更新する。updateStatus は「今表示中の章か」で
+    // ドックへ反映するか決めるため、順序を逆にするとドックが前の章の文言のまま残る。
+    originalShowCh(id);
     document.querySelectorAll('.tts-bar').forEach(function(bar){
       updateButtons(bar);
-      updateStatus(bar, 'このページを音声で聞けます（要点を整理した解説文を読み上げます）。');
+      updateStatus(bar, IDLE_MSG);
     });
-    originalShowCh(id);
   };
+
+  // 初期表示ぶんのドック同期
+  syncDock();
 
   // Stop speech if the user leaves the page
   window.addEventListener('beforeunload', function(){ synth.cancel(); });

@@ -335,6 +335,62 @@ body {
 }
 .pb-play-btn:hover { background: #2563eb; }
 .pb-phase-label { font-size: 12px; color: #8b949e; }
+
+/* 聞き流しモード：いま読み上げている側を光らせて、どこを喋っているか一目で分かるようにする */
+#playbackScreen .question-card,
+#playbackScreen .model-answer { transition: border-color .25s, box-shadow .25s, background .25s; }
+#playbackScreen .model-answer { border: 1px solid transparent; }
+#playbackScreen[data-phase="question"] .question-card,
+#playbackScreen[data-phase="answer"]   .model-answer {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59,130,246,.35), 0 0 22px rgba(59,130,246,.16);
+}
+#playbackScreen[data-phase="answer"] .model-answer { background: rgba(59,130,246,.07); }
+#playbackScreen[data-phase="answer"] .model-answer-label { color: #93c5fd; }
+
+/* ===== 聞き流しモード：スマホ横向き =====
+   端末を寝かせて少し離れた位置から眺める使い方なので、
+   横幅の制限を外して文字を大きくする。縦向きとPCの見た目は変えない。 */
+@media (orientation: landscape) and (max-height: 560px) {
+  /* 画面の高さを使い切る縦フレックスにして、再生ボタンが常に画面内に残るようにする。
+     余った高さはすべて解答欄に渡し、あふれる場合はそこだけスクロールさせる。 */
+  body.pb-active { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+  body.pb-active .header { padding: 5px 12px; flex-shrink: 0; position: static; }
+  body.pb-active .header-titles .sub,
+  body.pb-active #networkBadge { display: none; }
+  body.pb-active .container {
+    max-width: none; padding: 8px 20px 10px;
+    flex: 1; min-height: 0; display: flex; flex-direction: column;
+  }
+  body.pb-active #playbackScreen:not(.hidden) {
+    display: flex; flex-direction: column; flex: 1; min-height: 0;
+  }
+
+  #playbackScreen .exam-header { margin-bottom: 8px; padding-bottom: 6px; flex-shrink: 0; }
+  #playbackScreen .progress-bar-wrap { margin-top: 4px; }
+  #playbackScreen .question-card { padding: 10px 18px; margin-bottom: 8px; border-radius: 10px; flex-shrink: 0; }
+  #playbackScreen .q-label-row { margin-bottom: 6px; }
+  #playbackScreen .question-text { font-size: 26px; line-height: 1.45; }
+  #playbackScreen .pb-phase-label { font-size: 14px; }
+  #playbackScreen .model-answer {
+    margin-top: 0; padding: 10px 18px;
+    flex: 1; min-height: 0; display: flex; flex-direction: column;
+  }
+  #playbackScreen .model-answer-label-row { flex-shrink: 0; margin-bottom: 6px; }
+  #playbackScreen .model-answer-text { font-size: 23px; line-height: 1.55; flex: 1; min-height: 0; overflow-y: auto; }
+  /* 解答が出ていない間もボタンの位置が動かないよう、下端に寄せておく */
+  #playbackScreen .pb-controls { margin-top: auto; padding-top: 8px; gap: 14px; flex-shrink: 0; }
+  #playbackScreen .pb-play-btn { width: 44px; height: 44px; font-size: 17px; }
+  #playbackScreen .btn-secondary { padding: 8px 14px; }
+
+  /* 模範解答を読み上げている間は解答を主役にする。
+     問題文は2行に畳んで場所を空け、長い解答でも画面内に収める。 */
+  #playbackScreen[data-phase="answer"] .question-text {
+    font-size: 16px; line-height: 1.4; color: #8b949e;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  #playbackScreen[data-phase="answer"] .model-answer-text { font-size: 27px; }
+}
 </style>
 </head>
 <body>
@@ -1847,6 +1903,7 @@ function startExam() {
 
   if (appMode === 'playback') {
     document.getElementById('playbackScreen').classList.remove('hidden');
+    document.body.classList.add('pb-active');   // 横向き用の大きなレイアウトを有効にする
     document.getElementById('pbTotal').textContent = examQuestions.length;
     startPlayback();
     return;
@@ -2097,6 +2154,7 @@ let pbIdx = 0;
 let pbPaused = false;
 let pbGeneration = 0; // 世代番号：古いタイマー/speak完了を無効化
 let pbTimer = null;
+let pbScrollTimer = null; // 模範解答の読み上げに合わせた自動スクロール用
 let pbPhase = 'question'; // 'question' | 'thinking' | 'answer' | 'gap' — 一時停止からの再開位置を覚えておく
 let pbCountdownRemain = 0;
 
@@ -2109,6 +2167,13 @@ function currentPbQA() { return activeQA()[examQuestions[pbIdx]]; }
 function setPbPhaseLabel(text) {
   const el = document.getElementById('pbPhaseLabel');
   if (el) el.textContent = text;
+}
+
+// フェーズをCSSから参照できるようにする（いま読み上げている側を強調するため）
+function setPbPhase(phase) {
+  pbPhase = phase;
+  const scr = document.getElementById('playbackScreen');
+  if (scr) scr.dataset.phase = phase;
 }
 
 function updatePlaybackUI() {
@@ -2134,7 +2199,7 @@ function runPlaybackStep() {
   pbGeneration++;
   const myGen = pbGeneration;
   updatePlaybackUI();
-  pbPhase = 'question';
+  setPbPhase('question');
   setPbPhaseLabel('🔊 問題を読み上げ中');
   speak(currentPbQA().q, () => {
     if (myGen !== pbGeneration || pbPaused) return;
@@ -2143,7 +2208,7 @@ function runPlaybackStep() {
 }
 
 function startThinkingPhase(myGen) {
-  pbPhase = 'thinking';
+  setPbPhase('thinking');
   pbCountdownRemain = thinkPauseSeconds();
   runThinkingCountdown(myGen);
 }
@@ -2156,17 +2221,52 @@ function runThinkingCountdown(myGen) {
 }
 
 function startAnswerPhase(myGen) {
-  pbPhase = 'answer';
-  document.getElementById('pbAnswerBox').classList.remove('hidden');
+  setPbPhase('answer');
+  const box = document.getElementById('pbAnswerBox');
+  box.classList.remove('hidden');
   setPbPhaseLabel('🔊 模範解答を読み上げ中');
+  // 解答が画面の下に隠れたまま読み上げが始まらないよう、確実に見える位置まで送る
+  requestAnimationFrame(() => {
+    const r = box.getBoundingClientRect();
+    if (r.bottom > window.innerHeight || r.top < 0) {
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    startAnswerAutoScroll(myGen);
+  });
   speak(currentPbQA().a, () => {
     if (myGen !== pbGeneration || pbPaused) return;
     startGapPhase(myGen);
   });
 }
 
+/* 横向きなど解答欄に収まりきらない場合、読み上げの進行に合わせて解答を送る。
+   Web Speech API の boundary イベントは iOS で発火が当てにできないため、
+   文字数から所要時間を見積もって1ページずつ送る方式にしている。
+   ずれても読める状態は保たれ、最後は必ず末尾で止まる。 */
+function startAnswerAutoScroll(myGen) {
+  clearInterval(pbScrollTimer);
+  const el = document.getElementById('pbAnswerText');
+  if (!el) return;
+  el.scrollTop = 0;                       // 前問の続きから始まらないよう先頭へ
+  const hidden = el.scrollHeight - el.clientHeight;
+  if (hidden <= 4) return;                // 全部見えているならスクロール不要
+
+  const chars = (currentPbQA().a || '').length;
+  const estMs = Math.min(Math.max(chars / 7 * 1000, 3000), 120000); // 約7文字/秒
+  const pages = Math.ceil(hidden / el.clientHeight);
+  const stepMs = estMs / (pages + 1);
+
+  pbScrollTimer = setInterval(() => {
+    if (myGen !== pbGeneration || pbPaused || pbPhase !== 'answer') { clearInterval(pbScrollTimer); return; }
+    const remain = el.scrollHeight - el.clientHeight - el.scrollTop;
+    if (remain <= 2) { clearInterval(pbScrollTimer); return; }
+    el.scrollBy({ top: Math.min(el.clientHeight * 0.85, remain), behavior: 'smooth' });
+  }, stepMs);
+}
+
 function startGapPhase(myGen) {
-  pbPhase = 'gap';
+  clearInterval(pbScrollTimer);
+  setPbPhase('gap');
   pbCountdownRemain = 2;
   runGapCountdown(myGen);
 }
@@ -2201,14 +2301,14 @@ function pbAdvance() {
 
 function pbNext() {
   pbGeneration++;
-  stopSpeaking(); clearTimeout(pbTimer);
+  stopSpeaking(); clearTimeout(pbTimer); clearInterval(pbScrollTimer);
   if (pbIdx < examQuestions.length - 1) pbIdx++;
   if (pbPaused) updatePlaybackUI(); else runPlaybackStep();
 }
 
 function pbPrev() {
   pbGeneration++;
-  stopSpeaking(); clearTimeout(pbTimer);
+  stopSpeaking(); clearTimeout(pbTimer); clearInterval(pbScrollTimer);
   pbIdx = Math.max(0, pbIdx - 1);
   if (pbPaused) updatePlaybackUI(); else runPlaybackStep();
 }
@@ -2219,7 +2319,7 @@ function pbTogglePause() {
   if (pbPaused) {
     btn.textContent = '▶️';
     pbGeneration++;
-    stopSpeaking(); clearTimeout(pbTimer);
+    stopSpeaking(); clearTimeout(pbTimer); clearInterval(pbScrollTimer);
     setPbPhaseLabel('⏸ 一時停止中');
   } else {
     btn.textContent = '⏸️';
@@ -2248,6 +2348,7 @@ function resumeFromPause() {
 
 function finishPlayback() {
   stopSpeaking();
+  clearInterval(pbScrollTimer);
   sessionRunning = false;
   releaseWakeLock();
   setPbPhaseLabel('✅ 終了');
@@ -2260,7 +2361,7 @@ function finishPlayback() {
 function abortPlayback() {
   if (confirm('聞き流しを終了して表紙に戻りますか？')) {
     pbGeneration++;
-    stopSpeaking(); clearTimeout(pbTimer);
+    stopSpeaking(); clearTimeout(pbTimer); clearInterval(pbScrollTimer);
     pbPaused = true;
     sessionRunning = false;
     releaseWakeLock();
@@ -2304,6 +2405,7 @@ function showStart() {
   document.getElementById('finalScreen').classList.add('hidden');
   document.getElementById('examScreen').classList.add('hidden');
   document.getElementById('playbackScreen').classList.add('hidden');
+  document.body.classList.remove('pb-active');
   document.getElementById('statusScreen').classList.add('hidden');
   document.getElementById('startScreen').classList.remove('hidden');
   document.getElementById('savedCorrect').textContent = sessionCorrect;

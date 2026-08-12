@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d1117">
-<title>AIP（航空情報公開集）ENR 抜粋</title>
+<title>AIP（航空情報公開集）ENR 要点まとめ</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
-  background: #0d1117; color: #e6edf3; min-height: 100vh;
+  background: #0d1117; color: #e6edf3; line-height: 1.8;
   padding-bottom: env(safe-area-inset-bottom);
 }
 .header {
   background: #161b22; border-bottom: 1px solid #21262d;
   padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-  position: sticky; top: 0; z-index: 10;
+  position: sticky; top: 0; z-index: 20;
 }
 .header a.back {
   display: flex; align-items: center; justify-content: center;
@@ -27,65 +27,82 @@ body {
   color: #8b949e; font-size: 16px; text-decoration: none; flex-shrink: 0;
 }
 .header-logo {
-  width: 30px; height: 30px;
-  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  width: 30px; height: 30px; background: linear-gradient(135deg,#3b82f6,#1e40af);
   border-radius: 7px; display: flex; align-items: center; justify-content: center;
   font-size: 15px; flex-shrink: 0;
 }
 .header-title { font-size: 13px; font-weight: 600; }
 .header-sub { font-size: 10px; color: #8b949e; margin-top: 1px; }
 
-.hero { text-align: center; padding: 30px 20px 20px; }
-.hero-icon { font-size: 42px; margin-bottom: 12px; }
-.hero h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-.hero p { font-size: 13.5px; color: #8b949e; line-height: 1.7; }
+.container { max-width: 720px; margin: 0 auto; padding: 22px 16px 60px; }
 
-.container { max-width: 560px; margin: 0 auto; padding: 0 16px 40px; }
+.hero { text-align: center; padding: 8px 0 22px; }
+.hero h1 { font-size: 21px; font-weight: 700; margin-bottom: 8px; }
+.hero p { font-size: 13.5px; color: #8b949e; }
 
-.note {
+.intro {
   background: #161b22; border: 1px solid #21262d; border-left: 3px solid #3b82f6;
-  border-radius: 10px; padding: 13px 15px; margin-bottom: 22px;
-  font-size: 13px; color: #c9d1d9; line-height: 1.8;
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 22px; font-size: 13.5px; color: #c9d1d9;
 }
-.note b { color: #e6edf3; }
-.note .star { color: #d29922; font-weight: 700; }
+.intro b { color: #e6edf3; }
 
-.section-label {
-  font-size: 11px; color: #484f58; font-weight: 600; letter-spacing: .08em;
-  text-transform: uppercase; margin: 26px 0 10px;
+/* 目次 */
+.toc { background:#161b22; border:1px solid #21262d; border-radius:10px; padding:12px 16px; margin-bottom:26px; }
+.toc-t { font-size:11px; color:#484f58; font-weight:600; letter-spacing:.08em; margin-bottom:8px; }
+.toc a { display:inline-block; color:#60a5fa; text-decoration:none; font-size:13px; margin:3px 12px 3px 0; }
+.toc a:hover { text-decoration:underline; }
+.toc a .k { color:#d29922; }
+
+.part {
+  font-size: 12px; color: #484f58; font-weight: 700; letter-spacing: .1em;
+  margin: 34px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #21262d;
 }
-.section-label span { color: #8b949e; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.part span { color:#8b949e; font-weight:400; letter-spacing:0; }
 
-.card {
-  display: flex; align-items: flex-start; gap: 13px;
-  background: #161b22; border: 1px solid #21262d; border-radius: 14px;
-  padding: 14px 16px; text-decoration: none; color: #e6edf3;
-  margin-bottom: 10px; transition: border-color .2s, background .2s, transform .15s;
-  -webkit-tap-highlight-color: transparent;
+section { margin-bottom: 22px; scroll-margin-top: 60px; }
+.sec-head { display:flex; align-items:baseline; gap:10px; margin-bottom: 10px; flex-wrap:wrap; }
+.no {
+  background:#0d2044; color:#60a5fa; border:1px solid #1e3a6e; border-radius:7px;
+  padding:3px 9px; font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; flex-shrink:0;
 }
-.card:hover { border-color: #3b82f6; background: #0d1b30; transform: translateY(-1px); }
-.card:active { transform: scale(.98); }
-.card.key { border-color: #5c3d00; }
-.card.key:hover { border-color: #d29922; }
+section.key .no { background:#2d1d00; color:#d29922; border-color:#5c3d00; }
+h2 { font-size: 16.5px; font-weight: 700; }
+h2 .star { color:#d29922; font-size:13px; margin-left:4px; }
 
-.enr {
-  flex-shrink: 0; width: 62px; text-align: center;
-  background: #0d2044; color: #60a5fa; border: 1px solid #1e3a6e;
-  border-radius: 8px; padding: 6px 0; font-size: 12px; font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.box { background:#161b22; border:1px solid #21262d; border-radius:12px; padding:14px 16px; }
+section.key .box { border-color:#5c3d00; }
+.box h3 {
+  font-size: 12.5px; color:#8b949e; font-weight:700; letter-spacing:.04em;
+  margin: 16px 0 7px; padding-left:9px; border-left:3px solid #30363d;
 }
-.card.key .enr { background: #2d1d00; color: #d29922; border-color: #5c3d00; }
+.box h3:first-child { margin-top: 0; }
+.box p { font-size: 13.5px; color:#c9d1d9; margin-bottom: 9px; }
+.box p:last-child { margin-bottom: 0; }
+.box b { color:#e6edf3; }
+.box ul, .box ol { margin: 0 0 9px 20px; font-size: 13.5px; color:#c9d1d9; }
+.box li { margin-bottom: 4px; }
 
-.body { flex: 1; min-width: 0; }
-.name { font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
-.name .star { color: #d29922; font-size: 12px; margin-left: 4px; }
-.desc { font-size: 12.5px; color: #8b949e; line-height: 1.65; }
-.meta { font-size: 11px; color: #484f58; margin-top: 5px; }
+table { width:100%; border-collapse:collapse; font-size:12.5px; margin:6px 0 10px; }
+th { background:#0d2044; color:#c9d1d9; padding:7px 8px; text-align:left; font-weight:600; border:1px solid #21262d; }
+td { padding:6px 8px; border:1px solid #21262d; color:#c9d1d9; vertical-align:top; }
+tr:nth-child(even) td { background:#11161d; }
+td.n { text-align:center; font-variant-numeric:tabular-nums; white-space:nowrap; }
+/* 1列目の見出しが縦に潰れないよう最低幅を確保する */
+table td:first-child { min-width: 6.2em; }
+table.vmc td:first-child { min-width: 7.4em; }
+table.vmc th:first-child { min-width: 3.4em; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
-.footer {
-  text-align: center; padding: 24px 16px; font-size: 12px;
-  color: #484f58; border-top: 1px solid #161b22; margin-top: 20px; line-height: 1.8;
+.tip, .warn {
+  border-radius:9px; padding:11px 13px; font-size:13px; margin:10px 0; line-height:1.75;
 }
+.tip { background:#0a1f2e; border:1px solid #0e4a6e; color:#c9d1d9; }
+.warn { background:#2a1a00; border:1px solid #5c3d00; color:#e6d5b8; }
+.tip .t, .warn .t { font-weight:700; display:block; margin-bottom:4px; }
+.tip .t { color:#7dd3fc; }
+.warn .t { color:#d29922; }
+
+.footer { text-align:center; padding:26px 16px; font-size:12px; color:#484f58; border-top:1px solid #161b22; margin-top:30px; }
 </style>
 </head>
 <body>
@@ -95,186 +112,359 @@ body {
   <div class="header-logo">✈</div>
   <div>
     <div class="header-title">AIP（航空情報公開集）</div>
-    <div class="header-sub">Part 2 ENR — エンルート</div>
+    <div class="header-sub">Part 2 ENR — 要点まとめ</div>
   </div>
-</div>
-
-<div class="hero">
-  <div class="hero-icon">📘</div>
-  <h1>ENR 抜粋</h1>
-  <p>自家用操縦士（滑空機）に関係するENR項目を収録</p>
 </div>
 
 <div class="container">
 
-  <div class="note">
+  <div class="hero">
+    <h1>ENR 要点まとめ</h1>
+    <p>自家用操縦士（滑空機）に関係する項目を日本語で整理</p>
+  </div>
+
+  <div class="intro">
     <b>AIP</b>（Aeronautical Information Publication／航空情報公開集）は国土交通省が発行する、日本の空を飛ぶための公式情報集です。<b>Part 2 が ENR</b>（En-route＝空港間の途中）で、飛行方式・空域・障害区域などがここにまとまっています。<br>
-    口述試験では「捜索救難は？」「ニアミスの報告書は？」のように<b>AIPを開いて答えてよい</b>場面が多いので、どの項目がどこにあるかを把握しておくことが重要です。<br>
-    <span class="star">★</span> は講義ノート第6章「AIPの読み方」で<b>特に確認すべき</b>とされている項目です。
+    口述試験では「捜索救難は？」「ニアミスの報告書は？」のように<b>AIPを開いて答えてよい</b>場面が多いので、どの項目に何が書いてあるかを把握しておくことが重要です。<br>
+    <b style="color:#d29922">★</b> は講義ノート第6章「AIPの読み方」で特に確認すべきとされている項目です。
   </div>
 
-  <div class="section-label">ENR 0 <span>／ 目次</span></div>
-
-  <a class="card" href="./aip/ENR0.6.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">0.6</div>
-    <div class="body">
-      <div class="name">目次（Part 2 全体）</div>
-      <div class="desc">ENR 1〜6 の全項目と掲載ページの一覧。まずここで「どこに何があるか」を掴む。</div>
-      <div class="meta">4ページ</div>
-    </div>
-  </a>
-
-  <div class="section-label">ENR 1 <span>／ 一般規則および方式</span></div>
-
-  <a class="card" href="./aip/ENR1.1.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.1</div>
-    <div class="body">
-      <div class="name">一般規則</div>
-      <div class="desc">総則／計器飛行証明／酒精飲料等／<b>操縦者の見張り義務</b>／異常接近報告／巡航高度／速度制限／曲技飛行／操縦練習飛行／通信機故障の場合の飛行方法／位置通報 ほか全20項目。</div>
-      <div class="meta">10ページ</div>
-    </div>
-  </a>
-
-  <a class="card key" href="./aip/ENR1.2.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.2</div>
-    <div class="body">
-      <div class="name">有視界飛行方式<span class="star">★</span></div>
-      <div class="desc"><b>VMCの数値表</b>（高度・飛行視程・雲からの距離）。VFRでの離着陸制限（雲高300m未満／地上視程5km未満）。FL290以上と特別管制空域でのVFR禁止。目視位置通報点。</div>
-      <div class="meta">2ページ　実施細則「有視界飛行方式に関する諸規則の概要」の出典</div>
-    </div>
-  </a>
-
-  <a class="card key" href="./aip/ENR1.4.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.4</div>
-    <div class="body">
-      <div class="name">ATS空域の分類<span class="star">★</span></div>
-      <div class="desc">空域分類（クラスA〜G）の一覧表。各クラスで提供される業務、VFRの可否、通信・許可の要否。</div>
-      <div class="meta">16ページ　実施細則「航空交通管制方式の概要」の出典</div>
-    </div>
-  </a>
-
-  <a class="card" href="./aip/ENR1.7.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.7</div>
-    <div class="body">
-      <div class="name">高度計規正方式</div>
-      <div class="desc">高度計規正の基本と規正空域の説明、運航者（パイロット）に適用される方式、巡航高度表。<b>QNH／QNEの切り替え</b>の根拠。</div>
-      <div class="meta">2ページ</div>
-    </div>
-  </a>
-
-  <a class="card" href="./aip/ENR1.10.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.10</div>
-    <div class="body">
-      <div class="name">飛行計画</div>
-      <div class="desc">フライトプランの提出手続き、記入要領、反復飛行計画システム、提出後の変更。<b>型式欄の記載方法</b>もここ。</div>
-      <div class="meta">20ページ</div>
-    </div>
-  </a>
-
-  <a class="card" href="./aip/ENR1.11.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.11</div>
-    <div class="body">
-      <div class="name">飛行計画通報の宛先</div>
-      <div class="desc">ATSメッセージの送付先と、メッセージの種類。</div>
-      <div class="meta">2ページ</div>
-    </div>
-  </a>
-
-  <a class="card" href="./aip/ENR1.12.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.12</div>
-    <div class="body">
-      <div class="name">民間機に対する要撃</div>
-      <div class="desc">要撃を受けた場合にとるべき措置と<b>視覚信号</b>の一覧。</div>
-      <div class="meta">4ページ</div>
-    </div>
-  </a>
-
-  <a class="card" href="./aip/ENR1.13.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.13</div>
-    <div class="body">
-      <div class="name">不法妨害</div>
-      <div class="desc">不法妨害（ハイジャック等）を受けた航空機がとる手順と通報方法。</div>
-      <div class="meta">2ページ</div>
-    </div>
-  </a>
-
-  <a class="card key" href="./aip/ENR1.14.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">1.14</div>
-    <div class="body">
-      <div class="name">航空交通インシデント<span class="star">★</span></div>
-      <div class="desc">インシデントの定義／<b>報告書式（航空交通インシデント報告書）の様式</b>／報告手続き（飛行中の手続きを含む）／報告の目的と取扱い。<b>「ニアミス時に何を提出するか」と聞かれたら、ここの報告書を挙げる。</b></div>
-      <div class="meta">6ページ　後半の様式は必ず目を通しておく</div>
-    </div>
-  </a>
-
-  <div class="section-label">ENR 5 <span>／ 航行の障害</span></div>
-
-  <a class="card key" href="./aip/ENR5.1.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">5.1</div>
-    <div class="body">
-      <div class="name">禁止、制限及び危険区域<span class="star">★</span></div>
-      <div class="desc">飛行禁止区域・飛行制限区域の一覧（区域名、範囲、高度、活動時間）。<b>現在、北海道には設定されていない</b>ことを押さえておく。</div>
-      <div class="meta">12ページ</div>
-    </div>
-  </a>
-
-  <a class="card" href="./aip/ENR5.2.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">5.2</div>
-    <div class="body">
-      <div class="name">演習及び訓練空域並びに防空識別圏</div>
-      <div class="desc">自衛隊の低高度訓練／試験空域など、演習・訓練に使われる空域と防空識別圏（ADIZ）。</div>
-      <div class="meta">26ページ</div>
-    </div>
-  </a>
-
-  <a class="card key" href="./aip/ENR5.3.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">5.3</div>
-    <div class="body">
-      <div class="name">その他危険を伴う諸活動<span class="star">★</span></div>
-      <div class="desc"><b>民間訓練試験空域の詳細</b>。空域使用者はATMセンターへ訓練計画を提出し承認を受ける必要があること、および訓練空域内の飛行場・滑空場での飛行の扱い。</div>
-      <div class="meta">38ページ</div>
-    </div>
-  </a>
-
-  <a class="card key" href="./aip/ENR5.5.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">5.5</div>
-    <div class="body">
-      <div class="name">航空スポーツ及びレクリエーション活動<span class="star">★</span></div>
-      <div class="desc">飛行場以外における<b>滑空機の主な活動拠点の一覧</b>（座標・運用時間つき）。滝川スカイパーク、（公社）滝川スカイスポーツ振興協会、当麻・美瑛・新篠津の各滑空場などが掲載されている。</div>
-      <div class="meta">2ページ　自分の滑空場がどう載っているか確認しておく</div>
-    </div>
-  </a>
-
-  <div class="section-label">ENR 6 <span>／ エンルートチャート</span></div>
-
-  <a class="card key" href="./aip/ENR6.1.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">6.1</div>
-    <div class="body">
-      <div class="name">ENRC1（稚内〜東京）<span class="star">★</span></div>
-      <div class="desc">ICAOエンルートチャート。上部に<b>凡例</b>（空港記号・無線航法施設・報告点・境界線の種類・管制方式の規則）があり、他の図を読むときの基準になる。</div>
-      <div class="meta">A3・有効 2026年7月9日　※AIPの言語設定を日本語にしていると表示されない</div>
-    </div>
-  </a>
-
-  <a class="card key" href="./aip/ENR6.10.pdf" target="_blank" rel="noopener noreferrer">
-    <div class="enr">6.10</div>
-    <div class="body">
-      <div class="name">エリアチャート 北海道<span class="star">★</span></div>
-      <div class="desc">北海道域の拡大図。札幌・新千歳・旭川・帯広・釧路・女満別などの位置と周波数、<b>ATSルート（V／Y／B）</b>、管制区の境界が一枚で見渡せる。<b>滝川周辺の空域を把握するのに最適。</b></div>
-      <div class="meta">A3横・有効 2026年7月9日</div>
-    </div>
-  </a>
-
-  <div class="note" style="margin-top:26px;border-left-color:#d29922;">
-    <b>ENR 6 を開くときの注意</b><br>
-    エンルートチャートは<b>英語版に限り表示されます</b>。AIP本体の言語設定を日本語にしていると一覧に出てこないので、探すときは英語版に切り替えてください（講義ノート第6章「AIPの読み方」参照）。
+  <div class="toc">
+    <div class="toc-t">目次</div>
+    <a href="#e11">1.1 一般規則</a>
+    <a href="#e12"><span class="k">★</span>1.2 有視界飛行方式</a>
+    <a href="#e14"><span class="k">★</span>1.4 ATS空域の分類</a>
+    <a href="#e17">1.7 高度計規正方式</a>
+    <a href="#e110">1.10 飛行計画</a>
+    <a href="#e111">1.11 飛行計画通報の宛先</a>
+    <a href="#e112">1.12 民間機に対する要撃</a>
+    <a href="#e113">1.13 不法妨害</a>
+    <a href="#e114"><span class="k">★</span>1.14 航空交通インシデント</a>
+    <a href="#e51"><span class="k">★</span>5.1 禁止・制限及び危険区域</a>
+    <a href="#e52">5.2 演習・訓練空域／ADIZ</a>
+    <a href="#e53"><span class="k">★</span>5.3 その他危険を伴う諸活動</a>
+    <a href="#e55"><span class="k">★</span>5.5 航空スポーツ及びレクリエーション活動</a>
   </div>
+
+  <div class="part">ENR 1 <span>／ 一般規則および方式</span></div>
+
+  <section id="e11">
+    <div class="sec-head"><span class="no">1.1</span><h2>一般規則</h2></div>
+    <div class="box">
+      <h3>総則</h3>
+      <p>日本の航空規則・航空交通業務方式は、一部の例外を除き ICAO の文書に従います。第2付属書（航空規則）、第11付属書（航空交通業務）、Doc 4444（航空交通管理）、Doc 8168（航空機の運航）、Doc 7030（地区補則手続き）、および米連邦航空局便覧（標準計器進入方式基準）。</p>
+
+      <h3>計器飛行証明（2項）</h3>
+      <p>事業用操縦士・自家用操縦士の技能証明を持つ者でも、<b>計器飛行証明を受けなければ</b>次の飛行を行ってはなりません。</p>
+      <ul>
+        <li>計器飛行</li>
+        <li>計器航法による飛行（計器のみに依存して位置・針路を測定する飛行）のうち<b>110km 又は 30分のいずれかを超えて</b>行うもの　例：洋上又は雲上のVFR飛行</li>
+        <li>計器飛行方式（IFR）による飛行</li>
+      </ul>
+
+      <h3>酒精飲料等（3項）</h3>
+      <p>航空機乗組員は、酒精飲料や麻酔剤その他の薬品の影響により<b>航空機の正常な運航ができないおそれがある間</b>は、その航空業務を行ってはなりません。</p>
+
+      <h3>収録されているその他の項目（全20項目）</h3>
+      <p>操縦者の見張り義務／異常接近報告／巡航高度／高度変更禁止空域／速度制限／曲技飛行及び航空機の試験をする飛行／超音速飛行／操縦練習飛行／航空交通の安全を阻害するおそれのある飛行／計器飛行及び計器航法による飛行／計器気象状態における飛行／特別管制空域における飛行／管制圏における飛行／飛行に影響を及ぼすおそれのある行為／通信機故障の場合の飛行方法／不測の事態における一時的な措置／位置通報</p>
+    </div>
+  </section>
+
+  <section id="e12" class="key">
+    <div class="sec-head"><span class="no">1.2</span><h2>有視界飛行方式<span class="star">★</span></h2></div>
+    <div class="box">
+      <h3>1. 有視界気象状態（VMC）</h3>
+      <p>有視界飛行方式による飛行では、下表に定められた<b>視程及び雲からの距離の値、又はそれ以上</b>を維持しなければなりません。</p>
+      <div class="scroll">
+      <table class="vmc">
+        <tr>
+          <th rowspan="2">区分</th>
+          <th colspan="2">管制区・管制圏又は情報圏<b>内</b></th>
+          <th colspan="3">管制区・管制圏及び情報圏<b>以外</b>の空域</th>
+        </tr>
+        <tr>
+          <th class="n">3,000m<br>（10,000ft）以上</th><th class="n">未満</th>
+          <th class="n">3,000m<br>（10,000ft）以上</th><th class="n">未満</th>
+          <th class="n">地表又は水面から<br>300m 以下</th>
+        </tr>
+        <tr><td><b>飛行視程</b></td><td class="n">8,000m</td><td class="n">5,000m</td><td class="n">8,000m</td><td class="n">1,500m</td><td class="n">1,500m<sup>*</sup></td></tr>
+        <tr><td><b>雲からの距離</b><br>水平</td><td class="n">1,500m</td><td class="n">600m<br>(2,000ft)</td><td class="n">1,500m</td><td class="n">600m<br>(2,000ft)</td>
+            <td rowspan="3">雲から離れ、かつ<b>地表又は水面を引き続き視認できる</b>こと</td></tr>
+        <tr><td>雲からの距離<br>垂直・上方</td><td class="n">300m<br>(1,000ft)</td><td class="n">150m<br>(500ft)</td><td class="n">300m<br>(1,000ft)</td><td class="n">150m<br>(500ft)</td></tr>
+        <tr><td>雲からの距離<br>垂直・下方</td><td class="n">300m<br>(1,000ft)</td><td class="n">300m<br>(1,000ft)</td><td class="n">300m<br>(1,000ft)</td><td class="n">300m<br>(1,000ft)</td></tr>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:#8b949e;"><sup>*</sup>他の物件との衝突を避けることができる速度で飛行するヘリコプター及びマルチローターには適用されない。</p>
+
+      <div class="tip"><span class="t">覚え方</span>
+        3,000m以上を基本形（視程8,000m／水平1,500m／上下300m）として、そこからの<b>差分</b>で覚えると整理しやすい。3,000m未満になると水平が600m、上方が150mに縮む。管制区等の<b>内</b>と<b>外</b>で違うのは<b>飛行視程だけ</b>（5,000m と 1,500m）。
+      </div>
+
+      <h3>離着陸の制限</h3>
+      <p>管制圏又は情報圏にある空港等、および管制圏・情報圏外にある国土交通大臣指定の空港等では、次の場合<b>VFRで離陸・着陸してはなりません</b>。</p>
+      <ul>
+        <li>雲高が 300m（1,000ft）未満</li>
+        <li>地上視程が 5km 未満</li>
+      </ul>
+      <p style="font-size:12.5px;color:#8b949e;">指定された空港等：調布飛行場、但馬飛行場、天草飛行場</p>
+
+      <h3>2. 有視界飛行方式による飛行の禁止</h3>
+      <p>管制機関の許可を受けなければ、<b>29,000ft 以上の空域</b>および<b>特別管制空域</b>においてVFRで飛行してはなりません。</p>
+
+      <h3>3. 目視位置通報点</h3>
+      <p><b>TOWER運用空港</b>：VFR機が着陸その他の目的で管制圏に進入しようとするときは、許可又は指示を受けるため、各空港に定められている管制圏外の目視位置通報点、又は任意の地点の上空で、現在位置・高度・機長の意向等を管制機関に通報します。管制圏内を飛行するときは、管制圏内の目視位置通報点での通報を指示されることがあります。</p>
+      <p><b>AFIS運用空港</b>：VFR機が空港等の標点を中心とする<b>半径5NMの円内</b>を、空港等の標点から<b>3,000ft以下</b>の高度で飛行しようとするときは、各空港に定められた目視位置通報点、又は標点から5NM以遠の任意の地点の上空で、現在位置・高度・機長の意向等を飛行場対空援助業務実施機関に通報します。</p>
+    </div>
+  </section>
+
+  <section id="e14" class="key">
+    <div class="sec-head"><span class="no">1.4</span><h2>ATS空域の分類<span class="star">★</span></h2></div>
+    <div class="box">
+      <h3>空域分類の考え方</h3>
+      <p>日本の飛行情報区（FIR）を、国際民間航空条約第11付属書の標準に従い、<b>クラスA・B・C・D・E の5つの管制空域</b>と<b>クラスG の非管制空域</b>に分類しています。</p>
+      <div class="scroll">
+      <table>
+        <tr><th>クラス</th><th>該当する空域</th></tr>
+        <tr><td class="n"><b>A</b></td><td>特別管制空域A／航空交通管制区のうち高度 29,000ft 以上／洋上管制区のうち高度 20,000ft 以上</td></tr>
+        <tr><td class="n"><b>B</b></td><td>特別管制空域B（指定：那覇 10,000ft以下）</td></tr>
+        <tr><td class="n"><b>C</b></td><td>特別管制空域C（指定：三沢第一 ほか）</td></tr>
+        <tr><td class="n"><b>D</b></td><td><b>航空交通管制圏</b>（法第2条第13項）</td></tr>
+        <tr><td class="n"><b>E</b></td><td>航空交通管制区のうち特別管制空域と29,000ft以上を除く空域／洋上管制区のうち20,000ft未満／<b>航空交通情報圏</b>（法第2条第14項）</td></tr>
+        <tr><td class="n"><b>G</b></td><td>上記以外の空域（非管制空域）</td></tr>
+      </table>
+      </div>
+      <div class="tip"><span class="t">グライダーが関係するのはどこか</span>
+        通常のフライトで関わるのは、<b>クラスD（管制圏）</b>・<b>クラスE（管制区・情報圏）</b>・<b>クラスG（それ以外）</b>の3つです。クラスA〜Cは高高度や特別管制空域なので、自家用滑空機では通常入りません。
+      </div>
+
+      <h3>各クラスの主な要件</h3>
+      <div class="scroll">
+      <table>
+        <tr><th>クラス</th><th>VFRへの提供業務</th><th>管制間隔</th><th>無線通信</th><th>管制許可</th></tr>
+        <tr><td class="n">B</td><td>管制業務</td><td>全ての航空機との間に設定</td><td>常時双方向</td><td class="n">必要</td></tr>
+        <tr><td class="n">C</td><td>管制業務</td><td>IFR機との間に設定</td><td>常時双方向</td><td class="n">必要</td></tr>
+        <tr><td class="n">D</td><td>管制業務</td><td>IFR機との間に設定</td><td>常時双方向</td><td class="n">必要</td></tr>
+        <tr><td class="n">E</td><td>管制区：交通情報<br>情報圏：飛行場対空援助業務</td><td>設定されない</td><td>情報圏では必要</td><td class="n">不要</td></tr>
+        <tr><td class="n">G</td><td>飛行情報業務</td><td>設定されない</td><td>不要</td><td class="n">不要</td></tr>
+      </table>
+      </div>
+
+      <h3>クラスD（管制圏）の指定空域 — 北海道</h3>
+      <div class="scroll">
+      <table>
+        <tr><th>管制圏名</th><th>コード</th><th>上限高度(ft)</th></tr>
+        <tr><td>千歳</td><td class="n">RJCJ／RJCC</td><td class="n">6,000</td></tr>
+        <tr><td>大雪（旭川空港）</td><td class="n">RJEC</td><td class="n">4,000</td></tr>
+        <tr><td>札幌（丘珠）</td><td class="n">RJCO</td><td class="n">4,000</td></tr>
+        <tr><td>旭川（陸自）</td><td class="n">RJCA</td><td class="n">3,000</td></tr>
+        <tr><td>女満別</td><td class="n">RJCM</td><td class="n">3,000</td></tr>
+        <tr><td>釧路</td><td class="n">RJCK</td><td class="n">3,000</td></tr>
+        <tr><td>帯広</td><td class="n">RJCB</td><td class="n">3,000</td></tr>
+        <tr><td>函館</td><td class="n">RJCH</td><td class="n">3,000</td></tr>
+        <tr><td>十勝</td><td class="n">RJCT</td><td class="n">1,500</td></tr>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:#8b949e;">全国では約70の管制圏が指定されています。上限高度は空港ごとに異なる点に注意。</p>
+    </div>
+  </section>
+
+  <section id="e17">
+    <div class="sec-head"><span class="no">1.7</span><h2>高度計規正方式</h2></div>
+    <div class="box">
+      <h3>一般方式</h3>
+      <p>福岡FIR内を飛行する航空機は、次により高度計規正を行い、高度又はフライトレベルを維持します。</p>
+      <ul>
+        <li><b>平均海面上 14,000ft 未満</b> — 最寄の飛行経路上の地点の<b>QNH値</b>により規正する。出発空港のQNH値が入手できない場合は、出発空港の標高により規正する。</li>
+        <li><b>平均海面上 14,000ft（FL140）以上</b> — 標準気圧 <b>29.92インチ（1013.2hPa）</b>により規正する。</li>
+      </ul>
+      <div class="tip"><span class="t">QNH／QNE の切り替え</span>
+        「<b>14,000ft 未満は QNH、14,000ft 以上は QNE</b>」がこの項の要点。自家用滑空機の高度域は当然すべてQNHです。
+      </div>
+
+      <h3>最低利用可能フライトレベル</h3>
+      <p>フライトレベルで飛行する機と高度で飛行する機の垂直間隔を確保するため、その地域の大気圧に応じて使用できる最低のフライトレベルが定められています（QNH 29.92インチ以上のとき FL140、気圧が下がるほど FL145、FL150… と上がっていく）。</p>
+      <p>富士山（標高12,388ft）から半径5NM以内の空域をIFRで飛行する航空機の最低利用可能フライトレベルは <b>FL160</b>。</p>
+
+      <h3>洋上</h3>
+      <p>上記の空域以外の洋上を飛行する航空機は 29.92インチ（1013.2hPa）で規正します。洋上管制区は、原則として海面から1,700m（5,500ft）以上の空域です。</p>
+    </div>
+  </section>
+
+  <section id="e110">
+    <div class="sec-head"><span class="no">1.10</span><h2>飛行計画</h2></div>
+    <div class="box">
+      <h3>提出義務と、その例外</h3>
+      <p>航空機は飛行しようとするとき、事前に飛行計画を空港事務所に通報しなければなりません。</p>
+      <div class="warn"><span class="t">グライダーに直結する例外</span>
+        <b>VFRにより飛行する航空機が、出発地を中心として半径9km以内の範囲を飛行し、かつ当該範囲内に着陸する場合は、飛行計画の通報は不要</b>です。滑空場周辺の場周飛行だけで完結するフライトがこれに当たります。
+      </div>
+
+      <h3>通報の時期</h3>
+      <ul>
+        <li>移動開始時刻（出発のため移動を開始する時刻）の<b>120時間より前には通報しない</b>こと。</li>
+        <li>IFRの場合：航空交通流管理の効果を確保するため移動開始時刻の2時間前までが望ましく、<b>少なくとも30分前まで</b>に通報すること。</li>
+        <li>外国FIRに入る場合：当該ATS当局が要求する時刻前までに関係管制機関に到達するよう通報すること。</li>
+        <li>VFRで、捜索救助のため飛行開始前に通報する手段がない場合、又は離陸しようとする場外離着陸場に通報手段がない場合は、<b>飛行開始後、出発地を中心として半径9km以内の範囲において通報</b>すること。</li>
+      </ul>
+
+      <h3>そのほかの収録内容</h3>
+      <p>飛行計画の記入要領（各欄の書き方）、反復飛行計画システム、提出された飛行計画の変更手続き。</p>
+    </div>
+  </section>
+
+  <section id="e111">
+    <div class="sec-head"><span class="no">1.11</span><h2>飛行計画通報の宛先</h2></div>
+    <div class="box">
+      <h3>ATSメッセージの種類</h3>
+      <div class="scroll">
+      <table>
+        <tr><th>略号</th><th>名称</th><th>送付する場面</th></tr>
+        <tr><td class="n"><b>FPL</b></td><td>飛行計画通報</td><td>ENR 1.10 に基づき関係するATS機関に送付する通報</td></tr>
+        <tr><td class="n"><b>DLA</b></td><td>遅延通報</td><td>通報した飛行計画の移動開始時刻が<b>30分以上遅延</b>する場合</td></tr>
+        <tr><td class="n"><b>CHG</b></td><td>変更通報</td><td>通報した飛行計画の内容を変更する場合（DLAによる場合を除く）</td></tr>
+        <tr><td class="n"><b>CNL</b></td><td>飛行計画取消通報</td><td>通報した飛行計画を取り消す場合</td></tr>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:#8b949e;">移動開始時刻が 0000(UTC) を跨いで30分以上遅延する場合は、DLAではなくCHGで通報します。</p>
+    </div>
+  </section>
+
+  <section id="e112">
+    <div class="sec-head"><span class="no">1.12</span><h2>民間機に対する要撃</h2></div>
+    <div class="box">
+      <h3>要撃を受けた場合の措置</h3>
+      <p>他機により要撃を受けた航空機（被要撃機）は、直ちに次の措置をとります。</p>
+      <ol>
+        <li>定められた<b>視覚信号</b>を理解し応答し、要撃機の指示に従う。</li>
+        <li>可能ならば、適切な航空交通業務機関に通報する。</li>
+        <li>緊急周波数 <b>121.5MHz</b> により呼出しを行い、要撃機又は適切な要撃管制機関との通信設定に努め、自機の情報を伝える。</li>
+      </ol>
+      <p>本文には、要撃機と被要撃機がやり取りする視覚信号（機体の動き・灯火）の一覧表が収録されています。</p>
+    </div>
+  </section>
+
+  <section id="e113">
+    <div class="sec-head"><span class="no">1.13</span><h2>不法妨害</h2></div>
+    <div class="box">
+      <h3>手順</h3>
+      <ol>
+        <li>不法妨害を受けている航空機は、優先権の付与と他機との間隔確保のため、<b>不法妨害の事実・状況・飛行計画からの逸脱内容</b>をATS機関に通報するよう努める。</li>
+        <li>機上で他に考慮すべき事由がない限り、機長は<b>最寄りの適切な飛行場</b>又は指定された飛行場にできるだけ速やかに着陸を試みる。</li>
+        <li>機長は事態を知らせるため、トランスポンダーに<b>モードA/C コード 7500</b> を設定するよう試みる。</li>
+      </ol>
+      <div class="tip"><span class="t">7500 の扱い</span>
+        機長がコード7500を設定し、管制機関からの確認に対して<b>応答がなされない場合</b>、管制機関はその使用が不注意による誤設定ではないものと見なします。
+      </div>
+      <p>ATS機関へ通報できない場合は、指示された経路・高度で飛行を継続する、無線連絡が設定できない場合は経路・高度から逸脱してよい、といった手順も定められています。</p>
+    </div>
+  </section>
+
+  <section id="e114" class="key">
+    <div class="sec-head"><span class="no">1.14</span><h2>航空交通インシデント<span class="star">★</span></h2></div>
+    <div class="box">
+      <h3>重大インシデントの定義（主なもの）</h3>
+      <ul>
+        <li>閉鎖中の滑走路／他機が使用中の滑走路／指示と異なる滑走路／誘導路 からの<b>離陸又はその中止</b></li>
+        <li>上記の場所や道路など、着陸することが想定されない場所への<b>着陸又はその試み</b></li>
+        <li>着陸時に発動機覆い・翼端など<b>脚以外の部分が地表面に接触</b>した事態</li>
+        <li>オーバーラン、アンダーシュート、滑走路からの逸脱（自ら地上走行できなくなった場合に限る）</li>
+        <li>非常脱出スライドを使用した非常脱出</li>
+        <li>飛行中、<b>地表面又は水面への衝突・接触を避けるため緊急の操作</b>を行った事態</li>
+        <li>飛行中の発動機の継続的な停止・推力の損失（<b>動力滑空機の発動機を意図して停止した場合を除く</b>）</li>
+        <li>プロペラ・回転翼・脚・方向舵・昇降舵・フラップ等が損傷し航行が継続できなくなった事態</li>
+        <li>機内の火炎・煙の発生、機内気圧の異常な低下、緊急の措置を要する燃料の欠乏</li>
+        <li><b>気流の擾乱その他の異常な気象状態との遭遇</b>、装置の故障、又は<b>対気速度限界・制限荷重倍数・運用高度限界を超えた飛行</b>により操縦に障害が発生した事態</li>
+        <li>乗組員が負傷・疾病により運航中に正常に業務を行えなかった事態</li>
+        <li>機外に装着・つり下げ・曳航していた物件が意図せず落下し、又は緊急の操作を要した事態</li>
+      </ul>
+
+      <div class="warn"><span class="t">口述試験でのポイント</span>
+        「<b>ニアミスが起きたら何を提出するか</b>」と問われたら、この ENR 1.14 に収録されている<b>航空交通インシデント報告書</b>を挙げます。本文の後半に報告書の様式（機長・発生日時・発生場所・航空機・運航者及び便名・搭乗者・概要・人の死傷 …の記入欄）が載っているので、必ず開いて確認しておいてください。
+      </div>
+
+      <h3>そのほかの収録内容</h3>
+      <p>航空交通インシデント報告書式の仕様／報告手続き（飛行中の手続きを含む）／報告の目的及び書式の取扱い。</p>
+    </div>
+  </section>
+
+  <div class="part">ENR 5 <span>／ 航行の障害</span></div>
+
+  <section id="e51" class="key">
+    <div class="sec-head"><span class="no">5.1</span><h2>禁止、制限及び危険区域<span class="star">★</span></h2></div>
+    <div class="box">
+      <p>この項目は「1. 飛行禁止区域」「2. 飛行制限区域」「4. 空域制限」などに分かれ、それぞれ区域名・範囲（座標）・上限／下限高度の一覧が載っています。</p>
+
+      <div class="warn"><span class="t">北海道にも制限区域はある（要注意）</span>
+        講義ノート第6章では「禁止・制限及び危険空域は現在北海道には存在しない」と説明されていますが、<b>実際の ENR 5.1 には北海道の区域が掲載されています</b>。試験で聞かれたら実物を確認して答えてください。
+      </div>
+
+      <div class="scroll">
+      <table>
+        <tr><th>区域</th><th>名称</th><th>高度</th><th>位置</th></tr>
+        <tr><td class="n">R-131</td><td>日高沖空戦訓練区域</td><td class="n">SFC〜UNL</td><td>日高沖（北緯41〜42度／東経142度付近）</td></tr>
+        <tr><td class="n">R-138</td><td>島松射撃場</td><td class="n">GND〜9,000ft</td><td>北海道 島松（北緯42度54分／東経141度26分付近）</td></tr>
+        <tr><td class="n">空域制限</td><td>矢臼別演習場</td><td class="n">GND〜36,000ft</td><td>北海道 別海町付近（北緯43度／東経144〜145度）</td></tr>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:#8b949e;">島松射撃場は札幌〜千歳の間にあり、滝川から南下する経路では位置関係を把握しておくとよい区域です。</p>
+    </div>
+  </section>
+
+  <section id="e52">
+    <div class="sec-head"><span class="no">5.2</span><h2>演習及び訓練空域並びに防空識別圏</h2></div>
+    <div class="box">
+      <h3>自衛隊低高度訓練／試験空域</h3>
+      <p>別表に示す範囲のうち、次の空域を除いた空域をいいます。</p>
+      <ul>
+        <li><b>公示された待機経路に係る空域</b>：当該訓練／試験空域の上限高度より1,000ft低い高度まで平行移動した面の直上の空域</li>
+        <li><b>公示された航空路等に係る空域</b>：航空路・直行経路・洋上転移経路の中心線から、NDBで構成されるものは片側10海里以内、VOR又はTACANによるものは片側9海里以内、RNAV経路は片側9海里以内の範囲</li>
+      </ul>
+      <h3>防空識別圏（ADIZ）</h3>
+      <p>防空識別圏の範囲と、その通過に関する手続きが収録されています。</p>
+    </div>
+  </section>
+
+  <section id="e53" class="key">
+    <div class="sec-head"><span class="no">5.3</span><h2>その他危険を伴う諸活動<span class="star">★</span></h2></div>
+    <div class="box">
+      <h3>民間訓練試験空域</h3>
+      <p>民間訓練試験空域（訓練空域）において訓練試験飛行等を実施しようとする航空機の運航者（空域使用者）は、<b>航空交通管理センター（ATMセンター）に訓練試験等計画（訓練計画）を提出し、同空域の使用について承認を受けなければなりません</b>。</p>
+
+      <div class="warn"><span class="t">滑空場での飛行の扱い（グライダーに直結）</span>
+        訓練空域内の飛行場・<b>滑空場</b>・場外離着陸場における飛行については、次のとおりです。<br>
+        <b>(1)</b> 飛行場等における<b>場周区域に限定された離着陸訓練</b>のための飛行は、当該空域を<b>通過する飛行として取り扱い、訓練計画の提出義務の対象外</b>。<br>
+        <b>(2)</b> 飛行場等周辺の訓練空域における<b>グライダーの訓練飛行</b>を行う場合は、訓練計画の提出等について<b>あらかじめATMセンターと調整</b>する。
+      </div>
+      <p>上記以外の飛行を行う場合は、訓練空域の使用についてあらかじめATMセンターと調整します。なお FL290 以上の空域に係る訓練計画の提出には、航空法第94条の2第1項ただし書に係る申請が含まれます。</p>
+      <p>本文には、全国の民間訓練試験空域の名称・範囲・高度の一覧が収録されています。</p>
+    </div>
+  </section>
+
+  <section id="e55" class="key">
+    <div class="sec-head"><span class="no">5.5</span><h2>航空スポーツ及びレクリエーション活動<span class="star">★</span></h2></div>
+    <div class="box">
+      <h3>滑空機の主な活動拠点</h3>
+      <p>飛行場以外における滑空機の主な活動拠点が、座標と運用時間つきで一覧になっています。<b>自分の滑空場がAIPにどう記載されているかを確認しておいてください。</b></p>
+      <div class="scroll">
+      <table>
+        <tr><th>名称</th><th>所在</th><th>座標</th><th>運用時間</th></tr>
+        <tr><td><b>たきかわスカイパーク</b></td><td>北海道滝川市</td><td class="n">—</td><td class="n">HJ<sup>*</sup></td></tr>
+        <tr><td>北見地区農道離着陸場</td><td>北海道北見市</td><td class="n">434648N/1434351E</td><td class="n">HJ<sup>*</sup></td></tr>
+        <tr><td>別海フライトパーク</td><td>北海道野付郡別海町</td><td class="n">432827N/1444702E</td><td class="n">HJ</td></tr>
+        <tr><td>当麻滑空場</td><td>北海道上川郡当麻町</td><td class="n">435231N/1423042E</td><td class="n">HJ</td></tr>
+        <tr><td>美瑛町滑空場</td><td>北海道上川郡美瑛町</td><td class="n">433153N/1423350E</td><td class="n">HJ</td></tr>
+        <tr><td>新篠津滑空場</td><td>北海道石狩郡新篠津村</td><td class="n">431633N/1413909E</td><td class="n">HJ<sup>*</sup></td></tr>
+      </table>
+      </div>
+      <p style="font-size:12.5px;color:#8b949e;"><b>HJ</b>＝日の出から日没まで。<sup>*</sup>付きは期間の限定あり（例：4月〜12月）。本文には本州以南の滑空場（角田・鬼怒川・小山絹・真壁・板倉・妻沼 など）も掲載されています。</p>
+    </div>
+  </section>
 
 </div>
 
 <div class="footer">
-  出典：国土交通省 航空局 AIP Japan（Part 2 ENR）<br>
-  収録したPDFは取得時点のもの。実際の飛行・受験時は必ず最新版を確認してください。
+  出典：国土交通省 航空局「AIP Japan」Part 2（ENR）<br>
+  取得時点の内容を要約したものです。実際の飛行・受験時は必ず最新版の原文を確認してください。
 </div>
 
 </body>

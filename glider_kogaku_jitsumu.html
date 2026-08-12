@@ -4869,7 +4869,9 @@ var wakeLock = {
     voice: null,
     voiceLang: null,   // lang string of the chosen voice, used on the utterance instead of a hardcoded 'ja-JP'
     charOffset: 0,     // 現ブロックの何文字目から読み始めたか（±15秒送り用）
-    blockStartedAt: 0  // その読み上げを開始した時刻（同上）
+    blockStartedAt: 0, // その読み上げを開始した時刻（同上）
+    gen: 0,            // 世代番号。cancel()で発火する古い発話のコールバックを無効化する
+    seekTimer: null
   };
 
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -5061,11 +5063,32 @@ var wakeLock = {
     [/滑空場/g, 'かっくうじょう'],
     [/滑空機/g, 'かっくうき'],
     [/試験官/g, 'しけんかん'],
+    [/好条件/g, 'こうじょうけん'],
+    [/反時計回り/g, 'はんとけいまわり'],
+    [/層雲系/g, 'そううんけい'],
+    [/積乱雲/g, 'せきらんうん'],
+    [/遠方/g, 'えんぽう'],
+    [/何時間/g, 'なんじかん'],
+    [/接近中/g, 'せっきんちゅう'],
     // 「曳航」関連：複合語を先に置換してから、最後に単独の「曳航」を置換する
     [/曳航索/g, 'えいこうさく'],
     [/曳航機/g, 'えいこうき'],
     [/曳航中/g, 'えいこうちゅう'],
-    [/曳航/g, 'えいこう']
+    [/曳航/g, 'えいこう'],
+    // 「風」関連：複合語をすべて先に処理してから、最後に単独の「風」を「かぜ」にする
+    [/風切り音/g, 'かざきりおん'],
+    [/上昇風/g, 'じょうしょうふう'],
+    [/正対風/g, 'せいたいふう'],
+    [/横風/g, 'よこかぜ'],
+    [/突風/g, 'とっぷう'],
+    [/台風/g, 'たいふう'],
+    [/強風/g, 'きょうふう'],
+    [/無風/g, 'むふう'],
+    [/風向/g, 'ふうこう'],
+    [/風速/g, 'ふうそく'],
+    [/風上/g, 'かざかみ'],
+    [/風下/g, 'かざしも'],
+    [/風/g, 'かぜ']
   ];
   function normalizeForSpeech(raw){
     var t = raw;
@@ -5117,9 +5140,29 @@ var wakeLock = {
     }
     if (target > state.blocks[idx].text.length) target = state.blocks[idx].text.length;
 
+    var start = snapToSentence(state.blocks[idx].text, target);
+
+    /* cancel() を呼ぶと、いま鳴っている発話の onend / onerror が遅れて発火する。
+       そのまま放置すると「次のブロックへ進む」処理が走り、せっかく戻した位置を
+       上書きしてしまう（連打すると戻らない・変な位置に飛ぶ原因）。
+       世代番号を進めて古いコールバックを無効化し、位置も先に確定させておく。 */
+    state.gen++;
+    var myGen = state.gen;
     state.paused = false;
+    state.index = idx;
+    state.charOffset = start;
+    state.blockStartedAt = 0;      // まだ喋り出していないので経過時間は0扱い
+    highlightBlock(state.blocks[idx].anchor);
+    updateStatus(bar, '読み上げ中… (' + (idx+1) + ' / ' + state.blocks.length + ')');
+    updateButtons(bar);
+
     synth.cancel();
-    speakIndex(bar, idx, snapToSentence(state.blocks[idx].text, target));
+    clearTimeout(state.seekTimer);
+    // cancel() の完了を待ってから喋り直す。連打された場合は最後の1回だけが生き残る。
+    state.seekTimer = setTimeout(function(){
+      if (myGen !== state.gen) return;
+      speakIndex(bar, idx, start);
+    }, 160);
   }
 
   function speakIndex(bar, idx, offset){
@@ -5143,8 +5186,12 @@ var wakeLock = {
     updateStatus(bar, '読み上げ中… (' + (idx+1) + ' / ' + state.blocks.length + ')');
     updateButtons(bar);
 
+    state.gen++;
+    var myGen = state.gen;
+
     var utter = makeUtterance(block.text.slice(offset));
     utter.onend = function(){
+      if (myGen !== state.gen) return;   // ±15秒送りや停止で無効化された古い発話
       if (state.playing && !state.paused){
         // Queue the next block immediately (no cancel() here) so playback
         // doesn't stutter or leave a gap between sentences.
@@ -5152,6 +5199,7 @@ var wakeLock = {
       }
     };
     utter.onerror = function(){
+      if (myGen !== state.gen) return;
       if (state.playing && !state.paused){
         speakIndex(bar, idx+1);
       }
@@ -5279,6 +5327,7 @@ var wakeLock = {
     bar.querySelector('.tts-fwd').addEventListener('click',  function(){ skipSeconds(bar,  15); });
 
     stopBtn.addEventListener('click', function(){
+      state.gen++; clearTimeout(state.seekTimer);
       synth.cancel();
       state.playing = false; wakeLock.release();
       state.paused = false;
@@ -5291,6 +5340,7 @@ var wakeLock = {
   }
 
   function stopAllOtherBars(currentBar){
+    state.gen++; clearTimeout(state.seekTimer);
     synth.cancel();
     state.playing = false; wakeLock.release();
     state.paused = false;
@@ -5308,6 +5358,7 @@ var wakeLock = {
 
   var originalShowCh = window.showCh;
   window.showCh = function(id){
+    state.gen++; clearTimeout(state.seekTimer);
     synth.cancel();
     state.playing = false; wakeLock.release();
     state.paused = false;

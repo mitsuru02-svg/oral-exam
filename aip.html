@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1117">
+<title>AIP（航空情報公開集）ENR 抜粋</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+  background: #0d1117; color: #e6edf3; min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.header {
+  background: #161b22; border-bottom: 1px solid #21262d;
+  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 10;
+}
+.header a.back {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 7px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  color: #8b949e; font-size: 16px; text-decoration: none; flex-shrink: 0;
+}
+.header-logo {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.header-title { font-size: 13px; font-weight: 600; }
+.header-sub { font-size: 10px; color: #8b949e; margin-top: 1px; }
+
+.hero { text-align: center; padding: 30px 20px 20px; }
+.hero-icon { font-size: 42px; margin-bottom: 12px; }
+.hero h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.hero p { font-size: 13.5px; color: #8b949e; line-height: 1.7; }
+
+.container { max-width: 560px; margin: 0 auto; padding: 0 16px 40px; }
+
+.note {
+  background: #161b22; border: 1px solid #21262d; border-left: 3px solid #3b82f6;
+  border-radius: 10px; padding: 13px 15px; margin-bottom: 22px;
+  font-size: 13px; color: #c9d1d9; line-height: 1.8;
+}
+.note b { color: #e6edf3; }
+.note .star { color: #d29922; font-weight: 700; }
+
+.section-label {
+  font-size: 11px; color: #484f58; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; margin: 26px 0 10px;
+}
+.section-label span { color: #8b949e; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+.card {
+  display: flex; align-items: flex-start; gap: 13px;
+  background: #161b22; border: 1px solid #21262d; border-radius: 14px;
+  padding: 14px 16px; text-decoration: none; color: #e6edf3;
+  margin-bottom: 10px; transition: border-color .2s, background .2s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.card:hover { border-color: #3b82f6; background: #0d1b30; transform: translateY(-1px); }
+.card:active { transform: scale(.98); }
+.card.key { border-color: #5c3d00; }
+.card.key:hover { border-color: #d29922; }
+
+.enr {
+  flex-shrink: 0; width: 62px; text-align: center;
+  background: #0d2044; color: #60a5fa; border: 1px solid #1e3a6e;
+  border-radius: 8px; padding: 6px 0; font-size: 12px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.card.key .enr { background: #2d1d00; color: #d29922; border-color: #5c3d00; }
+
+.body { flex: 1; min-width: 0; }
+.name { font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
+.name .star { color: #d29922; font-size: 12px; margin-left: 4px; }
+.desc { font-size: 12.5px; color: #8b949e; line-height: 1.65; }
+.meta { font-size: 11px; color: #484f58; margin-top: 5px; }
+
+.footer {
+  text-align: center; padding: 24px 16px; font-size: 12px;
+  color: #484f58; border-top: 1px solid #161b22; margin-top: 20px; line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back" href="./index.html">‹</a>
+  <div class="header-logo">✈</div>
+  <div>
+    <div class="header-title">AIP（航空情報公開集）</div>
+    <div class="header-sub">Part 2 ENR — エンルート</div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-icon">📘</div>
+  <h1>ENR 抜粋</h1>
+  <p>自家用操縦士（滑空機）に関係するENR項目を収録</p>
+</div>
+
+<div class="container">
+
+  <div class="note">
+    <b>AIP</b>（Aeronautical Information Publication／航空情報公開集）は国土交通省が発行する、日本の空を飛ぶための公式情報集です。<b>Part 2 が ENR</b>（En-route＝空港間の途中）で、飛行方式・空域・障害区域などがここにまとまっています。<br>
+    口述試験では「捜索救難は？」「ニアミスの報告書は？」のように<b>AIPを開いて答えてよい</b>場面が多いので、どの項目がどこにあるかを把握しておくことが重要です。<br>
+    <span class="star">★</span> は講義ノート第6章「AIPの読み方」で<b>特に確認すべき</b>とされている項目です。
+  </div>
+
+  <div class="section-label">ENR 0 <span>／ 目次</span></div>
+
+  <a class="card" href="./aip/ENR0.6.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">0.6</div>
+    <div class="body">
+      <div class="name">目次（Part 2 全体）</div>
+      <div class="desc">ENR 1〜6 の全項目と掲載ページの一覧。まずここで「どこに何があるか」を掴む。</div>
+      <div class="meta">4ページ</div>
+    </div>
+  </a>
+
+  <div class="section-label">ENR 1 <span>／ 一般規則および方式</span></div>
+
+  <a class="card" href="./aip/ENR1.1.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.1</div>
+    <div class="body">
+      <div class="name">一般規則</div>
+      <div class="desc">総則／計器飛行証明／酒精飲料等／<b>操縦者の見張り義務</b>／異常接近報告／巡航高度／速度制限／曲技飛行／操縦練習飛行／通信機故障の場合の飛行方法／位置通報 ほか全20項目。</div>
+      <div class="meta">10ページ</div>
+    </div>
+  </a>
+
+  <a class="card key" href="./aip/ENR1.2.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.2</div>
+    <div class="body">
+      <div class="name">有視界飛行方式<span class="star">★</span></div>
+      <div class="desc"><b>VMCの数値表</b>（高度・飛行視程・雲からの距離）。VFRでの離着陸制限（雲高300m未満／地上視程5km未満）。FL290以上と特別管制空域でのVFR禁止。目視位置通報点。</div>
+      <div class="meta">2ページ　実施細則「有視界飛行方式に関する諸規則の概要」の出典</div>
+    </div>
+  </a>
+
+  <a class="card key" href="./aip/ENR1.4.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.4</div>
+    <div class="body">
+      <div class="name">ATS空域の分類<span class="star">★</span></div>
+      <div class="desc">空域分類（クラスA〜G）の一覧表。各クラスで提供される業務、VFRの可否、通信・許可の要否。</div>
+      <div class="meta">16ページ　実施細則「航空交通管制方式の概要」の出典</div>
+    </div>
+  </a>
+
+  <a class="card" href="./aip/ENR1.7.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.7</div>
+    <div class="body">
+      <div class="name">高度計規正方式</div>
+      <div class="desc">高度計規正の基本と規正空域の説明、運航者（パイロット）に適用される方式、巡航高度表。<b>QNH／QNEの切り替え</b>の根拠。</div>
+      <div class="meta">2ページ</div>
+    </div>
+  </a>
+
+  <a class="card" href="./aip/ENR1.10.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.10</div>
+    <div class="body">
+      <div class="name">飛行計画</div>
+      <div class="desc">フライトプランの提出手続き、記入要領、反復飛行計画システム、提出後の変更。<b>型式欄の記載方法</b>もここ。</div>
+      <div class="meta">20ページ</div>
+    </div>
+  </a>
+
+  <a class="card" href="./aip/ENR1.11.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.11</div>
+    <div class="body">
+      <div class="name">飛行計画通報の宛先</div>
+      <div class="desc">ATSメッセージの送付先と、メッセージの種類。</div>
+      <div class="meta">2ページ</div>
+    </div>
+  </a>
+
+  <a class="card" href="./aip/ENR1.12.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.12</div>
+    <div class="body">
+      <div class="name">民間機に対する要撃</div>
+      <div class="desc">要撃を受けた場合にとるべき措置と<b>視覚信号</b>の一覧。</div>
+      <div class="meta">4ページ</div>
+    </div>
+  </a>
+
+  <a class="card" href="./aip/ENR1.13.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.13</div>
+    <div class="body">
+      <div class="name">不法妨害</div>
+      <div class="desc">不法妨害（ハイジャック等）を受けた航空機がとる手順と通報方法。</div>
+      <div class="meta">2ページ</div>
+    </div>
+  </a>
+
+  <a class="card key" href="./aip/ENR1.14.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">1.14</div>
+    <div class="body">
+      <div class="name">航空交通インシデント<span class="star">★</span></div>
+      <div class="desc">インシデントの定義／<b>報告書式（航空交通インシデント報告書）の様式</b>／報告手続き（飛行中の手続きを含む）／報告の目的と取扱い。<b>「ニアミス時に何を提出するか」と聞かれたら、ここの報告書を挙げる。</b></div>
+      <div class="meta">6ページ　後半の様式は必ず目を通しておく</div>
+    </div>
+  </a>
+
+  <div class="section-label">ENR 5 <span>／ 航行の障害</span></div>
+
+  <a class="card key" href="./aip/ENR5.1.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">5.1</div>
+    <div class="body">
+      <div class="name">禁止、制限及び危険区域<span class="star">★</span></div>
+      <div class="desc">飛行禁止区域・飛行制限区域の一覧（区域名、範囲、高度、活動時間）。<b>現在、北海道には設定されていない</b>ことを押さえておく。</div>
+      <div class="meta">12ページ</div>
+    </div>
+  </a>
+
+  <a class="card" href="./aip/ENR5.2.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">5.2</div>
+    <div class="body">
+      <div class="name">演習及び訓練空域並びに防空識別圏</div>
+      <div class="desc">自衛隊の低高度訓練／試験空域など、演習・訓練に使われる空域と防空識別圏（ADIZ）。</div>
+      <div class="meta">26ページ</div>
+    </div>
+  </a>
+
+  <a class="card key" href="./aip/ENR5.3.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">5.3</div>
+    <div class="body">
+      <div class="name">その他危険を伴う諸活動<span class="star">★</span></div>
+      <div class="desc"><b>民間訓練試験空域の詳細</b>。空域使用者はATMセンターへ訓練計画を提出し承認を受ける必要があること、および訓練空域内の飛行場・滑空場での飛行の扱い。</div>
+      <div class="meta">38ページ</div>
+    </div>
+  </a>
+
+  <a class="card key" href="./aip/ENR5.5.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">5.5</div>
+    <div class="body">
+      <div class="name">航空スポーツ及びレクリエーション活動<span class="star">★</span></div>
+      <div class="desc">飛行場以外における<b>滑空機の主な活動拠点の一覧</b>（座標・運用時間つき）。滝川スカイパーク、（公社）滝川スカイスポーツ振興協会、当麻・美瑛・新篠津の各滑空場などが掲載されている。</div>
+      <div class="meta">2ページ　自分の滑空場がどう載っているか確認しておく</div>
+    </div>
+  </a>
+
+  <div class="section-label">ENR 6 <span>／ エンルートチャート</span></div>
+
+  <a class="card key" href="./aip/ENR6.1.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">6.1</div>
+    <div class="body">
+      <div class="name">ENRC1（稚内〜東京）<span class="star">★</span></div>
+      <div class="desc">ICAOエンルートチャート。上部に<b>凡例</b>（空港記号・無線航法施設・報告点・境界線の種類・管制方式の規則）があり、他の図を読むときの基準になる。</div>
+      <div class="meta">A3・有効 2026年7月9日　※AIPの言語設定を日本語にしていると表示されない</div>
+    </div>
+  </a>
+
+  <a class="card key" href="./aip/ENR6.10.pdf" target="_blank" rel="noopener noreferrer">
+    <div class="enr">6.10</div>
+    <div class="body">
+      <div class="name">エリアチャート 北海道<span class="star">★</span></div>
+      <div class="desc">北海道域の拡大図。札幌・新千歳・旭川・帯広・釧路・女満別などの位置と周波数、<b>ATSルート（V／Y／B）</b>、管制区の境界が一枚で見渡せる。<b>滝川周辺の空域を把握するのに最適。</b></div>
+      <div class="meta">A3横・有効 2026年7月9日</div>
+    </div>
+  </a>
+
+  <div class="note" style="margin-top:26px;border-left-color:#d29922;">
+    <b>ENR 6 を開くときの注意</b><br>
+    エンルートチャートは<b>英語版に限り表示されます</b>。AIP本体の言語設定を日本語にしていると一覧に出てこないので、探すときは英語版に切り替えてください（講義ノート第6章「AIPの読み方」参照）。
+  </div>
+
+</div>
+
+<div class="footer">
+  出典：国土交通省 航空局 AIP Japan（Part 2 ENR）<br>
+  収録したPDFは取得時点のもの。実際の飛行・受験時は必ず最新版を確認してください。
+</div>
+
+</body>
+</html>

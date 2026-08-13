@@ -317,7 +317,8 @@ body {
   .sec-extra     { order: 8; }
   .start-cta     { order: 9; }
   /* 下部固定バーの下に潜り込まないよう、スクロール位置に余白を持たせる */
-  .panel, .wb-details, .cat-card, .mode-card, .setting-row, select, summary { scroll-margin-bottom: 96px; }
+  .panel, .wb-details, .cat-card, .mode-card, .setting-row, select, summary,
+  .sl-row, .sl-del { scroll-margin-bottom: 96px; }
   .start-cta {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
     flex-direction: row; align-items: center; gap: 8px;
@@ -375,12 +376,25 @@ body {
 
 /* 登録済みID一覧 */
 .sl-msg { font-size: 12.5px; color: #8b949e; text-align: center; padding: 6px 0; }
-.sl-row { padding: 8px 0; border-bottom: 1px solid #21262d; }
+/* IDごとの行。右側に削除ボタンを置くのでグリッドで組む */
+.sl-row {
+  padding: 8px 0; border-bottom: 1px solid #21262d;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "id del" "stats del" "time del";
+  align-items: center; column-gap: 10px;
+}
 .sl-row:last-child { border-bottom: none; }
 .sl-row-me { background: #0d2044; margin: 0 -16px; padding: 8px 16px; border-radius: 6px; }
-.sl-id { font-size: 13px; font-weight: 600; color: #e6edf3; }
-.sl-stats { font-size: 12px; color: #8b949e; margin-top: 2px; }
-.sl-time { font-size: 10.5px; color: #6e7681; margin-top: 2px; }
+.sl-id { grid-area: id; font-size: 13px; font-weight: 600; color: #e6edf3; overflow-wrap: anywhere; }
+.sl-stats { grid-area: stats; font-size: 12px; color: #8b949e; margin-top: 2px; }
+.sl-time { grid-area: time; font-size: 10.5px; color: #6e7681; margin-top: 2px; }
+.sl-del {
+  grid-area: del; align-self: center; flex-shrink: 0;
+  background: transparent; color: #8b949e; border: 1px solid #30363d; border-radius: 8px;
+  padding: 7px 11px; font-size: 12px; cursor: pointer; white-space: nowrap;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.sl-del:hover { color: #f85149; border-color: #6e1a1a; background: rgba(248,81,73,.08); }
 
 /* 全問題ステータス一覧 */
 .st-summary { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 16px 0 20px; }
@@ -626,9 +640,9 @@ body {
             <label for="countSelect">出題数</label>
             <select id="countSelect">
               <option value="5">5問</option>
-              <option value="10" selected>10問</option>
+              <option value="10">10問</option>
               <option value="20">20問</option>
-              <option value="155">全問 (155問)</option>
+              <option value="168" selected>全問 (168問)</option>
             </select>
           </div>
           <div class="setting-row hidden" id="thinkPauseRow">
@@ -926,10 +940,14 @@ function initApp() {
 
 function updateCountMax() {
   const pool = getCategoryPool();
-  const sel = document.getElementById('countSelect');
+  const sel  = document.getElementById('countSelect');
+  // 「全問」を選んでいるかは、値ではなく選択位置で見る。
+  // 値は絞り込みのたびに変わるので、値で比較すると判定できない。
+  const wasAll = sel.selectedIndex === 3;
   sel.options[3].value = pool.length;
   sel.options[3].text  = `全問 (${pool.length}問)`;
-  if (parseInt(sel.value) > pool.length) sel.value = Math.min(pool.length, 10);
+  if (wasAll) sel.selectedIndex = 3;                       // 全問のまま追従させる
+  else if (parseInt(sel.value) > pool.length) sel.selectedIndex = 3;
 }
 
 // ── ハンズフリーモード ────────────────────────────────────────
@@ -1725,7 +1743,9 @@ async function loadSyncList() {
       wrap.innerHTML = '<div class="sl-msg">まだ登録されたIDはありません。</div>';
       return;
     }
-    wrap.innerHTML = ids.map(row => {
+    // 件数を出して、全件が表示されていることを分かるようにする
+    const head = `<div class="sl-msg" style="text-align:left;padding:0 0 6px;">登録済み ${ids.length}件（更新が新しい順）</div>`;
+    wrap.innerHTML = head + ids.map(row => {
       const pct = row.totalAnswered > 0 ? Math.round(row.totalCorrect / row.totalAnswered * 100) : 0;
       const when = row.updatedAt
         ? new Date(row.updatedAt).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})
@@ -1736,10 +1756,46 @@ async function loadSyncList() {
           <div class="sl-id">${isMe ? '👤 ' : ''}${escapeHtml(row.id)}</div>
           <div class="sl-stats">正解 ${row.totalCorrect}/${row.totalAnswered}（${pct}%）・苦手 ${row.wrongCount}・⭐ ${row.checkedCount}</div>
           <div class="sl-time">${when}</div>
+          ${isMe ? `<button class="sl-del" title="このIDを削除" data-id="${escapeHtml(row.id)}"
+                  onclick="deleteSyncId(this.dataset.id)">🗑 削除</button>` : ''}
         </div>`;
     }).join('');
   } catch (e) {
     wrap.innerHTML = '<div class="sl-msg" style="color:#f85149;">読み込みに失敗しました（オフライン、またはWorker未対応）</div>';
+  }
+}
+
+// 同期IDの削除。
+// 削除できるのは、いまこの端末で使用中のIDだけに限る。他人のIDを消せてしまうと
+// 取り返しがつかないため、ボタン自体も自分の行にしか出していない。
+// 取り消せない操作なので、確認をとってからでないと実行しない。
+async function deleteSyncId(id) {
+  if (!id) return;
+  if (id !== syncId) {
+    alert('削除できるのは、この端末で使用中の同期IDだけです。');
+    return;
+  }
+  const msg = `同期ID「${id}」を削除します。\n\nサーバー上の記録（正解数・苦手問題・チェック）が消え、元に戻せません。\nこのIDは現在この端末で使用中のため、同期の紐づけも解除されます。\n（この端末に保存された学習履歴は残ります）\n\n削除しますか？`;
+  if (!confirm(msg)) return;
+
+  const wrap = document.getElementById('syncListWrap');
+  try {
+    const res = await fetch(syncEndpoint(id), { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    syncId = '';
+    localStorage.removeItem('jitchi_syncId');
+    const input = document.getElementById('syncIdInput');
+    if (input) input.value = '';
+    setSyncStatus('同期IDを削除し、この端末の紐づけを解除しました。', '#8b949e');
+    await loadSyncList();
+  } catch (e) {
+    if (wrap) {
+      const err = document.createElement('div');
+      err.className = 'sl-msg';
+      err.style.color = '#f85149';
+      err.textContent = '削除に失敗しました（オフライン、またはWorkerが削除に未対応）';
+      wrap.appendChild(err);
+    }
   }
 }
 

@@ -6,12 +6,191 @@
 <title>第9章 運航安全・航空医学 | AIM-J完全版リファレンス</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+/* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
+:root{
+  /* 面 */
+  --bg:#0d1117;          /* 本文背景 */
+  --surface:#161b22;     /* カード・パネル */
+  --surface-2:#0f141c;   /* サイドバー・一段沈んだ面 */
+  --surface-3:#21262d;   /* ボタン・タグの地 */
+  --line:#21262d;        /* 罫線 */
+  --line-strong:#30363d; /* 入力欄の枠など、はっきり見せたい罫線 */
+  /* 文字 */
+  --text:#e6edf3;
+  --text-dim:#8b949e;
+  --text-faint:#6e7681;
+  /* 役割色 */
+  --accent:#3b82f6;      /* 主操作・選択中 */
+  --accent-soft:#0d2044; /* 選択中の地 */
+  --accent-text:#93c5fd;
+  --key:#d29922;         /* 重要・読み上げ中 */
+  --key-soft:rgba(210,153,34,.12);
+  --ok:#3fb950;
+  --warn:#d29922;
+  --danger:#f85149;
+  /* 文字組み */
+  --font:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
+  /* 寸法 */
+  --sb-w:280px;          /* サイドバー幅 */
+  --hdr-h:52px;          /* ヘッダー高さ */
+  --radius:10px;
+  --radius-lg:14px;
+}
+/* ブレークポイントは2つだけ。
+   900px以上 = サイドバー常時表示（PC）／600px以下 = スマホ密度 */
+/* ══════════ 共通ヘッダー ══════════ */
+.appbar{
+  position:sticky;top:0;z-index:900;
+  height:var(--hdr-h);display:flex;align-items:center;gap:10px;
+  padding:0 12px;background:var(--surface);border-bottom:1px solid var(--line);
+}
+.appbar .ab-back,.appbar .ab-logo{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.appbar .ab-back{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--text-dim);font-size:16px;text-decoration:none;
+}
+.appbar .ab-back:hover{background:rgba(255,255,255,.12);color:var(--text);}
+.appbar .ab-logo{background:linear-gradient(135deg,#3b82f6,#1e40af);font-size:15px;}
+.appbar .ab-txt{min-width:0;}
+.appbar .ab-title{font-size:13px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appbar .ab-sub{font-size:10px;color:var(--text-dim);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#hamburger{
+  margin-left:auto;flex-shrink:0;width:36px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+#hamburger:hover{background:rgba(255,255,255,.12);}
+/* ══════════ 共通サイドバー ══════════ */
+#sb-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:940;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#sb-overlay.open{opacity:1;pointer-events:auto;}
+#sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:min(86vw,var(--sb-w));
+  background:var(--surface-2);border-right:1px solid var(--line);
+  z-index:950;display:flex;flex-direction:column;
+  transform:translateX(-102%);transition:transform .22s ease;
+}
+#sidebar.open{transform:none;}
+.sb-head{
+  height:var(--hdr-h);flex-shrink:0;padding:0 14px;
+  display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);
+}
+.sb-head b{font-size:13px;font-weight:700;color:var(--text);}
+.sb-close{
+  margin-left:auto;width:30px;height:30px;border-radius:8px;cursor:pointer;
+  background:none;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:13px;line-height:1;
+}
+.sb-close:hover{color:var(--text);border-color:var(--text-dim);}
+.sb-search{
+  margin:10px 12px 4px;width:calc(100% - 24px);
+  padding:8px 10px;background:var(--bg);border:1px solid var(--line-strong);
+  border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;
+}
+.sb-search::placeholder{color:var(--text-faint);}
+.sb-search:focus{outline:none;border-color:var(--accent);}
+.sb-scroll{flex:1;overflow-y:auto;padding:8px 8px 28px;-webkit-overflow-scrolling:touch;}
+.sb-grp{
+  font-size:10.5px;font-weight:700;color:var(--text-faint);
+  letter-spacing:.06em;padding:12px 8px 6px;
+}
+.sb-link{
+  display:flex;align-items:baseline;gap:8px;padding:8px 9px;border-radius:8px;
+  font-size:12.5px;line-height:1.5;color:var(--text-dim);text-decoration:none;
+  transition:background .15s,color .15s;
+}
+.sb-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.sb-link.current{background:var(--accent-soft);color:var(--accent-text);}
+.sb-link.reading{background:var(--key-soft);color:var(--key);}
+.sb-num{font-family:var(--mono);font-size:10.5px;color:var(--key);
+  flex-shrink:0;min-width:30px;}
+.sb-empty{color:var(--text-faint);font-size:12px;padding:12px 8px;}
+/* ══════════ 共通 読み上げUI ══════════ */
+.tts-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px 12px;margin:0 0 18px;
+}
+.tts-btn{
+  background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:8px 13px;font-family:var(--font);font-size:12.5px;
+  font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.tts-btn:hover{background:var(--line-strong);}
+.tts-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.stop{color:var(--danger);border-color:#5c1a17;}
+.tts-btn.stop:hover{background:rgba(248,81,73,.12);}
+.tts-btn:disabled{opacity:.45;cursor:default;}
+.tts-sel{
+  background:var(--bg);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:7px 9px;font-family:var(--font);font-size:12.5px;
+  max-width:170px;cursor:pointer;
+}
+.tts-sel:focus{outline:none;border-color:var(--accent);}
+.tts-st{font-size:11.5px;color:var(--text-dim);margin-left:auto;}
+
+#tts-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:930;display:none;
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(13,17,23,.97);border-top:1px solid var(--line);
+  backdrop-filter:blur(8px);box-shadow:0 -6px 22px rgba(0,0,0,.5);
+}
+#tts-dock.on{display:block;}
+.dk-inner{max-width:980px;margin:0 auto;}
+.dk-bar{height:3px;background:var(--surface-3);border-radius:2px;
+  overflow:hidden;margin-bottom:7px;}
+.dk-bar i{display:block;height:100%;background:var(--key);width:0;
+  transition:width .3s linear;}
+.dk-meta{display:flex;gap:10px;align-items:baseline;font-size:11px;
+  color:var(--text-faint);margin-bottom:7px;}
+.dk-meta .dk-now{color:var(--text-dim);font-size:11.5px;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.dk-btns .tts-sel{margin-left:auto;}
+
+/* 読み上げ中の箇所 */
+.tts-reading{
+  outline:2px solid var(--key);outline-offset:3px;
+  background:var(--key-soft);border-radius:6px;
+}
+/* ══════════ 共通レスポンシブ ══════════ */
+/* PC：サイドバーを出したまま、本文を右にずらす */
+@media (min-width:900px){
+  html body{padding-left:var(--sb-w);}   /* 各ページの html,body{padding:0} に勝たせる */
+  #sidebar{transform:none;width:var(--sb-w);}
+  #sb-overlay,#hamburger,.sb-close{display:none;}
+  #tts-dock{left:var(--sb-w);}
+}
+/* スマホ：操作は下のドックに集約し、本文中のバーは軽くする */
+@media (max-width:600px){
+  .tts-bar .tts-st{width:100%;margin-left:0;}
+  .dk-btns .tts-btn{flex:1;padding:10px 6px;font-size:12.5px;}
+  .dk-btns .tts-sel{margin-left:0;flex:0 0 auto;}
+  /* 下のドックに隠れないよう、スクロール位置に余白を持たせる */
+  .tts-bar,.sb-link,select,summary,section,h2{scroll-margin-bottom:120px;}
+}
+
+  /* 既存の色名は、共通トークンへの別名として残している。
+     個々のルールを書き換えずに全体の配色を揃えるため。 */
   :root{
-    --navy-950:#070b14; --navy-900:#0c1220; --navy-800:#121a2c; --navy-700:#1a2540; --navy-600:#243458;
-    --line:#2a3a5c; --amber:#e8a33d; --amber-bright:#ffc25c; --amber-dim:#8a6a30; --sky:#5fb4d6;
-    --danger:#e0563f; --ok:#5fbf8c; --ink:#e8ecf4; --ink-dim:#9aa8c4; --ink-faint:#5c6a8a;
-    --mono:'Space Mono', monospace; --sans:'Noto Sans JP', sans-serif;
+    --navy-950:var(--bg); --navy-900:var(--surface); --navy-800:#1c222b;
+    --navy-700:var(--line); --navy-600:var(--line-strong);
+    --amber:var(--key); --amber-bright:#e3b341; --amber-dim:#5c3d00;
+    --sky:var(--accent);
+    --danger:var(--danger); --ok:var(--ok);
+    --ink:var(--text); --ink-dim:var(--text-dim); --ink-faint:var(--text-faint);
+    --mono:var(--mono); --sans:var(--font);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -19,36 +198,30 @@
   .wrap{max-width:980px;margin:0 auto;padding:0 20px 190px;}
 
   /* HERO */
-  .hero{padding:44px 20px 26px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--navy-900),var(--navy-950));}
+  .hero{padding:22px 20px 18px;border-bottom:1px solid var(--line);background:var(--surface);}
   .hero-inner{max-width:980px;margin:0 auto;}
-  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:0.12em;color:var(--amber);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .eyebrow{font-size:11px;letter-spacing:0.1em;color:var(--key);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
   .eyebrow::before{content:"AIM-J §8 完全版";border:1px solid var(--amber-dim);padding:2px 8px;border-radius:3px;color:var(--amber-bright);}
-  h1.title{font-size:clamp(24px,4.2vw,36px);margin:0 0 8px;line-height:1.3;font-weight:900;}
-  .hero-lede{color:var(--ink-dim);max-width:720px;line-height:1.85;font-size:14.5px;}
-  .stat-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
-  .stat-row b{color:var(--amber-bright);font-size:15px;display:block;}
-
-  /* STICKY BLOCK NAV */
-  .block-nav{position:sticky;top:50px;z-index:50;background:rgba(7,11,20,0.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;padding:10px 20px;}
-  .block-nav-inner{max-width:980px;margin:0 auto;display:flex;gap:6px;}
-  .block-nav a{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--line);padding:6px 10px;border-radius:16px;text-decoration:none;flex-shrink:0;transition:.15s;}
-  .block-nav a:hover{color:var(--amber-bright);border-color:var(--amber-dim);}
+  h1.title{font-size:clamp(19px,2.6vw,25px);margin:0 0 6px;line-height:1.4;font-weight:800;}
+  .hero-lede{color:var(--text-dim);max-width:720px;line-height:1.8;font-size:13px;}
+  .stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--text-faint);}
+  .stat-row b{color:var(--key);font-size:13px;display:inline;margin-right:3px;}
 
   /* BLOCK SHELL */
-  .block{margin-top:52px;scroll-margin-top:60px;}
+  .block{margin-top:38px;scroll-margin-top:70px;}
   .block-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;flex-wrap:wrap;}
   .block-head .blocknum{font-family:var(--mono);font-size:13px;color:var(--amber);border:1px solid var(--amber-dim);border-radius:4px;padding:2px 8px;}
   .block-head h2{font-size:24px;margin:0;font-weight:900;}
   .block-intro{color:var(--ink-dim);font-size:14px;line-height:1.9;max-width:760px;margin:8px 0 20px;}
 
-  .tts-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 20px;padding:10px 14px;background:var(--navy-900);border:1px solid var(--line);border-radius:8px;}
-  .tts-btn{font-family:var(--mono);font-size:11px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
-  .tts-btn:hover{background:rgba(95,180,214,0.12);}
-  .tts-btn.playing{background:var(--sky);color:var(--navy-950);}
-  .tts-btn.tts-stop{border-color:var(--danger);color:var(--danger);}
-  .tts-btn.tts-stop:hover{background:rgba(224,86,63,0.12);}
-  .tts-status{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
-  .tts-voice{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;max-width:180px;cursor:pointer;}
+  .tts-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 20px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+  .tts-btn{font-family:var(--font);font-size:12.5px;font-weight:600;background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);border-radius:8px;padding:8px 13px;cursor:pointer;line-height:1;white-space:nowrap;transition:background .15s,border-color .15s,color .15s;}
+  .tts-btn:hover{background:var(--line-strong);}
+  .tts-btn.playing{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tts-btn.tts-stop{color:var(--danger);border-color:#5c1a17;}
+  .tts-btn.tts-stop:hover{background:rgba(248,81,73,.12);}
+  .tts-status{font-size:11.5px;color:var(--text-dim);}
+  .tts-voice,.tts-rate{font-family:var(--font);font-size:12.5px;background:var(--bg);color:var(--text);border:1px solid var(--line-strong);border-radius:8px;padding:7px 9px;max-width:170px;cursor:pointer;}
   .tts-controls-mini{margin:0 0 14px;padding:0;background:none;border:none;gap:6px;}
   .tts-controls-mini .tts-btn{font-size:10px;padding:4px 9px;}
 
@@ -127,56 +300,17 @@
   }
 
   footer.note{text-align:center;margin-top:50px;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
-  /* ===== ハンバーガー & サイドバー目次 ===== */
-  /* PC＝常時表示、スマホ＝ハンバーガーで開閉（講義ノートと同じ形） */
-  :root{ --sb-w:264px; }
-  #hamburger{margin-left:auto;flex-shrink:0;width:34px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#c9d4e5;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  #hamburger:hover{background:rgba(255,255,255,.12);}
-  #sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:998;opacity:0;pointer-events:none;transition:opacity .2s;}
-  #sb-overlay.open{opacity:1;pointer-events:auto;}
-  #sidebar{position:fixed;top:0;left:0;width:min(86vw,var(--sb-w));height:100dvh;z-index:1000;background:var(--navy-900);border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .22s ease;display:flex;flex-direction:column;}
-  #sidebar.open{transform:translateX(0);}
-  .sb-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
-  .sb-head b{font-size:13px;font-weight:700;color:var(--ink);}
-  .sb-close{margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;}
-  .sb-search{margin:10px 14px 6px;padding:8px 10px;background:var(--navy-950);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:13px;width:calc(100% - 28px);}
-  .sb-search::placeholder{color:var(--ink-faint);}
-  #sb-list{overflow-y:auto;flex:1;padding:6px 10px 30px;-webkit-overflow-scrolling:touch;}
   .sb-group{margin-bottom:12px;}
-  .sb-block{display:block;font-size:13px;font-weight:700;color:var(--amber-bright);text-decoration:none;padding:8px 8px;border-radius:6px;background:rgba(232,163,61,.08);margin-bottom:4px;}
-  .sb-block:hover{background:rgba(232,163,61,.16);}
-  .sb-topic{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--ink-dim);text-decoration:none;padding:6px 8px 6px 12px;border-radius:6px;line-height:1.5;}
-  .sb-topic:hover{background:rgba(255,255,255,.05);color:var(--ink);}
-  .sb-topic.reading{background:rgba(232,163,61,.14);color:var(--amber-bright);}
-  .sb-num{font-family:var(--mono);font-size:10.5px;color:var(--amber);flex-shrink:0;min-width:30px;}
+  .sb-block{display:block;font-size:12.5px;font-weight:700;color:var(--key);text-decoration:none;padding:8px 9px;border-radius:8px;background:var(--key-soft);margin-bottom:4px;}
+  .sb-block:hover{filter:brightness(1.3);}
+  .sb-topic{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--text-dim);text-decoration:none;padding:6px 8px 6px 12px;border-radius:8px;line-height:1.5;transition:background .15s,color .15s;}
+  .sb-topic:hover{background:rgba(255,255,255,.05);color:var(--text);}
+  .sb-topic.reading{background:var(--key-soft);color:var(--key);}
   .sb-empty{color:var(--ink-faint);font-size:12px;padding:12px 8px;}
 
-  /* ===== 画面下に固定した再生バー ===== */
-  #tts-dock{position:fixed;left:0;right:0;bottom:0;z-index:880;background:rgba(12,18,32,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:none;}
-  #tts-dock.on{display:block;}
-  .dk-inner{max-width:980px;margin:0 auto;}
-  .dk-bar{height:3px;background:var(--navy-700);border-radius:2px;overflow:hidden;margin-bottom:7px;}
-  .dk-bar i{display:block;height:100%;background:var(--amber);width:0;transition:width .3s linear;}
-  .dk-meta{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-bottom:7px;}
-  .dk-meta #dk-topic{color:var(--ink-dim);font-family:var(--sans);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-  .dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
-  .dk-btns button{font-family:var(--mono);font-size:12px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:8px 13px;cursor:pointer;}
-  .dk-btns button:hover{background:rgba(95,180,214,.12);}
-  #dk-play{background:var(--sky);color:var(--navy-950);font-weight:700;min-width:104px;}
-  #dk-stop{border-color:var(--danger);color:var(--danger);}
-  .dk-btns select{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:7px 9px;margin-left:auto;cursor:pointer;}
-  .tts-rate{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;cursor:pointer;}
 
-  /* PC：メニューを出したまま、本文を右にずらす */
-  @media (min-width:1000px){
-    body{padding-left:var(--sb-w);}
-    #sidebar{transform:none;width:var(--sb-w);}
-    #sb-overlay,#hamburger,.sb-close{display:none;}
-    #tts-dock{left:var(--sb-w);}
-  }
 
-  @media (max-width:640px){
-    #sidebar{width:min(92vw,340px);}
+  @media (max-width:600px){
     .dk-btns button{flex:1;padding:10px 6px;font-size:12.5px;}
     #dk-play{flex:1.4 1 100%;order:-1;margin-bottom:6px;}
     .dk-btns select{margin-left:0;flex:0 0 auto;}
@@ -189,15 +323,15 @@
 
 </head>
 <body>
-<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;" id="page-header">
-  <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;">‹</a>
-  <div style="width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#1e40af);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✈</div>
-  <div>
-    <div style="font-size:13px;font-weight:600;color:#e6edf3;">AIM-J 第9章 運航安全・航空医学</div>
-    <div style="font-size:10px;color:#8b949e;margin-top:1px;">自家用操縦士（滑空機）</div>
+<header class="appbar">
+  <a class="ab-back" href="./index.html" aria-label="入口へ戻る">‹</a>
+  <div class="ab-logo">✈</div>
+  <div class="ab-txt">
+    <div class="ab-title">AIM-J 第9章 運航安全・航空医学</div>
+    <div class="ab-sub">自家用操縦士（滑空機）</div>
   </div>
   <button id="hamburger" aria-label="目次">☰</button>
-</div>
+</header>
 
 <div id="sb-overlay"></div>
 <aside id="sidebar">
@@ -209,13 +343,13 @@
 <div id="tts-dock">
   <div class="dk-inner">
     <div class="dk-bar"><i></i></div>
-    <div class="dk-meta"><span id="dk-topic">—</span><span id="dk-pos"></span></div>
+    <div class="dk-meta"><span class="dk-now" id="dk-topic">—</span><span id="dk-pos"></span></div>
     <div class="dk-btns">
-      <button id="dk-back">◀ 15秒</button>
-      <button id="dk-play">⏸ 一時停止</button>
-      <button id="dk-fwd">15秒 ▶</button>
-      <button id="dk-stop">■ 停止</button>
-      <select id="dk-rate" title="読み上げ速度"></select>
+      <button class="tts-btn" id="dk-back">◀ 15秒</button>
+      <button class="tts-btn primary" id="dk-play">⏸ 一時停止</button>
+      <button class="tts-btn" id="dk-fwd">15秒 ▶</button>
+      <button class="tts-btn stop" id="dk-stop">■ 停止</button>
+      <select class="tts-sel" id="dk-rate" title="読み上げ速度"></select>
     </div>
   </div>
 </div>
@@ -237,14 +371,6 @@
   </div>
 </div>
 
-<div class="block-nav">
-  <div class="block-nav-inner">
-    <a href="ch8_kokuu_kisho_full.html">§8 航空気象</a>
-    <a href="#bA">① 運航の安全対策(934-946)</a>
-    <a href="#bB">② 航空医学(960-969)</a>
-  </div>
-</div>
-
 <div class="wrap">
 
 <!-- ============ BLOCK A: 運航の安全対策 ============ -->
@@ -252,9 +378,9 @@
   <div class="block-head"><span class="blocknum">934-946</span><h2>① 運航の安全対策</h2></div>
   <p class="block-intro">ウェイクタービュランス、空中衝突予防、VFR事故対策、そして山岳地帯の飛行まで。実際の運航判断に直結する内容です。</p>
   <div class="tts-controls" data-tts-id="blockA">
-    <button class="tts-btn tts-play">▶ ブロック①を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -401,9 +527,9 @@
   <div class="block-head"><span class="blocknum">960-969</span><h2>② 航空医学</h2></div>
   <p class="block-intro">パイロット自身の心身の状態が操縦能力にどう影響するか。IMSAFEチェックリストから高高度の生理反応、飛行中の錯覚まで。</p>
   <div class="tts-controls" data-tts-id="blockB">
-    <button class="tts-btn tts-play">▶ ブロック②を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -533,6 +659,51 @@
 <script>
 const LECTURE_SCRIPTS = {"blockIntros": {"blockA": "ここからは、運航の安全対策のブロックです。ウェイクタービュランスや空中衝突の予防、そしてVFR飛行の事故原因と対策まで、実際の運航で直接使う知識を扱います。", "blockB": "ここからは、航空医学のブロックです。パイロット自身の心身の状態が、安全な操縦能力にどう影響するかを扱います。健康管理は、機体の点検と同じくらい重要な、飛行前点検の対象です。"}, "topics": {"934": "ウェイクタービュランスの話です。地上での先行機のジェットブラストと、飛行中に翼端から発生する渦、翼端渦、この2つが後続機に重大な危険を及ぼす可能性があります。まずジェットブラストについて。大型機のジェットエンジンの排気は、噴出速度が毎時56キロメートルを超えると、後方の小型機に危険を及ぼすとされています。次に翼端渦です。機体が重く、低速飛行状態にあるときほど、翼端渦は強くなります。離着陸時は速度が遅いため渦が強く、巡航中は高度が高いほど空気密度が小さくなるため、これも渦を強めます。翼端渦に突入すると、パイロットの意志に反して急激なロールが起きることがあり、エルロンを一杯に使っても操縦不能になった例が報告されています。渦の動きにも特徴があります。風がないとき、渦は地面に当たると左右に広がります。横風があると、風上側の広がりは減り、風下側の広がりは増えます。水平飛行中の渦は、機体の下方やや外側に、毎分数百フィートの速さで沈んでいきます。回避の基本は、先行機のフライトパスより高いパスを維持し、先行機の接地点や浮揚地点を注目して、その手前または向こう側に自機の接地点・浮揚地点を設定することです。ヘリコプターの後方にも、強い下降流や渦流が発生するため、ローター直径の3倍以内には近づかないようにします。", "935": "空中衝突の予防です。最終的な空中衝突の回避は、シーアンドアボイド、つまり自分の目で見て避けることに頼らざるを得ません。脅威となる航空機を発見し、動向を見極め、回避操作を終えるまでに、少なくとも12.5秒が必要とされています。衝突コースの見極め方について。自機と相手機がともに直線飛行をしている場合、2機の相対方位が変わらずに近づいてくるなら、両機は衝突コース上にあります。ここで注意が必要なのは、人間の目は動いている物体は見つけやすいのですが、止まっているものは見つけにくいということです。衝突コースにある相手機は、まさに機影が止まって見えるため、発見が遅れがちになります。もう一つ重要なのが、相対速度による見え方の変化です。ある時期までは非常に小さく見えていた相手機が、衝突の直前に急に大きく広がって見え、次の瞬間に衝突してしまう、という現象が起こります。正面から接近する戦闘機の例では、衝突の15秒前でもウィンドシールドに1円玉を貼り付けた程度の大きさにしか見えず、3秒前で初めて視角が0.5度になります。小さく見えていても油断せず、コースを見定めて早めの回避操作を行う必要があります。", "940": "VFRフライトの事故原因と対策です。ジェネラルアビエーションの事故のうち、パイロットの判断・処置に関わる頻度の高い要因が10項目挙げられています。不十分な飛行準備や計画、方向コントロールの失敗、飛行速度の獲得・維持の失敗、不適切なレベルオフ、障害物の発見・回避の失敗、飛行距離と速度に関する誤判断、燃料制御の失敗、飛行中の判断ミス、不適当な地形の選定、そして不適当な操縦技術です。このリストは、過去数十年にわたって変わっていません。見張りの必要性についても触れておきます。天気の良いときほど油断してはいけません。空中衝突は、ほとんど例外なく理想的な天候状態のもとで発生しています。非常に良い視程は、かえってパイロットの安心感を助長してしまうためです。最新の気象情報の入手と早期の判断も重要です。全ての飛行経路で有視界気象状態の維持が確認できない場合は出発しないこと、気象状態の悪化に備えて代替案を準備しておくこと、悪化の兆候が見られたら時機を逃さず飛行継続の可否を判断し、引き返すか最寄りの飛行場に着陸することです。VMCを維持できなくなった場合、緊急事態の宣言をためらうべきではありません。進路権についても、たとえ法的に自分に進路権があっても、相手がそれに気づいて避けるのを待つより、自分から進路を譲るべきとされています。", "941": "プリフライトの注意事項です。まず自分自身のコンディションを確認すること。体調不良はもちろん、過労や二日酔いなど異常な体調のときは飛行を見合わせる判断が必要です。精神的に安定していることも重要です。近親者の不幸やショッキングな出来事、激しい口論の後などは、脈拍や血圧に影響を及ぼすことがあります。飛行前点検を確実に実施すること。燃料や滑油の量、整備点検記録の確認、重要部分の点検、重量とバランス、携行物件などを確認します。フライトの内容を地上の人に知らせておくこと。飛行計画は管制情報機関に提出するだけでなく、基地の運航管理者にも残しておくことが望ましいとされています。VFRでは特に天候の急変に備えた心構えが必要です。目的地の天候が悪化した場合、計器飛行方式で着陸するか代替飛行場に向かうかの判断を迫られるため、必要な情報をあらかじめ準備しておきます。", "942": "チェックリストの活用です。フライトにあたって重要な操作の点検は、必ずチェックリストに従って実施すべきとされています。人間は同時に複数の仕事を行うことができません。ある操作の途中で別の作業のために中断すると、必要な項目を見落としがちになります。また、実施していない操作を実施済みと勘違いしやすい傾向もあります。チェックリストの活用は、こうした人間の特性を補うためのものです。", "943": "トラフィックの輻輳する空域でのVFR飛行です。異常接近や空中衝突は、8,000フィート以下、かつ飛行場から30マイル以内の空域で発生することが多いとされています。こうした空域を通過したり着陸しようとする場合は、より厳重な見張りが必要です。異常接近の防止は、最終的には目視による回避に頼らざるを得ないため、関連トラフィックがどこにいるかを見つけること、そして自機も相手から見つけやすくすることが大切です。ストロボライトや着陸灯の点灯も視認性向上に有効とされています。VHFの活用も重要です。レーダーでカバーされている空域ではレーダーアドバイザリーを、タワーやレディオのある飛行場周辺ではVHF交信でトラフィック情報を入手します。通信施設のない飛行場や滑空場では、航空機相互間の共通周波数で、位置・高度・意向を発信することが望ましいとされています。", "944": "飛行障害物です。地上2,000フィート未満の高度を飛ぶときは、地上から突き出した障害物に警戒が必要です。アンテナ塔の中には地上1,000フィート以上突き出しているものもあり、これを支えるワイヤーは水平距離で500メートルも延びていることがあります。ワイヤーは晴天時でも発見が難しく、鉄骨塔を見つけたら周辺600メートルは間隔を保つことが望ましいとされています。架線ワイヤーも、滑走路への進入経路や湖、河川、峡谷などの飛行コースにまたがって延びていることがあります。多くは航空法上の障害物認定基準から外れているため、障害灯が設置されていないこともあります。浮遊気球についても注意が必要です。気球の下に吊り下げられた物やワイヤーアンテナは、よほど接近しないと視認できないため、気球から十分な間隔をとり、決して下側を飛ぼうとしてはいけません。", "945": "山岳地帯の飛行です。滝川での運航にも直結する内容です。山岳地帯では不時着に適した平坦地を見つけることが難しく、気象も変わりやすいため、積乱雲の急速な発達や視程低下、乱気流、強い上昇・下降気流が発生しやすくなります。安全に飛行するには、適切な飛行計画、風や気象への十分な配慮、山岳地帯特有の知識、そして常に退避経路を確保しておくことが必要です。具体的な注意点を挙げます。不時着不可能な区域を避け、民家のある地域やよく知られた山越えルートを選び、地面から十分な高度を保つこと。一般に午前中の方が飛行条件は良く、午後は積雲が増えて風も強くなりやすいこと。夜間の山岳飛行は避けるべきこと。密度高度が高くなると航空機の性能が著しく低下すること。山岳波は、風が30度以上の交角、15ノット以上の速度で山脈に吹きつける場合に発生しやすく、風下側に猛烈な下降流を生成することがあります。風下側から山脈に接近する場合は、通常より最低でも1,000フィートは高い高度をとるべきとされています。稜線や峠の通過については、頂上から少なくとも1,000フィート離れた高度で、少なくとも3海里手前からその高度に到達し、3海里はその高度を維持することが推奨されています。風下から稜線に近づくときは、稜線に対して約45度の角度で近づくことで、強い乱気流や下降気流に遭遇した場合に90度旋回して安全に離脱できます。峡谷は行き止まりになっていることもあるため、常に180度ターンができるスペースを確保しておく必要があります。", "946": "無人航空機、ドローンの話です。近年、撮影や農薬散布、インフラ点検などで急速に普及しており、航空機への接近も報告されています。無人航空機は、空港等から離れた、地表または水面から500フィート以下の空域では、NOTAMが発行されないまま飛行していることがあります。サイズが小さいため、視認も回避も困難です。TCASとの関係にも触れておきます。トランスポンダーが作動していない機体に対しては、トラフィックアドバイザリーもレゾリューションアドバイザリーも発出されません。また、概ね1,000フィートAGL以下ではレゾリューションアドバイザリーの作動が抑止され、概ね500フィートAGL以下ではトラフィックアドバイザリーの音声も抑止されます。つまりTCASは、離着陸の直前・直後の衝突防止には役立たないという点を理解しておく必要があります。", "960": "航空医学のブロックに入ります。航空機を安全に操縦するには、パイロットが健康であることが大前提です。世界保健機関は、健康を、単に身体的機能が正常なだけでなく、精神的、社会的にも正常であることと定義しています。心身の機能が揃って正常なときのみ、人間は健康と言えます。健康でない状態で操縦することは、パイロットインキャパシテーション、つまり操縦不能状態に繋がりかねません。", "961": "飛行への適合性、IMSAFEチェックリストの話です。パイロットは有効な航空身体検査証明書を持っていても、身体検査基準に適合しない状態にある間は、航空業務を行うことが禁止されています。人的チェックリストとして、頭文字を取ってアイエムセーフと呼ばれるものがあります。アイは病気。日常生活では軽い病気とされるものでも、判断力や記憶力、警戒心を鈍らせることがあります。エムは服薬。処方薬でも市販薬でも、パイロットの能力を低下させることがあり、航空法でも、薬品の影響で正常な運航ができないおそれがある間の航空業務は禁止されています。エスはストレス。仕事上の行き詰まりなどは警戒心を減退させ、悪天候の中にかまわず飛び込むような危険な判断につながりがちです。エーはアルコール。中程度の飲酒量が体内から完全に消えた後でも、二日酔いの影響でかなりの時間、能力低下が続きます。国内では乗務開始前に血中アルコール濃度0.2グラムパーリットル未満、呼気検査で0.09ミリグラムパーリットル未満であることが求められています。エフは疲労。急性疲労は休養と睡眠で回復できますが、それが回復する前に次の疲労が重なる慢性疲労は、長期の休養が必要です。イーは感情。近親者の死や離別、失業などによる感情の高ぶりは、警戒心を著しく減退させます。この6項目を、飛行前に自分自身への点検として確認する習慣が推奨されています。", "962": "高高度の影響です。低酸素症は、脳などの機能に障害をきたすほど、体内の酸素が不足する状態を言います。大気中の酸素の割合は高度が上がっても一定なので、高度が上がり気圧が下がるほど、低酸素症の傾向は強まります。健康なパイロットであれば、12,000フィート未満では夜間視力以外に顕著な影響は出ないとされていますが、12,000から15,000フィートになると、判断力、記憶力、警戒心、身体運動の調和性、計算能力が低下し始め、頭痛やめまいが起こります。15,000フィートでは、15分以内に能力の重大な低下が起きることがあります。さらに高度が上がると、視野の外周が灰白化してトンネル視界になり、爪や唇が青くなるチアノーゼが進行します。18,000フィートでは20分から30分、20,000フィートでは5分から12分で、修正操作や回避操作を行う能力が失われ、間もなく失神します。喫煙や一酸化炭素、貧血、飲酒、服薬などがあると、より低い高度でも同様の影響が出ることがあります。予防には酸素吸入システムの活用が有効で、昼間は10,000フィート、夜間は5,000フィートを超えたら補助酸素の使用が推奨されています。耳閉塞についても触れます。降下中は、耳管を通じて空気が自然には入りにくいため、唾を飲み込んだりあくびをしたりして、自分で中耳内外の気圧を等しくする必要があります。風邪や鼻アレルギーがあると耳管周りが充血し、耳閉塞が起きやすくなります。スキューバダイビングの後の飛行にも注意が必要です。体内に吸収された窒素が血管内で気化すると、潜函病、減圧病を起こすことがあります。8,000フィートまでのフライトでも、減圧浮上を要しない潜水の後は少なくとも12時間、減圧浮上を要する潜水の後は少なくとも24時間の地上待機が必要です。8,000フィートを超えるフライトでは、いかなるダイビングの後も最低24時間の待機が必要です。", "963": "飛行中の過呼吸です。過呼吸は、飛行中に緊迫した状況に遭遇したときに、無意識に起きる心身の状態です。呼吸困難に見えますが、実際には体内から必要以上に二酸化炭素を排出してしまっている状態です。頭がふらふらしたり、息苦しくなったり、耳鳴りや悪寒が起き、それによってさらに過呼吸が増幅されてしまいます。兆候が現れたら、呼吸の速さと深さを意識的に調節し、ゆっくり呼吸することで、通常は2分から3分で治まります。鼻から吸って、唇を強めに締めて口からゆっくり吐き出す腹式呼吸が効果的です。過呼吸と低酸素症は初期の兆候がよく似ており、同時に発生することも多いため、どちらか判断がつかないときは、酸素を100パーセントにして大きく息を吸い込み、しばらく止めておくとよいとされています。", "964": "飛行中の一酸化炭素中毒です。一酸化炭素は無色、無味、無臭で、排気ガスにも含まれています。わずかな量でも吸い続けると、血液の酸素運搬能力が著しく低下し、低酸素症と同じ症状が出ます。軽飛行機の暖房装置の多くは、排気管を通り抜ける空気を利用しているため、マニフォールドにひびが入っていたり、シールに隙間があると、一酸化炭素が漏れ出す危険があります。ヒーター使用中に排気の臭いや、頭痛、眠気、めまいの兆候を感じたら、直ちにヒーターを停止し、通気孔を開けて外気を導入すべきです。", "965": "飛行中の錯覚です。飛行中は様々な錯覚に見舞われることがあり、空間識失調や着陸の失敗につながることがあります。視覚や平衡感覚だけを信じて操縦を続けると、きりもみや急降下、失速に陥る可能性があります。空間識失調に関わる錯覚は数多く報告されています。傾斜錯覚は、ゆっくりとバンクをつけたあと急激に修正すると、反対方向にバンクしているように感じる錯覚です。コリオリ効果による錯覚は、長時間の定常旋回中に頭を急に動かすと、まったく違う軸で旋回しているように感じるものです。死の錐揉みは、錐揉みから回復した直後に、反対方向の錐揉みに入ったような錯覚に陥り、実際にまた錐揉み状態に戻してしまうというものです。死の螺旋降下は、定常旋回中に高度低下に気づくと、水平に降下しているような錯覚から、操縦桿を引いてかえって螺旋降下を強めてしまう現象です。このほか、加速度による錯覚、転回性錯覚、上下錯覚、擬似水平線、自動運動といった錯覚も知られています。着陸時の錯覚も重要です。狭い滑走路は実際より高く見え、パスが低くなりがちです。上り勾配の滑走路や地形も同様に高く見えます。地上物標のない水面や積雪地帯では、実際より高く飛んでいるように錯覚しがちです。これらの錯覚を防ぐには、信頼できる地上の目標物や飛行計器を確実に視認すること、不慣れな飛行場では着陸前に空中から目視点検を行うこと、可能ならグライドスロープやPAPIを活用することが有効です。", "966": "飛行中の視覚です。視覚は安全飛行にとって最も重要な感覚です。暗順応について。真っ暗闇の中で暗順応を得るには少なくとも30分かかりますが、薄明かりの赤いコックピット照明のもとでは、20分以内に中程度の暗順応を得ることができます。わずか2、3秒明るい光を見るだけで、暗順応は失われてしまいます。げん惑、まぶしさについても注意が必要です。キャノピーや雲、水面、雪などからの反射光は、斜視状態や涙眼、一時的な盲目状態を引き起こすことがあります。他機の見張りについて。効果的なスキャニングは、目を規則正しく短い時間ごとに移動させることで行います。一回の目の動きは10度以下とし、視認のために少なくとも1秒間は同一点に視線を保持することが必要です。航空灯火の色にも意味があります。白は方向、赤は危険・停止・禁止、黄は注意・警告、緑は安全・進行・正常、青は用心・制限を示します。", "967": "曲技飛行です。運動中の加速度は身体的な緊張を生じさせます。脳は血液循環による酸素供給を絶え間なく必要とするため、パイロットが失神せずに耐えられるGフォースと継続時間には生理的な限界があります。プラスのGフォースがかかると、血液が頭から脚の方へ移動する力が働き、視野が狭まるグレイアウト、何も見えなくなるブラックアウト、そして失神に至ることがあります。急激にGフォースがかかると、突然のGロック、Gフォースによる意識喪失に陥ることもあります。マイナスのGフォースでは逆に、血液が頭の方へ移動し、頭痛や眼球の充血、視野が赤っぽくなるレッドアウトが起きることがあります。Gフォースへの耐性には個人差があり、健康状態がすぐれないときは耐性が低下します。曲技飛行の訓練を始める前には、担当医師に相談すべきとされています。", "968": "低血糖症候群です。血液中のブドウ糖、血糖値が低下すると、イライラ感がつのり、判断力と注意力が鈍って、重大なヒューマンエラーにつながることがあります。さらに悪化すると、脱力感やけいれんが起き、パイロットインキャパシテーションにつながりかねません。血糖値は空腹時に低下するため、食事を摂らずに飛行を行うと、自分でも気づかないうちに低血糖症に陥っていることがあるので、注意が必要です。", "969": "低体温症です。エンジンを装備しない航空機や、エンジンの余熱を利用できない小型機では、低体温症になりやすいとされています。特に冬季に滑空機で山岳飛行を行う場合は、冬山登山に準じた防寒対策が必要です。"}, "display": {"934": "ジェットブラスト＝噴出速度56km/h超で後方の小型機に危険\n\n翼端渦の強さ：機体が重い・低速ほど強い\n・離着陸時（低速）→強い\n・巡航中（高高度・低密度）→強い\n\n渦の動き：\n・無風時、地面で左右に拡散\n・水平飛行中は毎分数百ftで沈下\n\n回避の基本：\n先行機のパスより高く飛び、先行機の接地点/浮揚地点の手前(または先)に自機を設定\n\nヘリコプター：ローター直径の3倍以内に近づかない", "935": "See and avoidが最終防衛線。発見→判断→回避完了に最低12.5秒必要\n\n衝突コースの見極め：\n相対方位が変わらず接近＝衝突コース\n→人間の目は「止まって見える物体」を発見しにくい\n\n相対速度による見え方：\n小さく見えていた機が、衝突直前に急に大きく広がる\n（正面の戦闘機の例：3秒前でようやく視角0.5°）\n\n→小さく見えても油断せず早めに回避操作", "940": "GA事故で多い10要因（数十年変わらず）：\n①準備・計画不足 ②方向コントロール失敗 ③速度獲得/維持失敗\n④不適切なレベルオフ ⑤障害物発見/回避失敗 ⑥距離速度の誤判断\n⑦燃料制御失敗 ⑧判断ミス ⑨地形選定不適 ⑩操縦技術不適\n\n見張り：好天時ほど油断禁物（衝突は好天時に多発）\n\n気象悪化への対応：\n・全経路でVMC維持を確認できなければ出発しない\n・悪化の兆候→時機を逃さず引き返し/最寄りへ着陸判断\n・VMC維持不能なら緊急事態宣言をためらわない\n\n進路権：法的な権利があっても自分から譲る方が安全", "941": "自分自身の飛行前点検：\n①体調（過労・二日酔いなら飛行見合わせ）\n②精神的安定（ショッキングな出来事の後は要注意）\n③機体の点検（燃料/滑油/整備記録/重量バランス/携行品）\n④地上への飛行計画共有（管制機関＋運航管理者）\n⑤天候急変への備え（代替飛行場の情報を事前準備）", "942": "チェックリストが必要な理由：\n・人間は複数作業を同時にできない\n・作業中断時に項目を見落としがち\n・「やったつもり」の勘違いが起きやすい\n→人間の特性を補う仕組みとして必須", "943": "異常接近・空中衝突の多発条件：\n8,000ft以下 かつ 飛行場から30マイル以内\n\n対策：\n・より厳重な見張り\n・ストロボ/着陸灯で視認性向上\n・レーダーアドバイザリー活用（対応空域）\n・VHFでトラフィック情報を交換\n・通信施設なしの滑空場等→共通周波数で位置/高度/意向を発信", "944": "地上2,000ft未満飛行時の警戒対象：\n\n①アンテナ塔：1,000ft超えるものも。支持ワイヤーは水平500m延びることも\n→鉄骨塔発見時は周辺600mの間隔を確保\n\n②架線ワイヤー：進入経路/湖/河川/峡谷を横断することも。障害灯がないことも多い\n\n③浮遊気球：付属物は接近しないと見えない\n→十分な間隔、下側を飛ばない", "945": "山岳飛行の基本注意：\n①不時着不可能区域を避け、十分な高度を保つ\n②午前中の方が条件良好（午後は積雲・風増加）、夜間は避ける\n③密度高度上昇→機体性能が著しく低下\n\n山岳波の発生条件：交角30°以上・風速15kt以上で山脈に吹きつけ\n→風下側は通常より最低1,000ft高い高度を\n\n稜線・峠の通過：\n・頂上から最低1,000ft離れた高度\n・3NM手前からその高度に到達、3NM維持\n\n風下からの接近：稜線に対し約45度の角度\n→乱気流遭遇時、90度旋回で安全に離脱可能\n\n峡谷：常に180度ターンできるスペースを確保\n\n関連：着氷[856]・山岳波[857]・高高度の影響[962]・飛行中の錯覚[965]", "946": "無人航空機（ドローン）の特徴：\n・地表/水面から500ft以下の空域はNOTAMなしで飛行していることも\n・サイズが小さく視認・回避が困難\n\nTCASとの関係：\n・トランスポンダー非作動機にはTA/RA発出されない\n・1,000ft AGL以下→RA抑止\n・500ft AGL以下→TA音声も抑止\n→TCASは離着陸直前直後の衝突防止には役立たない", "960": "健康の定義（WHO）：身体的・精神的・社会的に正常であること\n\n不健康な状態での操縦→パイロットインキャパシテーションのリスク", "961": "IMSAFEチェックリスト（飛行前の自己点検）\n\nI = Illness 病気\nM = Medication 服薬（航空法で禁止規定あり）\nS = Stress ストレス\nA = Alcohol アルコール（血中濃度0.2g/L未満・呼気0.09mg/L未満が必要）\nF = Fatigue 疲労（急性は休養で回復、慢性は長期休養が必要）\nE = Emotion 感情\n\n→この6項目を飛行前に自己点検する習慣", "962": "低酸素症の進行（高度別）：\n12,000ft未満：夜間視力以外は顕著な影響なし\n12,000-15,000ft：判断力/記憶力/警戒心が低下開始、頭痛・めまい\n15,000ft：15分以内に能力の重大な低下\n18,000ft：20-30分で操作能力喪失\n20,000ft：5-12分で操作能力喪失→失神\n\n予防：昼間10,000ft・夜間5,000ft超で補助酸素を推奨\n\n耳閉塞：降下中は自分で耳抜きが必要（風邪・鼻アレルギーで悪化）\n\nダイビング後の待機時間：\n・8,000ftまでの飛行：減圧浮上なし12時間／減圧浮上あり24時間\n・8,000ft超の飛行：どのダイビングでも24時間", "963": "過呼吸の正体：体内の二酸化炭素の排出過多（酸素不足ではない）\n\n症状：めまい・息苦しさ・耳鳴り・悪寒→さらに過呼吸を増幅\n\n対処：意識的にゆっくり呼吸（鼻から吸い口からゆっくり吐く腹式呼吸）\n→通常2-3分で治まる\n\n低酸素症との判別が難しい場合：\n酸素100%にして大きく吸って一旦止める", "964": "一酸化炭素：無色・無味・無臭、排気ガスに含まれる\n→血液の酸素運搬能力を低下させる（低酸素症と同じ症状）\n\n原因：暖房装置がマニフォールド経由の空気を利用\n→ひび割れ/シール不良で漏れる危険\n\n対処：排気臭・頭痛・眠気・めまいを感じたら\n直ちにヒーター停止＋通気孔で外気導入", "965": "空間識失調をもたらす錯覚（一部）：\n・傾斜錯覚：ゆっくりバンク→急な修正で逆バンクの錯覚\n・コリオリ効果：長時間旋回中に頭を動かすと別軸で回転している錯覚\n・死の錐揉み：錐揉み回復直後、逆錐揉みの錯覚→再び錐揉みへ\n・死の螺旋降下：定常旋回中の高度低下に気づき操縦桿を引く→螺旋降下悪化\n・その他：加速度錯覚/転回性錯覚/上下錯覚/擬似水平線/自動運動\n\n着陸時の錯覚：\n・狭い滑走路/上り勾配→実際より高く見える→パスが低くなりがち\n・無物標地形（水面・積雪）→高く飛んでいる錯覚\n\n防止策：地上物標/計器の確実な視認、グライドスロープ/PAPI活用", "966": "暗順応：\n・真っ暗闇で30分必要／赤色照明下なら20分で中程度\n・わずか2-3秒の明るい光で失われる\n\nげん惑（まぶしさ）：キャノピー/雲/水面/雪の反射光に注意\n\n効果的なスキャニング：\n・目の動きは10度以下\n・1点に最低1秒視線を保持\n\n航空灯火の色の意味：\n白=方向／赤=危険・停止・禁止／黄=注意・警告／緑=安全・進行・正常／青=用心・制限", "967": "プラスGフォース：血液が頭から脚へ移動\n→視野狭窄(グレイアウト)→ブラックアウト→失神（G-LOC）\n\nマイナスGフォース：血液が頭へ移動\n→頭痛・眼球充血・視野が赤くなる(レッドアウト)\n\nGフォース耐性は個人差あり、体調不良時は低下\n→曲技飛行訓練前は医師に相談", "968": "低血糖の影響：判断力・注意力低下→重大なヒューマンエラー\n悪化すると脱力感・けいれん→パイロットインキャパシテーションの恐れ\n\n原因：空腹での飛行（自覚がないまま陥ることも）", "969": "低体温症のリスク：エンジンなし機（滑空機）は防寒対策が特に重要\n\n冬季の山岳飛行→冬山登山に準じた防寒が必須"}};
 
+
+/* ══════════ 共通：読み上げ設定の保存と共有 ══════════
+   速度と音声の選択は全ページで同じキーに保存する。
+   どれか1ページで設定すれば、他のページを開いたときにも効く。 */
+var TTSPrefs = (function () {
+  var K_RATE = 'oralexam_tts_rate', K_VOICE = 'oralexam_tts_voice';
+  var RATES = [["0.75", "ゆっくり ×0.75"], ["0.9", "×0.9"], ["1", "標準"], ["1.15", "×1.15"], ["1.3", "×1.3"], ["1.5", "速い ×1.5"]];
+  function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  return {
+    rate:      function () { var r = parseFloat(get(K_RATE, '1')); return isNaN(r) ? 1 : r; },
+    setRate:   function (v) { set(K_RATE, String(v)); },
+    voice:     function () { return get(K_VOICE, ''); },
+    setVoice:  function (n) { set(K_VOICE, n || ''); },
+    /* <select> に速度の選択肢を入れて、保存値を選んだ状態にする */
+    fillRate:  function (sel) {
+      if (!sel) return;
+      sel.innerHTML = '';
+      RATES.forEach(function (r) {
+        var o = document.createElement('option');
+        o.value = r[0]; o.textContent = r[1];
+        sel.appendChild(o);
+      });
+      sel.value = String(TTSPrefs.rate());
+      if (sel.selectedIndex < 0) sel.value = '1';
+    },
+    /* 日本語の音声を並べる。Windows の Haruka があれば先頭かつ既定にする */
+    jaVoices: function () {
+      var all = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+      var ja = all.filter(function (v) { return v.lang && /^ja/i.test(v.lang); });
+      var list = ja.length ? ja : all;
+      var i = list.findIndex(function (v) { return /haruka|はるか/i.test(v.name || ''); });
+      if (i > 0) { var h = list.splice(i, 1)[0]; list = [h].concat(list); }
+      return list;
+    },
+    /* 保存された音声名、なければ Haruka、それもなければ先頭 */
+    pickVoice: function () {
+      var list = TTSPrefs.jaVoices();
+      if (!list.length) return null;
+      var saved = TTSPrefs.voice();
+      return (saved && list.filter(function (v) { return v.name === saved; })[0]) || list[0];
+    }
+  };
+})();
+
 const pronFix = (s) => s
   .replace(/輻輳/g,'ふくそう').replace(/索道/g,'さくどう').replace(/潜函病/g,'せんかんびょう')
   .replace(/減圧浮上/g,'げんあつふじょう').replace(/密度高度/g,'みつどこうど')
@@ -634,7 +805,7 @@ function highlightReadingTopic(){
     }
   });
 }
-var speechRate = 0.98;
+var speechRate = TTSPrefs.rate();
 function speakChunkFrom(index, charOffset, delayMs){
   const chunk = player.chunks[index];
   if(!chunk){ hardStop(); return; }
@@ -784,7 +955,7 @@ document.querySelectorAll('details.topic').forEach(d=>{
   const bar = document.createElement('div');
   bar.className = 'tts-controls tts-controls-mini';
   bar.setAttribute('data-tts-id', 'topic-' + tid);
-  bar.innerHTML = `<button class="tts-btn tts-play">🔊 この項目を聞く</button><button class="tts-btn tts-stop">■</button><span class="tts-status"></span>`;
+  bar.innerHTML = `<button class="tts-btn tts-play">▶ この項目を読み上げ</button><button class="tts-btn tts-stop">■</button><span class="tts-status"></span>`;
   body.insertBefore(bar, body.firstChild);
 });
 

@@ -6,12 +6,191 @@
 <title>第8章 航空気象 | 完全版リファレンス</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+/* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
+:root{
+  /* 面 */
+  --bg:#0d1117;          /* 本文背景 */
+  --surface:#161b22;     /* カード・パネル */
+  --surface-2:#0f141c;   /* サイドバー・一段沈んだ面 */
+  --surface-3:#21262d;   /* ボタン・タグの地 */
+  --line:#21262d;        /* 罫線 */
+  --line-strong:#30363d; /* 入力欄の枠など、はっきり見せたい罫線 */
+  /* 文字 */
+  --text:#e6edf3;
+  --text-dim:#8b949e;
+  --text-faint:#6e7681;
+  /* 役割色 */
+  --accent:#3b82f6;      /* 主操作・選択中 */
+  --accent-soft:#0d2044; /* 選択中の地 */
+  --accent-text:#93c5fd;
+  --key:#d29922;         /* 重要・読み上げ中 */
+  --key-soft:rgba(210,153,34,.12);
+  --ok:#3fb950;
+  --warn:#d29922;
+  --danger:#f85149;
+  /* 文字組み */
+  --font:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
+  /* 寸法 */
+  --sb-w:280px;          /* サイドバー幅 */
+  --hdr-h:52px;          /* ヘッダー高さ */
+  --radius:10px;
+  --radius-lg:14px;
+}
+/* ブレークポイントは2つだけ。
+   900px以上 = サイドバー常時表示（PC）／600px以下 = スマホ密度 */
+/* ══════════ 共通ヘッダー ══════════ */
+.appbar{
+  position:sticky;top:0;z-index:900;
+  height:var(--hdr-h);display:flex;align-items:center;gap:10px;
+  padding:0 12px;background:var(--surface);border-bottom:1px solid var(--line);
+}
+.appbar .ab-back,.appbar .ab-logo{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.appbar .ab-back{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--text-dim);font-size:16px;text-decoration:none;
+}
+.appbar .ab-back:hover{background:rgba(255,255,255,.12);color:var(--text);}
+.appbar .ab-logo{background:linear-gradient(135deg,#3b82f6,#1e40af);font-size:15px;}
+.appbar .ab-txt{min-width:0;}
+.appbar .ab-title{font-size:13px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appbar .ab-sub{font-size:10px;color:var(--text-dim);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#hamburger{
+  margin-left:auto;flex-shrink:0;width:36px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+#hamburger:hover{background:rgba(255,255,255,.12);}
+/* ══════════ 共通サイドバー ══════════ */
+#sb-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:940;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#sb-overlay.open{opacity:1;pointer-events:auto;}
+#sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:min(86vw,var(--sb-w));
+  background:var(--surface-2);border-right:1px solid var(--line);
+  z-index:950;display:flex;flex-direction:column;
+  transform:translateX(-102%);transition:transform .22s ease;
+}
+#sidebar.open{transform:none;}
+.sb-head{
+  height:var(--hdr-h);flex-shrink:0;padding:0 14px;
+  display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);
+}
+.sb-head b{font-size:13px;font-weight:700;color:var(--text);}
+.sb-close{
+  margin-left:auto;width:30px;height:30px;border-radius:8px;cursor:pointer;
+  background:none;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:13px;line-height:1;
+}
+.sb-close:hover{color:var(--text);border-color:var(--text-dim);}
+.sb-search{
+  margin:10px 12px 4px;width:calc(100% - 24px);
+  padding:8px 10px;background:var(--bg);border:1px solid var(--line-strong);
+  border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;
+}
+.sb-search::placeholder{color:var(--text-faint);}
+.sb-search:focus{outline:none;border-color:var(--accent);}
+.sb-scroll{flex:1;overflow-y:auto;padding:8px 8px 28px;-webkit-overflow-scrolling:touch;}
+.sb-grp{
+  font-size:10.5px;font-weight:700;color:var(--text-faint);
+  letter-spacing:.06em;padding:12px 8px 6px;
+}
+.sb-link{
+  display:flex;align-items:baseline;gap:8px;padding:8px 9px;border-radius:8px;
+  font-size:12.5px;line-height:1.5;color:var(--text-dim);text-decoration:none;
+  transition:background .15s,color .15s;
+}
+.sb-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.sb-link.current{background:var(--accent-soft);color:var(--accent-text);}
+.sb-link.reading{background:var(--key-soft);color:var(--key);}
+.sb-num{font-family:var(--mono);font-size:10.5px;color:var(--key);
+  flex-shrink:0;min-width:30px;}
+.sb-empty{color:var(--text-faint);font-size:12px;padding:12px 8px;}
+/* ══════════ 共通 読み上げUI ══════════ */
+.tts-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px 12px;margin:0 0 18px;
+}
+.tts-btn{
+  background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:8px 13px;font-family:var(--font);font-size:12.5px;
+  font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.tts-btn:hover{background:var(--line-strong);}
+.tts-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.stop{color:var(--danger);border-color:#5c1a17;}
+.tts-btn.stop:hover{background:rgba(248,81,73,.12);}
+.tts-btn:disabled{opacity:.45;cursor:default;}
+.tts-sel{
+  background:var(--bg);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:7px 9px;font-family:var(--font);font-size:12.5px;
+  max-width:170px;cursor:pointer;
+}
+.tts-sel:focus{outline:none;border-color:var(--accent);}
+.tts-st{font-size:11.5px;color:var(--text-dim);margin-left:auto;}
+
+#tts-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:930;display:none;
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(13,17,23,.97);border-top:1px solid var(--line);
+  backdrop-filter:blur(8px);box-shadow:0 -6px 22px rgba(0,0,0,.5);
+}
+#tts-dock.on{display:block;}
+.dk-inner{max-width:980px;margin:0 auto;}
+.dk-bar{height:3px;background:var(--surface-3);border-radius:2px;
+  overflow:hidden;margin-bottom:7px;}
+.dk-bar i{display:block;height:100%;background:var(--key);width:0;
+  transition:width .3s linear;}
+.dk-meta{display:flex;gap:10px;align-items:baseline;font-size:11px;
+  color:var(--text-faint);margin-bottom:7px;}
+.dk-meta .dk-now{color:var(--text-dim);font-size:11.5px;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.dk-btns .tts-sel{margin-left:auto;}
+
+/* 読み上げ中の箇所 */
+.tts-reading{
+  outline:2px solid var(--key);outline-offset:3px;
+  background:var(--key-soft);border-radius:6px;
+}
+/* ══════════ 共通レスポンシブ ══════════ */
+/* PC：サイドバーを出したまま、本文を右にずらす */
+@media (min-width:900px){
+  html body{padding-left:var(--sb-w);}   /* 各ページの html,body{padding:0} に勝たせる */
+  #sidebar{transform:none;width:var(--sb-w);}
+  #sb-overlay,#hamburger,.sb-close{display:none;}
+  #tts-dock{left:var(--sb-w);}
+}
+/* スマホ：操作は下のドックに集約し、本文中のバーは軽くする */
+@media (max-width:600px){
+  .tts-bar .tts-st{width:100%;margin-left:0;}
+  .dk-btns .tts-btn{flex:1;padding:10px 6px;font-size:12.5px;}
+  .dk-btns .tts-sel{margin-left:0;flex:0 0 auto;}
+  /* 下のドックに隠れないよう、スクロール位置に余白を持たせる */
+  .tts-bar,.sb-link,select,summary,section,h2{scroll-margin-bottom:120px;}
+}
+
+  /* 既存の色名は、共通トークンへの別名として残している。
+     個々のルールを書き換えずに全体の配色を揃えるため。 */
   :root{
-    --navy-950:#070b14; --navy-900:#0c1220; --navy-800:#121a2c; --navy-700:#1a2540; --navy-600:#243458;
-    --line:#2a3a5c; --amber:#e8a33d; --amber-bright:#ffc25c; --amber-dim:#8a6a30; --sky:#5fb4d6;
-    --danger:#e0563f; --ok:#5fbf8c; --ink:#e8ecf4; --ink-dim:#9aa8c4; --ink-faint:#5c6a8a;
-    --mono:'Space Mono', monospace; --sans:'Noto Sans JP', sans-serif;
+    --navy-950:var(--bg); --navy-900:var(--surface); --navy-800:#1c222b;
+    --navy-700:var(--line); --navy-600:var(--line-strong);
+    --amber:var(--key); --amber-bright:#e3b341; --amber-dim:#5c3d00;
+    --sky:var(--accent);
+    --danger:var(--danger); --ok:var(--ok);
+    --ink:var(--text); --ink-dim:var(--text-dim); --ink-faint:var(--text-faint);
+    --mono:var(--mono); --sans:var(--font);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -19,37 +198,30 @@
   .wrap{max-width:980px;margin:0 auto;padding:0 20px 190px;}
 
   /* HERO */
-  .hero{padding:44px 20px 26px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--navy-900),var(--navy-950));}
+  .hero{padding:22px 20px 18px;border-bottom:1px solid var(--line);background:var(--surface);}
   .hero-inner{max-width:980px;margin:0 auto;}
-  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:0.12em;color:var(--amber);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .eyebrow{font-size:11px;letter-spacing:0.1em;color:var(--key);display:flex;align-items:center;gap:8px;margin-bottom:8px;}
   .eyebrow::before{content:"AIM-J §8 完全版";border:1px solid var(--amber-dim);padding:2px 8px;border-radius:3px;color:var(--amber-bright);}
-  h1.title{font-size:clamp(24px,4.2vw,36px);margin:0 0 8px;line-height:1.3;font-weight:900;}
-  .hero-lede{color:var(--ink-dim);max-width:720px;line-height:1.85;font-size:14.5px;}
-  .stat-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
-  .stat-row b{color:var(--amber-bright);font-size:15px;display:block;}
-
-  /* STICKY BLOCK NAV */
-  .block-nav{position:sticky;top:50px;z-index:50;background:rgba(7,11,20,0.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;padding:10px 20px;}
-  .block-nav-inner{max-width:980px;margin:0 auto;display:flex;gap:6px;}
-  .block-nav a{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--line);padding:6px 10px;border-radius:16px;text-decoration:none;flex-shrink:0;transition:.15s;}
-  .block-nav a:hover{color:var(--amber-bright);border-color:var(--amber-dim);}
-  .block-nav a:first-child{color:var(--amber-bright);border-color:var(--amber-dim);background:rgba(232,163,61,0.08);margin-right:4px;}
+  h1.title{font-size:clamp(19px,2.6vw,25px);margin:0 0 6px;line-height:1.4;font-weight:800;}
+  .hero-lede{color:var(--text-dim);max-width:720px;line-height:1.8;font-size:13px;}
+  .stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--text-faint);}
+  .stat-row b{color:var(--key);font-size:13px;display:inline;margin-right:3px;}
 
   /* BLOCK SHELL */
-  .block{margin-top:52px;scroll-margin-top:60px;}
+  .block{margin-top:38px;scroll-margin-top:70px;}
   .block-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;flex-wrap:wrap;}
   .block-head .blocknum{font-family:var(--mono);font-size:13px;color:var(--amber);border:1px solid var(--amber-dim);border-radius:4px;padding:2px 8px;}
   .block-head h2{font-size:24px;margin:0;font-weight:900;}
   .block-intro{color:var(--ink-dim);font-size:14px;line-height:1.9;max-width:760px;margin:8px 0 20px;}
 
-  .tts-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 20px;padding:10px 14px;background:var(--navy-900);border:1px solid var(--line);border-radius:8px;}
-  .tts-btn{font-family:var(--mono);font-size:11px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s;}
-  .tts-btn:hover{background:rgba(95,180,214,0.12);}
-  .tts-btn.playing{background:var(--sky);color:var(--navy-950);}
-  .tts-btn.tts-stop{border-color:var(--danger);color:var(--danger);}
-  .tts-btn.tts-stop:hover{background:rgba(224,86,63,0.12);}
-  .tts-status{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);}
-  .tts-voice{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;max-width:180px;cursor:pointer;}
+  .tts-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 20px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+  .tts-btn{font-family:var(--font);font-size:12.5px;font-weight:600;background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);border-radius:8px;padding:8px 13px;cursor:pointer;line-height:1;white-space:nowrap;transition:background .15s,border-color .15s,color .15s;}
+  .tts-btn:hover{background:var(--line-strong);}
+  .tts-btn.playing{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tts-btn.tts-stop{color:var(--danger);border-color:#5c1a17;}
+  .tts-btn.tts-stop:hover{background:rgba(248,81,73,.12);}
+  .tts-status{font-size:11.5px;color:var(--text-dim);}
+  .tts-voice,.tts-rate{font-family:var(--font);font-size:12.5px;background:var(--bg);color:var(--text);border:1px solid var(--line-strong);border-radius:8px;padding:7px 9px;max-width:170px;cursor:pointer;}
   .tts-controls-mini{margin:0 0 14px;padding:0;background:none;border:none;gap:6px;}
   .tts-controls-mini .tts-btn{font-size:10px;padding:4px 9px;}
 
@@ -128,56 +300,17 @@
   }
 
   footer.note{text-align:center;margin-top:50px;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
-  /* ===== ハンバーガー & サイドバー目次 ===== */
-  /* PC＝常時表示、スマホ＝ハンバーガーで開閉（講義ノートと同じ形） */
-  :root{ --sb-w:264px; }
-  #hamburger{margin-left:auto;flex-shrink:0;width:34px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#c9d4e5;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  #hamburger:hover{background:rgba(255,255,255,.12);}
-  #sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:998;opacity:0;pointer-events:none;transition:opacity .2s;}
-  #sb-overlay.open{opacity:1;pointer-events:auto;}
-  #sidebar{position:fixed;top:0;left:0;width:min(86vw,var(--sb-w));height:100dvh;z-index:1000;background:var(--navy-900);border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .22s ease;display:flex;flex-direction:column;}
-  #sidebar.open{transform:translateX(0);}
-  .sb-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
-  .sb-head b{font-size:13px;font-weight:700;color:var(--ink);}
-  .sb-close{margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;}
-  .sb-search{margin:10px 14px 6px;padding:8px 10px;background:var(--navy-950);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:13px;width:calc(100% - 28px);}
-  .sb-search::placeholder{color:var(--ink-faint);}
-  #sb-list{overflow-y:auto;flex:1;padding:6px 10px 30px;-webkit-overflow-scrolling:touch;}
   .sb-group{margin-bottom:12px;}
-  .sb-block{display:block;font-size:13px;font-weight:700;color:var(--amber-bright);text-decoration:none;padding:8px 8px;border-radius:6px;background:rgba(232,163,61,.08);margin-bottom:4px;}
-  .sb-block:hover{background:rgba(232,163,61,.16);}
-  .sb-topic{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--ink-dim);text-decoration:none;padding:6px 8px 6px 12px;border-radius:6px;line-height:1.5;}
-  .sb-topic:hover{background:rgba(255,255,255,.05);color:var(--ink);}
-  .sb-topic.reading{background:rgba(232,163,61,.14);color:var(--amber-bright);}
-  .sb-num{font-family:var(--mono);font-size:10.5px;color:var(--amber);flex-shrink:0;min-width:30px;}
+  .sb-block{display:block;font-size:12.5px;font-weight:700;color:var(--key);text-decoration:none;padding:8px 9px;border-radius:8px;background:var(--key-soft);margin-bottom:4px;}
+  .sb-block:hover{filter:brightness(1.3);}
+  .sb-topic{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--text-dim);text-decoration:none;padding:6px 8px 6px 12px;border-radius:8px;line-height:1.5;transition:background .15s,color .15s;}
+  .sb-topic:hover{background:rgba(255,255,255,.05);color:var(--text);}
+  .sb-topic.reading{background:var(--key-soft);color:var(--key);}
   .sb-empty{color:var(--ink-faint);font-size:12px;padding:12px 8px;}
 
-  /* ===== 画面下に固定した再生バー ===== */
-  #tts-dock{position:fixed;left:0;right:0;bottom:0;z-index:880;background:rgba(12,18,32,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:none;}
-  #tts-dock.on{display:block;}
-  .dk-inner{max-width:980px;margin:0 auto;}
-  .dk-bar{height:3px;background:var(--navy-700);border-radius:2px;overflow:hidden;margin-bottom:7px;}
-  .dk-bar i{display:block;height:100%;background:var(--amber);width:0;transition:width .3s linear;}
-  .dk-meta{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-bottom:7px;}
-  .dk-meta #dk-topic{color:var(--ink-dim);font-family:var(--sans);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
-  .dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
-  .dk-btns button{font-family:var(--mono);font-size:12px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:8px 13px;cursor:pointer;}
-  .dk-btns button:hover{background:rgba(95,180,214,.12);}
-  #dk-play{background:var(--sky);color:var(--navy-950);font-weight:700;min-width:104px;}
-  #dk-stop{border-color:var(--danger);color:var(--danger);}
-  .dk-btns select{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:7px 9px;margin-left:auto;cursor:pointer;}
-  .tts-rate{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;cursor:pointer;}
 
-  /* PC：メニューを出したまま、本文を右にずらす */
-  @media (min-width:1000px){
-    body{padding-left:var(--sb-w);}
-    #sidebar{transform:none;width:var(--sb-w);}
-    #sb-overlay,#hamburger,.sb-close{display:none;}
-    #tts-dock{left:var(--sb-w);}
-  }
 
-  @media (max-width:640px){
-    #sidebar{width:min(92vw,340px);}
+  @media (max-width:600px){
     .dk-btns button{flex:1;padding:10px 6px;font-size:12.5px;}
     #dk-play{flex:1.4 1 100%;order:-1;margin-bottom:6px;}
     .dk-btns select{margin-left:0;flex:0 0 auto;}
@@ -189,15 +322,15 @@
 </style>
 </head>
 <body>
-<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;" id="page-header">
-  <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;">‹</a>
-  <div style="width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#1e40af);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✈</div>
-  <div>
-    <div style="font-size:13px;font-weight:600;color:#e6edf3;">AIM-J 第8章 航空気象</div>
-    <div style="font-size:10px;color:#8b949e;margin-top:1px;">自家用操縦士（滑空機）</div>
+<header class="appbar">
+  <a class="ab-back" href="./index.html" aria-label="入口へ戻る">‹</a>
+  <div class="ab-logo">✈</div>
+  <div class="ab-txt">
+    <div class="ab-title">AIM-J 第8章 航空気象</div>
+    <div class="ab-sub">自家用操縦士（滑空機）</div>
   </div>
   <button id="hamburger" aria-label="目次">☰</button>
-</div>
+</header>
 
 <div id="sb-overlay"></div>
 <aside id="sidebar">
@@ -209,13 +342,13 @@
 <div id="tts-dock">
   <div class="dk-inner">
     <div class="dk-bar"><i></i></div>
-    <div class="dk-meta"><span id="dk-topic">—</span><span id="dk-pos"></span></div>
+    <div class="dk-meta"><span class="dk-now" id="dk-topic">—</span><span id="dk-pos"></span></div>
     <div class="dk-btns">
-      <button id="dk-back">◀ 15秒</button>
-      <button id="dk-play">⏸ 一時停止</button>
-      <button id="dk-fwd">15秒 ▶</button>
-      <button id="dk-stop">■ 停止</button>
-      <select id="dk-rate" title="読み上げ速度"></select>
+      <button class="tts-btn" id="dk-back">◀ 15秒</button>
+      <button class="tts-btn primary" id="dk-play">⏸ 一時停止</button>
+      <button class="tts-btn" id="dk-fwd">15秒 ▶</button>
+      <button class="tts-btn stop" id="dk-stop">■ 停止</button>
+      <select class="tts-sel" id="dk-rate" title="読み上げ速度"></select>
     </div>
   </div>
 </div>
@@ -236,20 +369,6 @@
   </div>
 </div>
 
-<div class="block-nav">
-  <div class="block-nav-inner">
-    <a href="ch9_anzen_koku_igaku.html">§9 運航安全・航空医学 →</a>
-    <a href="#b1">① 総論・観測(800-804)</a>
-    <a href="#b2">② 通報式の読み方(810-816)</a>
-    <a href="#b3">③ 飛行中の気象情報(820-824)</a>
-    <a href="#b4">④ VFR気象(830-839)</a>
-    <a href="#b5">⑤ IFR気象(840-849)</a>
-    <a href="#b6">⑥ 悪天と飛行(850-865)</a>
-    <a href="#b7">⑦ 雲と風(870-886)</a>
-    <a href="#b8">⑧ 気象通報・附録(890-899)</a>
-  </div>
-</div>
-
 <div class="wrap">
 
 <!-- ============ BLOCK 1 ============ -->
@@ -257,9 +376,9 @@
   <div class="block-head"><span class="blocknum">800-804</span><h2>① 総論・観測網とブリーフィング</h2></div>
   <p class="block-intro">気象情報がどこから来て、どう入手するかの土台部分です。ここを押さえておくと、あとの通報式の話が「誰が何のために作っている電文か」がわかって頭に入りやすくなります。</p>
   <div class="tts-controls" data-tts-id="block1">
-    <button class="tts-btn tts-play">▶ ブロック①を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -352,9 +471,9 @@
   <div class="block-head"><span class="blocknum">810-816</span><h2>② 気象通報式の読み方（METAR・TAF・SIGMET）</h2></div>
   <p class="block-intro">この章の心臓部です。METAR/SPECIを確実に解読できることが前提とされています。実際の電文をクリックして意味を確認できるラボと、SCAN・従来型AUTO・TAF・SIGMET・火山灰情報のカードを用意しました。</p>
   <div class="tts-controls" data-tts-id="block2">
-    <button class="tts-btn tts-play">▶ ブロック②を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -495,9 +614,9 @@
   <div class="block-head"><span class="blocknum">820-824</span><h2>③ 飛行中に利用できる気象情報</h2></div>
   <p class="block-intro">地上でのブリーフィングだけでなく、飛行中にもリアルタイムで気象情報を取りにいく手段が用意されています。</p>
   <div class="tts-controls" data-tts-id="block3">
-    <button class="tts-btn tts-play">▶ ブロック③を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -556,9 +675,9 @@
   <div class="block-head"><span class="blocknum">830-839</span><h2>④ VFRフライトのための気象</h2></div>
   <p class="block-intro">グライダー訓練生にとって最も直結するブロックです。VMCの数値条件、雲の見極め、離着陸時の風とガスト対応まで。</p>
   <div class="tts-controls" data-tts-id="block4">
-    <button class="tts-btn tts-play">▶ ブロック④を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -716,9 +835,9 @@
   <div class="block-head"><span class="blocknum">840-849</span><h2>⑤ IFRに必要な気象の知識</h2></div>
   <p class="block-intro">「雲の中に入ってはならない」VFRに対し、IFRは「雲中飛行を前提に気象をとらえる」発想の転換が必要です。</p>
   <div class="tts-controls" data-tts-id="block5">
-    <button class="tts-btn tts-play">▶ ブロック⑤を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -784,9 +903,9 @@
   <div class="block-head"><span class="blocknum">850-865</span><h2>⑥ 悪天と飛行</h2></div>
   <p class="block-intro">この章のハイライト。雷雨・台風・ひょう・乱気流・着氷・山岳波・火山灰、そして日本特有の低気圧型と季節の悪天まで。</p>
   <div class="tts-controls" data-tts-id="block6">
-    <button class="tts-btn tts-play">▶ ブロック⑥を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -977,9 +1096,9 @@
   <div class="block-head"><span class="blocknum">870-886</span><h2>⑦ 雲と風</h2></div>
   <p class="block-intro">雲の分布から読み取れる気象情報、風系の大循環からジェット気流、そして低層ウィンドシアー・ダウンバーストへの実践的対策まで。</p>
   <div class="tts-controls" data-tts-id="block7">
-    <button class="tts-btn tts-play">▶ ブロック⑦を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -1109,9 +1228,9 @@
   <div class="block-head"><span class="blocknum">890-899</span><h2>⑧ パイロットの気象通報 ＋ 附録</h2></div>
   <p class="block-intro">気象状態に遭遇したパイロット自身が、次の一機のために情報を還元する仕組みです。口頭試験の頻出テーマでもあります。</p>
   <div class="tts-controls" data-tts-id="block8">
-    <button class="tts-btn tts-play">▶ ブロック⑧を読み上げる</button>
+    <button class="tts-btn tts-play">▶ このブロックを読み上げ</button>
     <button class="tts-btn tts-back">⏪ 15秒</button>
-    <button class="tts-btn tts-stop">■ 終了</button>
+    <button class="tts-btn tts-stop">■ 停止</button>
     <span class="tts-status"></span>
   </div>
 
@@ -1375,6 +1494,51 @@ document.getElementById('dbSvg').innerHTML = `
 </svg>`;
 
 /* ================= TTS ENGINE (block-level, seekable) ================= */
+
+/* ══════════ 共通：読み上げ設定の保存と共有 ══════════
+   速度と音声の選択は全ページで同じキーに保存する。
+   どれか1ページで設定すれば、他のページを開いたときにも効く。 */
+var TTSPrefs = (function () {
+  var K_RATE = 'oralexam_tts_rate', K_VOICE = 'oralexam_tts_voice';
+  var RATES = [["0.75", "ゆっくり ×0.75"], ["0.9", "×0.9"], ["1", "標準"], ["1.15", "×1.15"], ["1.3", "×1.3"], ["1.5", "速い ×1.5"]];
+  function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  return {
+    rate:      function () { var r = parseFloat(get(K_RATE, '1')); return isNaN(r) ? 1 : r; },
+    setRate:   function (v) { set(K_RATE, String(v)); },
+    voice:     function () { return get(K_VOICE, ''); },
+    setVoice:  function (n) { set(K_VOICE, n || ''); },
+    /* <select> に速度の選択肢を入れて、保存値を選んだ状態にする */
+    fillRate:  function (sel) {
+      if (!sel) return;
+      sel.innerHTML = '';
+      RATES.forEach(function (r) {
+        var o = document.createElement('option');
+        o.value = r[0]; o.textContent = r[1];
+        sel.appendChild(o);
+      });
+      sel.value = String(TTSPrefs.rate());
+      if (sel.selectedIndex < 0) sel.value = '1';
+    },
+    /* 日本語の音声を並べる。Windows の Haruka があれば先頭かつ既定にする */
+    jaVoices: function () {
+      var all = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+      var ja = all.filter(function (v) { return v.lang && /^ja/i.test(v.lang); });
+      var list = ja.length ? ja : all;
+      var i = list.findIndex(function (v) { return /haruka|はるか/i.test(v.name || ''); });
+      if (i > 0) { var h = list.splice(i, 1)[0]; list = [h].concat(list); }
+      return list;
+    },
+    /* 保存された音声名、なければ Haruka、それもなければ先頭 */
+    pickVoice: function () {
+      var list = TTSPrefs.jaVoices();
+      if (!list.length) return null;
+      var saved = TTSPrefs.voice();
+      return (saved && list.filter(function (v) { return v.name === saved; })[0]) || list[0];
+    }
+  };
+})();
+
 const pronFix = (s) => s
   .replace(/航空測候所/g,'こうくうそっこうじょ').replace(/観測所/g,'かんそくじょ')
   .replace(/時間毎/g,'じかんごと').replace(/分毎/g,'ふんごと')
@@ -1475,7 +1639,7 @@ function highlightReadingTopic(){
     }
   });
 }
-var speechRate = 0.98;
+var speechRate = TTSPrefs.rate();
 function speakChunkFrom(index, charOffset, delayMs){
   const chunk = player.chunks[index];
   if(!chunk){ hardStop(); return; }
@@ -1625,7 +1789,7 @@ document.querySelectorAll('details.topic').forEach(d=>{
   const bar = document.createElement('div');
   bar.className = 'tts-controls tts-controls-mini';
   bar.setAttribute('data-tts-id', 'topic-' + tid);
-  bar.innerHTML = `<button class="tts-btn tts-play">🔊 この項目を聞く</button><button class="tts-btn tts-stop">■</button><span class="tts-status"></span>`;
+  bar.innerHTML = `<button class="tts-btn tts-play">▶ この項目を読み上げ</button><button class="tts-btn tts-stop">■</button><span class="tts-status"></span>`;
   body.insertBefore(bar, body.firstChild);
 });
 

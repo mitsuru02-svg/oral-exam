@@ -10,29 +10,186 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
+:root{
+  /* 面 */
+  --bg:#0d1117;          /* 本文背景 */
+  --surface:#161b22;     /* カード・パネル */
+  --surface-2:#0f141c;   /* サイドバー・一段沈んだ面 */
+  --surface-3:#21262d;   /* ボタン・タグの地 */
+  --line:#21262d;        /* 罫線 */
+  --line-strong:#30363d; /* 入力欄の枠など、はっきり見せたい罫線 */
+  /* 文字 */
+  --text:#e6edf3;
+  --text-dim:#8b949e;
+  --text-faint:#6e7681;
+  /* 役割色 */
+  --accent:#3b82f6;      /* 主操作・選択中 */
+  --accent-soft:#0d2044; /* 選択中の地 */
+  --accent-text:#93c5fd;
+  --key:#d29922;         /* 重要・読み上げ中 */
+  --key-soft:rgba(210,153,34,.12);
+  --ok:#3fb950;
+  --warn:#d29922;
+  --danger:#f85149;
+  /* 文字組み */
+  --font:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
+  /* 寸法 */
+  --sb-w:280px;          /* サイドバー幅 */
+  --hdr-h:52px;          /* ヘッダー高さ */
+  --radius:10px;
+  --radius-lg:14px;
+}
+/* ブレークポイントは2つだけ。
+   900px以上 = サイドバー常時表示（PC）／600px以下 = スマホ密度 */
+/* ══════════ 共通ヘッダー ══════════ */
+.appbar{
+  position:sticky;top:0;z-index:900;
+  height:var(--hdr-h);display:flex;align-items:center;gap:10px;
+  padding:0 12px;background:var(--surface);border-bottom:1px solid var(--line);
+}
+.appbar .ab-back,.appbar .ab-logo{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.appbar .ab-back{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--text-dim);font-size:16px;text-decoration:none;
+}
+.appbar .ab-back:hover{background:rgba(255,255,255,.12);color:var(--text);}
+.appbar .ab-logo{background:linear-gradient(135deg,#3b82f6,#1e40af);font-size:15px;}
+.appbar .ab-txt{min-width:0;}
+.appbar .ab-title{font-size:13px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appbar .ab-sub{font-size:10px;color:var(--text-dim);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#hamburger{
+  margin-left:auto;flex-shrink:0;width:36px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+#hamburger:hover{background:rgba(255,255,255,.12);}
+/* ══════════ 共通サイドバー ══════════ */
+#sb-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:940;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#sb-overlay.open{opacity:1;pointer-events:auto;}
+#sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:min(86vw,var(--sb-w));
+  background:var(--surface-2);border-right:1px solid var(--line);
+  z-index:950;display:flex;flex-direction:column;
+  transform:translateX(-102%);transition:transform .22s ease;
+}
+#sidebar.open{transform:none;}
+.sb-head{
+  height:var(--hdr-h);flex-shrink:0;padding:0 14px;
+  display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);
+}
+.sb-head b{font-size:13px;font-weight:700;color:var(--text);}
+.sb-close{
+  margin-left:auto;width:30px;height:30px;border-radius:8px;cursor:pointer;
+  background:none;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:13px;line-height:1;
+}
+.sb-close:hover{color:var(--text);border-color:var(--text-dim);}
+.sb-search{
+  margin:10px 12px 4px;width:calc(100% - 24px);
+  padding:8px 10px;background:var(--bg);border:1px solid var(--line-strong);
+  border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;
+}
+.sb-search::placeholder{color:var(--text-faint);}
+.sb-search:focus{outline:none;border-color:var(--accent);}
+.sb-scroll{flex:1;overflow-y:auto;padding:8px 8px 28px;-webkit-overflow-scrolling:touch;}
+.sb-grp{
+  font-size:10.5px;font-weight:700;color:var(--text-faint);
+  letter-spacing:.06em;padding:12px 8px 6px;
+}
+.sb-link{
+  display:flex;align-items:baseline;gap:8px;padding:8px 9px;border-radius:8px;
+  font-size:12.5px;line-height:1.5;color:var(--text-dim);text-decoration:none;
+  transition:background .15s,color .15s;
+}
+.sb-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.sb-link.current{background:var(--accent-soft);color:var(--accent-text);}
+.sb-link.reading{background:var(--key-soft);color:var(--key);}
+.sb-num{font-family:var(--mono);font-size:10.5px;color:var(--key);
+  flex-shrink:0;min-width:30px;}
+.sb-empty{color:var(--text-faint);font-size:12px;padding:12px 8px;}
+/* ══════════ 共通 読み上げUI ══════════ */
+.tts-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px 12px;margin:0 0 18px;
+}
+.tts-btn{
+  background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:8px 13px;font-family:var(--font);font-size:12.5px;
+  font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.tts-btn:hover{background:var(--line-strong);}
+.tts-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.stop{color:var(--danger);border-color:#5c1a17;}
+.tts-btn.stop:hover{background:rgba(248,81,73,.12);}
+.tts-btn:disabled{opacity:.45;cursor:default;}
+.tts-sel{
+  background:var(--bg);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:7px 9px;font-family:var(--font);font-size:12.5px;
+  max-width:170px;cursor:pointer;
+}
+.tts-sel:focus{outline:none;border-color:var(--accent);}
+.tts-st{font-size:11.5px;color:var(--text-dim);margin-left:auto;}
+
+#tts-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:930;display:none;
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(13,17,23,.97);border-top:1px solid var(--line);
+  backdrop-filter:blur(8px);box-shadow:0 -6px 22px rgba(0,0,0,.5);
+}
+#tts-dock.on{display:block;}
+.dk-inner{max-width:980px;margin:0 auto;}
+.dk-bar{height:3px;background:var(--surface-3);border-radius:2px;
+  overflow:hidden;margin-bottom:7px;}
+.dk-bar i{display:block;height:100%;background:var(--key);width:0;
+  transition:width .3s linear;}
+.dk-meta{display:flex;gap:10px;align-items:baseline;font-size:11px;
+  color:var(--text-faint);margin-bottom:7px;}
+.dk-meta .dk-now{color:var(--text-dim);font-size:11.5px;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.dk-btns .tts-sel{margin-left:auto;}
+
+/* 読み上げ中の箇所 */
+.tts-reading{
+  outline:2px solid var(--key);outline-offset:3px;
+  background:var(--key-soft);border-radius:6px;
+}
+/* ══════════ 共通レスポンシブ ══════════ */
+/* PC：サイドバーを出したまま、本文を右にずらす */
+@media (min-width:900px){
+  html body{padding-left:var(--sb-w);}   /* 各ページの html,body{padding:0} に勝たせる */
+  #sidebar{transform:none;width:var(--sb-w);}
+  #sb-overlay,#hamburger,.sb-close{display:none;}
+  #tts-dock{left:var(--sb-w);}
+}
+/* スマホ：操作は下のドックに集約し、本文中のバーは軽くする */
+@media (max-width:600px){
+  .tts-bar .tts-st{width:100%;margin-left:0;}
+  .dk-btns .tts-btn{flex:1;padding:10px 6px;font-size:12.5px;}
+  .dk-btns .tts-sel{margin-left:0;flex:0 0 auto;}
+  /* 下のドックに隠れないよう、スクロール位置に余白を持たせる */
+  .tts-bar,.sb-link,select,summary,section,h2{scroll-margin-bottom:120px;}
+}
+
 body {
-  font-family: 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
-  background: #0d1117; color: #e6edf3; line-height: 1.8;
+  font-family: var(--font);
+  background: var(--bg); color: var(--text); line-height: 1.8;
   padding-bottom: env(safe-area-inset-bottom);
 }
-.header {
-  background: #161b22; border-bottom: 1px solid #21262d;
-  padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-  position: sticky; top: 0; z-index: 20;
-}
-.header a.back {
-  display: flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; border-radius: 7px;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-  color: #8b949e; font-size: 16px; text-decoration: none; flex-shrink: 0;
-}
-.header-logo {
-  width: 30px; height: 30px; background: linear-gradient(135deg,#3b82f6,#1e40af);
-  border-radius: 7px; display: flex; align-items: center; justify-content: center;
-  font-size: 15px; flex-shrink: 0;
-}
-.header-title { font-size: 13px; font-weight: 600; }
-.header-sub { font-size: 10px; color: #8b949e; margin-top: 1px; }
 
 .container { max-width: 720px; margin: 0 auto; padding: 22px 16px 60px; }
 
@@ -104,155 +261,56 @@ table.vmc th:first-child { min-width: 3.4em; }
 
 .footer { text-align:center; padding:26px 16px; font-size:12px; color:#484f58; border-top:1px solid #161b22; margin-top:30px; }
 
-/* ===== 読み上げ ===== */
-.tts-bar {
-  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  background:#161b22; border:1px solid #21262d; border-radius:12px;
-  padding:11px 13px; margin-bottom:22px;
-}
-.tts-bar button, .tts-dock button {
-  display:inline-flex; align-items:center; gap:5px;
-  border:none; border-radius:8px; cursor:pointer;
-  font-size:13px; font-weight:700; line-height:1; padding:10px 13px;
-  background:#1f6feb; color:#fff; transition:.15s; white-space:nowrap;
-}
-.tts-bar button.sub, .tts-dock button.sub {
-  background:#21262d; color:#c9d1d9; border:1px solid #30363d; font-weight:600;
-}
-.tts-bar button:hover, .tts-dock button:hover { filter:brightness(1.15); }
-.tts-bar button:disabled, .tts-dock button:disabled { opacity:.45; cursor:default; filter:none; }
-.tts-bar select {
-  background:#0d1117; color:#e6edf3; border:1px solid #30363d; border-radius:7px;
-  padding:8px 7px; font-size:12.5px; max-width:150px;
-}
-.tts-bar .st { font-size:12px; color:#8b949e; margin-left:auto; }
-@media(max-width:520px){ .tts-bar .st { margin-left:0; width:100%; } }
 
-.sec-play {
-  background:#21262d; color:#8b949e; border:1px solid #30363d; border-radius:20px;
-  font-size:11px; padding:4px 10px; cursor:pointer; margin-left:auto; white-space:nowrap;
-}
-.sec-play:hover { border-color:#1f6feb; color:#58a6ff; }
-
-#tts-dock {
-  position:fixed; left:0; right:0; bottom:0; z-index:60; display:none;
-  align-items:center; gap:7px;
-  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
-  background:rgba(13,17,23,.97); border-top:1px solid #21262d;
-  box-shadow:0 -6px 22px rgba(0,0,0,.5); backdrop-filter:blur(8px);
-}
-#tts-dock.show { display:flex; }
-#tts-dock .st { font-size:11.5px; color:#8b949e; margin-left:auto; white-space:nowrap;
-  overflow:hidden; text-overflow:ellipsis; max-width:32%; }
-@media(max-width:520px){
-  #tts-dock button { flex:1; padding:11px 8px; font-size:12.5px; }
-  #tts-dock .st { display:none; }
-}
-
-.tts-reading {
-  outline:2px solid #d29922 !important; outline-offset:3px;
-  background:rgba(210,153,34,.10) !important; border-radius:4px;
-}
 body.tts-on { padding-bottom:80px; }
 
-/* ══════════ 左メニュー ══════════
-   PCでは常時表示、スマホではハンバーガーで開閉する（講義ノートと同じ形） */
-:root { --sb-w: 264px; }
+/* AIP固有：PCでは左メニューと重複するので、本文中の目次を隠す */
+@media (min-width:900px){ .toc { display:none; } }
 
-#hamburger {
-  margin-left: auto; flex-shrink: 0; width: 34px; height: 30px;
-  border-radius: 7px; background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12); color: #c9d4e5;
-  font-size: 15px; line-height: 1; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-#hamburger:hover { background: rgba(255,255,255,.12); }
-
-#sb-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 70;
-  opacity: 0; pointer-events: none; transition: opacity .2s;
-}
-#sb-overlay.open { opacity: 1; pointer-events: auto; }
-
-#sidebar {
-  position: fixed; top: 0; left: 0; bottom: 0; width: min(88vw, var(--sb-w));
-  background: #0f141c; border-right: 1px solid #21262d;
-  z-index: 80; display: flex; flex-direction: column;
-  transform: translateX(-102%); transition: transform .22s ease;
-}
-#sidebar.open { transform: none; }
-.sb-head {
-  padding: 13px 14px; border-bottom: 1px solid #21262d;
-  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
-}
-.sb-head b { font-size: 13px; font-weight: 700; color: #e6edf3; }
-.sb-close {
-  margin-left: auto; background: none; border: 1px solid #30363d; color: #8b949e;
-  border-radius: 6px; width: 28px; height: 28px; cursor: pointer; font-size: 13px; line-height: 1;
-}
-.sb-scroll { overflow-y: auto; flex: 1; padding: 8px 8px 28px; -webkit-overflow-scrolling: touch; }
-.sb-grp {
-  font-size: 10.5px; font-weight: 700; color: #6e7681; letter-spacing: .06em;
-  padding: 12px 8px 6px;
-}
-.sb-item { display: flex; align-items: stretch; gap: 4px; }
-.sb-item > a {
-  flex: 1; min-width: 0; display: block; padding: 8px 9px; border-radius: 7px;
-  font-size: 12.5px; line-height: 1.5; color: #9aa8c4; text-decoration: none;
-  transition: background .15s, color .15s;
-}
-.sb-item > a:hover { background: rgba(255,255,255,.05); color: #e6edf3; }
-.sb-item.reading > a { background: rgba(210,153,34,.14); color: #e3b341; }
-.sb-item .k { color: #d29922; margin-right: 3px; }
+/* AIP固有：目次の項目行と、そこから読み上げを始める▶ */
+.sb-item { display:flex; align-items:center; gap:4px; }
+.sb-item > .sb-link { flex:1; min-width:0; }
+.sb-item .k { color:var(--key); margin-right:3px; }
 .sb-play {
-  flex-shrink: 0; width: 30px; background: transparent; color: #6e7681;
-  border: 1px solid #21262d; border-radius: 7px; cursor: pointer; font-size: 11px;
-  transition: color .15s, border-color .15s;
+  flex-shrink:0; width:28px; height:28px; background:transparent; color:var(--text-faint);
+  border:1px solid var(--line); border-radius:8px; cursor:pointer; font-size:10px;
+  display:flex; align-items:center; justify-content:center;
+  transition:color .15s, border-color .15s;
 }
-.sb-play:hover { color: #58a6ff; border-color: #1f6feb; }
-
-/* PC：メニューを出したまま、本文を右にずらす */
-@media (min-width: 1000px) {
-  body { padding-left: var(--sb-w); }
-  #sidebar { transform: none; width: var(--sb-w); }
-  #sb-overlay, #hamburger, .sb-close { display: none; }
-  #tts-dock { left: var(--sb-w); }
-  .toc { display: none; }          /* 左メニューと重複するので隠す */
-  .container { max-width: 780px; }
-}
+.sb-play:hover { color:var(--accent); border-color:var(--accent); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <a class="back" href="./index.html">‹</a>
-  <div class="header-logo">✈</div>
-  <div>
-    <div class="header-title">AIP（航空情報公開集）</div>
-    <div class="header-sub">Part 2 ENR — 要点まとめ</div>
+<header class="appbar">
+  <a class="ab-back" href="./index.html" aria-label="入口へ戻る">‹</a>
+  <div class="ab-logo">✈</div>
+  <div class="ab-txt">
+    <div class="ab-title">AIP（航空情報公開集）</div>
+    <div class="ab-sub">Part 2 ENR — 要点まとめ</div>
   </div>
   <button id="hamburger" aria-label="目次">☰</button>
-</div>
+</header>
 
 <div id="sb-overlay"></div>
 <nav id="sidebar">
   <div class="sb-head"><b>AIP ENR 目次</b><button class="sb-close" aria-label="閉じる">✕</button></div>
   <div class="sb-scroll">
     <div class="sb-grp">ENR 1 ／ 一般規則および方式</div>
-    <div class="sb-item" data-sec="e11"><a href="#e11">1.1 一般規則</a><button class="sb-play" data-sec="e11" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e12"><a href="#e12"><span class="k">★</span>1.2 有視界飛行方式</a><button class="sb-play" data-sec="e12" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e14"><a href="#e14"><span class="k">★</span>1.4 ATS空域の分類</a><button class="sb-play" data-sec="e14" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e17"><a href="#e17">1.7 高度計規正方式</a><button class="sb-play" data-sec="e17" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e110"><a href="#e110">1.10 飛行計画</a><button class="sb-play" data-sec="e110" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e111"><a href="#e111">1.11 飛行計画通報の宛先</a><button class="sb-play" data-sec="e111" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e112"><a href="#e112">1.12 民間機に対する要撃</a><button class="sb-play" data-sec="e112" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e113"><a href="#e113">1.13 不法妨害</a><button class="sb-play" data-sec="e113" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e114"><a href="#e114"><span class="k">★</span>1.14 航空交通インシデント</a><button class="sb-play" data-sec="e114" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e11"><a class="sb-link" href="#e11">1.1 一般規則</a><button class="sb-play" data-sec="e11" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e12"><a class="sb-link" href="#e12"><span class="k">★</span>1.2 有視界飛行方式</a><button class="sb-play" data-sec="e12" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e14"><a class="sb-link" href="#e14"><span class="k">★</span>1.4 ATS空域の分類</a><button class="sb-play" data-sec="e14" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e17"><a class="sb-link" href="#e17">1.7 高度計規正方式</a><button class="sb-play" data-sec="e17" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e110"><a class="sb-link" href="#e110">1.10 飛行計画</a><button class="sb-play" data-sec="e110" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e111"><a class="sb-link" href="#e111">1.11 飛行計画通報の宛先</a><button class="sb-play" data-sec="e111" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e112"><a class="sb-link" href="#e112">1.12 民間機に対する要撃</a><button class="sb-play" data-sec="e112" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e113"><a class="sb-link" href="#e113">1.13 不法妨害</a><button class="sb-play" data-sec="e113" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e114"><a class="sb-link" href="#e114"><span class="k">★</span>1.14 航空交通インシデント</a><button class="sb-play" data-sec="e114" title="ここから読み上げる">▶</button></div>
     <div class="sb-grp">ENR 5 ／ 航行上の障害</div>
-    <div class="sb-item" data-sec="e51"><a href="#e51"><span class="k">★</span>5.1 禁止・制限及び危険区域</a><button class="sb-play" data-sec="e51" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e52"><a href="#e52">5.2 演習・訓練空域／ADIZ</a><button class="sb-play" data-sec="e52" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e53"><a href="#e53"><span class="k">★</span>5.3 その他危険を伴う諸活動</a><button class="sb-play" data-sec="e53" title="ここから読み上げる">▶</button></div>
-    <div class="sb-item" data-sec="e55"><a href="#e55"><span class="k">★</span>5.5 航空スポーツ及びレクリエーション活動</a><button class="sb-play" data-sec="e55" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e51"><a class="sb-link" href="#e51"><span class="k">★</span>5.1 禁止・制限及び危険区域</a><button class="sb-play" data-sec="e51" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e52"><a class="sb-link" href="#e52">5.2 演習・訓練空域／ADIZ</a><button class="sb-play" data-sec="e52" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e53"><a class="sb-link" href="#e53"><span class="k">★</span>5.3 その他危険を伴う諸活動</a><button class="sb-play" data-sec="e53" title="ここから読み上げる">▶</button></div>
+    <div class="sb-item" data-sec="e55"><a class="sb-link" href="#e55"><span class="k">★</span>5.5 航空スポーツ及びレクリエーション活動</a><button class="sb-play" data-sec="e55" title="ここから読み上げる">▶</button></div>
   </div>
 </nav>
 
@@ -270,18 +328,13 @@ body.tts-on { padding-bottom:80px; }
   </div>
 
   <div class="tts-bar" id="ttsBar">
-    <button id="btnPlay">▶ 読み上げ開始</button>
-    <button class="sub" id="btnBack" disabled>◀ 15秒</button>
-    <button class="sub" id="btnFwd" disabled>15秒 ▶</button>
-    <button class="sub" id="btnStop" disabled>■ 停止</button>
-    <select id="selRate" title="読み上げ速度">
-      <option value="0.8">速度: 遅い</option>
-      <option value="1" selected>速度: 標準</option>
-      <option value="1.3">速度: 速い</option>
-      <option value="1.6">速度: かなり速い</option>
-    </select>
-    <select id="selVoice" title="読み上げの声"></select>
-    <span class="st" id="ttsStatus">このページを音声で聞けます。各項目の「▶ ここから」でも再生できます。</span>
+    <button class="tts-btn primary" id="btnPlay">▶ 読み上げ</button>
+    <button class="tts-btn" id="btnBack" disabled>◀ 15秒</button>
+    <button class="tts-btn" id="btnFwd" disabled>15秒 ▶</button>
+    <button class="tts-btn stop" id="btnStop" disabled>■ 停止</button>
+    <select class="tts-sel" id="selRate" title="読み上げ速度"></select>
+    <select class="tts-sel" id="selVoice" title="読み上げの声"></select>
+    <span class="tts-st" id="ttsStatus">このページを音声で聞けます。各項目の「▶ ここから」でも再生できます。</span>
   </div>
 
   <div class="toc">
@@ -637,6 +690,51 @@ body.tts-on { padding-bottom:80px; }
       '<span class="st">このブラウザは読み上げに対応していません。</span>';
     return;
   }
+
+/* ══════════ 共通：読み上げ設定の保存と共有 ══════════
+   速度と音声の選択は全ページで同じキーに保存する。
+   どれか1ページで設定すれば、他のページを開いたときにも効く。 */
+var TTSPrefs = (function () {
+  var K_RATE = 'oralexam_tts_rate', K_VOICE = 'oralexam_tts_voice';
+  var RATES = [["0.75", "ゆっくり ×0.75"], ["0.9", "×0.9"], ["1", "標準"], ["1.15", "×1.15"], ["1.3", "×1.3"], ["1.5", "速い ×1.5"]];
+  function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  return {
+    rate:      function () { var r = parseFloat(get(K_RATE, '1')); return isNaN(r) ? 1 : r; },
+    setRate:   function (v) { set(K_RATE, String(v)); },
+    voice:     function () { return get(K_VOICE, ''); },
+    setVoice:  function (n) { set(K_VOICE, n || ''); },
+    /* <select> に速度の選択肢を入れて、保存値を選んだ状態にする */
+    fillRate:  function (sel) {
+      if (!sel) return;
+      sel.innerHTML = '';
+      RATES.forEach(function (r) {
+        var o = document.createElement('option');
+        o.value = r[0]; o.textContent = r[1];
+        sel.appendChild(o);
+      });
+      sel.value = String(TTSPrefs.rate());
+      if (sel.selectedIndex < 0) sel.value = '1';
+    },
+    /* 日本語の音声を並べる。Windows の Haruka があれば先頭かつ既定にする */
+    jaVoices: function () {
+      var all = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+      var ja = all.filter(function (v) { return v.lang && /^ja/i.test(v.lang); });
+      var list = ja.length ? ja : all;
+      var i = list.findIndex(function (v) { return /haruka|はるか/i.test(v.name || ''); });
+      if (i > 0) { var h = list.splice(i, 1)[0]; list = [h].concat(list); }
+      return list;
+    },
+    /* 保存された音声名、なければ Haruka、それもなければ先頭 */
+    pickVoice: function () {
+      var list = TTSPrefs.jaVoices();
+      if (!list.length) return null;
+      var saved = TTSPrefs.voice();
+      return (saved && list.filter(function (v) { return v.name === saved; })[0]) || list[0];
+    }
+  };
+})();
+
   var synth = window.speechSynthesis;
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -712,9 +810,8 @@ body.tts-on { padding-bottom:80px; }
   var voiceSel = document.getElementById('selVoice');
   function isHaruka(v){ return /haruka|はるか/i.test(v.name || ''); }
   function pickVoice(){
-    var ja = (synth.getVoices() || []).filter(function(v){ return /^ja/i.test(v.lang); });
-    if (!ja.length) return null;
-    return ja.find(isHaruka) || ja.find(function(v){ return v.default; }) || ja[0];
+    /* 他のページで選んだ声を引き継ぐ。なければ Haruka、それもなければ先頭。 */
+    return TTSPrefs.pickVoice();
   }
   function buildVoices(){
     var ja = (synth.getVoices() || []).filter(function(v){ return /^ja/i.test(v.lang); });
@@ -744,10 +841,14 @@ body.tts-on { padding-bottom:80px; }
   }, 250);
   voiceSel.addEventListener('change', function(){
     var v = (voiceSel.__list || [])[+voiceSel.value];
-    if (v){ S.voice = v; S.voiceLang = v.lang; }
+    if (v){ S.voice = v; S.voiceLang = v.lang; TTSPrefs.setVoice(v.name); }
   });
-  document.getElementById('selRate').addEventListener('change', function(){
+  var rateSel = document.getElementById('selRate');
+  TTSPrefs.fillRate(rateSel);
+  S.rate = TTSPrefs.rate();
+  rateSel.addEventListener('change', function(){
     S.rate = parseFloat(this.value);
+    TTSPrefs.setRate(this.value);
   });
 
   /* ---------- 画面表示 ---------- */
@@ -756,9 +857,17 @@ body.tts-on { padding-bottom:80px; }
       elSt = document.getElementById('ttsStatus');
   var dock = document.createElement('div');
   dock.id = 'tts-dock';
-  dock.innerHTML = '<button class="sub d-back">◀ 15秒</button><button class="d-play">⏸ 一時停止</button>' +
-                   '<button class="sub d-fwd">15秒 ▶</button><button class="sub d-stop">■ 停止</button>' +
-                   '<span class="st"></span>';
+  dock.innerHTML =
+    '<div class="dk-inner">' +
+      '<div class="dk-bar"><i></i></div>' +
+      '<div class="dk-meta"><span class="dk-now st"></span></div>' +
+      '<div class="dk-btns">' +
+        '<button class="tts-btn d-back">◀ 15秒</button>' +
+        '<button class="tts-btn primary d-play">⏸ 一時停止</button>' +
+        '<button class="tts-btn d-fwd">15秒 ▶</button>' +
+        '<button class="tts-btn stop d-stop">■ 停止</button>' +
+      '</div>' +
+    '</div>';
   document.body.appendChild(dock);
   var dPlay = dock.querySelector('.d-play'), dSt = dock.querySelector('.st');
 
@@ -766,13 +875,18 @@ body.tts-on { padding-bottom:80px; }
     Array.prototype.forEach.call(document.querySelectorAll('.tts-reading'),
       function(e){ e.classList.remove('tts-reading'); });
   }
+  var dkFill = dock.querySelector('.dk-bar i');
   function status(t){ elSt.textContent = t; dSt.textContent = t; }
+  function progress(i){
+    if (!dkFill || !S.blocks.length) return;
+    dkFill.style.width = ((i + 1) / S.blocks.length * 100) + '%';
+  }
   function sync(){
     var live = S.playing || S.paused;
-    elPlay.textContent = (S.playing && !S.paused) ? '⏸ 一時停止' : (S.paused ? '▶ 再開' : '▶ 読み上げ開始');
+    elPlay.textContent = (S.playing && !S.paused) ? '⏸ 一時停止' : (S.paused ? '▶ 再開' : '▶ 読み上げ');
     dPlay.textContent  = S.paused ? '▶ 再開' : '⏸ 一時停止';
     [elBack, elFwd, elStop].forEach(function(b){ b.disabled = !live; });
-    dock.classList.toggle('show', !!live);
+    dock.classList.toggle('on', !!live);
     document.body.classList.toggle('tts-on', !!live);
   }
 
@@ -798,7 +912,7 @@ body.tts-on { padding-bottom:80px; }
     S.charOffset = offset; S.startedAt = Date.now();
     clearHL(); el.classList.add('tts-reading');
     el.scrollIntoView({behavior:'smooth', block:'center'});
-    status('読み上げ中… (' + (i+1) + ' / ' + S.blocks.length + ')');
+    status('読み上げ中… (' + (i+1) + ' / ' + S.blocks.length + ')'); progress(i);
     sync();
 
     S.gen++; var my = S.gen;
@@ -825,7 +939,7 @@ body.tts-on { padding-bottom:80px; }
     S.paused = false; S.idx = i; S.charOffset = start; S.startedAt = 0;
     clearHL(); S.blocks[i].classList.add('tts-reading');
     S.blocks[i].scrollIntoView({behavior:'smooth', block:'center'});
-    status('読み上げ中… (' + (i+1) + ' / ' + S.blocks.length + ')'); sync();
+    status('読み上げ中… (' + (i+1) + ' / ' + S.blocks.length + ')'); progress(i); sync();
     synth.cancel(); clearTimeout(S.seekTimer);
     S.seekTimer = setTimeout(function(){ if (my !== S.gen) return; speak(i, start); }, 160);
   }

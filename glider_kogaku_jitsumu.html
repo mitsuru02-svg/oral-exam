@@ -6,24 +6,137 @@
 <title>自家用操縦士（滑空機）口述試験対策｜飛行の原理・三舵・失速・限界事項</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
 <style>
+/* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
 :root{
-  --navy:#10243e;
-  --navy2:#16335a;
-  --accent:#2e7d9e;
-  --accent2:#4fa3c4;
-  --amber:#c87f2a;
-  --amber-light:#fff3e0;
-  --danger:#b3413a;
-  --danger-light:#fbe9e7;
-  --green:#3c7a52;
-  --green-light:#e8f5e9;
-  --bg:#f6f4ef;
-  --card:#ffffff;
-  --ink:#1d2733;
-  --ink-soft:#52606d;
-  --line:#dfe3e8;
-  --sidebar-w:250px;
-  --header-h:121px;
+  /* 面 */
+  --bg-base:#0d1117;          /* 本文背景 */
+  --surface:#161b22;     /* カード・パネル */
+  --surface-2:#0f141c;   /* サイドバー・一段沈んだ面 */
+  --surface-3:#21262d;   /* ボタン・タグの地 */
+  --line-base:#21262d;        /* 罫線 */
+  --line-strong:#30363d; /* 入力欄の枠など、はっきり見せたい罫線 */
+  /* 文字 */
+  --text:#e6edf3;
+  --text-dim:#8b949e;
+  --text-faint:#6e7681;
+  /* 役割色 */
+  --accent-base:#3b82f6;      /* 主操作・選択中 */
+  --accent-soft:#0d2044; /* 選択中の地 */
+  --accent-text:#93c5fd;
+  --key:#d29922;         /* 重要・読み上げ中 */
+  --key-soft:rgba(210,153,34,.12);
+  --ok:#3fb950;
+  --warn:#d29922;
+  --danger-base:#f85149;
+  /* 文字組み */
+  --font:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
+  /* 寸法 */
+  --sb-w:280px;          /* サイドバー幅 */
+  --hdr-h:52px;          /* ヘッダー高さ */
+  --radius:10px;
+  --radius-lg:14px;
+}
+/* ブレークポイントは2つだけ。
+   900px以上 = サイドバー常時表示（PC）／600px以下 = スマホ密度 */
+/* ══════════ 共通ヘッダー ══════════ */
+.appbar{
+  position:sticky;top:0;z-index:900;margin-left:var(--sidebar-w,0);
+  height:var(--hdr-h);display:flex;align-items:center;gap:10px;
+  padding:0 12px;background:var(--surface);border-bottom:1px solid var(--line-base);
+}
+.appbar .ab-back,.appbar .ab-logo{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.appbar .ab-back{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--text-dim);font-size:16px;text-decoration:none;
+}
+.appbar .ab-back:hover{background:rgba(255,255,255,.12);color:var(--text);}
+.appbar .ab-logo{background:linear-gradient(135deg,#3b82f6,#1e40af);font-size:15px;}
+.appbar .ab-txt{min-width:0;}
+.appbar .ab-title{font-size:13px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appbar .ab-sub{font-size:10px;color:var(--text-dim);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#hamburger{
+  margin-left:auto;flex-shrink:0;width:36px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+#hamburger:hover{background:rgba(255,255,255,.12);}
+/* ══════════ 共通 読み上げUI ══════════ */
+.tts-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line-base);
+  border-radius:var(--radius);padding:10px 12px;margin:0 0 18px;
+}
+.tts-btn{
+  background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:8px 13px;font-family:var(--font);font-size:12.5px;
+  font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.tts-btn:hover{background:var(--line-strong);}
+.tts-btn.primary{background:var(--accent-base);border-color:var(--accent-base);color:#fff;}
+.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.stop{color:var(--danger-base);border-color:#5c1a17;}
+.tts-btn.stop:hover{background:rgba(248,81,73,.12);}
+.tts-btn:disabled{opacity:.45;cursor:default;}
+.tts-sel{
+  background:var(--bg-base);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:7px 9px;font-family:var(--font);font-size:12.5px;
+  max-width:170px;cursor:pointer;
+}
+.tts-sel:focus{outline:none;border-color:var(--accent-base);}
+.tts-st{font-size:11.5px;color:var(--text-dim);margin-left:auto;}
+
+#tts-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:930;display:none;
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(13,17,23,.97);border-top:1px solid var(--line-base);
+  backdrop-filter:blur(8px);box-shadow:0 -6px 22px rgba(0,0,0,.5);
+}
+#tts-dock.on{display:block;}
+.dk-inner{max-width:980px;margin:0 auto;}
+.dk-bar{height:3px;background:var(--surface-3);border-radius:2px;
+  overflow:hidden;margin-bottom:7px;}
+.dk-bar i{display:block;height:100%;background:var(--key);width:0;
+  transition:width .3s linear;}
+.dk-meta{display:flex;gap:10px;align-items:baseline;font-size:11px;
+  color:var(--text-faint);margin-bottom:7px;}
+.dk-meta .dk-now{color:var(--text-dim);font-size:11.5px;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.dk-btns .tts-sel{margin-left:auto;}
+
+/* 読み上げ中の箇所 */
+.tts-reading{
+  outline:2px solid var(--key);outline-offset:3px;
+  background:var(--key-soft);border-radius:6px;
+}
+:root{
+  /* 既存の色名は共通トークンへの別名として残す。
+     個々のルールを書き換えずに配色だけを揃えるため。 */
+  --navy:var(--surface-2);
+  --navy2:var(--surface);
+  --accent:var(--accent-base);
+  --accent2:#58a6ff;
+  --amber:var(--key);
+  --amber-light:rgba(210,153,34,.12);
+  --danger:var(--danger-base);
+  --danger-light:rgba(248,81,73,.10);
+  --green:var(--ok);
+  --green-light:rgba(63,185,80,.10);
+  --bg:var(--bg-base);
+  --card:var(--surface);
+  --ink:var(--text);
+  --ink-soft:var(--text-dim);
+  --line:var(--line-base);
+  --sidebar-w:var(--sb-w);
+  --header-h:var(--hdr-h);
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -46,13 +159,15 @@ img,svg{max-width:100%;}
 .topbar .title{font-size:15px;font-weight:700;letter-spacing:.02em;}
 .topbar .title small{display:block;font-size:11px;font-weight:400;opacity:.75;margin-top:1px;}
 .hamburger{
-  display:none;background:none;border:none;color:#fff;font-size:24px;
-  cursor:pointer;padding:4px 10px;margin-right:8px;line-height:1;
+  display:none;margin-left:auto;flex-shrink:0;width:36px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-size:15px;line-height:1;cursor:pointer;
+  align-items:center;justify-content:center;
 }
 
 /* ===== Sidebar ===== */
 .sidebar{
-  position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);
+  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
   background:var(--navy);color:#dce4ec;overflow-y:auto;z-index:90;
   padding:14px 0 30px;
 }
@@ -72,7 +187,7 @@ img,svg{max-width:100%;}
 
 /* ===== Main ===== */
 .main{
-  margin-left:var(--sidebar-w);margin-top:var(--header-h);
+  margin-left:var(--sidebar-w);margin-top:0;
   padding:28px 38px 110px;max-width:880px; /* 下端は固定ミニプレーヤーのぶん余白を確保 */
 }
 .chapter{display:none;}
@@ -86,16 +201,16 @@ img,svg{max-width:100%;}
   color:var(--amber);font-weight:700;font-size:13px;letter-spacing:.05em;
 }
 .chapter-head h1{
-  margin:4px 0 8px;font-size:26px;color:var(--navy);font-weight:800;
+  margin:4px 0 8px;font-size:26px;color:var(--text);font-weight:800;
 }
 .chapter-head .lead{color:var(--ink-soft);font-size:14.5px;}
 
 h2.sec{
-  font-size:19px;color:var(--navy);margin:34px 0 14px;padding-left:12px;
+  font-size:19px;color:var(--text);margin:34px 0 14px;padding-left:12px;
   border-left:5px solid var(--accent);font-weight:800;
 }
 h3.sub{
-  font-size:15.5px;color:var(--navy2);margin:24px 0 10px;font-weight:700;
+  font-size:15.5px;color:var(--accent-text);margin:24px 0 10px;font-weight:700;
 }
 p{margin:10px 0;font-size:14.5px;}
 ul,ol{font-size:14.5px;padding-left:22px;}
@@ -103,9 +218,9 @@ li{margin:4px 0;}
 
 .card{
   background:var(--card);border:1px solid var(--line);border-radius:10px;
-  padding:18px 20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);
+  padding:18px 20px;margin:16px 0;
 }
-.card-title{font-weight:700;color:var(--navy);font-size:14.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.card-title{font-weight:700;color:var(--text);font-size:14.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 
 .callout{
   border-radius:8px;padding:14px 18px;margin:16px 0;font-size:14px;
@@ -117,25 +232,27 @@ li{margin:4px 0;}
 .callout.tip .ttl{color:var(--green);font-weight:800;margin-bottom:4px;}
 .callout.note{background:var(--amber-light);border-color:var(--amber);}
 .callout.note .ttl{color:var(--amber);font-weight:800;margin-bottom:4px;}
-.callout.info{background:#e8f1f7;border-color:var(--accent);}
+.callout.info{background:rgba(59,130,246,.10);border-color:var(--accent);}
 .callout.info .ttl{color:var(--accent);font-weight:800;margin-bottom:4px;}
 
 .diagram-box{
-  background:var(--card);border:1px solid var(--line);border-radius:10px;
+  /* 図版は明るい背景を前提に描かれているので、ここだけ明るいままにする。
+     中の文字も暗い色に戻さないと読めなくなる。 */
+  background:#f4f6f8;color:#1d2733;border:1px solid var(--line);border-radius:10px;
   padding:18px;margin:18px 0;text-align:center;
 }
-.diagram-box .cap{font-size:12.5px;color:var(--ink-soft);margin-top:8px;}
-.diagram-box .cap b{color:var(--ink);}
+.diagram-box .cap{font-size:12.5px;color:#52606d;margin-top:8px;}
+.diagram-box .cap b{color:#1d2733;}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
 @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
 
 table.datatbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0;}
-table.datatbl th{background:var(--navy);color:#fff;padding:9px 12px;text-align:left;font-weight:700;}
+table.datatbl th{background:var(--surface-3);color:var(--text);padding:9px 12px;text-align:left;font-weight:700;}
 table.datatbl td{padding:8px 12px;border-bottom:1px solid var(--line);}
-table.datatbl tr:nth-child(even) td{background:#f8f9fb;}
-table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+table.datatbl tr:nth-child(even) td{background:rgba(255,255,255,.03);}
+table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
 
 .tag{
   display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;
@@ -148,23 +265,23 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 .qa{border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow:hidden;background:var(--card);}
 .qa-q{
   display:flex;justify-content:space-between;align-items:center;gap:10px;
-  padding:13px 16px;cursor:pointer;font-weight:700;font-size:14px;color:var(--navy);
+  padding:13px 16px;cursor:pointer;font-weight:700;font-size:14px;color:var(--text);
   background:#fafbfc;
 }
-.qa-q:hover{background:#f1f4f7;}
+.qa-q:hover{background:var(--surface-3);}
 .qa-q .qmark{color:var(--accent);margin-right:6px;}
 .qa-q .arrow{transition:.2s;color:var(--ink-soft);flex-shrink:0;}
 .qa.open .qa-q .arrow{transform:rotate(180deg);}
 .qa-a{
   max-height:0;overflow:hidden;transition:max-height .25s ease;
-  background:#fff;
+  background:var(--bg-base);
 }
 .qa.open .qa-a{max-height:2000px;}
 .qa-a-inner{padding:4px 18px 16px;font-size:14px;color:var(--ink-soft);border-top:1px dashed var(--line);}
 .qa-a-inner b{color:var(--ink);}
 
 /* ===== Fill-in-blank practice ===== */
-.fillblank{background:#fff8e8;border:1px dashed var(--amber);border-radius:8px;padding:14px 16px;margin:14px 0;font-size:14px;}
+.fillblank{background:var(--key-soft);border:1px dashed var(--amber);border-radius:8px;padding:14px 16px;margin:14px 0;font-size:14px;}
 .fillblank .blank{
   display:inline-block;min-width:60px;border-bottom:2px solid var(--amber);
   text-align:center;font-weight:700;color:var(--amber);
@@ -173,10 +290,10 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 /* ===== V-n diagram interactive ===== */
 .vn-wrap{display:grid;grid-template-columns:1fr 230px;gap:18px;}
 @media(max-width:760px){.vn-wrap{grid-template-columns:1fr;}}
-.vn-controls{background:#f8f9fb;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px;}
-.vn-controls label{display:block;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.vn-controls{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13px;}
+.vn-controls label{display:block;font-weight:700;color:var(--text);margin-bottom:6px;}
 .vn-controls input[type=range]{width:100%;}
-.vn-readout{margin-top:10px;padding:10px;border-radius:6px;background:#fff;border:1px solid var(--line);font-size:13px;}
+.vn-readout{margin-top:10px;padding:10px;border-radius:6px;background:var(--bg-base);border:1px solid var(--line);font-size:13px;}
 .vn-readout .stt{font-weight:800;font-size:15px;}
 .vn-readout .stt.ok{color:var(--green);}
 .vn-readout .stt.bad{color:var(--danger);}
@@ -189,7 +306,8 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 
 /* ===== Mobile ===== */
 @media(max-width:880px){
-  .hamburger{display:inline-block;}
+  .appbar{margin-left:0;}
+  .hamburger{display:flex;}
   .sidebar{
     left:-100%;transition:left .25s ease;box-shadow:4px 0 14px rgba(0,0,0,.3);
   }
@@ -202,8 +320,8 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 /* ===== TTS read-aloud bar ===== */
 .tts-bar{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  background:linear-gradient(135deg,#eef5f8,#e7f0f5);
-  border:1px solid #c9dde6;border-radius:10px;
+  background:var(--surface);
+  border:1px solid var(--line-base);border-radius:10px;
   padding:10px 14px;margin:0 0 22px;
 }
 .tts-bar .tts-btn{
@@ -212,16 +330,16 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   padding:8px 14px;font-size:13.5px;font-weight:700;cursor:pointer;
   transition:.15s;line-height:1;
 }
-.tts-bar .tts-btn:hover{background:var(--navy2);}
-.tts-bar .tts-btn:disabled{background:#b9c4cc;cursor:default;}
-.tts-bar .tts-btn.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent);}
-.tts-bar .tts-btn.secondary:hover{background:#eef5f8;}
+.tts-bar .tts-btn:hover{filter:brightness(1.2);}
+.tts-bar .tts-btn:disabled{opacity:.45;cursor:default;}
+.tts-bar .tts-btn.secondary{background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);}
+.tts-bar .tts-btn.secondary:hover{background:var(--line-strong);}
 .tts-bar .tts-status{font-size:12.5px;color:var(--ink-soft);flex:1;min-width:120px;}
 .tts-bar select.tts-rate{
-  font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:5px 6px;background:#fff;color:var(--ink);
+  font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:5px 6px;background:var(--bg-base);color:var(--ink);
 }
 .tts-bar select.tts-voice{
-  font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:5px 6px;background:#fff;color:var(--ink);
+  font-size:12.5px;border:1px solid var(--line);border-radius:6px;padding:5px 6px;background:var(--bg-base);color:var(--ink);
   max-width:180px;
 }
 .tts-bar .tts-icon{font-size:14px;line-height:1;}
@@ -230,8 +348,8 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 .tts-dock{
   position:fixed;right:18px;bottom:18px;z-index:120;
   display:flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.97);
-  border:1px solid #c9dde6;border-radius:999px;
+  background:rgba(13,17,23,.97);
+  border:1px solid var(--line-base);border-radius:999px;
   padding:8px 12px;
   box-shadow:0 6px 22px rgba(20,40,60,.22);
   backdrop-filter:blur(6px);
@@ -245,10 +363,10 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   padding:8px 13px;transition:.15s;
   background:var(--accent);color:#fff;
 }
-.tts-dock button:hover{background:var(--navy2);}
-.tts-dock button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent);}
-.tts-dock button.ghost:hover{background:#eef5f8;}
-.tts-dock button:disabled{background:#b9c4cc;color:#fff;border-color:#b9c4cc;cursor:default;}
+.tts-dock button:hover{filter:brightness(1.2);}
+.tts-dock button.ghost{background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);}
+.tts-dock button.ghost:hover{background:var(--line-strong);}
+.tts-dock button:disabled{opacity:.45;cursor:default;}
 .tts-dock .tts-dock-info{
   color:var(--ink-soft);white-space:nowrap;
   max-width:170px;overflow:hidden;text-overflow:ellipsis;
@@ -261,7 +379,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 .tts-reading{
   outline:3px solid var(--amber) !important;
   outline-offset:3px;
-  background:#fff8e8 !important;
+  background:var(--key-soft) !important;
   border-radius:8px;
   scroll-margin-top:90px;
   transition:outline .15s, background .15s;
@@ -269,19 +387,15 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 </style>
 </head>
 <body>
-<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:fixed;top:0;left:0;right:0;z-index:1000;">
-  <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;">‹</a>
-  <div style="width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#1e40af);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✈</div>
-  <div>
-    <div style="font-size:13px;font-weight:600;color:#e6edf3;">グライダー工学・実務</div>
-    <div style="font-size:10px;color:#8b949e;margin-top:1px;">自家用操縦士（滑空機）</div>
+<header class="appbar">
+  <a class="ab-back" href="./index.html" aria-label="入口へ戻る">‹</a>
+  <div class="ab-logo">✈</div>
+  <div class="ab-txt">
+    <div class="ab-title">グライダー工学・実務</div>
+    <div class="ab-sub">自家用操縦士（滑空機）口述試験対策</div>
   </div>
-</div>
-
-<div class="topbar">
   <button class="hamburger" id="hamBtn" aria-label="menu">☰</button>
-  <div class="title">自家用操縦士（滑空機）口述試験対策<small>飛行の原理／三舵／失速／運動包囲線図　＋　実地・通信知識</small></div>
-</div>
+</header>
 
 <div class="overlay" id="overlay"></div>
 
@@ -2611,7 +2725,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   </div>
 
   <h2 class="sec">8-4　前線接近時のフライト判断</h2>
-  <div class="callout danger" id="tts-8-6" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-8-6" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">寒冷前線が接近したら、とっとと降りる！</div>
     強い寒冷前線は雷・激しい乱気流・ダウンバースト・強雨をもたらす。離着陸不能な風が吹くこともある。積乱雲を伴う前線の兆候が見えたら即帰投が正解。滝川の教官陣は雲の発達の見切りが巧みで、「降りましょう」の判断後に格納庫を閉めた瞬間に雨が来る、という経験がよくある。
   </div>
@@ -2878,7 +2992,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   </div>
 
   <h2 class="sec">9-6　METAR/SPECI/TAFのコード解読</h2>
-  <div class="callout danger" id="tts-9-17" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-9-17" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">解読できないと話にならない（マスト）</div>
     <b>METAR（定時飛行場実況気象通報式）</b>と<b>TAF（飛行場予報式）</b>は、口述試験で必ず解読できなければならない項目です。AIM第8章に詳しく記載されています。以下でコードの読み方を順に確認します。
   </div>
@@ -2912,7 +3026,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   </div>
 
   <h2 class="sec">9-7　風向の落とし穴：真方位と磁方位</h2>
-  <div class="callout danger" id="tts-9-27" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-9-27" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">試験官が好んで突く違い</div>
     <b>METAR・SPECI・TAFに書かれる風向は「真方位」</b>である（観測時刻前10分間の平均を10°単位に丸めたもの）。<br>
     一方で、<b>タワーやレディオが飛行中の機体に通報する風向は「磁方位」</b>であり、<b>滑走路の方向（例：滝川の「01」など）も磁方位</b>で決められている。<br>
@@ -3266,7 +3380,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
     <div class="cap"><b>図2　視野の構造</b>：水平視野角は約200度あるが、精細に見えるのは中心視のわずか約3度のみ。周辺視野ではかろうじて「動き」しか感知できない。</div>
   </div>
 
-  <div class="callout danger" id="tts-10-4" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-10-4" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">前方を見ていても死角がある</div>
     頭を動かさずに前方を見ている場合、上方・水平方向にそれぞれ視野角の範囲内でもコックピットパネルに遮られて見えない範囲がある。斜め下〜真下の下方視野はほとんど「無し」に近い。後方視野も当然「無し」。見えているようで、実は見えていない範囲が非常に広い。
   </div>
@@ -3307,7 +3421,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   </div>
 
   <h2 class="sec">10-6　衝突回避の方法</h2>
-  <div class="callout danger" id="tts-10-9" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-10-9" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">まずは回避！　進路権の議論は着陸後！！</div>
     相手機が動いて見えるうちはぶつからないが、止まって見える場合は危険なので、相手機の後方に回り込むように針路を大きく変えて避けるのが安全。高度差があればぶつからないので、高度差が大きくなるように上昇・下降するのも一つの方法。
   </div>
@@ -3537,7 +3651,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   <div id="tts-11-2">
   <p>ソアリングに夢中になり、うっかり滑走路（R/W）から離れて高度が低くなった場合の対処法。</p>
   </div>
-  <div class="callout danger" id="tts-11-3" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-11-3" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">低高度時の3ステップ</div>
     <ol style="margin:6px 0 0;">
       <li>下降流に叩かれるリスクを考え、<b>速度60ノット以上</b>でR/Wに向かう</li>
@@ -3591,7 +3705,7 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
   </div>
 
   <h2 class="sec">11-6　故障時の対処</h2>
-  <div class="callout danger" id="tts-11-12" style="border-left-color:#b3413a;background:#fbe9e7;">
+  <div class="callout danger" id="tts-11-12" style="border-left-color:var(--danger-base);background:rgba(248,81,73,.10);">
     <div class="ttl" style="color:#b3413a;">★大原則：曳航中は何があっても操縦に専念！</div>
     曳航機に危険を及ぼしてはならない。トラブルが起きても操縦を維持することが最優先。
   </div>
@@ -4758,6 +4872,51 @@ table.datatbl td.num{font-weight:700;color:var(--navy2);text-align:right;font-va
 </div>
 
 <script>
+
+/* ══════════ 共通：読み上げ設定の保存と共有 ══════════
+   速度と音声の選択は全ページで同じキーに保存する。
+   どれか1ページで設定すれば、他のページを開いたときにも効く。 */
+var TTSPrefs = (function () {
+  var K_RATE = 'oralexam_tts_rate', K_VOICE = 'oralexam_tts_voice';
+  var RATES = [["0.75", "ゆっくり ×0.75"], ["0.9", "×0.9"], ["1", "標準"], ["1.15", "×1.15"], ["1.3", "×1.3"], ["1.5", "速い ×1.5"]];
+  function get(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  return {
+    rate:      function () { var r = parseFloat(get(K_RATE, '1')); return isNaN(r) ? 1 : r; },
+    setRate:   function (v) { set(K_RATE, String(v)); },
+    voice:     function () { return get(K_VOICE, ''); },
+    setVoice:  function (n) { set(K_VOICE, n || ''); },
+    /* <select> に速度の選択肢を入れて、保存値を選んだ状態にする */
+    fillRate:  function (sel) {
+      if (!sel) return;
+      sel.innerHTML = '';
+      RATES.forEach(function (r) {
+        var o = document.createElement('option');
+        o.value = r[0]; o.textContent = r[1];
+        sel.appendChild(o);
+      });
+      sel.value = String(TTSPrefs.rate());
+      if (sel.selectedIndex < 0) sel.value = '1';
+    },
+    /* 日本語の音声を並べる。Windows の Haruka があれば先頭かつ既定にする */
+    jaVoices: function () {
+      var all = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+      var ja = all.filter(function (v) { return v.lang && /^ja/i.test(v.lang); });
+      var list = ja.length ? ja : all;
+      var i = list.findIndex(function (v) { return /haruka|はるか/i.test(v.name || ''); });
+      if (i > 0) { var h = list.splice(i, 1)[0]; list = [h].concat(list); }
+      return list;
+    },
+    /* 保存された音声名、なければ Haruka、それもなければ先頭 */
+    pickVoice: function () {
+      var list = TTSPrefs.jaVoices();
+      if (!list.length) return null;
+      var saved = TTSPrefs.voice();
+      return (saved && list.filter(function (v) { return v.name === saved; })[0]) || list[0];
+    }
+  };
+})();
+
 // ===== Mobile sidebar (define early so showCh's closeSidebar call works) =====
 var sidebar = document.getElementById('sidebar');
 var overlay = document.getElementById('overlay');
@@ -4865,7 +5024,7 @@ var wakeLock = {
     index: -1,         // current block index
     playing: false,
     paused: false,
-    rate: 1.0,
+    rate: TTSPrefs.rate(),
     voice: null,
     voiceLang: null,   // lang string of the chosen voice, used on the utterance instead of a hardcoded 'ja-JP'
     charOffset: 0,     // 現ブロックの何文字目から読み始めたか（±15秒送り用）
@@ -4890,6 +5049,9 @@ var wakeLock = {
   function pickJapaneseVoice(){
     var voices = synth.getVoices() || [];
     if (!voices.length) return null;
+    // 他のページで選んだ声があればそれを優先する（全ページで同じ声になる）
+    var shared = TTSPrefs.pickVoice();
+    if (shared) return shared;
     var ja = voices.filter(function(v){ return /^ja/i.test(v.lang); });
     if (!ja.length) return null;
     // Windows PCでは Microsoft Haruka を既定にする。Harukaは Windows にしか存在しないため、
@@ -5257,12 +5419,7 @@ var wakeLock = {
       '<button class="tts-btn secondary tts-back" disabled title="15秒戻る">◀ 15秒</button>' +
       '<button class="tts-btn secondary tts-fwd" disabled title="15秒進む">15秒 ▶</button>' +
       '<button class="tts-btn secondary tts-stop" disabled><span class="tts-icon">■</span>停止</button>' +
-      '<select class="tts-rate" title="読み上げ速度">' +
-        '<option value="0.8">速度: 遅い</option>' +
-        '<option value="1.0" selected>速度: 標準</option>' +
-        '<option value="1.3">速度: 速い</option>' +
-        '<option value="1.6">速度: かなり速い</option>' +
-      '</select>' +
+      '<select class="tts-sel tts-rate" title="読み上げ速度"></select>' +
       '<select class="tts-voice" title="読み上げの声"></select>' +
       '<span class="tts-status">このページを音声で聞けます（要点を整理した解説文を読み上げます）。</span>';
 
@@ -5271,8 +5428,12 @@ var wakeLock = {
     var rateSel = bar.querySelector('.tts-rate');
     var voiceSel = bar.querySelector('.tts-voice');
 
+    // 速度は全ページ共通の設定を使い、変更したら保存する
+    TTSPrefs.fillRate(rateSel);
+    state.rate = TTSPrefs.rate();
     rateSel.addEventListener('change', function(){
       state.rate = parseFloat(rateSel.value);
+      TTSPrefs.setRate(rateSel.value);
     });
 
     buildVoiceOptions(voiceSel);
@@ -5284,6 +5445,7 @@ var wakeLock = {
       if (v){
         state.voice = v;
         state.voiceLang = v.lang;
+        TTSPrefs.setVoice(v.name);   // 他のページにも引き継ぐ
       }
       // keep all chapters' dropdowns in sync since voice choice is global
       allVoiceSelects.forEach(function(sel){

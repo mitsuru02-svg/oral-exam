@@ -49,29 +49,77 @@ body {
 
 .container { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
 
-/* ── START SCREEN ── */
-.start-screen { text-align: center; padding: 40px 12px; }
-.start-icon { font-size: 56px; }
-.start-title-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
-.start-screen h2 { font-size: 22px; font-weight: 700; }
-.mode-card .mode-inner { display: flex; align-items: center; gap: 10px; }
-.mode-card .mode-icon { font-size: 20px; margin-bottom: 0; flex-shrink: 0; }
-.mode-card .mode-text { text-align: left; }
-.start-screen p { color: #8b949e; font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
-.stats-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap; }
-.stat-box { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 14px 20px; text-align: center; min-width: 100px; }
-.stat-box .num { font-size: 26px; font-weight: 700; color: #3b82f6; }
-.stat-box .label { font-size: 11px; color: #8b949e; margin-top: 3px; }
-.mode-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+/* ══════════ START SCREEN ══════════
+   スマホ＝1カラム＋画面下に固定した開始ボタン
+   PC＝左に「出題範囲を決める」／右に「状況・設定・開始」の2カラム        */
+.start-screen { padding: 24px 0 32px; text-align: left; }
+
+/* ヒーロー（タイトル・モード切替・説明） */
+.start-hero { text-align: center; margin-bottom: 24px; }
+.start-title-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 4px; }
+.start-icon { font-size: 38px; line-height: 1; }
+.start-screen h2 { font-size: 23px; font-weight: 700; letter-spacing: .01em; }
+.start-screen p { color: #8b949e; font-size: 13.5px; margin: 0; line-height: 1.75; }
+
+/* パネル（セクションの箱） */
+.panel {
+  background: #10151d; border: 1px solid #21262d; border-radius: 14px;
+  padding: 16px; margin-bottom: 14px;
+}
+.panel-title {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  font-size: 12.5px; font-weight: 700; color: #c9d1d9;
+  letter-spacing: .04em; margin-bottom: 12px;
+}
+.panel-sub { font-size: 11px; font-weight: 400; color: #6e7781; letter-spacing: 0; }
+.panel-flat { background: none; border: none; padding: 0; }
+
+/* 実績 */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat-box {
+  background: #161b22; border: 1px solid #21262d; border-radius: 10px;
+  padding: 12px 6px; text-align: center; min-width: 0;
+}
+.stat-box .num { font-size: 22px; font-weight: 700; color: #3b82f6; line-height: 1.2; }
+.stat-box .label { font-size: 10.5px; color: #8b949e; margin-top: 3px; white-space: nowrap; }
+
+/* 出題モード */
+.mode-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .mode-card {
   background: #161b22; border: 2px solid #21262d; border-radius: 12px;
-  padding: 16px 18px; cursor: pointer; transition: all 0.2s; text-align: left; min-width: 140px;
+  padding: 12px 13px; cursor: pointer; text-align: left; min-width: 0;
+  transition: border-color .18s, background .18s, box-shadow .18s;
 }
-.mode-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
-.mode-card.selected { border-color: #3b82f6; background: #0d2044; }
-.mode-card .mode-icon { font-size: 22px; margin-bottom: 6px; }
-.mode-card .mode-name { font-size: 14px; font-weight: 600; }
+.mode-card:hover { border-color: #30475f; background: #1a2230; }
+.mode-card.selected {
+  border-color: #3b82f6; background: #0d2044;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.14);
+}
+.mode-card .mode-inner { display: flex; align-items: center; gap: 9px; }
+.mode-card .mode-icon { font-size: 19px; margin: 0; flex-shrink: 0; }
+.mode-card .mode-text { text-align: left; min-width: 0; }
+.mode-card .mode-name { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mode-card.selected .mode-name { color: #cfe1ff; }
 .mode-card .mode-desc { font-size: 11px; color: #8b949e; margin-top: 3px; }
+
+/* 設定行（出題数・考える時間・読み上げ音声） */
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid #1b2029;
+}
+.setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+.setting-row:first-child { padding-top: 0; }
+.setting-row > label { font-size: 13px; color: #8b949e; flex-shrink: 0; }
+.setting-row select {
+  background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 8px;
+  padding: 7px 10px; font-size: 13.5px; max-width: 62%; cursor: pointer;
+}
+.setting-row select:focus { outline: none; border-color: #3b82f6; }
+
+/* 開始ボタン。スマホでは画面下に固定する */
+.start-cta { display: flex; flex-direction: column; gap: 10px; }
+.start-cta .btn-primary { width: 100%; }
+.start-cta .btn-secondary { width: 100%; }
 
 .btn-primary {
   background: #3b82f6; color: white; border: none; border-radius: 10px;
@@ -79,6 +127,7 @@ body {
 }
 .btn-primary:hover { background: #2563eb; }
 .btn-primary:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+
 .btn-secondary {
   background: #21262d; color: #e6edf3; border: 1px solid #30363d;
   border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; transition: all 0.2s;
@@ -230,17 +279,81 @@ body {
 /* カテゴリ選択 */
 .cat-section { margin-bottom: 20px; }
 .cat-section-title { font-size: 12px; color: #8b949e; margin-bottom: 8px; letter-spacing: 0.05em; text-align:left; }
-.cat-cards { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+/* 幅を揃えて折り返しをきれいにするため、フレックスではなくグリッドで並べる */
+.cat-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
 .cat-card {
   background: #161b22; border: 2px solid #21262d; border-radius: 10px;
-  padding: 8px 12px; cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; gap: 6px; font-size: 13px;
+  padding: 9px 11px; cursor: pointer; min-width: 0; min-height: 44px;
+  transition: border-color .18s, background .18s, box-shadow .18s, color .18s;
+  display: flex; align-items: center; gap: 7px; font-size: 12.5px;
 }
-.cat-card:hover { border-color: #3b82f6; }
-.cat-card.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
-.cat-card .cat-icon { font-size: 16px; }
-.cat-card .cat-count { font-size: 10px; color: #8b949e; margin-left: 2px; }
-.cat-card.selected .cat-count { color: #60a5fa; }
+.cat-card:hover { border-color: #30475f; background: #1a2230; }
+.cat-card.selected {
+  border-color: #3b82f6; background: #0d2044; color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.14);
+}
+.cat-card .cat-icon { font-size: 15px; flex-shrink: 0; }
+.cat-card > span:nth-child(2) { flex: 1; min-width: 0; line-height: 1.35; }
+.cat-card .cat-count {
+  font-size: 10.5px; color: #8b949e; margin-left: auto; flex-shrink: 0;
+  background: #0d1117; border: 1px solid #21262d; border-radius: 20px; padding: 1px 7px;
+}
+.cat-card.selected .cat-count { color: #93c5fd; background: #0b1b3a; border-color: #1e3a6b; }
+
+/* ── レスポンシブ ── */
+/* スマホ：開始ボタンを画面下に固定して、長いスクロールの途中でも押せるようにする */
+@media (max-width: 899px) {
+  .start-screen { padding-bottom: 96px; }
+  /* 左右カラムの入れ子を解いて、スマホで使いやすい順に並べ替える */
+  .start-grid { display: flex; flex-direction: column; }
+  .start-main, .start-side { display: contents; }
+  .sec-stats     { order: 1; }
+  .sec-mode      { order: 2; }
+  .sec-examiner  { order: 3; }
+  .sec-category  { order: 4; }
+  .sec-settings  { order: 5; }
+  .sec-info      { order: 6; }
+  .sec-breakdown { order: 7; }
+  .sec-extra     { order: 8; }
+  .start-cta     { order: 9; }
+  /* 下部固定バーの下に潜り込まないよう、スクロール位置に余白を持たせる */
+  .panel, .wb-details, .cat-card, .mode-card, .setting-row, select, summary { scroll-margin-bottom: 96px; }
+  .start-cta {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    flex-direction: row; align-items: center; gap: 8px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(13,17,23,.96); backdrop-filter: blur(8px);
+    border-top: 1px solid #21262d;
+  }
+  .start-cta .btn-primary { flex: 1; padding: 13px 10px; font-size: 15px; }
+  .start-cta .btn-secondary { width: auto; flex-shrink: 0; padding: 13px 14px; font-size: 13px; }
+  .stats-row { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .stat-box { padding: 10px 3px; }
+  .stat-box .num { font-size: 19px; }
+  .cat-cards { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+@media (max-width: 400px) {
+  .cat-cards { grid-template-columns: 1fr 1fr; }
+  .app-mode-tab { padding: 9px 12px; font-size: 12.5px; }
+}
+
+/* PC：左に出題範囲、右に状況・設定・開始。右列は追従させる */
+@media (min-width: 900px) {
+  /* .container は 640px なので、スタート画面だけ左右にはみ出させて広く使う */
+  #startScreen:not(.hidden) {
+    width: min(1060px, calc(100vw - 48px));
+    margin-left: calc(50% - min(530px, calc(50vw - 24px)));
+  }
+  .start-grid {
+    display: grid; grid-template-columns: minmax(0, 1fr) 322px;
+    gap: 20px; align-items: start;
+  }
+  .start-side { position: sticky; top: 78px; }
+  .mode-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cat-cards { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+  .start-screen h2 { font-size: 26px; }
+  .start-icon { font-size: 42px; }
+}
 
 /* 苦手問題の内訳 */
 .wb-details {
@@ -309,13 +422,18 @@ body {
 .btn-check.checked { border-color: #d29922; color: #d29922; background: #2d1d00; }
 
 /* アプリモード（試験／聞き流し）タブ */
-.app-mode-tabs { display: flex; gap: 8px; justify-content: center; margin: 14px 0 18px; }
-.app-mode-tab {
-  background: #161b22; border: 2px solid #21262d; border-radius: 10px;
-  padding: 10px 16px; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer;
-  transition: all 0.2s;
+/* セグメント型に。2つしかないので枠を共有して切替であることを見せる */
+.app-mode-tabs {
+  display: inline-flex; gap: 4px; margin: 14px 0 14px;
+  background: #10151d; border: 1px solid #21262d; border-radius: 12px; padding: 4px;
 }
-.app-mode-tab.selected { border-color: #3b82f6; background: #0d2044; color: #93c5fd; }
+.app-mode-tab {
+  background: transparent; border: none; border-radius: 9px;
+  padding: 9px 18px; font-size: 13px; font-weight: 600; color: #8b949e; cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.app-mode-tab:hover { color: #c9d1d9; }
+.app-mode-tab.selected { background: #1d4ed8; color: #fff; }
 
 /* 問題集切り替え（標準 / Fuka先生） */
 .bank-tabs { display: flex; gap: 8px; justify-content: center; margin: 0 0 18px; }
@@ -425,144 +543,151 @@ body {
 
   <!-- START SCREEN -->
   <div id="startScreen" class="start-screen">
-    <div id="syncBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:14px 16px;margin-bottom:20px;">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
-        <span style="font-size:13px;color:#8b949e;">🔄 端末間同期ID：</span>
-        <input id="syncIdInput" type="text" placeholder="例：taro-glider" maxlength="40"
-               style="background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 10px;font-size:13px;width:160px;">
-        <button class="btn-secondary" style="padding:6px 14px;font-size:13px;" onclick="saveSyncId()">設定して同期</button>
-      </div>
-      <div id="syncStatus" style="font-size:11px;color:#8b949e;text-align:center;margin-top:8px;">
-        同じIDを別の端末でも入力すると、正解数・苦手問題・チェックを引き継げます。
-      </div>
-    </div>
-    <div class="start-title-row">
-      <div class="start-icon">🛩</div>
-      <h2 id="modeTitle">口述模擬試験</h2>
-    </div>
-    <div class="app-mode-tabs">
-      <button class="app-mode-tab selected" id="tabExam" onclick="selectAppMode('exam')">📝 試験モード</button>
-      <button class="app-mode-tab" id="tabPlayback" onclick="selectAppMode('playback')">🎧 聞き流しモード</button>
-    </div>
-    <p id="modeDesc">問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
-    <div style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#8b949e;text-align:left;line-height:1.7;">
-      滝川滑空場での過去の実地試験報告書（上級滑空機の受験者分のみ）から作成した、実際に出た質問の練習問題集です。試験官ごとに質問の傾向が異なるため、下で試験官を絞り込んで練習できます。
-    </div>
-    <div id="examInfoBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
-      🤚 <strong style="color:#3fb950">ON</strong> にすることで、完全ハンズフリー。<br>
-      「<strong>採点</strong>」と言うと結果表示、その後「<strong>次</strong>」と言うと次の問題に進みます。
-    </div>
-    <div id="playbackInfoBox" class="hidden" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
-      🎧 質問→間→模範解答を自動で読み上げ続けます。マイクは使いません。<br>
-      ロック画面やイヤホン・車載機の再生/停止ボタンでも操作できます。
-    </div>
-    <div style="margin-bottom:20px">
-      <label style="font-size:13px;color:#8b949e;margin-right:8px">読み上げ音声：</label>
-      <select id="voiceSelect" onchange="onVoiceSelectChange()" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px;max-width:220px;">
-        <option value="">自動（おすすめ）</option>
-      </select>
-    </div>
-    <div class="stats-row">
-      <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
-      <div class="stat-box"><div class="num" id="savedCorrect">0</div><div class="label">正解数</div></div>
-      <div class="stat-box"><div class="num" id="savedTotal">0</div><div class="label">解答数</div></div>
-      <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
-    </div>
 
-    <div class="mode-cards">
-      <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
-        <div class="mode-inner">
-          <div class="mode-icon">🔀</div>
-          <div class="mode-text">
-            <div class="mode-name">ランダム</div>
-          </div>
-        </div>
+    <header class="start-hero">
+      <div class="start-title-row">
+        <div class="start-icon">🛩</div>
+        <h2 id="modeTitle">口述模擬試験</h2>
       </div>
-      <div class="mode-card" onclick="selectMode('wrong')" id="modeWrong">
-        <div class="mode-inner">
-          <div class="mode-icon">🎯</div>
-          <div class="mode-text">
-            <div class="mode-name">苦手問題</div>
-          </div>
-        </div>
+      <div class="app-mode-tabs">
+        <button class="app-mode-tab selected" id="tabExam" onclick="selectAppMode('exam')">📝 試験モード</button>
+        <button class="app-mode-tab" id="tabPlayback" onclick="selectAppMode('playback')">🎧 聞き流しモード</button>
       </div>
-      <div class="mode-card" onclick="selectMode('unmastered')" id="modeUnmastered" title="不正解・部分正解・スキップのまま残っている問題に加え、一度も解答していない問題も含みます">
-        <div class="mode-inner">
-          <div class="mode-icon">🆕</div>
-          <div class="mode-text">
-            <div class="mode-name">未正解</div>
-          </div>
-        </div>
-      </div>
-      <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
-        <div class="mode-inner">
-          <div class="mode-icon">⭐</div>
-          <div class="mode-text">
-            <div class="mode-name">チェック</div>
-          </div>
-        </div>
-      </div>
-      <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
-        <div class="mode-inner">
-          <div class="mode-icon">📋</div>
-          <div class="mode-text">
-            <div class="mode-name">順番通り</div>
-          </div>
-        </div>
-      </div>
-      <div class="mode-card" onclick="selectMode('importance')" id="modeImportance">
-        <div class="mode-inner">
-          <div class="mode-icon">🔥</div>
-          <div class="mode-text">
-            <div class="mode-name">頻出順</div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <p id="modeDesc">問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
+    </header>
 
-    <details class="wb-details">
-      <summary>🎯 苦手問題の内訳（カテゴリ別・試験官別）</summary>
-      <div id="wrongBreakdownWrap"></div>
-    </details>
+    <div class="start-grid">
 
-    <!-- 試験官で絞り込み -->
-    <div class="cat-section">
-      <div class="cat-section-title">🧑‍✈️ 試験官で絞り込み（実際にその試験官が出した質問のみ）</div>
-      <div class="cat-cards" id="examinerCards"></div>
-    </div>
-    <!-- カテゴリ選択 -->
-    <div class="cat-section">
-      <div class="cat-section-title">📂 カテゴリ（タップで絞り込み）</div>
-      <div class="cat-cards" id="catCards"></div>
-    </div>
+      <!-- ── 左：出題範囲を決める ── -->
+      <div class="start-main">
 
-    <div style="margin-bottom:20px">
-      <label style="font-size:13px;color:#8b949e;margin-right:8px">出題数：</label>
-      <select id="countSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
-        <option value="5">5問</option>
-        <option value="10" selected>10問</option>
-        <option value="20">20問</option>
-        <option value="155">全問 (155問)</option>
-      </select>
-    </div>
-    <div id="thinkPauseRow" class="hidden" style="margin-bottom:20px">
-      <label style="font-size:13px;color:#8b949e;margin-right:8px">考える時間：</label>
-      <select id="thinkPauseSelect" style="background:#161b22;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:6px 12px;font-size:14px">
-        <option value="3">3秒</option>
-        <option value="5" selected>5秒</option>
-        <option value="8">8秒</option>
-        <option value="12">12秒</option>
-      </select>
-    </div>
-    <button class="btn-primary" onclick="startExam()" id="startBtn">試験開始</button>
-    <div style="margin-top:12px;">
-      <button class="btn-secondary" onclick="showStatusScreen()">📊 全問題ステータス一覧を見る</button>
-    </div>
+        <section class="panel sec-mode">
+          <div class="panel-title">🎲 出題モード</div>
+          <div class="mode-cards">
+            <div class="mode-card selected" onclick="selectMode('random')" id="modeRandom">
+              <div class="mode-inner"><div class="mode-icon">🔀</div>
+                <div class="mode-text"><div class="mode-name">ランダム</div></div></div>
+            </div>
+            <div class="mode-card" onclick="selectMode('wrong')" id="modeWrong">
+              <div class="mode-inner"><div class="mode-icon">🎯</div>
+                <div class="mode-text"><div class="mode-name">苦手問題</div></div></div>
+            </div>
+            <div class="mode-card" onclick="selectMode('unmastered')" id="modeUnmastered" title="不正解・部分正解・スキップのまま残っている問題に加え、一度も解答していない問題も含みます">
+              <div class="mode-inner"><div class="mode-icon">🆕</div>
+                <div class="mode-text"><div class="mode-name">未正解</div></div></div>
+            </div>
+            <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
+              <div class="mode-inner"><div class="mode-icon">⭐</div>
+                <div class="mode-text"><div class="mode-name">チェック</div></div></div>
+            </div>
+            <div class="mode-card" onclick="selectMode('order')" id="modeOrder">
+              <div class="mode-inner"><div class="mode-icon">📋</div>
+                <div class="mode-text"><div class="mode-name">順番通り</div></div></div>
+            </div>
+            <div class="mode-card" onclick="selectMode('importance')" id="modeImportance">
+              <div class="mode-inner"><div class="mode-icon">🔥</div>
+                <div class="mode-text"><div class="mode-name">頻出順</div></div></div>
+            </div>
+          </div>
+        </section>
 
-    <details class="wb-details" id="syncListDetails" ontoggle="if(this.open) loadSyncList()">
-      <summary>📋 登録済みIDの進捗一覧</summary>
-      <div id="syncListWrap"><div style="font-size:12.5px;color:#8b949e;text-align:center;padding:6px 0;">開くと読み込みます...</div></div>
-    </details>
+        <section class="panel sec-examiner">
+          <div class="panel-title">🧑‍✈️ 出題者<span class="panel-sub">実際にその試験官が出した質問に絞ります</span></div>
+          <div class="cat-cards" id="examinerCards"></div>
+        </section>
+
+        <section class="panel sec-category">
+          <div class="panel-title">📂 カテゴリ<span class="panel-sub">出題者との併用もできます</span></div>
+          <div class="cat-cards" id="catCards"></div>
+        </section>
+
+        <details class="wb-details sec-breakdown">
+          <summary>🎯 苦手問題の内訳（カテゴリ別・出題者別）</summary>
+          <div id="wrongBreakdownWrap"></div>
+        </details>
+
+      </div>
+
+      <!-- ── 右：状況・設定・開始 ── -->
+      <aside class="start-side">
+
+        <section class="panel sec-stats">
+          <div class="stats-row">
+            <div class="stat-box"><div class="num" id="totalQCount">-</div><div class="label">総問題数</div></div>
+            <div class="stat-box"><div class="num" id="savedCorrect">0</div><div class="label">正解数</div></div>
+            <div class="stat-box"><div class="num" id="savedTotal">0</div><div class="label">解答数</div></div>
+            <div class="stat-box"><div class="num" id="checkedCount" style="color:#d29922">0</div><div class="label">⭐チェック</div></div>
+          </div>
+        </section>
+
+        <section class="panel sec-settings">
+          <div class="panel-title">⚙️ 設定</div>
+          <div class="setting-row">
+            <label for="countSelect">出題数</label>
+            <select id="countSelect">
+              <option value="5">5問</option>
+              <option value="10" selected>10問</option>
+              <option value="20">20問</option>
+              <option value="155">全問 (155問)</option>
+            </select>
+          </div>
+          <div class="setting-row hidden" id="thinkPauseRow">
+            <label for="thinkPauseSelect">考える時間</label>
+            <select id="thinkPauseSelect">
+              <option value="3">3秒</option>
+              <option value="5" selected>5秒</option>
+              <option value="8">8秒</option>
+              <option value="12">12秒</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <label for="voiceSelect">読み上げ音声</label>
+            <select id="voiceSelect" onchange="onVoiceSelectChange()">
+              <option value="">自動（おすすめ）</option>
+            </select>
+          </div>
+        </section>
+
+        <div id="examInfoBox" class="panel sec-info" style="font-size:12.5px;color:#c9d1d9;line-height:1.8;">
+          🤚 <strong style="color:#3fb950">ON</strong> にすることで、完全ハンズフリー。<br>
+          「<strong>採点</strong>」と言うと結果表示、その後「<strong>次</strong>」と言うと次の問題に進みます。
+        </div>
+        <div id="playbackInfoBox" class="panel sec-info hidden" style="font-size:12.5px;color:#c9d1d9;line-height:1.8;">
+          🎧 質問→間→模範解答を自動で読み上げ続けます。マイクは使いません。<br>
+          ロック画面やイヤホン・車載機の再生/停止ボタンでも操作できます。
+        </div>
+
+        <div class="start-cta">
+          <button class="btn-primary" onclick="startExam()" id="startBtn">試験開始</button>
+          <button class="btn-secondary" onclick="showStatusScreen()">📊 ステータス一覧</button>
+        </div>
+
+        <details class="wb-details sec-extra" style="margin-top:14px;">
+          <summary>ℹ️ この問題集について</summary>
+          <div style="font-size:12.5px;color:#8b949e;line-height:1.8;">
+            滝川滑空場での過去の実地試験報告書（上級滑空機の受験者分のみ）から作成した、実際に出た質問の練習問題集です。試験官ごとに質問の傾向が異なるため、出題者で絞り込んで練習できます。日口教官は模擬オーラルの記録で、設問数が少ないため、内容が重なる関連設問もあわせて出題します。
+          </div>
+        </details>
+
+        <details class="wb-details sec-extra" id="syncBox">
+          <summary>🔄 端末間で進捗を同期する</summary>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <input id="syncIdInput" type="text" placeholder="例：taro-glider" maxlength="40"
+                   style="flex:1;min-width:120px;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:8px;padding:8px 10px;font-size:13px;">
+            <button class="btn-secondary" style="padding:8px 14px;font-size:13px;" onclick="saveSyncId()">設定</button>
+          </div>
+          <div id="syncStatus" style="font-size:11.5px;color:#8b949e;margin-top:8px;line-height:1.7;">
+            同じIDを別の端末でも入力すると、正解数・苦手問題・チェックを引き継げます。
+          </div>
+        </details>
+
+        <details class="wb-details sec-extra" id="syncListDetails" ontoggle="if(this.open) loadSyncList()">
+          <summary>📋 登録済みIDの進捗一覧</summary>
+          <div id="syncListWrap"><div style="font-size:12.5px;color:#8b949e;padding:6px 0;">開くと読み込みます...</div></div>
+        </details>
+
+      </aside>
+    </div>
   </div>
 
   <!-- STATUS SCREEN -->
@@ -761,8 +886,12 @@ function initExaminerCards() {
     const btn = document.createElement('div');
     btn.className = 'cat-card';
     btn.id = 'ex-' + ex.id;
-    btn.title = ex.note;
-    btn.innerHTML = `<span class="cat-icon">${ex.icon}</span><span>${ex.name}</span><span class="cat-count">${ex.indices.length}</span>`;
+    const rel = ex.relatedCount || 0;
+    btn.title = rel
+      ? `${ex.note}\n\n記録にある設問 ${ex.indices.length}問 ＋ 内容が重なる関連設問 ${rel}問 ＝ 計${ex.poolIndices.length}問を出題します。`
+      : ex.note;
+    const countLabel = rel ? `${ex.indices.length}+${rel}` : `${ex.indices.length}`;
+    btn.innerHTML = `<span class="cat-icon">${ex.icon}</span><span>${ex.name}</span><span class="cat-count">${countLabel}</span>`;
     btn.onclick = () => selectExaminer(ex.id);
     container.appendChild(btn);
   });
@@ -1669,9 +1798,11 @@ function getCategoryPool() {
     ? [...Array(activeQA().length).keys()]
     : (activeCats().find(c => c.id === selectedCategory)?.indices.slice() || [...Array(activeQA().length).keys()]);
   // 試験官絞り込み（併用可能）
+  // poolIndices は「直接記録されている設問＋内容が重なる関連設問」。
+  // 記録数が少ない出題者でも、十分な問題数で練習できるようにするため。
   if (selectedExaminer) {
     const exGroup = JITCHI_EXAMINER_GROUPS.find(e => e.id === selectedExaminer);
-    const exSet = new Set(exGroup ? exGroup.indices : []);
+    const exSet = new Set(exGroup ? (exGroup.poolIndices || exGroup.indices) : []);
     pool = pool.filter(i => exSet.has(i));
   }
   return pool;

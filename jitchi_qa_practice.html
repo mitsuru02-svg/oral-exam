@@ -184,6 +184,13 @@ body {
 .btn-speak-ans:hover { border-color: #3b82f6; color: #93c5fd; }
 .btn-speak-ans.speaking { border-color: #3b82f6; color: #3b82f6; animation: pulse 1.2s infinite; }
 .model-answer-text { font-size: 14px; line-height: 1.8; color: #c9d1d9; }
+/* 原典を確認できていない箇所の注記。模範解答の外に置き、読み上げ対象にしない */
+.qa-note {
+  margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+  background: rgba(210,153,34,.08); border: 1px solid #5c3d00;
+  font-size: 12px; line-height: 1.75; color: #d29922;
+}
+.qa-note b { color: #f0b429; font-weight: 700; }
 
 .next-row { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
 
@@ -391,6 +398,7 @@ body {
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   #playbackScreen[data-phase="answer"] .model-answer-text { font-size: 27px; }
+  #playbackScreen .qa-note { font-size: 15px; padding: 8px 10px; flex-shrink: 0; }
 }
 </style>
 </head>
@@ -667,6 +675,7 @@ body {
         <span class="model-answer-label">▼ 模範解答</span>
       </div>
       <div class="model-answer-text" id="pbAnswerText"></div>
+      <div class="hidden" id="pbNote"></div>
     </div>
 
     <div class="pb-controls">
@@ -714,6 +723,14 @@ function activeCats()  { return JITCHI_CATEGORIES; }
 function bankKey(name) { return 'jitchi_' + name; }
 
 let selectedExaminer = null; // null = 全員
+
+// 注記は模範解答の要素の外に出す。speakModelAnswer() は modelAnswerText の
+// textContent だけを読むので、注記が読み上げに混ざることはない。
+function noteHtml(qa) {
+  if (!qa || !qa.note) return '';
+  const esc = String(qa.note).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return '<div class="qa-note"><b>⚠️ 要確認</b>　' + esc + '</div>';
+}
 
 function impLabel(qa) {
   const stars = qa.imp === 3 ? '★★★ 定番' : qa.imp === 2 ? '★★ 頻出' : '★ 標準';
@@ -2054,6 +2071,7 @@ function handleResult(result, qa, qIdx, userAns) {
         <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
       </div>
       <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
+      ${noteHtml(qa)}
     </div>` : ''}
   `;
   box.classList.remove('hidden');
@@ -2103,6 +2121,7 @@ function showAnswer() {
           <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
         </div>
         <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
+        ${noteHtml(qa)}
       </div>`;
   }
   document.getElementById('btnShowAns').style.display = 'none';
@@ -2185,6 +2204,9 @@ function updatePlaybackUI() {
   document.getElementById('pbQuestionText').textContent = qa.q;
   document.getElementById('pbAnswerBox').classList.add('hidden');
   document.getElementById('pbAnswerText').textContent = qa.a;
+  const pbNote = document.getElementById('pbNote');
+  pbNote.innerHTML = noteHtml(qa);
+  pbNote.classList.toggle('hidden', !qa.note);
   document.getElementById('progressBarPb').style.width = (pbIdx / examQuestions.length * 100) + '%';
   updateMediaSessionMeta(qa);
 }

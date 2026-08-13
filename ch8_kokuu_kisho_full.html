@@ -16,7 +16,7 @@
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   html,body{margin:0;padding:0;background:var(--navy-950);color:var(--ink);font-family:var(--sans);}
-  .wrap{max-width:980px;margin:0 auto;padding:0 20px 140px;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px 190px;}
 
   /* HERO */
   .hero{padding:44px 20px 26px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--navy-900),var(--navy-950));}
@@ -128,15 +128,85 @@
   }
 
   footer.note{text-align:center;margin-top:50px;font-size:11.5px;color:var(--ink-faint);font-family:var(--mono);}
+  /* ===== ハンバーガー & サイドバー目次 ===== */
+  #hamburger{margin-left:auto;flex-shrink:0;width:34px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#c9d4e5;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  #hamburger:hover{background:rgba(255,255,255,.12);}
+  #sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:998;opacity:0;pointer-events:none;transition:opacity .2s;}
+  #sb-overlay.open{opacity:1;pointer-events:auto;}
+  #sidebar{position:fixed;top:0;left:0;width:min(86vw,320px);height:100dvh;z-index:1000;background:var(--navy-900);border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .22s ease;display:flex;flex-direction:column;}
+  #sidebar.open{transform:translateX(0);}
+  .sb-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  .sb-head b{font-size:13px;font-weight:700;color:var(--ink);}
+  .sb-close{margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;}
+  .sb-search{margin:10px 14px 6px;padding:8px 10px;background:var(--navy-950);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:13px;width:calc(100% - 28px);}
+  .sb-search::placeholder{color:var(--ink-faint);}
+  #sb-list{overflow-y:auto;flex:1;padding:6px 10px 30px;-webkit-overflow-scrolling:touch;}
+  .sb-group{margin-bottom:12px;}
+  .sb-block{display:block;font-size:13px;font-weight:700;color:var(--amber-bright);text-decoration:none;padding:8px 8px;border-radius:6px;background:rgba(232,163,61,.08);margin-bottom:4px;}
+  .sb-block:hover{background:rgba(232,163,61,.16);}
+  .sb-topic{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--ink-dim);text-decoration:none;padding:6px 8px 6px 12px;border-radius:6px;line-height:1.5;}
+  .sb-topic:hover{background:rgba(255,255,255,.05);color:var(--ink);}
+  .sb-topic.reading{background:rgba(232,163,61,.14);color:var(--amber-bright);}
+  .sb-num{font-family:var(--mono);font-size:10.5px;color:var(--amber);flex-shrink:0;min-width:30px;}
+  .sb-empty{color:var(--ink-faint);font-size:12px;padding:12px 8px;}
+
+  /* ===== 画面下に固定した再生バー ===== */
+  #tts-dock{position:fixed;left:0;right:0;bottom:0;z-index:880;background:rgba(12,18,32,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:none;}
+  #tts-dock.on{display:block;}
+  .dk-inner{max-width:980px;margin:0 auto;}
+  .dk-bar{height:3px;background:var(--navy-700);border-radius:2px;overflow:hidden;margin-bottom:7px;}
+  .dk-bar i{display:block;height:100%;background:var(--amber);width:0;transition:width .3s linear;}
+  .dk-meta{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-bottom:7px;}
+  .dk-meta #dk-topic{color:var(--ink-dim);font-family:var(--sans);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+  .dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+  .dk-btns button{font-family:var(--mono);font-size:12px;background:transparent;color:var(--sky);border:1px solid var(--sky);border-radius:20px;padding:8px 13px;cursor:pointer;}
+  .dk-btns button:hover{background:rgba(95,180,214,.12);}
+  #dk-play{background:var(--sky);color:var(--navy-950);font-weight:700;min-width:104px;}
+  #dk-stop{border-color:var(--danger);color:var(--danger);}
+  .dk-btns select{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:7px 9px;margin-left:auto;cursor:pointer;}
+  .tts-rate{font-family:var(--mono);font-size:11px;background:var(--navy-800);color:var(--ink-dim);border:1px solid var(--line);border-radius:20px;padding:5px 10px;cursor:pointer;}
+
+  @media (max-width:640px){
+    #sidebar{width:min(92vw,340px);}
+    .dk-btns button{flex:1;padding:10px 6px;font-size:12.5px;}
+    #dk-play{flex:1.4 1 100%;order:-1;margin-bottom:6px;}
+    .dk-btns select{margin-left:0;flex:0 0 auto;}
+    /* 画面下のバーが担当するので、本文中のバーは再生と設定だけにする */
+    .tts-controls:not(.tts-controls-mini) .tts-back,
+    .tts-controls:not(.tts-controls-mini) .tts-fwd,
+    .tts-controls:not(.tts-controls-mini) .tts-stop{display:none;}
+  }
 </style>
 </head>
 <body>
-<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;">
+<div style="background:#161b22;border-bottom:1px solid #21262d;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:999;" id="page-header">
   <a href="./index.html" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8b949e;font-size:16px;text-decoration:none;flex-shrink:0;">‹</a>
   <div style="width:30px;height:30px;background:linear-gradient(135deg,#3b82f6,#1e40af);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">✈</div>
   <div>
     <div style="font-size:13px;font-weight:600;color:#e6edf3;">AIM-J 第8章 航空気象</div>
     <div style="font-size:10px;color:#8b949e;margin-top:1px;">自家用操縦士（滑空機）</div>
+  </div>
+  <button id="hamburger" aria-label="目次">☰</button>
+</div>
+
+<div id="sb-overlay"></div>
+<aside id="sidebar">
+  <div class="sb-head"><b>AIM-J 第8章 航空気象</b><button class="sb-close" aria-label="閉じる">✕</button></div>
+  <input id="sb-search" class="sb-search" type="search" placeholder="項目名・番号で絞り込み" autocomplete="off">
+  <div id="sb-list"><div class="sb-empty" style="display:none">該当する項目がありません</div></div>
+</aside>
+
+<div id="tts-dock">
+  <div class="dk-inner">
+    <div class="dk-bar"><i></i></div>
+    <div class="dk-meta"><span id="dk-topic">—</span><span id="dk-pos"></span></div>
+    <div class="dk-btns">
+      <button id="dk-back">◀ 15秒</button>
+      <button id="dk-play">⏸ 一時停止</button>
+      <button id="dk-fwd">15秒 ▶</button>
+      <button id="dk-stop">■ 停止</button>
+      <select id="dk-rate" title="読み上げ速度"></select>
+    </div>
   </div>
 </div>
 
@@ -1349,7 +1419,7 @@ function blockText(id){
   return getTopicOrder(id).map(i=>i.text).join(' ');
 }
 
-let player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[] };
+let player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[], gen:0, timer:null, pausedAt:0 };
 
 function allControls(){ return document.querySelectorAll('.tts-controls'); }
 function updateButtons(){
@@ -1367,10 +1437,13 @@ function updateButtons(){
       status.textContent = '';
     }
   });
+  if(window.__syncDock) window.__syncDock();
 }
 function hardStop(){
+  const nextGen = player.gen + 1;                 /* 世代番号は引き継ぐ（遅れて届く onend を無効化するため） */
+  clearTimeout(player.timer);
   window.speechSynthesis.cancel();
-  player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[] };
+  player = { id:null, chunks:[], index:0, offsetChars:0, state:'stopped', chunkStartedAt:0, topicRanges:[], gen:nextGen, timer:null, pausedAt:0 };
   updateButtons();
   document.querySelectorAll('details.topic.reading').forEach(d=>{
     d.classList.remove('reading');
@@ -1392,23 +1465,35 @@ function highlightReadingTopic(){
     }
   });
 }
-function speakChunkFrom(index, charOffset){
-  window.speechSynthesis.cancel();
+var speechRate = 0.98;
+function speakChunkFrom(index, charOffset, delayMs){
   const chunk = player.chunks[index];
   if(!chunk){ hardStop(); return; }
-  const text = pronFix(chunk.text.slice(charOffset));
-  const u = new SpeechSynthesisUtterance(text || '。');
-  if(selectedVoice){ u.voice = selectedVoice; u.lang = selectedVoice.lang; }
-  else { u.lang = chunk.lang; }
-  u.rate = 0.98;
+  /* 世代番号。cancel() の直後に古い発話の onend が遅れて飛んでくるため、
+     それが次の文へ勝手に進めてしまわないように無効化する。 */
+  player.gen++;
+  const myGen = player.gen;
+  /* 表示上の位置は先に確定させる（連打しても表示と再生位置がズレない） */
   player.index = index; player.offsetChars = charOffset; player.chunkStartedAt = Date.now(); player.state = 'playing';
-  u.onend = () => {
-    if(player.state !== 'playing') return;
-    if(index+1 < player.chunks.length){ speakChunkFrom(index+1, 0); updateButtons(); } else { hardStop(); }
-  };
-  window.speechSynthesis.speak(u);
   updateButtons();
   highlightReadingTopic();
+  window.speechSynthesis.cancel();
+  clearTimeout(player.timer);
+  player.timer = setTimeout(()=>{
+    if(myGen !== player.gen) return;
+    const u = new SpeechSynthesisUtterance(pronFix(chunk.text.slice(charOffset)) || '。');
+    if(selectedVoice){ u.voice = selectedVoice; u.lang = selectedVoice.lang; }
+    else { u.lang = chunk.lang; }
+    u.rate = speechRate;
+    player.chunkStartedAt = Date.now();
+    u.onend = () => {
+      if(myGen !== player.gen) return;
+      if(player.state !== 'playing') return;
+      if(index+1 < player.chunks.length){ speakChunkFrom(index+1, 0); } else { hardStop(); }
+    };
+    u.onerror = () => {};
+    window.speechSynthesis.speak(u);
+  }, delayMs || 0);
 }
 function computeTopicRanges(topicOrder){
   let cum = 0;
@@ -1446,28 +1531,45 @@ function togglePlayPause(id){
   if(player.id!==id || player.state==='stopped'){ startGeneric(id); return; }
   if(player.state==='playing'){
     try{ window.speechSynthesis.pause(); }catch(e){}
+    player.pausedAt = Date.now();
     player.state='paused'; updateButtons();
   } else if(player.state==='paused'){
+    /* 一時停止していた分だけ開始時刻をずらす（±15秒の計算が狂わないように） */
+    if(player.pausedAt) player.chunkStartedAt += (Date.now()-player.pausedAt);
+    player.pausedAt = 0;
     try{ window.speechSynthesis.resume(); player.state='playing'; }
-    catch(e){ speakChunkFrom(player.index, player.offsetChars); }
+    catch(e){ speakChunkFrom(player.index, player.offsetChars, 120); }
     updateButtons();
+    /* iOS など resume() が効かない環境では、その文の続きから読み直す */
+    setTimeout(()=>{
+      if(player.state==='playing' && !window.speechSynthesis.speaking){
+        speakChunkFrom(player.index, player.offsetChars, 60);
+      }
+    }, 350);
   }
 }
 function seek(id, deltaMs){
   if(player.id!==id || player.chunks.length===0) return;
-  const elapsedInChunk = player.state==='playing' ? (Date.now()-player.chunkStartedAt) : 0;
-  let totalMs = elapsedInChunk;
-  for(let i=0;i<player.index;i++) totalMs += player.chunks[i].estMs;
-  let totalAll = totalMs;
-  for(let i=player.index;i<player.chunks.length;i++) totalAll += (i===player.index ? (player.chunks[i].estMs-elapsedInChunk) : player.chunks[i].estMs);
-  let targetMs = Math.min(Math.max(0, totalMs+deltaMs), totalAll-100);
+  const rate = speechRate || 1;
+  const dur = (c)=> c.estMs / rate;                                  /* 速度を反映した所要時間 */
+  const mpc = (c)=> ((c.lang && c.lang.startsWith('en')) ? 90 : 175) / rate;
+  /* 現在位置＝(この文のすでに読み飛ばした分)＋(この文の再生経過)＋(前の文の合計)
+     読み飛ばした分を足すのが肝。ここを忘れると連打しても同じ所に戻ってしまう。 */
+  const cur = player.chunks[player.index];
+  const elapsed = player.state==='playing' ? (Date.now()-player.chunkStartedAt) : 0;
+  let posMs = player.offsetChars * mpc(cur) + elapsed;
+  for(let i=0;i<player.index;i++) posMs += dur(player.chunks[i]);
+  let totalAll = 0;
+  player.chunks.forEach(c=>{ totalAll += dur(c); });
+  const targetMs = Math.min(Math.max(0, posMs+deltaMs), Math.max(0, totalAll-200));
   let i=0, acc=0;
-  while(i < player.chunks.length-1 && acc+player.chunks[i].estMs < targetMs){ acc += player.chunks[i].estMs; i++; }
-  const intoChunkMs = Math.max(0, targetMs-acc);
+  while(i < player.chunks.length-1 && acc+dur(player.chunks[i]) <= targetMs){ acc += dur(player.chunks[i]); i++; }
   const chunk = player.chunks[i];
-  const msPerChar = chunk.lang.startsWith('en') ? 90 : 175;
-  const charOffset = Math.min(chunk.text.length, Math.floor(intoChunkMs/msPerChar));
-  speakChunkFrom(i, charOffset);
+  const intoChunkMs = Math.max(0, targetMs-acc);
+  let charOffset = Math.floor(intoChunkMs/mpc(chunk));
+  if(charOffset < 10) charOffset = 0;                                /* 文頭付近なら頭から読む */
+  charOffset = Math.min(charOffset, Math.max(0, chunk.text.length-1));
+  speakChunkFrom(i, charOffset, 160);
 }
 function back15(id){ seek(id, -15000); }
 function forward15(id){ seek(id, 15000); }
@@ -1545,6 +1647,210 @@ populateVoiceSelects();
 document.querySelectorAll('.metar-examples button, .cb-stage-tabs button').forEach(b=>{
   b.addEventListener('click', hardStop);
 });
+</script>
+
+<script>
+/* ============ サイドバー目次 / 画面下固定バー / 速度選択 ============ */
+(function(){
+  var RATES = [['0.75','ゆっくり×0.75'],['0.9','×0.9'],['0.98','標準'],['1.15','×1.15'],['1.3','×1.3'],['1.5','速い×1.5']];
+  var LS_RATE = 'aimj_rate', LS_VOICE = 'aimj_voice';
+
+  /* ---- 保存してある再生速度を復元 ---- */
+  try{
+    var saved = localStorage.getItem(LS_RATE);
+    if(saved && !isNaN(parseFloat(saved))) speechRate = parseFloat(saved);
+  }catch(e){}
+
+  function makeRateSelect(cls){
+    var s = document.createElement('select');
+    s.className = 'tts-rate ' + (cls||'');
+    s.title = '読み上げ速度';
+    RATES.forEach(function(r){
+      var o = document.createElement('option');
+      o.value = r[0]; o.textContent = r[1];
+      s.appendChild(o);
+    });
+    s.value = String(speechRate);
+    if(s.selectedIndex < 0) s.value = '0.98';
+    s.addEventListener('change', function(){
+      speechRate = parseFloat(s.value);
+      try{ localStorage.setItem(LS_RATE, s.value); }catch(e){}
+      document.querySelectorAll('.tts-rate').forEach(function(o){ o.value = s.value; });
+      /* 再生中なら、その文の頭から新しい速度で読み直す */
+      if(player.state === 'playing') speakChunkFrom(player.index, player.offsetChars, 120);
+    });
+    return s;
+  }
+  document.querySelectorAll('.tts-controls:not(.tts-controls-mini)').forEach(function(c){
+    var st = c.querySelector('.tts-status');
+    var sel = makeRateSelect();
+    if(st) c.insertBefore(sel, st); else c.appendChild(sel);
+  });
+
+  /* ---- 音声の選択を記憶する ---- */
+  try{
+    var savedVoice = localStorage.getItem(LS_VOICE);
+    if(savedVoice){
+      var apply = function(){
+        var v = (window.speechSynthesis.getVoices()||[]).find(function(x){ return x.name === savedVoice; });
+        if(v){ selectedVoice = v; document.querySelectorAll('.tts-voice').forEach(function(s){ s.value = v.name; }); }
+      };
+      apply(); setTimeout(apply, 400);
+    }
+  }catch(e){}
+  document.addEventListener('change', function(ev){
+    if(ev.target && ev.target.classList && ev.target.classList.contains('tts-voice')){
+      try{ localStorage.setItem(LS_VOICE, ev.target.value); }catch(e){}
+    }
+  }, true);
+
+  /* ================= サイドバー目次 ================= */
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sb-overlay');
+  var list    = document.getElementById('sb-list');
+  var search  = document.getElementById('sb-search');
+
+  document.querySelectorAll('.block').forEach(function(b){
+    var h2 = b.querySelector('.block-head h2');
+    if(!h2) return;
+    var grp = document.createElement('div'); grp.className = 'sb-group';
+    var ba = document.createElement('a');
+    ba.className = 'sb-block'; ba.href = '#' + b.id;
+    ba.textContent = h2.textContent.trim();
+    grp.appendChild(ba);
+    b.querySelectorAll('details.topic').forEach(function(d){
+      var tid = d.getAttribute('data-tid');
+      if(!tid) return;
+      if(!d.id) d.id = 't-' + tid;
+      var sum = d.querySelector('summary');
+      var numEl = sum ? sum.querySelector('.num') : null;
+      var num = numEl ? numEl.textContent.trim() : '';
+      var full = sum ? sum.textContent.replace(/\s+/g,' ').trim() : '';
+      var label = num && full.indexOf(num) === 0 ? full.slice(num.length).trim() : full;
+      var a = document.createElement('a');
+      a.className = 'sb-topic'; a.href = '#' + d.id; a.dataset.tid = tid;
+      a.innerHTML = '<span class="sb-num"></span><span class="sb-lbl"></span>';
+      a.querySelector('.sb-num').textContent = num;
+      a.querySelector('.sb-lbl').textContent = label;
+      a.addEventListener('click', function(ev){
+        ev.preventDefault();
+        d.open = true;
+        closeSb();
+        setTimeout(function(){ d.scrollIntoView({block:'start', behavior:'smooth'}); }, 60);
+      });
+      grp.appendChild(a);
+    });
+    list.appendChild(grp);
+  });
+
+  function openSb(){ sidebar.classList.add('open'); overlay.classList.add('open'); syncSbHighlight(); }
+  function closeSb(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+  document.getElementById('hamburger').addEventListener('click', function(){
+    sidebar.classList.contains('open') ? closeSb() : openSb();
+  });
+  overlay.addEventListener('click', closeSb);
+  document.querySelector('.sb-close').addEventListener('click', closeSb);
+  document.querySelectorAll('.sb-block').forEach(function(a){ a.addEventListener('click', closeSb); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeSb(); });
+
+  search.addEventListener('input', function(){
+    var q = search.value.trim().toLowerCase();
+    var hit = 0;
+    document.querySelectorAll('.sb-group').forEach(function(g){
+      var shown = 0;
+      g.querySelectorAll('.sb-topic').forEach(function(a){
+        var ok = !q || a.textContent.toLowerCase().indexOf(q) >= 0;
+        a.style.display = ok ? '' : 'none';
+        if(ok) shown++;
+      });
+      var blockHit = !q || g.querySelector('.sb-block').textContent.toLowerCase().indexOf(q) >= 0;
+      if(blockHit){ g.querySelectorAll('.sb-topic').forEach(function(a){ a.style.display=''; }); shown = g.querySelectorAll('.sb-topic').length; }
+      g.style.display = (shown > 0 || blockHit) ? '' : 'none';
+      hit += shown;
+    });
+    var empty = document.querySelector('.sb-empty');
+    empty.style.display = (q && hit === 0) ? '' : 'none';
+  });
+
+  function syncSbHighlight(){
+    var range = player.topicRanges && player.topicRanges.find(function(r){ return player.index >= r.start && player.index <= r.end; });
+    var tid = range ? range.tid : null;
+    document.querySelectorAll('.sb-topic').forEach(function(a){
+      a.classList.toggle('reading', !!tid && a.dataset.tid === tid);
+    });
+  }
+
+  /* ================= 画面下の固定バー ================= */
+  var dock  = document.getElementById('tts-dock');
+  var dkPl  = document.getElementById('dk-play');
+  var dkTop = document.getElementById('dk-topic');
+  var dkPos = document.getElementById('dk-pos');
+  var dkFill= document.querySelector('#tts-dock .dk-bar i');
+  var dkRate= document.getElementById('dk-rate');
+
+  RATES.forEach(function(r){
+    var o = document.createElement('option'); o.value = r[0]; o.textContent = r[1]; dkRate.appendChild(o);
+  });
+  dkRate.className = 'tts-rate';
+  dkRate.value = String(speechRate);
+  if(dkRate.selectedIndex < 0) dkRate.value = '0.98';
+  dkRate.addEventListener('change', function(){
+    speechRate = parseFloat(dkRate.value);
+    try{ localStorage.setItem(LS_RATE, dkRate.value); }catch(e){}
+    document.querySelectorAll('.tts-rate').forEach(function(o){ o.value = dkRate.value; });
+    if(player.state === 'playing') speakChunkFrom(player.index, player.offsetChars, 120);
+  });
+
+  document.getElementById('dk-back').addEventListener('click', function(){ if(player.id) back15(player.id); });
+  document.getElementById('dk-fwd') .addEventListener('click', function(){ if(player.id) forward15(player.id); });
+  document.getElementById('dk-stop').addEventListener('click', function(){ hardStop(); });
+  dkPl.addEventListener('click', function(){ if(player.id) togglePlayPause(player.id); });
+
+  function currentTopicTitle(){
+    if(!player.id) return '';
+    var range = player.topicRanges && player.topicRanges.find(function(r){ return player.index >= r.start && player.index <= r.end; });
+    if(range && range.tid){
+      var d = document.querySelector('details.topic[data-tid="' + range.tid + '"] summary');
+      if(d) return d.textContent.replace(/\s+/g,' ').trim();
+    }
+    var blockEl = document.getElementById(String(player.id).replace('block','b'));
+    if(blockEl){
+      var h2 = blockEl.querySelector('.block-head h2');
+      if(h2) return h2.textContent.trim() + '（導入）';
+    }
+    return '読み上げ中';
+  }
+
+  /* 画面がスリープしないようにする（読み上げ中のみ） */
+  var wakeLock = null;
+  function reqWake(){
+    try{
+      if('wakeLock' in navigator && !wakeLock){
+        navigator.wakeLock.request('screen').then(function(w){
+          wakeLock = w;
+          w.addEventListener('release', function(){ wakeLock = null; });
+        }).catch(function(){});
+      }
+    }catch(e){}
+  }
+  function relWake(){ try{ if(wakeLock){ wakeLock.release(); wakeLock = null; } }catch(e){} }
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible' && player.state === 'playing') reqWake();
+  });
+
+  window.__syncDock = function(){
+    var on = !!player.id && player.state !== 'stopped';
+    dock.classList.toggle('on', on);
+    if(!on){ relWake(); syncSbHighlight(); return; }
+    reqWake();
+    dkPl.textContent = player.state === 'playing' ? '⏸ 一時停止' : '▶ 再開';
+    dkTop.textContent = currentTopicTitle();
+    dkPos.textContent = (player.index + 1) + ' / ' + player.chunks.length + ' 文';
+    dkFill.style.width = (player.chunks.length ? ((player.index + 1) / player.chunks.length * 100) : 0) + '%';
+    syncSbHighlight();
+  };
+  window.__syncDock();
+})();
 </script>
 </body>
 </html>

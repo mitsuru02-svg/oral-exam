@@ -174,7 +174,22 @@
   }
   #sidebar::-webkit-scrollbar{width:6px;}
   #sidebar::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
-  .sb-header{
+  
+/* ══════════ サイドバー先頭のタイトル区画（全ページ共通） ══════════ */
+.sb-brand{
+  flex-shrink:0;padding:16px 16px 14px;border-bottom:1px solid var(--line);
+}
+.sb-brand .tag{
+  font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);
+  margin-bottom:7px;
+}
+.sb-brand h1{
+  font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin:0;
+}
+.sb-brand .sub{
+  font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.6;
+}
+.sb-header{
     padding:22px 20px 16px;
     border-bottom:1px solid var(--line);
     position:sticky; top:0; background:var(--panel); z-index:5;
@@ -421,7 +436,7 @@
        この中に置かないと、サイドバー(z-index:50)より前面に出て操作を奪ってしまう -->
   <div id="sb-overlay" onclick="closeSidebar()"></div>
   <nav id="sidebar">
-    <div class="sb-header">
+    <div class="sb-header sb-brand">
       <div class="tag">TAKIKAWA GLIDING FIELD</div>
       <h1>機長の出発前確認<br>実地資料集</h1>
       <div class="sub">ASK-21（JA20HC）／法73条の2 対応版</div>
@@ -983,10 +998,10 @@ const TTS = (function(){
   if(speechSynthesis.onvoiceschanged !== undefined){ speechSynthesis.onvoiceschanged = loadVoices; }
   function onVoicesReady(fn){ voiceListeners.push(fn); if(voices.length) fn(voices); }
   function listVoices(){
-    // 日本語音声を優先して並べ、それ以外も選択肢として残す
-    const jp = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith('ja'));
-    const other = voices.filter(v=>!(v.lang && v.lang.toLowerCase().startsWith('ja')));
-    return jp.concat(other);
+    // 並び順は全ページ共通のルールに合わせる（日本語優先、Harukaがあれば先頭）
+    const ja = TTSPrefs.jaVoices();
+    const other = voices.filter(v=>!ja.includes(v));
+    return ja.concat(other);
   }
   // 選んだ音声は全ページ共通のキーに保存する（他の教材ページでも同じ声になる）
   let preferredVoiceName = TTSPrefs.voice() || null;
@@ -997,7 +1012,11 @@ const TTS = (function(){
     }
     return TTSPrefs.pickVoice() || voices[0] || null;
   }
-  function setVoiceByName(name){ preferredVoiceName = name || null; TTSPrefs.setVoice(name); }
+  // save=true のときだけ共通キーに書く。利用者が自分で選んだときだけ保存する。
+  function setVoiceByName(name, save){
+    preferredVoiceName = name || null;
+    if (save) TTSPrefs.setVoice(name);
+  }
 
   /* ============ 読み上げ用テキスト正規化 ============
      画面表示用の文章をそのまま音声合成に渡すと、専門用語の誤読や
@@ -1289,15 +1308,18 @@ function refreshVoiceSelects(voices){
     list.forEach(v=>{
       const o = document.createElement('option');
       o.value = v.name;
-      const jpTag = (v.lang && v.lang.toLowerCase().startsWith('ja')) ? '' : '（' + v.lang + '）';
-      o.textContent = v.name + jpTag;
+      const isJa = v.lang && v.lang.toLowerCase().startsWith('ja');
+      const tag = /haruka|はるか/i.test(v.name) ? '（推奨）' : (v.default ? '（標準）' : '');
+      o.textContent = v.name + (isJa ? tag : '（' + v.lang + '）');
       sel.appendChild(o);
     });
     if(list.some(v=>v.name === current)){
       sel.value = current;
     } else {
-      sel.value = list[0].name;
-      TTS.setVoiceByName(list[0].name);
+      // 既定は共通ルール（保存値 → Haruka → 先頭）。ここでは保存しない。
+      const def = TTSPrefs.pickVoice() || list[0];
+      sel.value = def.name;
+      TTS.setVoiceByName(def.name, false);
     }
   });
 }
@@ -1403,7 +1425,7 @@ function initTTSBar(sectionId, barId){
   });
   rateSel.addEventListener('change', ()=>{ TTS.setRate(parseFloat(rateSel.value)); });
   voiceSel.addEventListener('change', ()=>{
-    TTS.setVoiceByName(voiceSel.value);
+    TTS.setVoiceByName(voiceSel.value, true);
     allVoiceSelects.forEach(sel=>{ if(sel !== voiceSel) sel.value = voiceSel.value; });
     /* 再生中に音声を切り替えた場合、直前の文頭から新しい声で読み直す */
     if(TTS.state.playing){

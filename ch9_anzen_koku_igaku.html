@@ -69,14 +69,14 @@
 #hamburger:hover{background:rgba(255,255,255,.12);}
 /* ══════════ 共通サイドバー ══════════ */
 #sb-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:940;
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:870;
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
 #sb-overlay.open{opacity:1;pointer-events:auto;}
 #sidebar{
-  position:fixed;top:0;left:0;bottom:0;width:min(86vw,var(--sb-w));
+  position:fixed;top:var(--hdr-h);left:0;bottom:0;width:min(86vw,var(--sb-w));
   background:var(--surface-2);border-right:1px solid var(--line);
-  z-index:950;display:flex;flex-direction:column;
+  z-index:880;display:flex;flex-direction:column;
   transform:translateX(-102%);transition:transform .22s ease;
 }
 #sidebar.open{transform:none;}
@@ -114,6 +114,23 @@
 .sb-num{font-family:var(--mono);font-size:10.5px;color:var(--key);
   flex-shrink:0;min-width:30px;}
 .sb-empty{color:var(--text-faint);font-size:12px;padding:12px 8px;}
+
+/* ══════════ サイドバー先頭のタイトル区画（全ページ共通） ══════════ */
+.sb-brand{
+  position:relative;flex-shrink:0;padding:16px 16px 14px;border-bottom:1px solid var(--line);
+}
+.sb-brand .sb-close{position:absolute;top:12px;right:12px;margin:0;}
+.sb-brand .tag{
+  font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);
+  margin-bottom:7px;
+}
+.sb-brand h1{
+  font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin:0;
+}
+.sb-brand .sub{
+  font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.6;
+}
+
 /* ══════════ 共通 読み上げUI ══════════ */
 .tts-bar{
   display:flex;align-items:center;gap:8px;flex-wrap:wrap;
@@ -167,7 +184,11 @@
 /* ══════════ 共通レスポンシブ ══════════ */
 /* PC：サイドバーを出したまま、本文を右にずらす */
 @media (min-width:900px){
-  html body{padding-left:var(--sb-w);}   /* 各ページの html,body{padding:0} に勝たせる */
+    /* ヘッダーは画面最上部を横いっぱいに。本文だけを右へずらす。 */
+    html body{padding-left:0;}
+    html body > *:not(.appbar):not(#sidebar):not(#sb-overlay):not(#tts-dock){
+      margin-left:var(--sb-w);
+    }
   #sidebar{transform:none;width:var(--sb-w);}
   #sb-overlay,#hamburger,.sb-close{display:none;}
   #tts-dock{left:var(--sb-w);}
@@ -335,7 +356,12 @@
 
 <div id="sb-overlay"></div>
 <aside id="sidebar">
-  <div class="sb-head"><b>AIM-J 第9章 運航安全・航空医学</b><button class="sb-close" aria-label="閉じる">✕</button></div>
+  <div class="sb-brand">
+    <button class="sb-close" aria-label="目次を閉じる">✕</button>
+    <div class="tag">AIM-J 第9章</div>
+    <h1>運航安全・航空医学</h1>
+    <div class="sub">934〜969／全19項目</div>
+  </div>
   <input id="sb-search" class="sb-search" type="search" placeholder="項目名・番号で絞り込み" autocomplete="off">
   <div id="sb-list"><div class="sb-empty" style="display:none">該当する項目がありません</div></div>
 </aside>

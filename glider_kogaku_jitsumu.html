@@ -41,7 +41,7 @@
    900px以上 = サイドバー常時表示（PC）／600px以下 = スマホ密度 */
 /* ══════════ 共通ヘッダー ══════════ */
 .appbar{
-  position:sticky;top:0;z-index:900;margin-left:var(--sidebar-w,0);
+  position:sticky;top:0;z-index:900;
   height:var(--hdr-h);display:flex;align-items:center;gap:10px;
   padding:0 12px;background:var(--surface);border-bottom:1px solid var(--line-base);
 }
@@ -167,7 +167,7 @@ img,svg{max-width:100%;}
 
 /* ===== Sidebar ===== */
 .sidebar{
-  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
+  position:fixed;top:var(--hdr-h);left:0;bottom:0;width:var(--sidebar-w);
   background:var(--navy);color:#dce4ec;overflow-y:auto;z-index:90;
   padding:14px 0 30px;
 }
@@ -180,6 +180,21 @@ img,svg{max-width:100%;}
   font-size:13.5px;border-left:3px solid transparent;transition:.15s;
 }
 .sidebar a:hover{background:rgba(255,255,255,.06);color:#fff;}
+
+/* ══════════ サイドバー先頭のタイトル区画（全ページ共通） ══════════ */
+.sb-brand{
+  flex-shrink:0;padding:16px 16px 14px;border-bottom:1px solid var(--line);
+}
+.sb-brand .tag{
+  font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);
+  margin-bottom:7px;
+}
+.sb-brand h1{
+  font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin:0;
+}
+.sb-brand .sub{
+  font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.6;
+}
 .sidebar a.active{background:rgba(255,255,255,.1);border-left-color:var(--amber);color:#fff;font-weight:700;}
 .sidebar .chnum{
   display:inline-block;width:20px;color:var(--accent2);font-weight:700;margin-right:2px;
@@ -306,7 +321,6 @@ table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;f
 
 /* ===== Mobile ===== */
 @media(max-width:880px){
-  .appbar{margin-left:0;}
   .hamburger{display:flex;}
   .sidebar{
     left:-100%;transition:left .25s ease;box-shadow:4px 0 14px rgba(0,0,0,.3);
@@ -400,6 +414,11 @@ table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;f
 <div class="overlay" id="overlay"></div>
 
 <nav class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="tag">Y.fuka 先生 講義ノート</div>
+    <h1>グライダー工学・実務</h1>
+    <div class="sub">自家用操縦士（滑空機）／全13章</div>
+  </div>
   <div class="grp-label">巻頭</div>
   <a href="#ch1" data-ch="ch1"><span class="chnum">1</span>口述試験の心構えと資料</a>
   <div class="grp-label">第I部　航空工学（機体を知る）</div>

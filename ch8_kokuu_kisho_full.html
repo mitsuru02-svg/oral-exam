@@ -1566,6 +1566,15 @@ var TTSPrefs = (function () {
 })();
 
 const pronFix = (s) => s
+  .replace(/十勝/g,'とかち')
+  .replace(/便覧/g,'びんらん')
+  .replace(/雲高/g,'うんこう')
+  .replace(/行っては/g,'おこなっては')
+  .replace(/下表/g,'かひょう')
+  .replace(/この表/g,'このひょう')
+  .replace(/表の/g,'ひょうの')
+  .replace(/表に/g,'ひょうに')
+  .replace(/表は/g,'ひょうは')
   .replace(/海里/g,'ノーティカルマイル')
   .replace(/補則手続き/g,'ほそくてつづき')
   .replace(/補足手続き/g,'ほそくてつづき')

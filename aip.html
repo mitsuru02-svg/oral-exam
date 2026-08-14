@@ -824,10 +824,17 @@ var TTSPrefs = (function () {
     [/大雪/g, 'たいせつ'],
     [/当麻/g, 'とうま'],
     [/脚/g, 'きゃく'],
+    [/補則手続き/g, 'ほそくてつづき'],
+    [/補足手続き/g, 'ほそくてつづき'],
+    [/覚え方/g, 'おぼえかた'],
     [/\s*[〜～]\s*/g, 'から'],          // 範囲の記号はすべて「から」
     [/\s*[：:]\s*/g, '、'],             // コロンは間として読ませる
     [/／/g, '、'], [/\//g, '、'], [/・/g, '、'],
-    [/[（(]([^）)]{0,30})[）)]/g, '、$1、']
+    /* 括弧は耳では追いにくい。短い言い換え・英語併記・条文番号は読み飛ばし、
+       長い補足だけ読点で囲んで残す。画面の表示はそのまま。 */
+    [/[（(][^）)]{0,24}[）)]/g, ''],
+    [/[（(]([^）)]{25,60})[）)]/g, '、$1、'],
+    [/[（(][^）)]{61,}[）)]/g, '']
   ];
   /* 表の見出し（1行目の th）を覚えておく。値だけ読み上げても何の項目か分からないため。 */
   function headersOf(tr){
@@ -839,6 +846,67 @@ var TTSPrefs = (function () {
       return (c.textContent || '').replace(/\s+/g, ' ').trim();
     });
   }
+  /* ── 書き言葉を話し言葉に寄せる ──
+     条文調のままだと耳に残らないので、語尾だけ整える。意味は変えない。 */
+  function toSpoken(t){
+    return t
+      .replace(/しないこと。/g, 'しないでください。')
+      .replace(/(?:する)?こと。/g, 'してください。')
+      .replace(/しなければならない。/g, 'しなければなりません。')
+      .replace(/ならない。/g, 'なりません。')
+      .replace(/である。/g, 'です。')
+      .replace(/とする。/g, 'とします。')
+      .replace(/できる。/g, 'できます。');
+  }
+
+  /* ── その読み上げ単位が何なのかを、頭に一言そえる ──
+     見出しが裸で飛んでくると、何の話が始まったのか分からないため。 */
+  function lead(el){
+    if (el.tagName === 'H2'){
+      var no = el.closest('.sec-head') ? el.closest('.sec-head').querySelector('.no') : null;
+      var num = no ? no.textContent.trim() : '';
+      return 'ここからは、' + (num ? 'イーエヌアール' + num + '、' : '')
+             + el.textContent.replace(/[★☆*]/g, '').trim() + 'です。';
+    }
+    if (el.tagName === 'H3') return '次に、' + el.textContent.trim() + 'です。';
+    return null;
+  }
+
+  /* ── 箇条書きには番号をふる ── */
+  function ordinal(el){
+    if (el.tagName !== 'LI') return '';
+    var p = el.parentElement;
+    if (!p || (p.tagName !== 'UL' && p.tagName !== 'OL')) return '';
+    var items = Array.prototype.filter.call(p.children, function(c){ return c.tagName === 'LI'; });
+    if (items.length < 2) return '';
+    var i = items.indexOf(el);
+    return i < 0 ? '' : (i + 1) + 'つ目、';
+  }
+
+  /* ── 表は、1行目にさしかかったときに件数を先に言う ── */
+  function tableLead(el){
+    if (el.tagName !== 'TR') return '';
+    var tbl = el.closest('table');
+    if (!tbl) return '';
+    var rows = Array.prototype.filter.call(tbl.rows, function(r){
+      return !(r.querySelector('th') && !r.querySelector('td'));
+    });
+    if (rows.length < 2 || rows[0] !== el) return '';
+    return 'この表には' + rows.length + '件あります。';
+  }
+
+  /* 補足枠は「見出し」と「本文」が続けて読まれて切れ目が分からないので、間を入れる */
+  function noteText(el){
+    var ttl = el.querySelector(':scope > .t');
+    if (!ttl) return null;
+    var head = (ttl.textContent || '').trim().replace(/[。、]$/, '');
+    var body = '';
+    Array.prototype.forEach.call(el.childNodes, function(n){
+      if (n !== ttl) body += n.textContent || '';
+    });
+    return head + '。 ' + body.replace(/\s+/g, ' ').trim();
+  }
+
   function speechText(el){
     if (el.dataset.say !== undefined) return el.dataset.say;   // 手書きの言い回しがあればそれを使う
     if (el.dataset.text !== undefined) return el.dataset.text;
@@ -855,8 +923,12 @@ var TTSPrefs = (function () {
         return h ? h + 'は' + v : v;
       }).filter(Boolean).join('、');
     } else {
-      t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      t = noteText(el) || (el.textContent || '').replace(/\s+/g, ' ').trim();
     }
+    var head = lead(el);
+    if (head) t = head;                          // 見出しは文脈をそえた言い方に差し替える
+    else t = tableLead(el) + ordinal(el) + t;    // 表の件数・箇条書きの番号を頭にそえる
+    t = toSpoken(t);
     t = t.replace(/(\d),(?=\d{3}(?!\d))/g, '$1');   // 桁区切りのカンマは読ませない
     t = t.replace(/[*＊†★☆]/g, '');              // 注記記号は読まない
     FIX.forEach(function(p){ t = t.replace(p[0], p[1]); });

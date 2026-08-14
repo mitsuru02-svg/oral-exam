@@ -731,6 +731,9 @@ var TTSPrefs = (function () {
 })();
 
 const pronFix = (s) => s
+  .replace(/補則手続き/g,'ほそくてつづき')
+  .replace(/補足手続き/g,'ほそくてつづき')
+  .replace(/覚え方/g,'おぼえかた')
   .replace(/離着陸場/g,'りちゃくりくじょう')
   .replace(/空港等/g,'くうこうなど')
   .replace(/地区補足/g,'ちくほそく')

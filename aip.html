@@ -410,7 +410,7 @@ body.tts-on { padding-bottom:80px; }
       <h3>1. 有視界気象状態（VMC）</h3>
       <p>有視界飛行方式による飛行では、下表に定められた<b>視程及び雲からの距離の値、又はそれ以上</b>を維持しなければなりません。</p>
       <div class="scroll">
-      <table class="vmc">
+      <table class="vmc" data-no-tts>
         <tr>
           <th rowspan="2">区分</th>
           <th colspan="2">管制区・管制圏又は情報圏<b>内</b></th>
@@ -680,7 +680,7 @@ body.tts-on { padding-bottom:80px; }
       <h3>滑空機の主な活動拠点</h3>
       <p>飛行場以外における滑空機の主な活動拠点が、座標と運用時間つきで一覧になっています。<b>自分の滑空場がAIPにどう記載されているかを確認しておいてください。</b></p>
       <div class="scroll">
-      <table>
+      <table data-no-tts>
         <tr><th>名称</th><th>所在</th><th>座標</th><th>運用時間</th></tr>
         <tr><td><b>たきかわスカイパーク</b></td><td>北海道滝川市</td><td class="n">—</td><td class="n">HJ<sup>*</sup></td></tr>
         <tr><td>北見地区農道離着陸場</td><td>北海道北見市</td><td class="n">434648N/1434351E</td><td class="n">HJ<sup>*</sup></td></tr>
@@ -772,7 +772,7 @@ var TTSPrefs = (function () {
      略語・単位はそのままだと読めないのでかなに開く。長い語から先に処理する。 */
   var FIX = [
     [/ENR\s*/g, 'イーエヌアール'], [/AIP/g, 'エーアイピー'], [/AIM/g, 'エーアイエム'],
-    [/ICAO/g, 'アイカオ'], [/ATMセンター/g, 'エーティーエムセンター'],
+    [/ICAO/g, 'あいしーえーおー'], [/ATMセンター/g, 'エーティーエムセンター'],
     [/ATS/g, 'エーティーエス'], [/ATC/g, 'エーティーシー'], [/AFIS/g, 'エーエフアイエス'],
     [/ADIZ/g, 'エーディーアイゼット'], [/NOTAM/g, 'ノータム'], [/TOWER/g, 'タワー'],
     [/VMC/g, 'ブイエムシー'], [/VFR/g, 'ブイエフアール'], [/IFR/g, 'アイエフアール'],
@@ -787,7 +787,7 @@ var TTSPrefs = (function () {
     [/SFC/g, 'サーフェス'], [/UNL/g, 'アンリミテッド'], [/GND/g, 'グランド'],
     [/(\d[\d,\.]*)\s*ft/g, '$1フィート'],
     [/(\d[\d,\.]*)\s*NM/g, '$1ノーティカルマイル'],
-    [/(\d[\d,\.]*)\s*km/g, '$1キロメートル'],
+    [/(\d[\d,\.]*)\s*km/g, '$1キロ'],
     [/(\d[\d,\.]*)\s*m(?![a-zA-Z])/g, '$1メートル'],
     [/(\d[\d,\.]*)\s*hPa/g, '$1ヘクトパスカル'],
     [/(\d[\d,\.]*)\s*MHz/g, '$1メガヘルツ'],
@@ -798,23 +798,67 @@ var TTSPrefs = (function () {
     [/装備品/g, 'そうびひん'], [/附則/g, 'ふそく'], [/雑則/g, 'ざっそく'],
     [/場周/g, 'じょうしゅう'], [/風上/g, 'かざかみ'], [/風下/g, 'かざしも'],
     [/横風/g, 'よこかぜ'], [/風向/g, 'ふうこう'], [/風速/g, 'ふうそく'],
-    [/([0-9])\s*〜\s*([0-9])/g, '$1から$2'],
+    [/離着陸場/g, 'りちゃくりくじょう'],
+    [/空港等/g, 'くうこうなど'],
+    [/地区補足/g, 'ちくほそく'],
+    [/区域名/g, 'くいきめい'],
+    [/演習場/g, 'えんしゅうじょう'],
+    [/射撃場/g, 'しゃげきじょう'],
+    [/回転翼/g, 'かいてんよく'],
+    [/双方向/g, 'そうほうこう'],
+    [/海面上/g, 'かいめんじょう'],
+    [/富士山/g, 'ふじさん'],
+    [/入りません/g, 'はいりません'],
+    [/行った/g, 'おこなった'],
+    [/上方/g, 'じょうほう'],
+    [/直上/g, 'ちょくじょう'],
+    [/標点/g, 'ひょうてん'],
+    [/指示/g, 'しじ'],
+    [/要撃/g, 'ようげき'],
+    [/機上/g, 'きじょう'],
+    [/機外/g, 'きがい'],
+    [/翼端/g, 'よくたん'],
+    [/推力/g, 'すいりょく'],
+    [/書式/g, 'しょしき'],
+    [/空戦/g, 'くうせん'],
+    [/大雪/g, 'たいせつ'],
+    [/当麻/g, 'とうま'],
+    [/脚/g, 'きゃく'],
+    [/\s*[〜～]\s*/g, 'から'],          // 範囲の記号はすべて「から」
+    [/\s*[：:]\s*/g, '、'],             // コロンは間として読ませる
     [/／/g, '、'], [/\//g, '、'], [/・/g, '、'],
     [/[（(]([^）)]{0,30})[）)]/g, '、$1、']
   ];
+  /* 表の見出し（1行目の th）を覚えておく。値だけ読み上げても何の項目か分からないため。 */
+  function headersOf(tr){
+    var tbl = tr.closest('table');
+    if (!tbl) return [];
+    var head = tbl.querySelector('tr');
+    if (!head || head === tr) return [];
+    return Array.prototype.map.call(head.cells, function(c){
+      return (c.textContent || '').replace(/\s+/g, ' ').trim();
+    });
+  }
   function speechText(el){
+    if (el.dataset.say !== undefined) return el.dataset.say;   // 手書きの言い回しがあればそれを使う
     if (el.dataset.text !== undefined) return el.dataset.text;
     var t;
     if (el.tagName === 'TR'){
-      // 表はセルが続けて読まれてしまうので、セル単位で区切る
-      t = Array.prototype.map.call(el.cells, function(c){
-        return (c.textContent || '').replace(/\s+/g, ' ').trim();
-      }).filter(function(s){ return s && s !== '—'; }).join('、');
+      // 表は「1列目＝何の行か」を先に言い、以降は「見出しは値」の形にする。
+      // 値だけ並べても耳では追えないため。
+      var hs = headersOf(el);
+      t = Array.prototype.map.call(el.cells, function(c, i){
+        var v = (c.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!v || v === '—') return '';
+        if (i === 0) return v;
+        var h = hs[i] || '';
+        return h ? h + 'は' + v : v;
+      }).filter(Boolean).join('、');
     } else {
       t = (el.textContent || '').replace(/\s+/g, ' ').trim();
     }
     t = t.replace(/(\d),(?=\d{3}(?!\d))/g, '$1');   // 桁区切りのカンマは読ませない
-    t = t.replace(/[*＊†]/g, '');                // 注記記号は読まない
+    t = t.replace(/[*＊†★☆]/g, '');              // 注記記号は読まない
     FIX.forEach(function(p){ t = t.replace(p[0], p[1]); });
     return t.replace(/、{2,}/g, '、').replace(/、+([。、])/g, '$1')
             .replace(/^、|、$/g, '').trim();
@@ -827,6 +871,7 @@ var TTSPrefs = (function () {
       document.querySelectorAll(sel),
       function(el){
         if (el.closest('.toc')) return false;
+        if (el.closest('[data-no-tts]')) return false;   // 読み上げない表など
         if (el.tagName === 'TR' && el.querySelector('th') && !el.querySelector('td')) return false;
         return speechText(el).length > 0;
       });

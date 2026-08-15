@@ -1568,6 +1568,17 @@ var TTSPrefs = (function () {
 })();
 
 const pronFix = (s) => s
+  /* ── 追加の読み ── */
+  .replace(/提供/g,'ていきょう')
+  .replace(/供して/g,'きょうして')
+  .replace(/1月前/g,'ひとつきまえ')
+  .replace(/一月前/g,'ひとつきまえ')
+  .replace(/事業場/g,'じぎょうじょう')
+  .replace(/認めれば/g,'みとめれば')
+  .replace(/取り消せる/g,'とりけせる')
+  .replace(/期間/g,'きかん')
+  .replace(/細目/g,'さいもく')
+  .replace(/機関士/g,'きかんし')
   .replace(/QNH値/g,'キューエヌエイチち')
   .replace(/場周区域/g,'じょうしゅうくいき')
   .replace(/大気圧/g,'たいきあつ')

@@ -22,7 +22,7 @@
   /* 文字 */
   --text:#e6edf3;
   --text-dim:#8b949e;
-  --text-faint:#6e7681;
+  --text-faint:#7d8590;
   /* 役割色 */
   --accent:#3b82f6;      /* 主操作・選択中 */
   --accent-soft:#0d2044; /* 選択中の地 */
@@ -125,8 +125,10 @@
 }
 .sb-brand .sb-close{position:absolute;top:12px;right:12px;margin:0;}
 .sb-brand .tag{
+  /* ページ既存の .tag（丸い青タグ）に負けないよう、地と余白を打ち消す */
+  display:block;background:none;border:none;padding:0;border-radius:0;
   font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);
-  margin-bottom:7px;
+  margin:0 0 7px;
 }
 .sb-brand h1{
   font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin:0;
@@ -148,8 +150,8 @@
   transition:background .15s,border-color .15s,color .15s;
 }
 .tts-btn:hover{background:var(--line-strong);}
-.tts-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.primary{background:#2563eb;border-color:#2563eb;color:#fff;}
+.tts-btn.primary:hover{background:#1d4ed8;}
 .tts-btn.stop{color:var(--danger);border-color:#5c1a17;}
 .tts-btn.stop:hover{background:rgba(248,81,73,.12);}
 .tts-btn:disabled{opacity:.45;cursor:default;}
@@ -232,7 +234,7 @@ body {
 .toc a .k { color:#d29922; }
 
 .part {
-  font-size: 12px; color: #484f58; font-weight: 700; letter-spacing: .1em;
+  font-size: 12px; color: var(--text-faint); font-weight: 700; letter-spacing: .1em;
   margin: 34px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #21262d;
 }
 .part span { color:#8b949e; font-weight:400; letter-spacing:0; }
@@ -280,7 +282,7 @@ table.vmc th:first-child { min-width: 3.4em; }
 .tip .t { color:#7dd3fc; }
 .warn .t { color:#d29922; }
 
-.footer { text-align:center; padding:26px 16px; font-size:12px; color:#484f58; border-top:1px solid #161b22; margin-top:30px; }
+.footer { text-align:center; padding:26px 16px; font-size:12px; color:var(--text-faint); border-top:1px solid #161b22; margin-top:30px; }
 
 
 body.tts-on { padding-bottom:80px; }
@@ -809,6 +811,7 @@ var TTSPrefs = (function () {
     [/海面上/g, 'かいめんじょう'],
     [/富士山/g, 'ふじさん'],
     [/入りません/g, 'はいりません'],
+    [/行っています/g, 'おこなっています'],
     [/行った/g, 'おこなった'],
     [/上方/g, 'じょうほう'],
     [/直上/g, 'ちょくじょう'],

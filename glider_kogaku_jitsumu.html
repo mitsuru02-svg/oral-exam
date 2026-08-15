@@ -18,7 +18,7 @@
   /* 文字 */
   --text:#e6edf3;
   --text-dim:#8b949e;
-  --text-faint:#6e7681;
+  --text-faint:#7d8590;
   /* 役割色 */
   --accent-base:#3b82f6;      /* 主操作・選択中 */
   --accent-soft:#0d2044; /* 選択中の地 */
@@ -80,8 +80,8 @@
   transition:background .15s,border-color .15s,color .15s;
 }
 .tts-btn:hover{background:var(--line-strong);}
-.tts-btn.primary{background:var(--accent-base);border-color:var(--accent-base);color:#fff;}
-.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.primary{background:#2563eb;border-color:#2563eb;color:#fff;}
+.tts-btn.primary:hover{background:#1d4ed8;}
 .tts-btn.stop{color:var(--danger-base);border-color:#5c1a17;}
 .tts-btn.stop:hover{background:rgba(248,81,73,.12);}
 .tts-btn:disabled{opacity:.45;cursor:default;}
@@ -186,8 +186,10 @@ img,svg{max-width:100%;}
   flex-shrink:0;padding:16px 16px 14px;border-bottom:1px solid var(--line);
 }
 .sb-brand .tag{
+  /* ページ既存の .tag（丸い青タグ）に負けないよう、地と余白を打ち消す */
+  display:block;background:none;border:none;padding:0;border-radius:0;
   font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);
-  margin-bottom:7px;
+  margin:0 0 7px;
 }
 .sb-brand h1{
   font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin:0;
@@ -340,7 +342,7 @@ table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;f
 }
 .tts-bar .tts-btn{
   display:inline-flex;align-items:center;gap:6px;
-  background:var(--accent);color:#fff;border:none;border-radius:7px;
+  background:#2563eb;color:#fff;border:none;border-radius:7px;
   padding:8px 14px;font-size:13.5px;font-weight:700;cursor:pointer;
   transition:.15s;line-height:1;
 }
@@ -375,7 +377,7 @@ table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;f
   border:none;border-radius:999px;cursor:pointer;
   font-size:13px;font-weight:700;line-height:1;
   padding:8px 13px;transition:.15s;
-  background:var(--accent);color:#fff;
+  background:#2563eb;color:#fff;
 }
 .tts-dock button:hover{filter:brightness(1.2);}
 .tts-dock button.ghost{background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);}
@@ -5257,6 +5259,7 @@ var wakeLock = {
   [/海面上/g, 'かいめんじょう'],
   [/富士山/g, 'ふじさん'],
   [/入りません/g, 'はいりません'],
+  [/行っています/g, 'おこなっています'],
   [/行った/g, 'おこなった'],
   [/上方/g, 'じょうほう'],
   [/直上/g, 'ちょくじょう'],

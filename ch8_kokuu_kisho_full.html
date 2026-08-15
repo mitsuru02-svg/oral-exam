@@ -18,7 +18,7 @@
   /* 文字 */
   --text:#e6edf3;
   --text-dim:#8b949e;
-  --text-faint:#6e7681;
+  --text-faint:#7d8590;
   /* 役割色 */
   --accent:#3b82f6;      /* 主操作・選択中 */
   --accent-soft:#0d2044; /* 選択中の地 */
@@ -121,8 +121,10 @@
 }
 .sb-brand .sb-close{position:absolute;top:12px;right:12px;margin:0;}
 .sb-brand .tag{
+  /* ページ既存の .tag（丸い青タグ）に負けないよう、地と余白を打ち消す */
+  display:block;background:none;border:none;padding:0;border-radius:0;
   font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);
-  margin-bottom:7px;
+  margin:0 0 7px;
 }
 .sb-brand h1{
   font-size:15px;font-weight:700;color:var(--text);line-height:1.5;margin:0;
@@ -144,8 +146,8 @@
   transition:background .15s,border-color .15s,color .15s;
 }
 .tts-btn:hover{background:var(--line-strong);}
-.tts-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.tts-btn.primary:hover{background:#2563eb;}
+.tts-btn.primary{background:#2563eb;border-color:#2563eb;color:#fff;}
+.tts-btn.primary:hover{background:#1d4ed8;}
 .tts-btn.stop{color:var(--danger);border-color:#5c1a17;}
 .tts-btn.stop:hover{background:rgba(248,81,73,.12);}
 .tts-btn:disabled{opacity:.45;cursor:default;}
@@ -292,7 +294,7 @@
   .symbol-card{background:var(--navy-800);border:1px solid var(--line);border-radius:8px;padding:12px 8px;text-align:center;}
   .symbol-card svg{width:38px;height:38px;margin-bottom:6px;}
   .symbol-card .name{font-size:11.5px;font-weight:700;}
-  .symbol-card .en{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);}
+  .symbol-card .en{font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);}
 
   /* CB / DOWNBURST reused blocks */
   .cb-stage-tabs{display:flex;gap:8px;margin-bottom:12px;}
@@ -1597,6 +1599,7 @@ const pronFix = (s) => s
   .replace(/海面上/g,'かいめんじょう')
   .replace(/富士山/g,'ふじさん')
   .replace(/入りません/g,'はいりません')
+  .replace(/行っています/g,'おこなっています')
   .replace(/行った/g,'おこなった')
   .replace(/上方/g,'じょうほう')
   .replace(/直上/g,'ちょくじょう')

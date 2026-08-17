@@ -234,8 +234,58 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 .chip:hover{color:var(--text);border-color:var(--text-dim);}
 .chip.on{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:700;}
 .chip:disabled{opacity:.32;cursor:not-allowed;}
+.bar{flex-direction:column;align-items:stretch;gap:10px;}
+.bar .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;}
 .bar .spacer{flex:1;}
 .bar .note{font-size:11.5px;color:var(--text-faint);}
+
+/* ── 時刻のスライダー ── */
+.bar .row.time{gap:8px;}
+.tbtn{
+  flex:0 0 auto;width:34px;height:34px;border-radius:9px;cursor:pointer;
+  background:var(--surface-3);border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:12px;line-height:1;font-family:var(--font);transition:.13s;
+}
+.tbtn:hover{color:var(--text);border-color:var(--text-dim);}
+.tslide{flex:1;min-width:140px;}
+.tslide input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;
+  background:none;cursor:pointer;margin:0;display:block;
+}
+.tslide input[type=range]::-webkit-slider-runnable-track{
+  height:6px;border-radius:3px;background:var(--surface-3);border:1px solid var(--line-strong);
+}
+.tslide input[type=range]::-moz-range-track{
+  height:6px;border-radius:3px;background:var(--surface-3);border:1px solid var(--line-strong);
+}
+.tslide input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+  background:#2563eb;border:2px solid #dbe7ff;margin-top:-8px;
+}
+.tslide input[type=range]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;background:#2563eb;border:2px solid #dbe7ff;
+}
+.tslide input[type=range]:focus{outline:none;}
+.tslide input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(59,130,246,.35);}
+.ticks{display:flex;justify-content:space-between;margin-top:1px;}
+.ticks span{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);
+  flex:1;text-align:center;white-space:nowrap;}
+.ticks span:first-child{text-align:left;}
+.ticks span:last-child{text-align:right;}
+.tnow{
+  flex:0 0 auto;min-width:62px;text-align:center;
+  font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);
+}
+.chip.play.on{background:#b45309;border-color:#b45309;color:#fff;}
+
+/* ── 種類のしぼり込み ── */
+.bar .row.filt{
+  flex-wrap:nowrap;overflow-x:auto;gap:7px;
+  padding-bottom:2px;-webkit-overflow-scrolling:touch;
+  border-top:1px solid var(--line);padding-top:9px;
+}
+.bar .row.filt::-webkit-scrollbar{height:0;}
+.bar .row.filt .chip{flex:0 0 auto;}
 .chip.two{display:flex;flex-direction:column;align-items:center;gap:1px;
   padding:4px 11px;line-height:1.35;}
 .chip.two .t{font-size:12.5px;}
@@ -307,15 +357,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 #lb .lb-head{display:flex;align-items:center;gap:12px;flex-shrink:0;padding:2px 4px 10px;}
 #lb .lb-ttl{font-size:15px;font-weight:700;color:var(--text);}
 #lb .lb-sub{font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+#lb .lb-head > .tbtn{margin-left:0;}
+#lb .lb-head > .tbtn:first-of-type{margin-left:auto;}
 #lb .lb-x{
-  margin-left:auto;background:var(--surface-3);border:1px solid var(--line-strong);
+  background:var(--surface-3);border:1px solid var(--line-strong);
   color:var(--text);border-radius:9px;width:36px;height:36px;font-size:15px;cursor:pointer;
 }
 #lb .lb-x:hover{background:var(--surface);border-color:var(--text-dim);}
 #lb .lb-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
 #lb .lb-body img{max-width:100%;max-height:100%;object-fit:contain;}
-#lb .lb-foot{flex-shrink:0;display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:11px 4px 2px;}
+#lb .lb-foot{flex-shrink:0;display:flex;flex-wrap:wrap;gap:7px;
+  justify-content:center;align-items:center;padding:11px 4px 2px;}
+#lb .lb-body img{touch-action:pan-y;}
 
+@media (max-width:600px){
+  .tnow{min-width:50px;font-size:15px;}
+  .chip.play{padding:5px 8px;font-size:11.5px;}
+  .bar{padding:9px 10px;gap:8px;}
+  .bar .row{gap:7px 10px;}
+  .tbtn{width:30px;height:30px;}
+  .tslide{min-width:90px;}
+  .chip.two{padding:3px 9px;}
+  .chip.two .t{font-size:12px;}
+  .chip.two .d{font-size:9.5px;}
+  /* 下へたどると、帯を細くして図の見える面積を稼ぐ */
+  .bar.mini .row.filt{display:none;}
+  .bar.mini .chip.two .d{display:none;}
+  .bar.mini .grp .lb{display:none;}
+}
 @media (max-width:900px){
   /* ヘッダーは sticky で場所を取っているので、上に足さない */
   #main{
@@ -346,33 +415,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 <main id="main">
 
 <div class="bar" id="bar">
-  <div class="grp"><span class="lb">日</span><span id="g-day"></span></div>
-  <div class="grp"><span class="lb">格子</span><span id="g-grid"></span></div>
-  <div class="grp"><span class="lb">時刻</span><span id="g-time"></span></div>
-  <span class="spacer"></span>
-  <button class="chip" id="btn-reload" title="キャッシュを避けて読み直す">↻ 更新</button>
-  <button class="chip" id="btn-help" title="図が出ないときの調べ方">？ 図が出ない</button>
+
+  <div class="row">
+    <div class="grp"><span class="lb">日</span><span id="g-day"></span></div>
+    <div class="grp"><span class="lb">格子</span><span id="g-grid"></span></div>
+    <span class="spacer"></span>
+    <button class="chip" id="btn-reload" title="読み直す">↻</button>
+    <button class="chip" id="btn-help" title="図が出ないときの調べ方">？</button>
+  </div>
+
+  <div class="row time">
+    <button class="tbtn" id="t-prev" aria-label="1時間前">◀</button>
+    <div class="tslide">
+      <input type="range" id="t-range" min="0" max="9" step="1" value="4" aria-label="時刻">
+      <div class="ticks" id="t-ticks"></div>
+    </div>
+    <button class="tbtn" id="t-next" aria-label="1時間後">▶</button>
+    <div class="tnow" id="t-now">13:00</div>
+    <button class="chip play" id="t-play" title="1時間ずつ自動で送る">▶ 自動</button>
+  </div>
+
+  <div class="row filt" id="g-filt"></div>
+
 </div>
 
 <div class="now" id="now"></div>
 
 <div class="warn" id="mixed" style="display:none;"></div>
-
-<section class="gsec" id="g-use">
-  <div class="ghead"><h2>このページの使い方</h2><span>RASP BLIPMAP</span></div>
-  <div class="warn" style="background:var(--surface);border-color:var(--line);color:var(--text-dim);">
-    上の帯で<b style="color:var(--text);">日・格子・時刻</b>を選ぶと、31項目の図がまとめて切り替わります。
-    <b style="color:var(--text);">図をクリックすると大きく表示</b>され、
-    その中で時刻を送れます（← → キー、Esc で閉じる）。<br>
-    <b style="color:var(--text);">Coarse Grid</b>は09:00〜18:00の10コマで北海道全域、
-    <b style="color:var(--text);">Fine Grid</b>は11:00〜16:00の6コマで細かい格子です。
-    Fine Grid は<b style="color:var(--text);">当日のみ</b>提供されています。<br>
-    図は <a class="x" href="http://tk2-233-26218.vs.sakura.ne.jp/BLIPMAP/RASP_Table_H.html"
-    target="_blank" rel="noopener noreferrer">RASP BLIPMAP FORECASTS（北海道）</a>
-    のものをそのまま表示しています。色の目盛りは<b style="color:var(--text);">図ごとに変わる</b>ので、
-    凡例を必ず確認してください。
-  </div>
-</section>
 
 <section class="gsec" id="g-th">
   <div class="ghead"><h2>サーマル</h2><span>11項目</span></div>
@@ -536,6 +605,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
       <div class="lb-ttl" id="lb-ttl"></div>
       <div class="lb-sub" id="lb-sub"></div>
     </div>
+    <button class="tbtn" id="lb-up" aria-label="前の項目">▲</button>
+    <button class="tbtn" id="lb-dn" aria-label="次の項目">▼</button>
     <button class="lb-x" id="lb-x" aria-label="閉じる">✕</button>
   </div>
   <div class="lb-body"><img id="lb-img" alt=""></div>
@@ -570,7 +641,7 @@ var GRIDS = [
   { grid:'w2', label:'Fine',   times:['1100','1200','1300','1400','1500','1600'] }
 ];
 
-var S = { di:0, gi:0, ti:4, bust:'' };
+var S = { di:0, gi:0, ti:4, bust:'', gf:'' };
 
 /* 「当日」がいつを指しているか。端末の日付から数える。 */
 var WD = ['日','月','火','水','木','金','土'];
@@ -630,14 +701,96 @@ function drawBar(){
     }, off));
   });
 
-  var gt = document.getElementById('g-time');
-  gt.innerHTML = '';
-  GRIDS[S.gi].times.forEach(function(t, i){
-    gt.appendChild(chip(t.slice(0,2) + ':' + t.slice(2), i === S.ti, function(){
-      S.ti = i; drawBar(); paint();
+  drawTime();
+}
+
+/* ── 時刻のスライダー ── */
+var rng = document.getElementById('t-range'),
+    tks = document.getElementById('t-ticks'),
+    tnw = document.getElementById('t-now');
+
+function drawTime(){
+  var ts = GRIDS[S.gi].times;
+  if (S.ti > ts.length - 1) S.ti = ts.length - 1;
+  rng.max = ts.length - 1;
+  rng.value = S.ti;
+  tnw.textContent = hhmm(S.gi, S.ti);
+  /* 目盛りは端と真ん中だけ。細かく出すと読めなくなる。 */
+  tks.innerHTML = '';
+  ts.forEach(function(t, i){
+    var d = document.createElement('span');
+    var show = (i === 0 || i === ts.length - 1 || i === Math.floor((ts.length - 1) / 2));
+    d.textContent = show ? (t.slice(0,2) + '時') : '';
+    tks.appendChild(d);
+  });
+}
+function setTime(i, byUser){
+  var ts = GRIDS[S.gi].times;
+  if (i < 0) i = ts.length - 1;
+  if (i > ts.length - 1) i = 0;
+  S.ti = i;
+  if (byUser) stopPlay();
+  drawTime(); drawNow(); paint();
+  if (LB.on) drawLb();
+}
+rng.oninput = function(){ setTime(+rng.value, true); };
+document.getElementById('t-prev').onclick = function(){ setTime(S.ti - 1, true); };
+document.getElementById('t-next').onclick = function(){ setTime(S.ti + 1, true); };
+
+/* ── 1時間ずつ自動で送る ── */
+var playTimer = null;
+var btnPlay = document.getElementById('t-play');
+function stopPlay(){
+  if (!playTimer) return;
+  clearInterval(playTimer); playTimer = null;
+  btnPlay.classList.remove('on');
+  btnPlay.textContent = '▶ 自動';
+}
+function startPlay(){
+  preloadTimes();
+  playTimer = setInterval(function(){ setTime(S.ti + 1, false); }, 1100);
+  btnPlay.classList.add('on');
+  btnPlay.textContent = '⏸ 停止';
+}
+btnPlay.onclick = function(){ playTimer ? stopPlay() : startPlay(); };
+
+/* 自動送りが途切れないよう、先に読み込んでおく */
+function preloadTimes(){
+  var list = LB.on ? [LB.card] : cards.slice(0, 8);
+  GRIDS[S.gi].times.forEach(function(_, i){
+    list.forEach(function(c){
+      var im = new Image();
+      im.referrerPolicy = 'no-referrer';
+      im.src = url(c.dataset.p, S.di, S.gi, i);
+    });
+  });
+}
+
+/* ── 種類でしぼり込む ── */
+var GRPS = [].slice.call(document.querySelectorAll('.gsec'));
+function drawFilt(){
+  var box = document.getElementById('g-filt');
+  box.innerHTML = '';
+  box.appendChild(chip('すべて', S.gf === '', function(){ S.gf = ''; drawFilt(); applyFilt(); }));
+  GRPS.forEach(function(g){
+    var name = g.querySelector('h2').textContent;
+    box.appendChild(chip(name, S.gf === g.id, function(){
+      S.gf = (S.gf === g.id) ? '' : g.id;
+      drawFilt(); applyFilt();
     }));
   });
 }
+function applyFilt(){
+  GRPS.forEach(function(g){ g.style.display = (!S.gf || S.gf === g.id) ? '' : 'none'; });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── ← → キーで時刻を送る ── */
+document.addEventListener('keydown', function(e){
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
+  if (e.key === 'ArrowRight'){ setTime(S.ti + 1, true); e.preventDefault(); }
+  if (e.key === 'ArrowLeft'){ setTime(S.ti - 1, true); e.preventDefault(); }
+});
 
 /* ══════════ 図を並べる ══════════ */
 var cards = [].slice.call(document.querySelectorAll('.card'));
@@ -703,11 +856,19 @@ function drawLb(){
   lbSub.textContent = c.dataset.en + '　／　' + dayLabel(S.di) + ' ' +
                       GRIDS[S.gi].label + ' ' + hhmm(S.gi, S.ti);
   lbFoot.innerHTML = '';
+  var prev = document.createElement('button');
+  prev.className = 'tbtn'; prev.textContent = '◀'; prev.title = '1時間前';
+  prev.onclick = function(){ setTime(S.ti - 1, true); };
+  lbFoot.appendChild(prev);
   GRIDS[S.gi].times.forEach(function(t, i){
     lbFoot.appendChild(chip(t.slice(0,2) + ':' + t.slice(2), i === S.ti, function(){
-      S.ti = i; drawBar(); paint(); drawLb();
+      setTime(i, true);
     }));
   });
+  var next = document.createElement('button');
+  next.className = 'tbtn'; next.textContent = '▶'; next.title = '1時間後';
+  next.onclick = function(){ setTime(S.ti + 1, true); };
+  lbFoot.appendChild(next);
 }
 document.getElementById('lb-x').onclick = shutLb;
 lb.onclick = function(e){ if (e.target === lb || e.target.className === 'lb-body') shutLb(); };
@@ -716,9 +877,37 @@ document.querySelector('#lb .lb-body').onclick = function(e){ if (e.target !== l
 document.addEventListener('keydown', function(e){
   if (!LB.on) return;
   if (e.key === 'Escape') shutLb();
-  if (e.key === 'ArrowRight' && S.ti < GRIDS[S.gi].times.length - 1){ S.ti++; drawBar(); paint(); drawLb(); }
-  if (e.key === 'ArrowLeft'  && S.ti > 0){ S.ti--; drawBar(); paint(); drawLb(); }
+  if (e.key === 'ArrowDown'){ stepCard(1); e.preventDefault(); }
+  if (e.key === 'ArrowUp'){ stepCard(-1); e.preventDefault(); }
 });
+
+/* 拡大したまま、前後の項目へ移る */
+function stepCard(d){
+  var vis = cards.filter(function(c){ return c.closest('.gsec').style.display !== 'none'; });
+  var i = vis.indexOf(LB.card);
+  if (i < 0) return;
+  LB.card = vis[(i + d + vis.length) % vis.length];
+  drawLb();
+}
+document.getElementById('lb-up').onclick = function(){ stepCard(-1); };
+document.getElementById('lb-dn').onclick = function(){ stepCard(1); };
+
+/* スマホ：左右になぞって時刻、上下でとなりの項目 */
+(function(){
+  var x0 = 0, y0 = 0, on = false;
+  lbImg.addEventListener('touchstart', function(e){
+    if (e.touches.length !== 1) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; on = true;
+  }, { passive:true });
+  lbImg.addEventListener('touchend', function(e){
+    if (!on) return; on = false;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Math.abs(dx) < 40 && Math.abs(dy) < 40) return;
+    if (Math.abs(dx) > Math.abs(dy)) setTime(S.ti + (dx < 0 ? 1 : -1), true);
+    else stepCard(dy < 0 ? 1 : -1);
+  }, { passive:true });
+})();
 
 /* ══════════ 更新（キャッシュ避け） ══════════ */
 document.getElementById('btn-reload').onclick = function(){
@@ -796,7 +985,19 @@ function drawNow(){
 /* https のページなのに http の図を読もうとしている場合は、最初から出しておく */
 if (location.protocol === 'https:' && /^http:/.test(base())) showHelp();
 
+/* 下へたどったら帯を細くする（スマホ） */
+(function(){
+  var bar = document.getElementById('bar'), last = false;
+  window.addEventListener('scroll', function(){
+    var on = window.scrollY > 220;
+    if (on === last) return;
+    last = on;
+    bar.classList.toggle('mini', on);
+  }, { passive:true });
+})();
+
 drawBar();
+drawFilt();
 paint();
 
 </script>

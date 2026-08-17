@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>気象情報まとめ｜RASP BLIPMAP（北海道）</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="気象">
+<meta name="application-name" content="気象情報まとめ">
+<meta name="theme-color" content="#0d1117">
 <style>
 /* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
 :root{
@@ -188,36 +193,39 @@ html,body{margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--font);
   font-size:15px;line-height:1.85;-webkit-text-size-adjust:100%;}
 
-/* ══════════ ヘッダーとサイドバーの重なりを直す ══════════ */
-#sidebar{top:var(--hdr-h);z-index:880;}
-#sb-overlay{z-index:870;}
+/* ══════════ このページに目次は置かない ══════════ */
+#sidebar,#sb-overlay,#hamburger{display:none !important;}
+@media (min-width:900px){ html body{padding-left:0;} }
 
-.sb-brand{padding:14px 14px 10px;border-bottom:1px solid var(--line);}
-.sb-brand .row{display:flex;align-items:flex-start;gap:8px;}
-.sb-brand .tag{display:block;background:none;border:none;padding:0;border-radius:0;
-  font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);margin:0 0 7px;}
-.sb-brand h1{margin:0;font-size:15px;font-weight:700;color:var(--text);line-height:1.35;}
-.sb-brand .sub{margin-top:7px;font-size:11px;color:var(--text-dim);line-height:1.6;}
+/* ══════════ スマホのノッチ・丸角を避ける ══════════ */
+/* viewport-fit=cover なので、画面のふちに入り込む分を自分で空ける。
+   ヘッダーの高さも、その分だけ増やす。 */
+.appbar{
+  height:calc(var(--hdr-h) + env(safe-area-inset-top));
+  padding-top:env(safe-area-inset-top);
+  padding-left:calc(12px + env(safe-area-inset-left));
+  padding-right:calc(12px + env(safe-area-inset-right));
+}
 
-#main{padding:calc(var(--hdr-h) + 16px) 16px 60px;max-width:1400px;margin:0 auto;}
-
-/* PC：ヘッダーは全幅のまま、本文だけサイドバーの分だけ右へ */
-@media (min-width:900px){
-  html body{padding-left:0;}
-  html body > *:not(.appbar):not(#sidebar):not(#sb-overlay):not(#lb){
-    margin-left:var(--sb-w);
-  }
+/* 本文。ヘッダーは sticky で場所を取っているので、上の余白は足さない。 */
+#main{
+  padding:16px calc(16px + env(safe-area-inset-right))
+          calc(60px + env(safe-area-inset-bottom))
+          calc(16px + env(safe-area-inset-left));
+  max-width:1400px;margin:0 auto;
 }
 
 /* ── 操作の帯 ── */
 .bar{
-  position:sticky;top:var(--hdr-h);z-index:700;
+  position:sticky;top:calc(var(--hdr-h) + env(safe-area-inset-top));z-index:700;
   background:var(--surface);border:1px solid var(--line);border-radius:12px;
   padding:11px 13px;margin:0 0 18px;
   display:flex;flex-wrap:wrap;gap:14px;align-items:center;
 }
 .grp{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-.grp .lb{font-size:11px;font-weight:700;color:var(--text-faint);letter-spacing:.06em;}
+.grp > span{display:flex;align-items:stretch;gap:7px;flex-wrap:wrap;}
+.grp .lb{display:block;font-size:11px;font-weight:700;color:var(--text-faint);
+  letter-spacing:.06em;flex:0 0 auto;}
 .chip{
   background:var(--surface-3);border:1px solid var(--line-strong);color:var(--text-dim);
   border-radius:8px;padding:5px 11px;font-size:12.5px;font-family:var(--font);
@@ -228,6 +236,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 .chip:disabled{opacity:.32;cursor:not-allowed;}
 .bar .spacer{flex:1;}
 .bar .note{font-size:11.5px;color:var(--text-faint);}
+.chip.two{display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:4px 11px;line-height:1.35;}
+.chip.two .t{font-size:12.5px;}
+.chip.two .d{font-size:10.5px;opacity:.82;font-family:var(--mono);}
+
+/* いま何を見ているか */
+.now{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;
+  margin:0 0 16px;padding:0 2px;
+}
+.now b{font-size:15px;font-weight:700;color:var(--text);}
+.now span{font-size:11.5px;color:var(--text-faint);}
 
 /* ── お知らせ ── */
 .warn{
@@ -277,7 +297,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 /* ── 大きく表示 ── */
 #lb{
   position:fixed;inset:0;z-index:1200;background:rgba(3,6,12,.94);
-  display:none;flex-direction:column;padding:12px;
+  display:none;flex-direction:column;
+  padding:calc(12px + env(safe-area-inset-top))
+          calc(12px + env(safe-area-inset-right))
+          calc(12px + env(safe-area-inset-bottom))
+          calc(12px + env(safe-area-inset-left));
 }
 #lb.on{display:flex;}
 #lb .lb-head{display:flex;align-items:center;gap:12px;flex-shrink:0;padding:2px 4px 10px;}
@@ -293,7 +317,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 #lb .lb-foot{flex-shrink:0;display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:11px 4px 2px;}
 
 @media (max-width:900px){
-  #main{padding:calc(var(--hdr-h) + 12px) 12px 50px;}
+  /* ヘッダーは sticky で場所を取っているので、上に足さない */
+  #main{
+    padding:12px calc(12px + env(safe-area-inset-right))
+            calc(50px + env(safe-area-inset-bottom))
+            calc(12px + env(safe-area-inset-left));
+  }
   .cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
   .card .cap .ds{display:none;}
   .bar{padding:9px 10px;gap:10px;}
@@ -313,61 +342,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
   <button id="hamburger" aria-label="目次">☰</button>
 </header>
 
-<div id="sb-overlay"></div>
-
-<nav id="sidebar">
-  <div class="sb-brand">
-    <div class="row">
-      <div style="flex:1;">
-        <div class="tag">RASP BLIPMAP</div>
-        <h1>気象情報まとめ</h1>
-      </div>
-      <button class="sb-close" aria-label="閉じる">✕</button>
-    </div>
-    <div class="sub">滑空気象予想（北海道）／31項目</div>
-  </div>
-  <input class="sb-search" id="sb-q" type="search" placeholder="項目名で絞り込む" autocomplete="off">
-  <div class="sb-scroll" id="sb-scroll">
-      <a class="sb-link" href="#g-use"><span class="sb-num">案内</span><span>このページの使い方</span></a>
-      <div class="sb-grp">サーマル</div>
-      <a class="sb-link" href="#c-wstar"><span class="sb-num"></span><span>サーマル上昇速度 W*</span></a>
-      <a class="sb-link" href="#c-wstar_bsratio"><span class="sb-num"></span><span>サーマル上昇速度＋B/S比</span></a>
-      <a class="sb-link" href="#c-bsratio"><span class="sb-num"></span><span>浮力／シア比</span></a>
-      <a class="sb-link" href="#c-hwcrit"><span class="sb-num"></span><span>使えるサーマルの上限高度</span></a>
-      <a class="sb-link" href="#c-dwcrit"><span class="sb-num"></span><span>同・地表からの厚み</span></a>
-      <a class="sb-link" href="#c-hbl"><span class="sb-num"></span><span>混合層の頂</span></a>
-      <a class="sb-link" href="#c-dbl"><span class="sb-num"></span><span>混合層の厚み</span></a>
-      <a class="sb-link" href="#c-bltopvariab"><span class="sb-num"></span><span>サーマル高度のばらつき</span></a>
-      <a class="sb-link" href="#c-sfcshf"><span class="sb-num"></span><span>地表加熱</span></a>
-      <a class="sb-link" href="#c-sfcsunpct"><span class="sb-num"></span><span>日射率</span></a>
-      <a class="sb-link" href="#c-sfctemp"><span class="sb-num"></span><span>地上気温</span></a>
-      <div class="sb-grp">風</div>
-      <a class="sb-link" href="#c-sfcwind"><span class="sb-num"></span><span>地上風</span></a>
-      <a class="sb-link" href="#c-blwind"><span class="sb-num"></span><span>混合層の平均風</span></a>
-      <a class="sb-link" href="#c-bltopwind"><span class="sb-num"></span><span>混合層頂の風</span></a>
-      <a class="sb-link" href="#c-blwindshear"><span class="sb-num"></span><span>混合層の鉛直シア</span></a>
-      <a class="sb-link" href="#c-wblmaxmin"><span class="sb-num"></span><span>収束・発散</span></a>
-      <div class="sb-grp">雲</div>
-      <a class="sb-link" href="#c-zsfclcldif"><span class="sb-num"></span><span>積雲の出やすさ</span></a>
-      <a class="sb-link" href="#c-zsfclcl"><span class="sb-num"></span><span>積雲の雲底</span></a>
-      <a class="sb-link" href="#c-zsfclclmask"><span class="sb-num"></span><span>積雲の雲底（出る所だけ）</span></a>
-      <a class="sb-link" href="#c-zblcldif"><span class="sb-num"></span><span>曇天化の可能性</span></a>
-      <a class="sb-link" href="#c-zblcl"><span class="sb-num"></span><span>曇天の雲底</span></a>
-      <a class="sb-link" href="#c-zblclmask"><span class="sb-num"></span><span>曇天の雲底（出る所だけ）</span></a>
-      <a class="sb-link" href="#c-blcwbase"><span class="sb-num"></span><span>広がりのある雲の雲底</span></a>
-      <a class="sb-link" href="#c-sfcdewpt"><span class="sb-num"></span><span>地上露点温度</span></a>
-      <a class="sb-link" href="#c-cape"><span class="sb-num"></span><span>CAPE</span></a>
-      <a class="sb-link" href="#c-rain1"><span class="sb-num"></span><span>1時間降水量</span></a>
-      <div class="sb-grp">上層・ウェーブ</div>
-      <a class="sb-link" href="#c-press850"><span class="sb-num"></span><span>850hPaの鉛直流</span></a>
-      <a class="sb-link" href="#c-press700"><span class="sb-num"></span><span>700hPaの鉛直流</span></a>
-      <a class="sb-link" href="#c-press500"><span class="sb-num"></span><span>500hPaの鉛直流</span></a>
-      <a class="sb-link" href="#c-boxwmax"><span class="sb-num"></span><span>鉛直流の最大断面</span></a>
-      <div class="sb-grp">ゾンデ</div>
-      <a class="sb-link" href="#c-sounding1"><span class="sb-num"></span><span>ゾンデ（滝川）</span></a>
-    <div class="sb-empty" id="sb-none" style="display:none;">見つかりませんでした。</div>
-  </div>
-</nav>
 
 <main id="main">
 
@@ -379,6 +353,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
   <button class="chip" id="btn-reload" title="キャッシュを避けて読み直す">↻ 更新</button>
   <button class="chip" id="btn-help" title="図が出ないときの調べ方">？ 図が出ない</button>
 </div>
+
+<div class="now" id="now"></div>
 
 <div class="warn" id="mixed" style="display:none;"></div>
 
@@ -596,6 +572,17 @@ var GRIDS = [
 
 var S = { di:0, gi:0, ti:4, bust:'' };
 
+/* 「当日」がいつを指しているか。端末の日付から数える。 */
+var WD = ['日','月','火','水','木','金','土'];
+function dateOf(di){
+  var d = new Date();
+  d.setDate(d.getDate() + di);
+  return (d.getMonth() + 1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）';
+}
+function dayLabel(di){
+  return DAYS[di].label + ' ' + dateOf(di);
+}
+
 /* 画像のURLを組み立てる */
 function url(param, di, gi, ti){
   var d = DAYS[di], g = GRIDS[gi];
@@ -608,14 +595,19 @@ function hhmm(gi, ti){
 }
 
 /* ══════════ 操作の帯 ══════════ */
-function chip(label, on, fn, dis){
+function chip(label, on, fn, dis, sub){
   var b = document.createElement('button');
-  b.className = 'chip' + (on ? ' on' : '');
-  b.textContent = label;
+  b.className = 'chip' + (on ? ' on' : '') + (sub ? ' two' : '');
+  if (sub){
+    b.innerHTML = '<span class="t">' + label + '</span><span class="d">' + sub + '</span>';
+  } else {
+    b.textContent = label;
+  }
   if (dis) b.disabled = true; else b.onclick = fn;
   return b;
 }
 function drawBar(){
+  if (typeof drawNow === 'function') drawNow();
   var gd = document.getElementById('g-day');
   gd.innerHTML = '';
   DAYS.forEach(function(d, i){
@@ -624,7 +616,7 @@ function drawBar(){
       /* Fine Grid は当日だけ */
       if (i !== 0 && S.gi === 1) S.gi = 0;
       drawBar(); paint();
-    }));
+    }, false, dateOf(i)));
   });
 
   var gg = document.getElementById('g-grid');
@@ -708,7 +700,7 @@ function drawLb(){
   lbImg.src = url(c.dataset.p, S.di, S.gi, S.ti);
   lbImg.alt = c.dataset.ja;
   lbTtl.textContent = c.dataset.ja;
-  lbSub.textContent = c.dataset.en + '　／　' + DAYS[S.di].label + ' ' +
+  lbSub.textContent = c.dataset.en + '　／　' + dayLabel(S.di) + ' ' +
                       GRIDS[S.gi].label + ' ' + hhmm(S.gi, S.ti);
   lbFoot.innerHTML = '';
   GRIDS[S.gi].times.forEach(function(t, i){
@@ -790,44 +782,19 @@ function showHelp(force){
   };
 }
 document.getElementById('btn-help').onclick = function(){ showHelp(true); };
+
+/* いま何を見ているかを一行で出す */
+function drawNow(){
+  var el = document.getElementById('now');
+  if (!el) return;
+  el.innerHTML = '<b>' + dayLabel(S.di) + '　' + hhmm(S.gi, S.ti) + '</b>' +
+    '<span>' + GRIDS[S.gi].label + ' Grid（' +
+    (S.gi === 0 ? '北海道全域' : '細かい格子') + '）</span>' +
+    '<span>日付は、この端末の今日を基準に数えています。' +
+    'RASPの図が朝の更新前だと1日ずれることがあります。</span>';
+}
 /* https のページなのに http の図を読もうとしている場合は、最初から出しておく */
 if (location.protocol === 'https:' && /^http:/.test(base())) showHelp();
-
-/* ══════════ サイドバー ══════════ */
-(function(){
-  var sb = document.getElementById('sidebar'),
-      ov = document.getElementById('sb-overlay'),
-      ham = document.getElementById('hamburger'),
-      cls = document.querySelector('.sb-close');
-  function open(){ sb.classList.add('open'); ov.classList.add('open'); }
-  function shut(){ sb.classList.remove('open'); ov.classList.remove('open'); }
-  if (ham) ham.onclick = open;
-  if (ov) ov.onclick = shut;
-  if (cls) cls.onclick = shut;
-  sb.addEventListener('click', function(e){
-    if (e.target.closest('.sb-link') && window.innerWidth < 900) shut();
-  });
-
-  var q = document.getElementById('sb-q');
-  if (q) q.addEventListener('input', function(){
-    var t = q.value.trim(), hit = 0;
-    document.querySelectorAll('#sb-scroll .sb-link').forEach(function(a){
-      var on = !t || a.textContent.indexOf(t) >= 0;
-      a.style.display = on ? '' : 'none';
-      if (on) hit++;
-    });
-    document.querySelectorAll('#sb-scroll .sb-grp').forEach(function(g){
-      var any = false, n = g.nextElementSibling;
-      while (n && !n.classList.contains('sb-grp')){
-        if (n.classList.contains('sb-link') && n.style.display !== 'none') any = true;
-        n = n.nextElementSibling;
-      }
-      g.style.display = (!t || any) ? '' : 'none';
-    });
-    var em = document.getElementById('sb-none');
-    if (em) em.style.display = hit ? 'none' : '';
-  });
-})();
 
 drawBar();
 paint();

@@ -377,6 +377,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
   <div class="grp"><span class="lb">時刻</span><span id="g-time"></span></div>
   <span class="spacer"></span>
   <button class="chip" id="btn-reload" title="キャッシュを避けて読み直す">↻ 更新</button>
+  <button class="chip" id="btn-help" title="図が出ないときの調べ方">？ 図が出ない</button>
 </div>
 
 <div class="warn" id="mixed" style="display:none;"></div>
@@ -643,17 +644,26 @@ function drawBar(){
 /* ══════════ 図を並べる ══════════ */
 var cards = [].slice.call(document.querySelectorAll('.card'));
 
+var fail = { n:0, url:'' };
+
 function paint(){
+  fail.n = 0; fail.url = '';
   cards.forEach(function(c){
     var src = url(c.dataset.p, S.di, S.gi, S.ti);
     var th = c.querySelector('.thumb');
     var img = th.querySelector('img');
-    if (!img){
+    if (!img || img.dataset.dead){
       img = document.createElement('img');
       img.loading = 'lazy';
+      /* 直リンクを弾く設定のサーバがあるので、参照元は送らない */
+      img.referrerPolicy = 'no-referrer';
       img.alt = c.dataset.ja;
       img.onerror = function(){
-        th.innerHTML = '<span class="ph">この時刻の図は<br>まだ出ていません</span>';
+        img.dataset.dead = '1';
+        th.innerHTML = '<span class="ph">図を取得できません</span>';
+        fail.n++;
+        fail.url = img.getAttribute('src') || '';
+        if (fail.n >= 3) showHelp();
       };
       th.innerHTML = '';
       th.appendChild(img);
@@ -715,33 +725,62 @@ document.addEventListener('keydown', function(e){
 /* ══════════ 更新（キャッシュ避け） ══════════ */
 document.getElementById('btn-reload').onclick = function(){
   S.bust = '?t=' + Date.now();
+  cards.forEach(function(c){
+    var i = c.querySelector('.thumb img');
+    if (i) delete i.dataset.dead;
+  });
   paint();
 };
 
-/* ══════════ http の図が出ないときの案内 ══════════ */
-(function(){
+/* ══════════ 図が出ないときの案内 ══════════ */
+var helpShown = false;
+function showHelp(force){
   var box = document.getElementById('mixed');
+  if (helpShown && !force) return;
+  helpShown = true;
+  box.style.display = '';
   var cur = base();
-  if (location.protocol === 'https:' && /^http:/.test(cur)){
-    box.style.display = '';
-    box.innerHTML =
-      '<b>図が出ないときは、ここを直してください。</b><br>' +
-      'このページは <code>https</code> で開かれていますが、RASP の図は <code>http</code> で配信されています。' +
-      'ブラウザが安全でない読み込みとして遮断するため、図が空欄になります。<br>' +
-      '<b>手元にファイルを保存して開く</b>か、<b>https で取得できる中継先</b>を下に入れてください' +
-      '（末尾の <code>/BLIPMAP/</code> まで）。空にすると既定に戻ります。' +
-      '<input id="base-in" type="text" placeholder="' + DEFAULT_BASE + '" value="' +
-      (cur === DEFAULT_BASE ? '' : cur) + '">';
-    var inp = document.getElementById('base-in');
-    inp.onchange = function(){
-      try {
-        if (inp.value.trim()) localStorage.setItem(LS_BASE, inp.value.trim());
-        else localStorage.removeItem(LS_BASE);
-      } catch(e){}
-      paint();
-    };
-  }
-})();
+  var mixed = (location.protocol === 'https:' && /^http:/.test(cur));
+  var probe = fail.url || url('wstar', S.di, S.gi, S.ti);
+  box.innerHTML =
+    '<b>図を取得できませんでした。</b>取りに行ったのは次のURLです。' +
+    '<div style="margin:7px 0;"><code style="word-break:break-all;">' + probe + '</code></div>' +
+    '<a class="x" href="' + probe + '" target="_blank" rel="noopener noreferrer">' +
+    'このURLを新しいタブで開いて確かめる</a>' +
+    '<div style="margin-top:10px;">考えられるのは3つです。</div>' +
+    '<ol style="margin:5px 0 0;padding-left:20px;">' +
+      '<li>' + (mixed ? '<b>【いまこれに当てはまります】</b>' : '') +
+        'このページが <code>https</code>、図が <code>http</code> で、' +
+        'ブラウザが遮断している（混在コンテンツ）' +
+        '<span style="color:var(--text-dim);">' +
+        '　→ いまのページは <code>' + location.protocol + '</code> です。</span></li>' +
+      '<li>上のURLを直接開いても<b>出ない</b> → URLの組み立てか、その時刻の図がまだ作られていない</li>' +
+      '<li>上のURLを直接開くと<b>出るのにここでは出ない</b> → ' +
+        '配信元が他サイトからの読み込みを断っている（直リンク制限）' +
+        '<span style="color:var(--text-dim);">　→ この場合は中継が要ります。</span></li>' +
+    '</ol>' +
+    '<div style="margin-top:10px;"><b>取得元を変える</b>' +
+    '（末尾の <code>/BLIPMAP/</code> まで。空にすると既定に戻ります）</div>' +
+    '<input id="base-in" type="text" placeholder="' + DEFAULT_BASE + '" value="' +
+    (cur === DEFAULT_BASE ? '' : cur) + '">';
+  var inp = document.getElementById('base-in');
+  inp.onchange = function(){
+    try {
+      if (inp.value.trim()) localStorage.setItem(LS_BASE, inp.value.trim());
+      else localStorage.removeItem(LS_BASE);
+    } catch(e){}
+    cards.forEach(function(c){
+      var i = c.querySelector('.thumb img');
+      if (i) delete i.dataset.dead;
+    });
+    helpShown = false;
+    paint();
+    showHelp(true);
+  };
+}
+document.getElementById('btn-help').onclick = function(){ showHelp(true); };
+/* https のページで http の図を読む場合は、最初から出しておく */
+if (location.protocol === 'https:' && /^http:/.test(base())) showHelp();
 
 /* ══════════ サイドバー ══════════ */
 (function(){

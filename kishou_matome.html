@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>気象情報まとめ｜RASP BLIPMAP（北海道）</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
+<style>
+/* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
+:root{
+  /* 面 */
+  --bg:#0d1117;          /* 本文背景 */
+  --surface:#161b22;     /* カード・パネル */
+  --surface-2:#0f141c;   /* サイドバー・一段沈んだ面 */
+  --surface-3:#21262d;   /* ボタン・タグの地 */
+  --line:#21262d;        /* 罫線 */
+  --line-strong:#30363d; /* 入力欄の枠など、はっきり見せたい罫線 */
+  /* 文字 */
+  --text:#e6edf3;
+  --text-dim:#8b949e;
+  --text-faint:#7d8590;
+  /* 役割色 */
+  --accent:#3b82f6;      /* 主操作・選択中 */
+  --accent-soft:#0d2044; /* 選択中の地 */
+  --accent-text:#93c5fd;
+  --key:#d29922;         /* 重要・読み上げ中 */
+  --key-soft:rgba(210,153,34,.12);
+  --ok:#3fb950;
+  --warn:#d29922;
+  --danger:#f85149;
+  /* 文字組み */
+  --font:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,monospace;
+  /* 寸法 */
+  --sb-w:280px;          /* サイドバー幅 */
+  --hdr-h:52px;          /* ヘッダー高さ */
+  --radius:10px;
+  --radius-lg:14px;
+}
+/* ブレークポイントは2つだけ。
+   900px以上 = サイドバー常時表示（PC）／600px以下 = スマホ密度 */
+/* ══════════ 共通ヘッダー ══════════ */
+.appbar{
+  position:sticky;top:0;z-index:900;
+  height:var(--hdr-h);display:flex;align-items:center;gap:10px;
+  padding:0 12px;background:var(--surface);border-bottom:1px solid var(--line);
+}
+.appbar .ab-back,.appbar .ab-logo{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.appbar .ab-back{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:var(--text-dim);font-size:16px;text-decoration:none;
+}
+.appbar .ab-back:hover{background:rgba(255,255,255,.12);color:var(--text);}
+.appbar .ab-logo{background:linear-gradient(135deg,#3b82f6,#1e40af);font-size:15px;}
+.appbar .ab-txt{min-width:0;}
+.appbar .ab-title{font-size:13px;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.appbar .ab-sub{font-size:10px;color:var(--text-dim);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#hamburger{
+  margin-left:auto;flex-shrink:0;width:36px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:var(--text);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+#hamburger:hover{background:rgba(255,255,255,.12);}
+/* ══════════ 共通サイドバー ══════════ */
+#sb-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:940;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#sb-overlay.open{opacity:1;pointer-events:auto;}
+#sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:min(86vw,var(--sb-w));
+  background:var(--surface-2);border-right:1px solid var(--line);
+  z-index:950;display:flex;flex-direction:column;
+  transform:translateX(-102%);transition:transform .22s ease;
+}
+#sidebar.open{transform:none;}
+.sb-head{
+  height:var(--hdr-h);flex-shrink:0;padding:0 14px;
+  display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);
+}
+.sb-head b{font-size:13px;font-weight:700;color:var(--text);}
+.sb-close{
+  margin-left:auto;width:30px;height:30px;border-radius:8px;cursor:pointer;
+  background:none;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:13px;line-height:1;
+}
+.sb-close:hover{color:var(--text);border-color:var(--text-dim);}
+.sb-search{
+  margin:10px 12px 4px;width:calc(100% - 24px);
+  padding:8px 10px;background:var(--bg);border:1px solid var(--line-strong);
+  border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;
+}
+.sb-search::placeholder{color:var(--text-faint);}
+.sb-search:focus{outline:none;border-color:var(--accent);}
+.sb-scroll{flex:1;overflow-y:auto;padding:8px 8px 28px;-webkit-overflow-scrolling:touch;}
+.sb-grp{
+  font-size:10.5px;font-weight:700;color:var(--text-faint);
+  letter-spacing:.06em;padding:12px 8px 6px;
+}
+.sb-link{
+  display:flex;align-items:baseline;gap:8px;padding:8px 9px;border-radius:8px;
+  font-size:12.5px;line-height:1.5;color:var(--text-dim);text-decoration:none;
+  transition:background .15s,color .15s;
+}
+.sb-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.sb-link.current{background:var(--accent-soft);color:var(--accent-text);}
+.sb-link.reading{background:var(--key-soft);color:var(--key);}
+.sb-num{font-family:var(--mono);font-size:10.5px;color:var(--key);
+  flex-shrink:0;min-width:30px;}
+.sb-empty{color:var(--text-faint);font-size:12px;padding:12px 8px;}
+/* ══════════ 共通 読み上げUI ══════════ */
+.tts-bar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px 12px;margin:0 0 18px;
+}
+.tts-btn{
+  background:var(--surface-3);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:8px 13px;font-family:var(--font);font-size:12.5px;
+  font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.tts-btn:hover{background:var(--line-strong);}
+.tts-btn.primary{background:#2563eb;border-color:#2563eb;color:#fff;}
+.tts-btn.primary:hover{background:#1d4ed8;}
+.tts-btn.stop{color:var(--danger);border-color:#5c1a17;}
+.tts-btn.stop:hover{background:rgba(248,81,73,.12);}
+.tts-btn:disabled{opacity:.45;cursor:default;}
+.tts-sel{
+  background:var(--bg);color:var(--text);border:1px solid var(--line-strong);
+  border-radius:8px;padding:7px 9px;font-family:var(--font);font-size:12.5px;
+  max-width:170px;cursor:pointer;
+}
+.tts-sel:focus{outline:none;border-color:var(--accent);}
+.tts-st{font-size:11.5px;color:var(--text-dim);margin-left:auto;}
+
+#tts-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:930;display:none;
+  padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  background:rgba(13,17,23,.97);border-top:1px solid var(--line);
+  backdrop-filter:blur(8px);box-shadow:0 -6px 22px rgba(0,0,0,.5);
+}
+#tts-dock.on{display:block;}
+.dk-inner{max-width:980px;margin:0 auto;}
+.dk-bar{height:3px;background:var(--surface-3);border-radius:2px;
+  overflow:hidden;margin-bottom:7px;}
+.dk-bar i{display:block;height:100%;background:var(--key);width:0;
+  transition:width .3s linear;}
+.dk-meta{display:flex;gap:10px;align-items:baseline;font-size:11px;
+  color:var(--text-faint);margin-bottom:7px;}
+.dk-meta .dk-now{color:var(--text-dim);font-size:11.5px;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dk-btns{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.dk-btns .tts-sel{margin-left:auto;}
+
+/* 読み上げ中の箇所 */
+.tts-reading{
+  outline:2px solid var(--key);outline-offset:3px;
+  background:var(--key-soft);border-radius:6px;
+}
+/* ══════════ 共通レスポンシブ ══════════ */
+/* PC：サイドバーを出したまま、本文を右にずらす */
+@media (min-width:900px){
+  html body{padding-left:var(--sb-w);}   /* 各ページの html,body{padding:0} に勝たせる */
+  #sidebar{transform:none;width:var(--sb-w);}
+  #sb-overlay,#hamburger,.sb-close{display:none;}
+  #tts-dock{left:var(--sb-w);}
+}
+/* スマホ：操作は下のドックに集約し、本文中のバーは軽くする */
+@media (max-width:600px){
+  .tts-bar .tts-st{width:100%;margin-left:0;}
+  .dk-btns .tts-btn{flex:1;padding:10px 6px;font-size:12.5px;}
+  .dk-btns .tts-sel{margin-left:0;flex:0 0 auto;}
+  /* 下のドックに隠れないよう、スクロール位置に余白を持たせる */
+  .tts-bar,.sb-link,select,summary,section,h2{scroll-margin-bottom:120px;}
+}
+
+
+/* ══════════ 土台 ══════════ */
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);
+  font-size:15px;line-height:1.85;-webkit-text-size-adjust:100%;}
+
+/* ══════════ ヘッダーとサイドバーの重なりを直す ══════════ */
+#sidebar{top:var(--hdr-h);z-index:880;}
+#sb-overlay{z-index:870;}
+
+.sb-brand{padding:14px 14px 10px;border-bottom:1px solid var(--line);}
+.sb-brand .row{display:flex;align-items:flex-start;gap:8px;}
+.sb-brand .tag{display:block;background:none;border:none;padding:0;border-radius:0;
+  font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--key);margin:0 0 7px;}
+.sb-brand h1{margin:0;font-size:15px;font-weight:700;color:var(--text);line-height:1.35;}
+.sb-brand .sub{margin-top:7px;font-size:11px;color:var(--text-dim);line-height:1.6;}
+
+#main{padding:calc(var(--hdr-h) + 16px) 16px 60px;max-width:1400px;margin:0 auto;}
+
+/* PC：ヘッダーは全幅のまま、本文だけサイドバーの分だけ右へ */
+@media (min-width:900px){
+  html body{padding-left:0;}
+  html body > *:not(.appbar):not(#sidebar):not(#sb-overlay):not(#lb){
+    margin-left:var(--sb-w);
+  }
+}
+
+/* ── 操作の帯 ── */
+.bar{
+  position:sticky;top:var(--hdr-h);z-index:700;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px;margin:0 0 18px;
+  display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+}
+.grp{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.grp .lb{font-size:11px;font-weight:700;color:var(--text-faint);letter-spacing:.06em;}
+.chip{
+  background:var(--surface-3);border:1px solid var(--line-strong);color:var(--text-dim);
+  border-radius:8px;padding:5px 11px;font-size:12.5px;font-family:var(--font);
+  cursor:pointer;transition:.13s;
+}
+.chip:hover{color:var(--text);border-color:var(--text-dim);}
+.chip.on{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:700;}
+.chip:disabled{opacity:.32;cursor:not-allowed;}
+.bar .spacer{flex:1;}
+.bar .note{font-size:11.5px;color:var(--text-faint);}
+
+/* ── お知らせ ── */
+.warn{
+  background:#2a1e0b;border:1px solid #6b4d10;border-radius:10px;
+  padding:12px 14px;margin:0 0 16px;font-size:13px;color:#f0d58c;line-height:1.75;
+}
+.warn b{color:#ffe9ae;}
+.warn code{font-family:var(--mono);font-size:12px;background:#1a1206;padding:1px 5px;border-radius:4px;}
+.warn input{
+  width:100%;margin-top:9px;padding:8px 10px;background:var(--bg);
+  border:1px solid var(--line-strong);border-radius:8px;
+  color:var(--text);font-family:var(--mono);font-size:12px;
+}
+
+/* ── 図の並び ── */
+.gsec{margin:0 0 30px;}
+.ghead{
+  display:flex;align-items:baseline;gap:10px;
+  margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);
+}
+.ghead h2{margin:0;font-size:16px;font-weight:700;color:var(--text);}
+.ghead span{font-size:11.5px;color:var(--text-faint);}
+
+/* 本文中のリンク */
+.x{color:#bcd8ff;text-decoration:underline;text-underline-offset:2px;}
+.x:hover{color:#fff;}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;cursor:pointer;transition:.15s;text-align:left;
+  padding:0;font-family:var(--font);display:flex;flex-direction:column;
+}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.card .thumb{
+  position:relative;display:flex;width:100%;aspect-ratio:1/1;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.card .thumb img{width:100%;height:100%;object-fit:contain;display:block;}
+.card .thumb .ph{font-size:11.5px;color:var(--text-faint);padding:10px;text-align:center;line-height:1.7;}
+.card .cap{display:block;padding:9px 11px 11px;border-top:1px solid var(--line);}
+.card .cap .ja{display:block;font-size:13px;font-weight:700;color:var(--text);line-height:1.4;}
+.card .cap .en{display:block;font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:3px;}
+.card .cap .ds{display:block;font-size:11.5px;color:var(--text-dim);margin-top:6px;line-height:1.65;}
+.card .cap .ds b{color:var(--text);}
+
+/* ── 大きく表示 ── */
+#lb{
+  position:fixed;inset:0;z-index:1200;background:rgba(3,6,12,.94);
+  display:none;flex-direction:column;padding:12px;
+}
+#lb.on{display:flex;}
+#lb .lb-head{display:flex;align-items:center;gap:12px;flex-shrink:0;padding:2px 4px 10px;}
+#lb .lb-ttl{font-size:15px;font-weight:700;color:var(--text);}
+#lb .lb-sub{font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+#lb .lb-x{
+  margin-left:auto;background:var(--surface-3);border:1px solid var(--line-strong);
+  color:var(--text);border-radius:9px;width:36px;height:36px;font-size:15px;cursor:pointer;
+}
+#lb .lb-x:hover{background:var(--surface);border-color:var(--text-dim);}
+#lb .lb-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
+#lb .lb-body img{max-width:100%;max-height:100%;object-fit:contain;}
+#lb .lb-foot{flex-shrink:0;display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:11px 4px 2px;}
+
+@media (max-width:900px){
+  #main{padding:calc(var(--hdr-h) + 12px) 12px 50px;}
+  .cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .card .cap .ds{display:none;}
+  .bar{padding:9px 10px;gap:10px;}
+}
+
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <a class="ab-back" href="./index.html" aria-label="入口へ戻る">‹</a>
+  <div class="ab-logo">✈</div>
+  <div class="ab-txt">
+    <div class="ab-title">気象情報まとめ</div>
+    <div class="ab-sub">RASP BLIPMAP／滑空気象予想（北海道）</div>
+  </div>
+  <button id="hamburger" aria-label="目次">☰</button>
+</header>
+
+<div id="sb-overlay"></div>
+
+<nav id="sidebar">
+  <div class="sb-brand">
+    <div class="row">
+      <div style="flex:1;">
+        <div class="tag">RASP BLIPMAP</div>
+        <h1>気象情報まとめ</h1>
+      </div>
+      <button class="sb-close" aria-label="閉じる">✕</button>
+    </div>
+    <div class="sub">滑空気象予想（北海道）／31項目</div>
+  </div>
+  <input class="sb-search" id="sb-q" type="search" placeholder="項目名で絞り込む" autocomplete="off">
+  <div class="sb-scroll" id="sb-scroll">
+      <a class="sb-link" href="#g-use"><span class="sb-num">案内</span><span>このページの使い方</span></a>
+      <div class="sb-grp">サーマル</div>
+      <a class="sb-link" href="#c-wstar"><span class="sb-num"></span><span>サーマル上昇速度 W*</span></a>
+      <a class="sb-link" href="#c-wstar_bsratio"><span class="sb-num"></span><span>サーマル上昇速度＋B/S比</span></a>
+      <a class="sb-link" href="#c-bsratio"><span class="sb-num"></span><span>浮力／シア比</span></a>
+      <a class="sb-link" href="#c-hwcrit"><span class="sb-num"></span><span>使えるサーマルの上限高度</span></a>
+      <a class="sb-link" href="#c-dwcrit"><span class="sb-num"></span><span>同・地表からの厚み</span></a>
+      <a class="sb-link" href="#c-hbl"><span class="sb-num"></span><span>混合層の頂</span></a>
+      <a class="sb-link" href="#c-dbl"><span class="sb-num"></span><span>混合層の厚み</span></a>
+      <a class="sb-link" href="#c-bltopvariab"><span class="sb-num"></span><span>サーマル高度のばらつき</span></a>
+      <a class="sb-link" href="#c-sfcshf"><span class="sb-num"></span><span>地表加熱</span></a>
+      <a class="sb-link" href="#c-sfcsunpct"><span class="sb-num"></span><span>日射率</span></a>
+      <a class="sb-link" href="#c-sfctemp"><span class="sb-num"></span><span>地上気温</span></a>
+      <div class="sb-grp">風</div>
+      <a class="sb-link" href="#c-sfcwind"><span class="sb-num"></span><span>地上風</span></a>
+      <a class="sb-link" href="#c-blwind"><span class="sb-num"></span><span>混合層の平均風</span></a>
+      <a class="sb-link" href="#c-bltopwind"><span class="sb-num"></span><span>混合層頂の風</span></a>
+      <a class="sb-link" href="#c-blwindshear"><span class="sb-num"></span><span>混合層の鉛直シア</span></a>
+      <a class="sb-link" href="#c-wblmaxmin"><span class="sb-num"></span><span>収束・発散</span></a>
+      <div class="sb-grp">雲</div>
+      <a class="sb-link" href="#c-zsfclcldif"><span class="sb-num"></span><span>積雲の出やすさ</span></a>
+      <a class="sb-link" href="#c-zsfclcl"><span class="sb-num"></span><span>積雲の雲底</span></a>
+      <a class="sb-link" href="#c-zsfclclmask"><span class="sb-num"></span><span>積雲の雲底（出る所だけ）</span></a>
+      <a class="sb-link" href="#c-zblcldif"><span class="sb-num"></span><span>曇天化の可能性</span></a>
+      <a class="sb-link" href="#c-zblcl"><span class="sb-num"></span><span>曇天の雲底</span></a>
+      <a class="sb-link" href="#c-zblclmask"><span class="sb-num"></span><span>曇天の雲底（出る所だけ）</span></a>
+      <a class="sb-link" href="#c-blcwbase"><span class="sb-num"></span><span>広がりのある雲の雲底</span></a>
+      <a class="sb-link" href="#c-sfcdewpt"><span class="sb-num"></span><span>地上露点温度</span></a>
+      <a class="sb-link" href="#c-cape"><span class="sb-num"></span><span>CAPE</span></a>
+      <a class="sb-link" href="#c-rain1"><span class="sb-num"></span><span>1時間降水量</span></a>
+      <div class="sb-grp">上層・ウェーブ</div>
+      <a class="sb-link" href="#c-press850"><span class="sb-num"></span><span>850hPaの鉛直流</span></a>
+      <a class="sb-link" href="#c-press700"><span class="sb-num"></span><span>700hPaの鉛直流</span></a>
+      <a class="sb-link" href="#c-press500"><span class="sb-num"></span><span>500hPaの鉛直流</span></a>
+      <a class="sb-link" href="#c-boxwmax"><span class="sb-num"></span><span>鉛直流の最大断面</span></a>
+      <div class="sb-grp">ゾンデ</div>
+      <a class="sb-link" href="#c-sounding1"><span class="sb-num"></span><span>ゾンデ（滝川）</span></a>
+    <div class="sb-empty" id="sb-none" style="display:none;">見つかりませんでした。</div>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="bar" id="bar">
+  <div class="grp"><span class="lb">日</span><span id="g-day"></span></div>
+  <div class="grp"><span class="lb">格子</span><span id="g-grid"></span></div>
+  <div class="grp"><span class="lb">時刻</span><span id="g-time"></span></div>
+  <span class="spacer"></span>
+  <button class="chip" id="btn-reload" title="キャッシュを避けて読み直す">↻ 更新</button>
+</div>
+
+<div class="warn" id="mixed" style="display:none;"></div>
+
+<section class="gsec" id="g-use">
+  <div class="ghead"><h2>このページの使い方</h2><span>RASP BLIPMAP</span></div>
+  <div class="warn" style="background:var(--surface);border-color:var(--line);color:var(--text-dim);">
+    上の帯で<b style="color:var(--text);">日・格子・時刻</b>を選ぶと、31項目の図がまとめて切り替わります。
+    <b style="color:var(--text);">図をクリックすると大きく表示</b>され、
+    その中で時刻を送れます（← → キー、Esc で閉じる）。<br>
+    <b style="color:var(--text);">Coarse Grid</b>は09:00〜18:00の10コマで北海道全域、
+    <b style="color:var(--text);">Fine Grid</b>は11:00〜16:00の6コマで細かい格子です。
+    Fine Grid は<b style="color:var(--text);">当日のみ</b>提供されています。<br>
+    図は <a class="x" href="http://tk2-233-26218.vs.sakura.ne.jp/BLIPMAP/RASP_Table_H.html"
+    target="_blank" rel="noopener noreferrer">RASP BLIPMAP FORECASTS（北海道）</a>
+    のものをそのまま表示しています。色の目盛りは<b style="color:var(--text);">図ごとに変わる</b>ので、
+    凡例を必ず確認してください。
+  </div>
+</section>
+
+<section class="gsec" id="g-th">
+  <div class="ghead"><h2>サーマル</h2><span>11項目</span></div>
+  <div class="cards">
+    <button class="card" id="c-wstar" data-p="wstar" data-ja="サーマル上昇速度 W*" data-en="Thermal Updraft Velocity">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">サーマル上昇速度 W*</span><span class="en">Thermal Updraft Velocity</span><span class="ds"><b>まずここを見る。</b>1〜2m/sで渋い、3m/s以上で楽に上がる目安。</span></span>
+    </button>
+    <button class="card" id="c-wstar_bsratio" data-p="wstar_bsratio" data-ja="サーマル上昇速度＋B/S比" data-en="W* & B/S Ratio">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">サーマル上昇速度＋B/S比</span><span class="en">W* & B/S Ratio</span><span class="ds">上のW*に、<b>風で崩れて使いにくい所へ網かけ</b>を重ねた図。</span></span>
+    </button>
+    <button class="card" id="c-bsratio" data-p="bsratio" data-ja="浮力／シア比" data-en="Buoyancy/Shear Ratio">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">浮力／シア比</span><span class="en">Buoyancy/Shear Ratio</span><span class="ds">小さいほど風にちぎられる。<b>5以下はサーマルが立たない</b>目安。</span></span>
+    </button>
+    <button class="card" id="c-hwcrit" data-p="hwcrit" data-ja="使えるサーマルの上限高度" data-en="Hcrit（MSL）">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">使えるサーマルの上限高度</span><span class="en">Hcrit（MSL）</span><span class="ds"><b>上昇率が225ft/min（約1.1m/s）を下回る高度。</b>実質の作業上限。</span></span>
+    </button>
+    <button class="card" id="c-dwcrit" data-p="dwcrit" data-ja="同・地表からの厚み" data-en="AGL Hcrit">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">同・地表からの厚み</span><span class="en">AGL Hcrit</span><span class="ds">上のHcritを<b>地面からの高さ</b>で見た図。</span></span>
+    </button>
+    <button class="card" id="c-hbl" data-p="hbl" data-ja="混合層の頂" data-en="BL Top Height（MSL）">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">混合層の頂</span><span class="en">BL Top Height（MSL）</span><span class="ds">サーマルが届く理論上の天井。Hcritより高めに出る。</span></span>
+    </button>
+    <button class="card" id="c-dbl" data-p="dbl" data-ja="混合層の厚み" data-en="BL Depth">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">混合層の厚み</span><span class="en">BL Depth</span><span class="ds">混合層の頂を<b>地面からの厚み</b>で見た図。</span></span>
+    </button>
+    <button class="card" id="c-bltopvariab" data-p="bltopvariab" data-ja="サーマル高度のばらつき" data-en="Thermal Height Variability">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">サーマル高度のばらつき</span><span class="en">Thermal Height Variability</span><span class="ds">大きいほど<b>予報のあてが外れやすい</b>。</span></span>
+    </button>
+    <button class="card" id="c-sfcshf" data-p="sfcshf" data-ja="地表加熱" data-en="Surface Heating">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">地表加熱</span><span class="en">Surface Heating</span><span class="ds">サーマルの元になる熱。<b>朝の立ち上がりの早さ</b>を見る。</span></span>
+    </button>
+    <button class="card" id="c-sfcsunpct" data-p="sfcsunpct" data-ja="日射率" data-en="Normalized Surface Sun">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">日射率</span><span class="en">Normalized Surface Sun</span><span class="ds">雲でどれだけ日射が遮られるか。低い所はサーマルが弱る。</span></span>
+    </button>
+    <button class="card" id="c-sfctemp" data-p="sfctemp" data-ja="地上気温" data-en="Surface Temperature">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">地上気温</span><span class="en">Surface Temperature</span></span>
+    </button>
+  </div>
+</section>
+
+<section class="gsec" id="g-wd">
+  <div class="ghead"><h2>風</h2><span>5項目</span></div>
+  <div class="cards">
+    <button class="card" id="c-sfcwind" data-p="sfcwind" data-ja="地上風" data-en="Surface Wind">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">地上風</span><span class="en">Surface Wind</span><span class="ds"><b>離着陸の判断に直結。</b>滝川の風向・風速をここで。</span></span>
+    </button>
+    <button class="card" id="c-blwind" data-p="blwind" data-ja="混合層の平均風" data-en="BL Avg. Wind">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">混合層の平均風</span><span class="en">BL Avg. Wind</span><span class="ds"><b>飛んでいる高度で実際に受ける風。</b>流される量の見積もりに。</span></span>
+    </button>
+    <button class="card" id="c-bltopwind" data-p="bltopwind" data-ja="混合層頂の風" data-en="BL Top Wind">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">混合層頂の風</span><span class="en">BL Top Wind</span><span class="ds">雲底付近の風。地上との差が大きいとサーマルが傾く。</span></span>
+    </button>
+    <button class="card" id="c-blwindshear" data-p="blwindshear" data-ja="混合層の鉛直シア" data-en="BL Vertical Wind Shear">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">混合層の鉛直シア</span><span class="en">BL Vertical Wind Shear</span><span class="ds">大きいとサーマルが折れ曲がって<b>センタリングしにくい</b>。</span></span>
+    </button>
+    <button class="card" id="c-wblmaxmin" data-p="wblmaxmin" data-ja="収束・発散" data-en="BL Max. Up/Down（Convergence）">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">収束・発散</span><span class="en">BL Max. Up/Down（Convergence）</span><span class="ds"><b>コンバージェンスライン探しの図。</b>線状の上昇域が出たら狙い目。</span></span>
+    </button>
+  </div>
+</section>
+
+<section class="gsec" id="g-cl">
+  <div class="ghead"><h2>雲</h2><span>10項目</span></div>
+  <div class="cards">
+    <button class="card" id="c-zsfclcldif" data-p="zsfclcldif" data-ja="積雲の出やすさ" data-en="Cumulus Potential">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">積雲の出やすさ</span><span class="en">Cumulus Potential</span><span class="ds"><b>プラスなら積雲ができる。</b>サーマルの目印が付く。</span></span>
+    </button>
+    <button class="card" id="c-zsfclcl" data-p="zsfclcl" data-ja="積雲の雲底" data-en="Cu Cloudbase（Sfc.LCL, MSL）">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">積雲の雲底</span><span class="en">Cu Cloudbase（Sfc.LCL, MSL）</span><span class="ds">積雲ができた場合の雲底高度。</span></span>
+    </button>
+    <button class="card" id="c-zsfclclmask" data-p="zsfclclmask" data-ja="積雲の雲底（出る所だけ）" data-en="Cu Cloudbase where Cu Pot>0">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">積雲の雲底（出る所だけ）</span><span class="en">Cu Cloudbase where Cu Pot>0</span><span class="ds">上の図から<b>実際に積雲ができる所だけ</b>を残したもの。実用はこちら。</span></span>
+    </button>
+    <button class="card" id="c-zblcldif" data-p="zblcldif" data-ja="曇天化の可能性" data-en="Overcast Development Potential">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">曇天化の可能性</span><span class="en">Overcast Development Potential</span><span class="ds">プラスだと<b>べったり曇って日射が止まる</b>おそれ。</span></span>
+    </button>
+    <button class="card" id="c-zblcl" data-p="zblcl" data-ja="曇天の雲底" data-en="OD Cloudbase（BL CL, MSL）">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">曇天の雲底</span><span class="en">OD Cloudbase（BL CL, MSL）</span></span>
+    </button>
+    <button class="card" id="c-zblclmask" data-p="zblclmask" data-ja="曇天の雲底（出る所だけ）" data-en="OD Cloudbase where OD Pot>0">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">曇天の雲底（出る所だけ）</span><span class="en">OD Cloudbase where OD Pot>0</span></span>
+    </button>
+    <button class="card" id="c-blcwbase" data-p="blcwbase" data-ja="広がりのある雲の雲底" data-en="BL Extensive Cloudbase">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">広がりのある雲の雲底</span><span class="en">BL Extensive Cloudbase</span></span>
+    </button>
+    <button class="card" id="c-sfcdewpt" data-p="sfcdewpt" data-ja="地上露点温度" data-en="Surface Dew Point Temperature">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">地上露点温度</span><span class="en">Surface Dew Point Temperature</span><span class="ds">気温との差が小さいほど雲底が低い。</span></span>
+    </button>
+    <button class="card" id="c-cape" data-p="cape" data-ja="CAPE" data-en="CAPE">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">CAPE</span><span class="en">CAPE</span><span class="ds"><b>大きいと積乱雲。</b>1,000を超えたら発達に注意。</span></span>
+    </button>
+    <button class="card" id="c-rain1" data-p="rain1" data-ja="1時間降水量" data-en="1 hour Accumulated Rain">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">1時間降水量</span><span class="en">1 hour Accumulated Rain</span></span>
+    </button>
+  </div>
+</section>
+
+<section class="gsec" id="g-up">
+  <div class="ghead"><h2>上層・ウェーブ</h2><span>4項目</span></div>
+  <div class="cards">
+    <button class="card" id="c-press850" data-p="press850" data-ja="850hPaの鉛直流" data-en="Vertical Velocity at 850mb">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">850hPaの鉛直流</span><span class="en">Vertical Velocity at 850mb</span><span class="ds">約1,500m。<b>上昇域はウェーブや収束</b>の手がかり。</span></span>
+    </button>
+    <button class="card" id="c-press700" data-p="press700" data-ja="700hPaの鉛直流" data-en="Vertical Velocity at 700mb">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">700hPaの鉛直流</span><span class="en">Vertical Velocity at 700mb</span><span class="ds">約3,000m。</span></span>
+    </button>
+    <button class="card" id="c-press500" data-p="press500" data-ja="500hPaの鉛直流" data-en="Vertical Velocity at 500mb">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">500hPaの鉛直流</span><span class="en">Vertical Velocity at 500mb</span><span class="ds">約5,500m。</span></span>
+    </button>
+    <button class="card" id="c-boxwmax" data-p="boxwmax" data-ja="鉛直流の最大断面" data-en="Vert. Velocity Slice at Vert.Vel.Max">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">鉛直流の最大断面</span><span class="en">Vert. Velocity Slice at Vert.Vel.Max</span><span class="ds"><b>縦の断面図。</b>ウェーブが立っているかを横から見る。</span></span>
+    </button>
+  </div>
+</section>
+
+<section class="gsec" id="g-sd">
+  <div class="ghead"><h2>ゾンデ</h2><span>1項目</span></div>
+  <div class="cards">
+    <button class="card" id="c-sounding1" data-p="sounding1" data-ja="ゾンデ（滝川）" data-en="Sounding 1 — TakikawaSP">
+      <span class="thumb"><span class="ph">読み込み中…</span></span>
+      <span class="cap"><span class="ja">ゾンデ（滝川）</span><span class="en">Sounding 1 — TakikawaSP</span><span class="ds"><b>滝川滑空場の予想エマグラム。</b>逆転層とサーマルの頭打ちを読む。</span></span>
+    </button>
+  </div>
+</section>
+
+</main>
+
+<div id="lb">
+  <div class="lb-head">
+    <div>
+      <div class="lb-ttl" id="lb-ttl"></div>
+      <div class="lb-sub" id="lb-sub"></div>
+    </div>
+    <button class="lb-x" id="lb-x" aria-label="閉じる">✕</button>
+  </div>
+  <div class="lb-body"><img id="lb-img" alt=""></div>
+  <div class="lb-foot" id="lb-foot"></div>
+</div>
+
+<script>
+
+/* ══════════ 画像の取得元 ══════════ */
+var LS_BASE = 'oralexam_rasp_base';
+var DEFAULT_BASE = 'http://tk2-233-26218.vs.sakura.ne.jp/BLIPMAP/';
+function base(){
+  var v = '';
+  try { v = localStorage.getItem(LS_BASE) || ''; } catch(e){}
+  v = (v || DEFAULT_BASE).trim();
+  return v.replace(/\/+$/, '') + '/';
+}
+
+var DAYS = [
+  { day:'curr',   dir:'HOKKAIDO_JAPAN',    label:'当日'   },
+  { day:'curr+1', dir:'HOKKAIDO_JAPAN+1',  label:'翌日'   },
+  { day:'curr+2', dir:'HOKKAIDO_JAPAN+2',  label:'翌々日' }
+];
+var GRIDS = [
+  { grid:'d2', label:'Coarse', times:['0900','1000','1100','1200','1300','1400','1500','1600','1700','1800'] },
+  { grid:'w2', label:'Fine',   times:['1100','1200','1300','1400','1500','1600'] }
+];
+
+var S = { di:0, gi:0, ti:4, bust:'' };
+
+/* 画像のURLを組み立てる */
+function url(param, di, gi, ti){
+  var d = DAYS[di], g = GRIDS[gi];
+  var t = g.times[Math.min(ti, g.times.length - 1)];
+  return base() + d.dir + '/FCST/' + param + '.' + d.day + '.' + t + 'lst.' + g.grid + '.png' + S.bust;
+}
+function hhmm(gi, ti){
+  var t = GRIDS[gi].times[Math.min(ti, GRIDS[gi].times.length - 1)];
+  return t.slice(0,2) + ':' + t.slice(2);
+}
+
+/* ══════════ 操作の帯 ══════════ */
+function chip(label, on, fn, dis){
+  var b = document.createElement('button');
+  b.className = 'chip' + (on ? ' on' : '');
+  b.textContent = label;
+  if (dis) b.disabled = true; else b.onclick = fn;
+  return b;
+}
+function drawBar(){
+  var gd = document.getElementById('g-day');
+  gd.innerHTML = '';
+  DAYS.forEach(function(d, i){
+    gd.appendChild(chip(d.label, i === S.di, function(){
+      S.di = i;
+      /* Fine Grid は当日だけ */
+      if (i !== 0 && S.gi === 1) S.gi = 0;
+      drawBar(); paint();
+    }));
+  });
+
+  var gg = document.getElementById('g-grid');
+  gg.innerHTML = '';
+  GRIDS.forEach(function(g, i){
+    var off = (i === 1 && S.di !== 0);
+    gg.appendChild(chip(g.label, i === S.gi && !off, function(){
+      S.gi = i;
+      if (S.ti >= GRIDS[i].times.length) S.ti = GRIDS[i].times.length - 1;
+      drawBar(); paint();
+    }, off));
+  });
+
+  var gt = document.getElementById('g-time');
+  gt.innerHTML = '';
+  GRIDS[S.gi].times.forEach(function(t, i){
+    gt.appendChild(chip(t.slice(0,2) + ':' + t.slice(2), i === S.ti, function(){
+      S.ti = i; drawBar(); paint();
+    }));
+  });
+}
+
+/* ══════════ 図を並べる ══════════ */
+var cards = [].slice.call(document.querySelectorAll('.card'));
+
+function paint(){
+  cards.forEach(function(c){
+    var src = url(c.dataset.p, S.di, S.gi, S.ti);
+    var th = c.querySelector('.thumb');
+    var img = th.querySelector('img');
+    if (!img){
+      img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = c.dataset.ja;
+      img.onerror = function(){
+        th.innerHTML = '<span class="ph">この時刻の図は<br>まだ出ていません</span>';
+      };
+      th.innerHTML = '';
+      th.appendChild(img);
+    }
+    if (img.getAttribute('src') !== src) img.src = src;
+  });
+  if (LB.on) drawLb();
+}
+
+cards.forEach(function(c){
+  c.onclick = function(){ openLb(c); };
+});
+
+/* ══════════ 大きく表示 ══════════ */
+var LB = { on:false, card:null };
+var lb = document.getElementById('lb'),
+    lbImg = document.getElementById('lb-img'),
+    lbTtl = document.getElementById('lb-ttl'),
+    lbSub = document.getElementById('lb-sub'),
+    lbFoot = document.getElementById('lb-foot');
+
+function openLb(card){
+  LB.on = true; LB.card = card;
+  lb.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  drawLb();
+}
+function shutLb(){
+  LB.on = false;
+  lb.classList.remove('on');
+  document.body.style.overflow = '';
+}
+function drawLb(){
+  var c = LB.card;
+  if (!c) return;
+  lbImg.src = url(c.dataset.p, S.di, S.gi, S.ti);
+  lbImg.alt = c.dataset.ja;
+  lbTtl.textContent = c.dataset.ja;
+  lbSub.textContent = c.dataset.en + '　／　' + DAYS[S.di].label + ' ' +
+                      GRIDS[S.gi].label + ' ' + hhmm(S.gi, S.ti);
+  lbFoot.innerHTML = '';
+  GRIDS[S.gi].times.forEach(function(t, i){
+    lbFoot.appendChild(chip(t.slice(0,2) + ':' + t.slice(2), i === S.ti, function(){
+      S.ti = i; drawBar(); paint(); drawLb();
+    }));
+  });
+}
+document.getElementById('lb-x').onclick = shutLb;
+lb.onclick = function(e){ if (e.target === lb || e.target.className === 'lb-body') shutLb(); };
+document.querySelector('#lb .lb-body').onclick = function(e){ if (e.target !== lbImg) shutLb(); };
+
+document.addEventListener('keydown', function(e){
+  if (!LB.on) return;
+  if (e.key === 'Escape') shutLb();
+  if (e.key === 'ArrowRight' && S.ti < GRIDS[S.gi].times.length - 1){ S.ti++; drawBar(); paint(); drawLb(); }
+  if (e.key === 'ArrowLeft'  && S.ti > 0){ S.ti--; drawBar(); paint(); drawLb(); }
+});
+
+/* ══════════ 更新（キャッシュ避け） ══════════ */
+document.getElementById('btn-reload').onclick = function(){
+  S.bust = '?t=' + Date.now();
+  paint();
+};
+
+/* ══════════ http の図が出ないときの案内 ══════════ */
+(function(){
+  var box = document.getElementById('mixed');
+  var cur = base();
+  if (location.protocol === 'https:' && /^http:/.test(cur)){
+    box.style.display = '';
+    box.innerHTML =
+      '<b>図が出ないときは、ここを直してください。</b><br>' +
+      'このページは <code>https</code> で開かれていますが、RASP の図は <code>http</code> で配信されています。' +
+      'ブラウザが安全でない読み込みとして遮断するため、図が空欄になります。<br>' +
+      '<b>手元にファイルを保存して開く</b>か、<b>https で取得できる中継先</b>を下に入れてください' +
+      '（末尾の <code>/BLIPMAP/</code> まで）。空にすると既定に戻ります。' +
+      '<input id="base-in" type="text" placeholder="' + DEFAULT_BASE + '" value="' +
+      (cur === DEFAULT_BASE ? '' : cur) + '">';
+    var inp = document.getElementById('base-in');
+    inp.onchange = function(){
+      try {
+        if (inp.value.trim()) localStorage.setItem(LS_BASE, inp.value.trim());
+        else localStorage.removeItem(LS_BASE);
+      } catch(e){}
+      paint();
+    };
+  }
+})();
+
+/* ══════════ サイドバー ══════════ */
+(function(){
+  var sb = document.getElementById('sidebar'),
+      ov = document.getElementById('sb-overlay'),
+      ham = document.getElementById('hamburger'),
+      cls = document.querySelector('.sb-close');
+  function open(){ sb.classList.add('open'); ov.classList.add('open'); }
+  function shut(){ sb.classList.remove('open'); ov.classList.remove('open'); }
+  if (ham) ham.onclick = open;
+  if (ov) ov.onclick = shut;
+  if (cls) cls.onclick = shut;
+  sb.addEventListener('click', function(e){
+    if (e.target.closest('.sb-link') && window.innerWidth < 900) shut();
+  });
+
+  var q = document.getElementById('sb-q');
+  if (q) q.addEventListener('input', function(){
+    var t = q.value.trim(), hit = 0;
+    document.querySelectorAll('#sb-scroll .sb-link').forEach(function(a){
+      var on = !t || a.textContent.indexOf(t) >= 0;
+      a.style.display = on ? '' : 'none';
+      if (on) hit++;
+    });
+    document.querySelectorAll('#sb-scroll .sb-grp').forEach(function(g){
+      var any = false, n = g.nextElementSibling;
+      while (n && !n.classList.contains('sb-grp')){
+        if (n.classList.contains('sb-link') && n.style.display !== 'none') any = true;
+        n = n.nextElementSibling;
+      }
+      g.style.display = (!t || any) ? '' : 'none';
+    });
+    var em = document.getElementById('sb-none');
+    if (em) em.style.display = hit ? 'none' : '';
+  });
+})();
+
+drawBar();
+paint();
+
+</script>
+</body>
+</html>

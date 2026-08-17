@@ -298,6 +298,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 }
 .now b{font-size:15px;font-weight:700;color:var(--text);}
 .now span{font-size:11.5px;color:var(--text-faint);}
+.now span b.w{font-size:11.5px;color:var(--text-dim);}
 
 /* ── お知らせ ── */
 .warn{
@@ -346,7 +347,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 
 /* ── 大きく表示 ── */
 #lb{
-  position:fixed;inset:0;z-index:1200;background:rgba(3,6,12,.94);
+  position:fixed;inset:0;z-index:1200;background:rgba(3,6,12,.985);
+  backdrop-filter:blur(6px);
   display:none;flex-direction:column;
   padding:calc(12px + env(safe-area-inset-top))
           calc(12px + env(safe-area-inset-right))
@@ -366,8 +368,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
 #lb .lb-x:hover{background:var(--surface);border-color:var(--text-dim);}
 #lb .lb-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
 #lb .lb-body img{max-width:100%;max-height:100%;object-fit:contain;}
-#lb .lb-foot{flex-shrink:0;display:flex;flex-wrap:wrap;gap:7px;
-  justify-content:center;align-items:center;padding:11px 4px 2px;}
+#lb .lb-foot{
+  flex-shrink:0;display:flex;flex-direction:column;gap:9px;padding:11px 4px 2px;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px;margin-top:10px;
+}
+#lb .lb-foot .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;}
+#lb .lb-foot .row.time{gap:8px;}
+#lb .lb-foot .row > span[id]{display:flex;align-items:stretch;gap:7px;flex-wrap:wrap;}
+#lb .lb-lb{font-size:11px;font-weight:700;color:var(--text-faint);
+  letter-spacing:.06em;flex:0 0 auto;}
 #lb .lb-body img{touch-action:pan-y;}
 
 @media (max-width:600px){
@@ -421,7 +431,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
     <div class="grp"><span class="lb">格子</span><span id="g-grid"></span></div>
     <span class="spacer"></span>
     <button class="chip" id="btn-reload" title="読み直す">↻</button>
-    <button class="chip" id="btn-help" title="図が出ないときの調べ方">？</button>
   </div>
 
   <div class="row time">
@@ -610,7 +619,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);
     <button class="lb-x" id="lb-x" aria-label="閉じる">✕</button>
   </div>
   <div class="lb-body"><img id="lb-img" alt=""></div>
-  <div class="lb-foot" id="lb-foot"></div>
+  <div class="lb-foot" id="lb-foot">
+    <div class="row">
+      <span class="lb-lb">日</span><span id="lbg-day"></span>
+      <span class="lb-lb">マス目</span><span id="lbg-grid"></span>
+    </div>
+    <div class="row time">
+      <button class="tbtn" id="lbt-prev" aria-label="1時間前">◀</button>
+      <div class="tslide">
+        <input type="range" id="lbt-range" min="0" max="9" step="1" value="4" aria-label="時刻">
+        <div class="ticks" id="lbt-ticks"></div>
+      </div>
+      <button class="tbtn" id="lbt-next" aria-label="1時間後">▶</button>
+      <div class="tnow" id="lbt-now">13:00</div>
+      <button class="chip play" id="lbt-play" title="1時間ずつ自動で送る">▶ 自動</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -637,8 +661,13 @@ var DAYS = [
   { day:'curr+2', dir:'HOKKAIDO_JAPAN+2',  label:'翌々日' }
 ];
 var GRIDS = [
-  { grid:'d2', label:'Coarse', times:['0900','1000','1100','1200','1300','1400','1500','1600','1700','1800'] },
-  { grid:'w2', label:'Fine',   times:['1100','1200','1300','1400','1500','1600'] }
+  { grid:'d2', label:'ふつう', en:'Coarse Grid', note:'広い・09〜18時',
+    tip:'Coarse Grid：北海道全域を粗いマス目で計算したもの。09:00〜18:00の10コマ。',
+    times:['0900','1000','1100','1200','1300','1400','1500','1600','1700','1800'] },
+  { grid:'w2', label:'細かい', en:'Fine Grid', note:'狭い・11〜16時',
+    tip:'Fine Grid：範囲を狭めてマス目を細かくしたもの。地形の効きがよく出る。'
+        + '11:00〜16:00の6コマ。当日のみ。',
+    times:['1100','1200','1300','1400','1500','1600'] }
 ];
 
 var S = { di:0, gi:0, ti:4, bust:'', gf:'' };
@@ -679,49 +708,66 @@ function chip(label, on, fn, dis, sub){
 }
 function drawBar(){
   if (typeof drawNow === 'function') drawNow();
-  var gd = document.getElementById('g-day');
-  gd.innerHTML = '';
-  DAYS.forEach(function(d, i){
-    gd.appendChild(chip(d.label, i === S.di, function(){
-      S.di = i;
-      /* Fine Grid は当日だけ */
-      if (i !== 0 && S.gi === 1) S.gi = 0;
-      drawBar(); paint();
-    }, false, dateOf(i)));
+  ['g-day', 'lbg-day'].forEach(function(id){
+    var gd = document.getElementById(id);
+    if (!gd) return;
+    gd.innerHTML = '';
+    DAYS.forEach(function(d, i){
+      gd.appendChild(chip(d.label, i === S.di, function(){
+        S.di = i;
+        /* 細かいマス目は当日だけ */
+        if (i !== 0 && S.gi === 1) S.gi = 0;
+        stopPlay(); drawBar(); paint();
+        if (LB.on) drawLb();
+      }, false, dateOf(i)));
+    });
   });
 
-  var gg = document.getElementById('g-grid');
-  gg.innerHTML = '';
-  GRIDS.forEach(function(g, i){
-    var off = (i === 1 && S.di !== 0);
-    gg.appendChild(chip(g.label, i === S.gi && !off, function(){
-      S.gi = i;
-      if (S.ti >= GRIDS[i].times.length) S.ti = GRIDS[i].times.length - 1;
-      drawBar(); paint();
-    }, off));
+  ['g-grid', 'lbg-grid'].forEach(function(id){
+    var gg = document.getElementById(id);
+    if (!gg) return;
+    gg.innerHTML = '';
+    GRIDS.forEach(function(g, i){
+      var off = (i === 1 && S.di !== 0);
+      var b = chip(g.label, i === S.gi && !off, function(){
+        S.gi = i;
+        if (S.ti >= GRIDS[i].times.length) S.ti = GRIDS[i].times.length - 1;
+        stopPlay(); drawBar(); paint();
+        if (LB.on) drawLb();
+      }, off, g.note);
+      b.title = off ? '細かいマス目は当日だけ用意されています。' : g.tip;
+      gg.appendChild(b);
+    });
   });
 
   drawTime();
 }
 
-/* ── 時刻のスライダー ── */
-var rng = document.getElementById('t-range'),
-    tks = document.getElementById('t-ticks'),
-    tnw = document.getElementById('t-now');
+/* ── 時刻のスライダー（本体と拡大表示の2か所） ── */
+var SLIDERS = [
+  { r:'t-range',   k:'t-ticks',   n:'t-now',   p:'t-prev',   x:'t-next',   y:'t-play'   },
+  { r:'lbt-range', k:'lbt-ticks', n:'lbt-now', p:'lbt-prev', x:'lbt-next', y:'lbt-play' }
+].map(function(o){
+  var g = {};
+  for (var key in o) g[key] = document.getElementById(o[key]);
+  return g;
+}).filter(function(g){ return g.r; });
 
 function drawTime(){
   var ts = GRIDS[S.gi].times;
   if (S.ti > ts.length - 1) S.ti = ts.length - 1;
-  rng.max = ts.length - 1;
-  rng.value = S.ti;
-  tnw.textContent = hhmm(S.gi, S.ti);
-  /* 目盛りは端と真ん中だけ。細かく出すと読めなくなる。 */
-  tks.innerHTML = '';
-  ts.forEach(function(t, i){
-    var d = document.createElement('span');
-    var show = (i === 0 || i === ts.length - 1 || i === Math.floor((ts.length - 1) / 2));
-    d.textContent = show ? (t.slice(0,2) + '時') : '';
-    tks.appendChild(d);
+  SLIDERS.forEach(function(g){
+    g.r.max = ts.length - 1;
+    g.r.value = S.ti;
+    g.n.textContent = hhmm(S.gi, S.ti);
+    /* 目盛りは端と真ん中だけ。細かく出すと読めなくなる。 */
+    g.k.innerHTML = '';
+    ts.forEach(function(t, i){
+      var d = document.createElement('span');
+      var show = (i === 0 || i === ts.length - 1 || i === Math.floor((ts.length - 1) / 2));
+      d.textContent = show ? (t.slice(0,2) + '時') : '';
+      g.k.appendChild(d);
+    });
   });
 }
 function setTime(i, byUser){
@@ -733,26 +779,33 @@ function setTime(i, byUser){
   drawTime(); drawNow(); paint();
   if (LB.on) drawLb();
 }
-rng.oninput = function(){ setTime(+rng.value, true); };
-document.getElementById('t-prev').onclick = function(){ setTime(S.ti - 1, true); };
-document.getElementById('t-next').onclick = function(){ setTime(S.ti + 1, true); };
+SLIDERS.forEach(function(g){
+  g.r.oninput = function(){ setTime(+g.r.value, true); };
+  g.p.onclick = function(){ setTime(S.ti - 1, true); };
+  g.x.onclick = function(){ setTime(S.ti + 1, true); };
+});
 
 /* ── 1時間ずつ自動で送る ── */
 var playTimer = null;
-var btnPlay = document.getElementById('t-play');
+function paintPlay(){
+  SLIDERS.forEach(function(g){
+    g.y.classList.toggle('on', !!playTimer);
+    g.y.textContent = playTimer ? '⏸ 停止' : '▶ 自動';
+  });
+}
 function stopPlay(){
   if (!playTimer) return;
   clearInterval(playTimer); playTimer = null;
-  btnPlay.classList.remove('on');
-  btnPlay.textContent = '▶ 自動';
+  paintPlay();
 }
 function startPlay(){
   preloadTimes();
   playTimer = setInterval(function(){ setTime(S.ti + 1, false); }, 1100);
-  btnPlay.classList.add('on');
-  btnPlay.textContent = '⏸ 停止';
+  paintPlay();
 }
-btnPlay.onclick = function(){ playTimer ? stopPlay() : startPlay(); };
+SLIDERS.forEach(function(g){
+  g.y.onclick = function(){ playTimer ? stopPlay() : startPlay(); };
+});
 
 /* 自動送りが途切れないよう、先に読み込んでおく */
 function preloadTimes(){
@@ -834,7 +887,7 @@ var lb = document.getElementById('lb'),
     lbImg = document.getElementById('lb-img'),
     lbTtl = document.getElementById('lb-ttl'),
     lbSub = document.getElementById('lb-sub'),
-    lbFoot = document.getElementById('lb-foot');
+    lbFoot = null;
 
 function openLb(card){
   LB.on = true; LB.card = card;
@@ -854,21 +907,7 @@ function drawLb(){
   lbImg.alt = c.dataset.ja;
   lbTtl.textContent = c.dataset.ja;
   lbSub.textContent = c.dataset.en + '　／　' + dayLabel(S.di) + ' ' +
-                      GRIDS[S.gi].label + ' ' + hhmm(S.gi, S.ti);
-  lbFoot.innerHTML = '';
-  var prev = document.createElement('button');
-  prev.className = 'tbtn'; prev.textContent = '◀'; prev.title = '1時間前';
-  prev.onclick = function(){ setTime(S.ti - 1, true); };
-  lbFoot.appendChild(prev);
-  GRIDS[S.gi].times.forEach(function(t, i){
-    lbFoot.appendChild(chip(t.slice(0,2) + ':' + t.slice(2), i === S.ti, function(){
-      setTime(i, true);
-    }));
-  });
-  var next = document.createElement('button');
-  next.className = 'tbtn'; next.textContent = '▶'; next.title = '1時間後';
-  next.onclick = function(){ setTime(S.ti + 1, true); };
-  lbFoot.appendChild(next);
+                      hhmm(S.gi, S.ti) + '　' + GRIDS[S.gi].en;
 }
 document.getElementById('lb-x').onclick = shutLb;
 lb.onclick = function(e){ if (e.target === lb || e.target.className === 'lb-body') shutLb(); };
@@ -970,15 +1009,13 @@ function showHelp(force){
     showHelp(true);
   };
 }
-document.getElementById('btn-help').onclick = function(){ showHelp(true); };
-
 /* いま何を見ているかを一行で出す */
 function drawNow(){
   var el = document.getElementById('now');
   if (!el) return;
+  var g = GRIDS[S.gi];
   el.innerHTML = '<b>' + dayLabel(S.di) + '　' + hhmm(S.gi, S.ti) + '</b>' +
-    '<span>' + GRIDS[S.gi].label + ' Grid（' +
-    (S.gi === 0 ? '北海道全域' : '細かい格子') + '）</span>' +
+    '<span>マス目は<b class="w">' + g.label + '</b>（' + g.en + '／' + g.note + '）</span>' +
     '<span>日付は、この端末の今日を基準に数えています。' +
     'RASPの図が朝の更新前だと1日ずれることがあります。</span>';
 }

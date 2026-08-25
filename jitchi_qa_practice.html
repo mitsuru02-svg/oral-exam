@@ -1122,6 +1122,12 @@ function ttsClean(text) {
   text = text.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
   text = text.replace(/\u3000/g, ' ');
 
+  // 1.4 併記の単位は読み上げない。「151kt（280km/h）」→「151kt」。
+  //     kt を主・km/h を従とする表記に統一したため、括弧の中は冗長になる。
+  text = text.replace(
+    /[（(]\s*[\d,.]+(?:\s*(?:から|〜|~|-)\s*[\d,.]+)?\s*(?:km\/h|km|m\/s)(?:\s*[、,・]\s*[\d,.]+\s*(?:km\/h|km|m\/s))*\s*[）)]/g,
+    '');
+
   // 1.5 桁区切りのカンマを除去（1,500 → 1500）。以降の数値変換が桁区切りカンマ入りの
   // 数字（1,500m や 20,000ft 等）にマッチできず未変換のまま残ってしまうのを防ぐ。
   text = text.replace(/\d{1,3}(,\d{3})+/g, m => m.replace(/,/g, ''));
@@ -1168,6 +1174,11 @@ function ttsClean(text) {
     ['3990-2001','さん・きゅう・きゅう・まる の に・まる・まる・いち'],
     ['2026-55-06','にせんにじゅうろく の ごじゅうご の まる・ろく'],
     ['JA20HC',   'ジュリエット・アルファ・ツー・ゼロ・ホテル・チャーリー'],
+    ['Serial No.21719','シリアルナンバー、に・いち・なな・いち・きゅう'],
+    ['Data sheet No.339','データシート・ナンバー、さん・さん・きゅう'],
+    ['Amendment 12','アメンドメント・じゅうに'],
+    ['Serial No.','シリアルナンバー'],
+    ['Serial No','シリアルナンバー'],
     ['A3E',      'エー・さん・イー'],
     ['Becker',   'ベッカー'],
     ['Trig',     'トリグ'],
@@ -1221,6 +1232,9 @@ function ttsClean(text) {
   text = text.replace(/(\d+(?:\.\d+)?)\s*°/g,           (_, n) => numJp(n)+'度');
   text = text.replace(/(\d+(?:\.\d+)?)\s*W(?![A-Za-z])/g, (_, n) => numJp(n)+'ワット');
   text = text.replace(/mg\/dL\/H/g, 'ミリグラムパーデシリットルパーアワー');
+  // 数字の付かない単位（「何ktですか」など）
+  text = text.replace(/(?<![\d.])kts?(?![A-Za-z])/g, 'ノット');
+  text = text.replace(/(?<![\d.])ft(?![A-Za-z])/g,  'フィート');
 
   // 5. 数字の範囲（16～20 → 十六から二十）
   text = text.replace(/(\d+)\s*[~〜～]\s*(\d+)/g, (_, a, b) => numJp(a)+'から'+numJp(b));
@@ -1238,6 +1252,9 @@ function ttsClean(text) {
   // 7. 航空用語の読み仮名（TTSが誤読しやすい語）
   const kanjiWords = [
     /* 追加の読み */
+    ['決め方',  'きめかた'],
+    ['平方根',  'へいほうこん'],
+    ['旋風',    'せんぷう'],
     ['効き方',  'ききかた'],
     ['効き',    'きき'],
     ['主脚',    'しゅきゃく'],

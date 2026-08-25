@@ -327,6 +327,18 @@
   figure svg{width:100%; height:auto; display:block;}
   figcaption{font-size:12.5px; color:var(--text-dim); margin-top:10px; text-align:center; letter-spacing:.02em;}
   figcaption .fig-num{color:var(--amber); font-family:var(--disp); font-weight:700; margin-right:6px;}
+  .svg-fig{
+    margin:26px 0; background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:16px 18px 12px;
+  }
+  .svg-fig svg{display:block; width:100%; height:auto; margin:0 auto;}
+  .svg-fig figcaption{
+    font-size:12px; color:var(--text-dim); margin-top:10px; line-height:1.65; text-align:left;
+  }
+  @media (max-width:640px){
+    .svg-fig{padding:12px 10px 10px; margin:20px -6px;}
+    .svg-fig figcaption{font-size:11.5px;}
+  }
   .fig-src-note{font-size:11px; color:var(--text-dim); text-align:center; margin-top:4px; opacity:.75;}
   .fig-row{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:flex-start;}
   .fig-row img{background:#fff; border-radius:6px; padding:10px; box-sizing:border-box;}
@@ -470,6 +482,9 @@
       <div class="sb-part">第5部｜重量・速度の参考データ</div>
       <a class="sb-link" href="#ch14">第14章 重量別速度早見表</a>
       <a class="sb-link" href="#ch15">第15章 最良滑空比速度の設定</a>
+    <div class="sb-part">第6部｜機体書類と装備品の実データ</div>
+    <a class="sb-link" href="#ch16">第16章 装備品と期限管理</a>
+    <a class="sb-link" href="#ch17">第17章 無線機・トランスポンダーの操作</a>
     </div>
   </nav>
 
@@ -533,6 +548,69 @@
         <p data-tts data-text="1項目め、整備状況の確認です。書類があるかどうかをチェックし、内容は簡単に述べる程度でかまいません。必要書類は7種類です。">
           1項目め、整備状況の確認です。<strong>書類があるかどうかをチェックし、内容は簡単に述べる程度</strong>でかまいません。必要書類は次の7種類です。
         </p>
+<figure class="svg-fig">
+  <svg viewBox="0 0 800 470" role="img" aria-label="備え付け書類7点と根拠条文" style="max-width:760px">
+    <rect x="0" y="0" width="800" height="410" fill="none"/>
+    <text x="60" y="52" fill="#e6edf3" font-size="14" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">機体に備え付ける書類</text>
+    <text x="60" y="72" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">根拠と役割</text>
+    <text x="490" y="72" fill="#8b949e" font-size="11.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">搭載義務</text>
+    <text x="670" y="72" fill="#8b949e" font-size="11.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">滑空機は</text>
+    <rect x="60" y="96" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="96" width="4" height="35" fill="#3b82f6" rx="2"/>
+    <text x="76" y="119" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">航空機登録証明書</text>
+    <text x="252" y="119" fill="#3b82f6" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">法59条</text>
+    <text x="328" y="119" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">所有者を示す</text>
+    <text x="490" y="119" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="119" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除</text>
+    <rect x="60" y="136" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="136" width="4" height="35" fill="#3b82f6" rx="2"/>
+    <text x="76" y="159" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">耐空証明書</text>
+    <text x="252" y="159" fill="#3b82f6" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">法59条</text>
+    <text x="328" y="159" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">耐空性を示す</text>
+    <text x="490" y="159" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="159" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除</text>
+    <rect x="60" y="176" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="176" width="4" height="35" fill="#3b82f6" rx="2"/>
+    <text x="76" y="199" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">航空日誌</text>
+    <text x="252" y="199" fill="#3b82f6" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">法59条</text>
+    <text x="328" y="199" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">履歴を残す</text>
+    <text x="490" y="199" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="199" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除</text>
+    <rect x="60" y="216" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="216" width="4" height="35" fill="#d29922" rx="2"/>
+    <text x="76" y="239" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">運用限界等指定書</text>
+    <text x="252" y="239" fill="#d29922" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">令144条</text>
+    <text x="328" y="239" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">用途と運用限界</text>
+    <text x="490" y="239" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="239" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除</text>
+    <rect x="60" y="256" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="256" width="4" height="35" fill="#d29922" rx="2"/>
+    <text x="76" y="279" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">飛行規程</text>
+    <text x="252" y="279" fill="#d29922" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">令144条</text>
+    <text x="328" y="279" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">限界と操作の全て</text>
+    <text x="490" y="279" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="279" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除</text>
+    <rect x="60" y="296" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="296" width="4" height="35" fill="#d29922" rx="2"/>
+    <text x="76" y="319" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">航空図</text>
+    <text x="252" y="319" fill="#d29922" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">令144条</text>
+    <text x="328" y="319" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">飛行特性に応じて</text>
+    <text x="490" y="319" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="319" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除</text>
+    <rect x="60" y="336" width="700" height="35" fill="#161b22" stroke="#21262d" rx="4"/>
+    <rect x="60" y="336" width="4" height="35" fill="#3fb950" rx="2"/>
+    <text x="76" y="359" fill="#e6edf3" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">無線局免許状</text>
+    <text x="252" y="359" fill="#3fb950" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">電波法</text>
+    <text x="328" y="359" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">無線局の免許</text>
+    <text x="490" y="359" fill="#e6edf3" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">あり</text>
+    <text x="670" y="359" fill="#7d8590" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">対象外</text>
+    <rect x="60" y="388" width="700" height="56" fill="#0d2044" stroke="#1e3a6b" rx="6"/>
+    <text x="76" y="411" fill="#93c5fd" font-size="12.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">航空法施行規則 第143条 ── 滑空機は「搭載」が免除される</text>
+    <text x="76" y="431" fill="#e6edf3" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">免除されるのは機体に積むことであって、書類そのものが不要になるわけではない。地上に整えて現物で確認する。</text>
+    <text x="60" y="468" fill="#7d8590" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">※ 無線局免許状は電波法によるもので、規則143条の免除の対象外。</text>
+  </svg>
+  <figcaption data-tts data-text="図2-1は、機体に備え付ける書類を根拠条文ごとに並べたものです。航空法第59条によるものが3つで、航空機登録証明書、耐空証明書、航空日誌。航空法施行令第144条によるものが3つで、運用限界等指定書、飛行規程、航空図。これに電波法による無線局免許状を加えて7つです。いずれも搭載義務がありますが、滑空機は航空法施行規則第143条によって免除されています。ここで大事なのは、免除されるのは機体に積むことであって、書類そのものが不要になるわけではない、という点です。地上に整えておいて、出発前確認では現物で確認します。"><span class="fig-num">図2-1</span>備え付け書類は法59条が3つ、令144条が3つ、これに無線局免許状。滑空機は搭載が免除。</figcaption>
+</figure>
         <ul class="plist">
           <li data-tts data-text="航空機登録証明書、法59条。">航空機登録証明書（法59条）</li>
           <li data-tts data-text="耐空証明書、法59条。">耐空証明書（法59条）</li>
@@ -563,7 +641,7 @@
           2項目め、離陸重量・着陸重量・重心位置及び重量分布の確認です。滑空機は<strong>離陸重量＝着陸重量</strong>です。空虚重量に、固定バラスト・前席重量・後席重量・パラシュート・搭載物を加えて合計重量を求め、最大重量を超えていないことを確認します。
         </p>
         <div class="callout amber">
-          <span class="cal-label">記入例（ASK-21／JA20HC・複座）</span>
+          <span class="cal-label">記入例（ASK-21／JA20HC・複座／2026年8月17日）</span>
           <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin-top:4px;">
             <tr style="border-bottom:1px solid var(--line);">
               <th style="text-align:left; padding:5px; color:var(--cyan);">項目</th>
@@ -571,13 +649,165 @@
               <th style="text-align:left; padding:5px; color:var(--cyan);">アーム(mm)</th>
               <th style="text-align:left; padding:5px; color:var(--cyan);">備考</th>
             </tr>
-            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">空虚重量</td><td style="padding:5px;">384</td><td style="padding:5px;">-757</td><td style="padding:5px; color:var(--text-dim);">バッテリー・無線機・計器等を含む</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">空虚重量</td><td style="padding:5px;">385</td><td style="padding:5px;">-757</td><td style="padding:5px; color:var(--text-dim);">バッテリー・無線機・計器等を含む</td></tr>
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">前席重量</td><td style="padding:5px;">80</td><td style="padding:5px;">1180</td><td style="padding:5px; color:var(--text-dim);">パラシュート(5kg)を含む</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">後席重量</td><td style="padding:5px;">75</td><td style="padding:5px;">80</td><td style="padding:5px; color:var(--text-dim);">パラシュート(5kg)を含む</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">後席重量</td><td style="padding:5px;">78</td><td style="padding:5px;">80</td><td style="padding:5px; color:var(--text-dim);">パラシュート(5kg)を含む</td></tr>
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">固定錘</td><td style="padding:5px;">4</td><td style="padding:5px;">1250</td><td style="padding:5px; color:var(--text-dim);">前席足元に固定</td></tr>
-            <tr><td style="padding:5px; font-weight:700;">合計</td><td style="padding:5px; font-weight:700;">543</td><td style="padding:5px;" colspan="2">最大重量600kg未満</td></tr>
+            <tr><td style="padding:5px; font-weight:700;">合計</td><td style="padding:5px; font-weight:700;">547</td><td style="padding:5px;" colspan="2">最大重量600kg未満</td></tr>
           </table>
-          <p data-tts data-text="重心位置は、マイナス341ミリメートル。許容重心位置範囲は、マイナス234からマイナス469ミリメートル、中央はマイナス351.5ミリメートルです。" style="margin-top:8px; margin-bottom:0;">重心位置：-341mm（許容重心位置範囲 -234〜-469mm、中央 -351.5mm）</p>
+          <p data-tts data-text="重心位置は、マイナス339.7ミリメートル。許容重心位置範囲は、マイナス234からマイナス469ミリメートル、中央はマイナス351.5ミリメートルです。範囲内で、中央よりわずかに前寄りです。" style="margin-top:8px; margin-bottom:0;">重心位置：<b>-339.7mm</b>（許容重心位置範囲 -234〜-469mm、中央 -351.5mm）</p>
+          <p data-tts data-text="重量は2つの上限で確認します。全体では合計547キログラムで、最大離陸重量600キログラム未満。揚力発生部を除いた部分では合計351キログラムで、こちらの上限410キログラム未満です。" style="margin-top:6px; margin-bottom:0; color:var(--text-dim); font-size:13px;">重量：全体 <b>547kg</b> ＜ 600kg ／ 揚力発生部を除いた部分 <b>351kg</b> ＜ 410kg</p>
+        </div>
+<figure class="svg-fig">
+  <svg viewBox="0 0 800 260" role="img" aria-label="2つの重量上限に対する充填状況" style="max-width:760px">
+    <rect x="0" y="0" width="800" height="260" fill="none"/>
+    <text x="178" y="62" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">最大離陸重量</text>
+    <text x="178" y="78" fill="#7d8590" font-size="11" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">上限 600kg</text>
+    <rect x="190" y="40" width="470" height="34" fill="#161b22" stroke="#30363d" stroke-width="1" rx="4"/>
+    <rect x="190.0" y="40" width="301.6" height="34" fill="#8b949e" opacity=".8"/>
+    <text x="340.8" y="61" fill="#0d1117" font-size="10.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">385</text>
+    <rect x="491.6" y="40" width="58.8" height="34" fill="#3b82f6" opacity=".8"/>
+    <text x="521.0" y="61" fill="#0d1117" font-size="10.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">75</text>
+    <rect x="550.3" y="40" width="57.2" height="34" fill="#3fb950" opacity=".8"/>
+    <text x="578.9" y="61" fill="#0d1117" font-size="10.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">73</text>
+    <rect x="607.5" y="40" width="7.8" height="34" fill="#a371f7" opacity=".8"/>
+    <rect x="615.4" y="40" width="3.1" height="34" fill="#d29922" opacity=".8"/>
+    <line x1="618.5" y1="32" x2="618.5" y2="82" stroke="#f85149" stroke-width="2"/>
+    <text x="625.5" y="29" fill="#f85149" font-size="12" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">547kg</text>
+    <text x="670" y="61" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">残 53kg</text>
+    <text x="660" y="96" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">600kg</text>
+    <text x="178" y="172" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">揚力発生部を除いた部分</text>
+    <text x="178" y="188" fill="#7d8590" font-size="11" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">上限 410kg</text>
+    <rect x="190" y="150" width="470" height="34" fill="#161b22" stroke="#30363d" stroke-width="1" rx="4"/>
+    <rect x="190.0" y="150" width="220.1" height="34" fill="#8b949e" opacity=".8"/>
+    <text x="300.0" y="171" fill="#0d1117" font-size="10.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">192</text>
+    <rect x="410.1" y="150" width="86.0" height="34" fill="#3b82f6" opacity=".8"/>
+    <text x="453.1" y="171" fill="#0d1117" font-size="10.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">75</text>
+    <rect x="496.1" y="150" width="80.2" height="34" fill="#3fb950" opacity=".8"/>
+    <text x="536.2" y="171" fill="#0d1117" font-size="10.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">70</text>
+    <rect x="576.3" y="150" width="11.5" height="34" fill="#a371f7" opacity=".8"/>
+    <rect x="587.8" y="150" width="4.6" height="34" fill="#d29922" opacity=".8"/>
+    <line x1="592.4" y1="142" x2="592.4" y2="192" stroke="#f85149" stroke-width="2"/>
+    <text x="599.4" y="139" fill="#f85149" font-size="12" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">351kg</text>
+    <text x="670" y="171" fill="#8b949e" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">残 59kg</text>
+    <text x="660" y="206" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">410kg</text>
+    <rect x="190" y="232" width="11" height="11" fill="#8b949e" opacity=".8" rx="2"/>
+    <text x="206" y="242" fill="#8b949e" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">空虚/胴体</text>
+    <rect x="279" y="232" width="11" height="11" fill="#3b82f6" opacity=".8" rx="2"/>
+    <text x="295" y="242" fill="#8b949e" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">前席</text>
+    <rect x="335" y="232" width="11" height="11" fill="#3fb950" opacity=".8" rx="2"/>
+    <text x="351" y="242" fill="#8b949e" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">後席</text>
+    <rect x="391" y="232" width="11" height="11" fill="#a371f7" opacity=".8" rx="2"/>
+    <text x="407" y="242" fill="#8b949e" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">パラシュート</text>
+    <rect x="491" y="232" width="11" height="11" fill="#d29922" opacity=".8" rx="2"/>
+    <text x="507" y="242" fill="#8b949e" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">固定バラスト</text>
+    <text x="178" y="242" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">凡例</text>
+  </svg>
+  <figcaption data-tts data-text="図3-3は、重量の上限が2つあることを表したものです。上の帯が最大離陸重量600キログラムに対する充填で、合計547キログラム、残り53キログラム。下の帯が、揚力発生部を除いた部分の最大重量410キログラムに対する充填で、合計351キログラム、残り59キログラムです。下の帯には主翼が入っていないことに注目してください。410キログラムは実質的に主桁にかかる荷重の制限なので、主翼自身の揚力で支えられる水バラストは、この帯に入りません。"><span class="fig-num">図3-3</span>重量の上限は2つある。600kgは機体全体、410kgは主桁にかかる分。</figcaption>
+</figure>
+<figure class="svg-fig">
+  <svg viewBox="-10 -30 820 370" role="img" aria-label="各重量のアームとモーメント" style="max-width:760px">
+    <rect x="0" y="0" width="800" height="300" fill="none"/>
+    <line x1="60" y1="150" x2="740" y2="150" stroke="#30363d" stroke-width="3"/>
+    <polygon points="400,150 387,172 413,172" fill="#e6edf3"/>
+    <text x="400" y="190" fill="#e6edf3" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">基準点</text>
+    <text x="400" y="205" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">主翼翼根前縁</text>
+    <text x="250" y="190" fill="#7d8590" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">← 後方（−）</text>
+    <text x="560" y="190" fill="#7d8590" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">前方（＋）→</text>
+    <rect x="240.2" y="82.1" width="32" height="53.9" fill="#8b949e" opacity=".85" rx="3"/>
+    <line x1="256.2" y1="136" x2="256.2" y2="150" stroke="#8b949e" stroke-width="1.5"/>
+    <text x="256.2" y="74.1" fill="#8b949e" font-size="11.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">空虚重量</text>
+    <text x="256.2" y="60.1" fill="#e6edf3" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">385kg</text>
+    <line x1="400" y1="220" x2="256.2" y2="220" stroke="#8b949e" stroke-width="1.5"/>
+    <circle cx="256.2" cy="220" r="3" fill="#8b949e"/>
+    <text x="328.1" y="215" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">757mm</text>
+    <text x="755" y="224" fill="#8b949e" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">-291,445 kg･mm</text>
+    <rect x="608.2" y="124.8" width="32" height="11.2" fill="#3b82f6" opacity=".85" rx="3"/>
+    <line x1="624.2" y1="136" x2="624.2" y2="150" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="598.2" y="116.8" fill="#3b82f6" font-size="11.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">前席</text>
+    <text x="598.2" y="102.8" fill="#e6edf3" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">80kg</text>
+    <line x1="400" y1="240" x2="624.2" y2="240" stroke="#3b82f6" stroke-width="1.5"/>
+    <circle cx="624.2" cy="240" r="3" fill="#3b82f6"/>
+    <text x="512.1" y="235" fill="#3b82f6" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1180mm</text>
+    <text x="755" y="244" fill="#3b82f6" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+94,400 kg･mm</text>
+    <rect x="399.2" y="125.1" width="32" height="10.9" fill="#3fb950" opacity=".85" rx="3"/>
+    <line x1="415.2" y1="136" x2="415.2" y2="150" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="415.2" y="117.1" fill="#3fb950" font-size="11.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">後席</text>
+    <text x="415.2" y="103.1" fill="#e6edf3" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">78kg</text>
+    <line x1="400" y1="260" x2="415.2" y2="260" stroke="#3fb950" stroke-width="1.5"/>
+    <circle cx="415.2" cy="260" r="3" fill="#3fb950"/>
+    <text x="407.6" y="255" fill="#3fb950" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">80mm</text>
+    <text x="755" y="264" fill="#3fb950" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+6,240 kg･mm</text>
+    <rect x="621.5" y="126.0" width="32" height="10.0" fill="#d29922" opacity=".85" rx="3"/>
+    <line x1="637.5" y1="136" x2="637.5" y2="150" stroke="#d29922" stroke-width="1.5"/>
+    <line x1="637.5" y1="122.0" x2="637.5" y2="96.0" stroke="#d29922" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="637.5" y="84.0" fill="#d29922" font-size="11.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">固定錘</text>
+    <text x="637.5" y="70.0" fill="#e6edf3" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">4kg</text>
+    <line x1="400" y1="280" x2="637.5" y2="280" stroke="#d29922" stroke-width="1.5"/>
+    <circle cx="637.5" cy="280" r="3" fill="#d29922"/>
+    <text x="518.8" y="275" fill="#d29922" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1250mm</text>
+    <text x="755" y="284" fill="#d29922" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+5,000 kg･mm</text>
+    <line x1="60" y1="302" x2="755" y2="302" stroke="#30363d" stroke-width="1"/>
+    <text x="60" y="320" fill="#e6edf3" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">合計 547kg</text>
+    <text x="755" y="320" fill="#e6edf3" font-size="12" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">−185,805 kg･mm ÷ 547kg ＝ 基準点後方 約340mm</text>
+  </svg>
+  <figcaption data-tts data-text="図3-2は、それぞれの重量が重心にどう効くかをシーソーで表したものです。支点が基準点、主翼翼根前縁です。棒の高さが重量、支点からの距離がアームで、右端に重量かけるアーム、つまりモーメントの値を出しています。ここで見てほしいのは前席です。80キログラムしかないのに、アームが前方1180ミリメートルと長いため、モーメントは9万4400と大きな値になります。後席は78キログラムとほぼ同じ重さですが、アームが80ミリメートルしかないので、モーメントは6240にしかなりません。前席の人が抜けると重心が大きく後方へ動く、という話はここから来ています。緊急脱出で後席から先に出るのも同じ理由です。"><span class="fig-num">図3-2</span>モーメント＝重量×アーム。前席はアームが長いので、重量のわりに効きが大きい。</figcaption>
+</figure>
+<figure class="svg-fig">
+  <svg viewBox="0 0 790 230" role="img" aria-label="重心位置と飛行規程4-6のスピン特性帯" style="max-width:760px">
+    <rect x="0" y="0" width="790" height="230" fill="none"/>
+    <rect x="70.0" y="96" width="249.2" height="34" fill="#1e6f3a" opacity=".55"/>
+    <rect x="319.2" y="96" width="10.8" height="34" fill="#3f5c2a" opacity=".55"/>
+    <rect x="330.0" y="96" width="140.8" height="34" fill="#8a6d1f" opacity=".55"/>
+    <rect x="470.8" y="96" width="32.5" height="34" fill="#7a4a1c" opacity=".55"/>
+    <rect x="503.3" y="96" width="216.7" height="34" fill="#8a2f2a" opacity=".55"/>
+    <rect x="143.7" y="88" width="509.2" height="50" fill="none" stroke="#3b82f6" stroke-width="2" rx="3"/>
+    <text x="398.2" y="82" fill="#93c5fd" font-size="12" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">許容重心位置範囲 234〜469mm</text>
+    <line x1="143.7" y1="130" x2="143.7" y2="137" stroke="#8b949e" stroke-width="1"/>
+    <text x="143.7" y="151" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">234</text>
+    <text x="143.7" y="164" fill="#8b949e" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">前方限界</text>
+    <line x1="319.2" y1="130" x2="319.2" y2="137" stroke="#8b949e" stroke-width="1"/>
+    <text x="319.2" y="151" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">315</text>
+    <line x1="330.0" y1="130" x2="330.0" y2="151" stroke="#8b949e" stroke-width="1"/>
+    <text x="330.0" y="165" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">320</text>
+    <line x1="398.2" y1="130" x2="398.2" y2="137" stroke="#8b949e" stroke-width="1"/>
+    <text x="398.2" y="151" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">351.5</text>
+    <text x="398.2" y="164" fill="#8b949e" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">中央</text>
+    <line x1="470.8" y1="130" x2="470.8" y2="151" stroke="#8b949e" stroke-width="1"/>
+    <text x="470.8" y="165" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">385</text>
+    <line x1="503.3" y1="130" x2="503.3" y2="137" stroke="#8b949e" stroke-width="1"/>
+    <text x="503.3" y="151" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">400</text>
+    <line x1="652.8" y1="130" x2="652.8" y2="137" stroke="#8b949e" stroke-width="1"/>
+    <text x="652.8" y="151" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">469</text>
+    <text x="652.8" y="164" fill="#8b949e" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">後方限界</text>
+    <text x="194.6" y="110" fill="#e6edf3" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">スピンに</text>
+    <text x="194.6" y="123" fill="#e6edf3" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">入らない</text>
+    <text x="400.4" y="110" fill="#e6edf3" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">スピンに入りやすいが</text>
+    <text x="400.4" y="123" fill="#e6edf3" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">最大4回半で自然回復</text>
+    <text x="611.7" y="110" fill="#e6edf3" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">回復操作を</text>
+    <text x="611.7" y="123" fill="#e6edf3" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">取らねば持続</text>
+    <polygon points="372.7,66 364.7,52 380.7,52" fill="#f85149"/>
+    <line x1="372.7" y1="66" x2="372.7" y2="132" stroke="#f85149" stroke-width="2"/>
+    <text x="372.7" y="46" fill="#f85149" font-size="12.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">今日 340mm</text>
+    <text x="70" y="182" fill="#7d8590" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">← 前（機首側）</text>
+    <text x="720" y="182" fill="#7d8590" font-size="11" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">後（尾部側）→</text>
+    <text x="395.0" y="182" fill="#7d8590" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">基準点（主翼翼根前縁）からの距離 mm</text>
+  </svg>
+  <figcaption data-tts data-text="図3-1は、重心位置と飛行規程4-6のスピン特性を1本の軸に重ねたものです。青い枠が許容重心位置範囲で、基準点後方234ミリメートルから469ミリメートル。その内側が色の帯で3つに分かれていて、315ミリメートルより前方はスピンに入らない領域、320から385ミリメートルはスピンに入りやすいが最大4回半の旋転で自然に回復する領域、400ミリメートルより後方は回復操作を取らない限り持続する領域です。今日の重心はおよそ340ミリメートルで、真ん中の帯に入っています。許容範囲内であることと、スピンに入りにくいことは別だ、という点がこの図の要点です。"><span class="fig-num">図3-1</span>重心位置と飛行規程4-6のスピン特性帯。青枠が許容重心位置範囲、色帯がスピンの入りやすさ。</figcaption>
+</figure>
+        <div class="callout amber">
+          <span class="cal-label">重心が「範囲内」でも、スピンの入りやすさは別</span>
+          <p data-tts data-text="今日の重心はおよそ340ミリメートルで、許容重心位置範囲には余裕を持って収まっています。しかし飛行規程4-6でいう320から385ミリメートル、スピンに入りやすくなるが最大4回半の旋転で自然に回復する、という範囲に入っています。許容範囲内であることと、スピンに入りにくいことは別の話です。低高度での大きな舵や、旋回中の失速には普段以上に注意し、万一入っても飛行規程3-1の4段階で回復できるよう、手順と高度損失およそ80メートルを頭に入れておきます。より前に寄せたければ、固定バラストを増やすか、前席により重い人が乗ることになります。" style="margin:0;">
+            今日の重心 <b>約340mm</b> は許容範囲に余裕を持って収まっていますが、飛行規程4-6でいう<b>320〜385mm＝スピンに入りやすくなるが最大4回半の旋転で自然に回復する範囲</b>に入っています。<b>許容範囲内であることと、スピンに入りにくいことは別の話</b>です。低高度での大きな舵や旋回中の失速に普段以上に注意し、万一入っても飛行規程3-1の4段階で回復できるよう、手順と高度損失約80mを頭に入れておきます。より前に寄せたいなら、固定バラストを増やすか、前席により重い人が乗ることになります。
+          </p>
+        </div>
+        <div class="callout">
+          <span class="cal-label">固定バラスト ── 「1枚＝1.25kg」の意味</span>
+          <p data-tts data-text="飛行規程の表では、バラスト0枚のとき前席最小重量70.00キログラム、12枚で55.00キログラム。差の15.00キログラムを12枚で割ると、ちょうど1.25キログラムです。つまり1枚が搭乗者重量1.25キログラム分に相当するというのは、概数ではなく厳密な値です。一方で、効き方を決めるのは重量とアームの積ですから、鉛ディスクの実重量が1キログラムちょうどなら取付位置は基準点前方およそ1.6メートルでなければならず、逆に取付位置が1250ミリメートルなら実重量は1.2キログラム前後でなければなりません。実重量1キログラムとアーム1250ミリメートルは両立しないので、現物を量って取付位置を測って確かめる必要があります。" style="margin:0;">
+            飛行規程の表は 0枚 70.00kg → 12枚 55.00kg。差の15.00kgを12枚で割ると<b>ちょうど1.25kg</b>で、これは概数ではなく厳密な値です。<br>
+            一方、効き方を決めるのは<b>重量×アーム</b>。実重量が1.00kgちょうどなら取付位置は基準点前方<b>約1.6m</b>でなければならず、取付位置が1250mmなら実重量は<b>約1.2kg</b>でなければなりません。<b>「実重量1kg」と「アーム1250mm」は両立しません</b>──現物を量り、取付位置を測れば決着します。<br>
+            <span style="color:var(--text-dim); font-size:12.5px;">※ 4枚積んだ状態でアームを1250mm→1600mmに直しても重心の差は約2.5mm。判定（320〜385mmの帯）は変わりません。</span>
+          </p>
         </div>
         <p data-tts data-text="重心位置は、重量とアームの積であるモーメントアームを項目ごとに求め、その合計を合計重量で割ることで計算します。試験ではウェイト・アンド・バランスシートを実際に取り出し、その場で数字を当てはめて示す必要があるので、見方を事前に確認しておきます。">
           重心位置は、重量とアームの積である<strong>モーメントアーム</strong>を項目ごとに求め、その合計を合計重量で割ることで計算します。試験では<strong>ウェイト・アンド・バランスシートを実際に取り出し、その場で数字を当てはめて示す</strong>必要があるので、見方を事前に何度も確認しておきます。
@@ -594,6 +824,77 @@
         <p data-tts data-text="3項目め、航空法第99条第1項の規定により国土交通大臣が提供する航空情報の確認です。航空路誌、航空路誌改訂版、航空路誌補足版、ノータム、航空情報サーキュラーの5種類があり、いずれもSWIMによって提供されます。以前のAISジャパンは廃止され、SWIMに統合されました。">
           3項目め、<strong>航空法第99条第1項</strong>の規定により国土交通大臣が提供する航空情報の確認です。次の5種類があり、いずれも<strong>SWIM（航空情報共有システム）</strong>によって提供されます（旧AIS Japanは廃止され、SWIMに統合されました）。
         </p>
+<figure class="svg-fig">
+  <svg viewBox="0 0 860 330" role="img" aria-label="92条許可空域" style="max-width:760px">
+    <rect x="0" y="0" width="860" height="330" fill="none"/>
+    <text x="190" y="42" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">平面（半径9km）</text>
+    <circle cx="190" cy="168" r="108" fill="#0d2044" stroke="#3b82f6" stroke-width="2" opacity=".9"/>
+    <circle cx="190" cy="168" r="4" fill="#e6edf3"/>
+    <text x="190" y="188" fill="#e6edf3" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">たきかわスカイパーク</text>
+    <text x="190" y="203" fill="#7d8590" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">N43°32′56″ E141°53′38″</text>
+    <line x1="190" y1="168" x2="298" y2="168" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="244.0" y="160" fill="#93c5fd" font-size="11.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">9km（5NM）</text>
+    <text x="190" y="302" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">この円の外へ出るならフライトプラン</text>
+    <text x="600" y="42" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">断面（高度の上限）</text>
+    <rect x="400" y="60.0" width="400" height="208.0" fill="#0d2044" opacity=".55"/>
+    <line x1="400" y1="268" x2="800" y2="268" stroke="#30363d" stroke-width="2"/>
+    <line x1="400" y1="60.0" x2="800" y2="60.0" stroke="#3b82f6" stroke-width="2"/>
+    <text x="794" y="78.0" fill="#93c5fd" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">4,000ft MSL ── 92条許可の上限</text>
+    <line x1="400" y1="205.6" x2="800" y2="205.6" stroke="#d29922" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="406" y="198.6" fill="#d29922" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">市街地の最低安全高度 1,200ft</text>
+    <text x="600" y="132.8" fill="#e6edf3" font-size="12.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">操縦練習飛行が可能な範囲</text>
+    <text x="406" y="286" fill="#7d8590" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">地表</text>
+    <rect x="40" y="288" width="780" height="36" fill="#161b22" stroke="#30363d" rx="5"/>
+    <text x="54" y="304" fill="#93c5fd" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">許可の内容</text>
+    <text x="146" y="304" fill="#e6edf3" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">令和8年7月1日〜9月30日／日の出から日没まで／目的：技能証明および限定変更に係わるトレーニング</text>
+    <text x="146" y="319" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">新千歳空港事務所・陸自北部方面管制気象隊・ATMセンターと調整済。滑空場周辺の訓練飛行に訓練計画書の提出は不要。</text>
+  </svg>
+  <figcaption data-tts data-text="図4-2は、航空法第92条の操縦練習飛行等許可で認められている空域です。左が平面で、たきかわスカイパークを中心とする半径9キロメートル、5ノーティカルマイルの円。この円の外へ出るならフライトプランが必要になります。右が断面で、上限が4,000フィート、平均海面高度です。下側には市街地の最低安全高度1,200フィートがあるので、実際に使えるのはその間ということになります。許可の期間は令和8年7月1日から9月30日まで、時間帯は日の出から日没まで。新千歳空港事務所、陸上自衛隊北部方面管制気象隊、ATMセンターと調整済みで、滑空場周辺の訓練飛行に訓練計画書の提出は不要とされています。"><span class="fig-num">図4-2</span>92条の許可空域は、たきかわスカイパークを中心に半径9km・4,000ft MSL以下。</figcaption>
+</figure>
+<figure class="svg-fig">
+  <svg viewBox="0 0 860 360" role="img" aria-label="滝川周辺の障害物と最低安全高度" style="max-width:760px">
+    <rect x="0" y="0" width="860" height="360" fill="none"/>
+    <line x1="40" y1="292" x2="820" y2="292" stroke="#30363d" stroke-width="2"/>
+    <line x1="40" y1="292.0" x2="820" y2="292.0" stroke="#21262d" stroke-width="1" stroke-dasharray="3 5"/>
+    <text x="34" y="296.0" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">0ft</text>
+    <line x1="40" y1="214.5" x2="820" y2="214.5" stroke="#21262d" stroke-width="1" stroke-dasharray="3 5"/>
+    <text x="34" y="218.5" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">500ft</text>
+    <line x1="40" y1="137.0" x2="820" y2="137.0" stroke="#21262d" stroke-width="1" stroke-dasharray="3 5"/>
+    <text x="34" y="141.0" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1000ft</text>
+    <line x1="40" y1="59.5" x2="820" y2="59.5" stroke="#21262d" stroke-width="1" stroke-dasharray="3 5"/>
+    <text x="34" y="63.5" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1500ft</text>
+    <rect x="128.0" y="287.3" width="24" height="4.7" fill="#21262d" stroke="#30363d"/>
+    <line x1="82" y1="285.5" x2="198" y2="285.5" stroke="#8b949e" stroke-width="2"/>
+    <text x="140" y="277.5" fill="#8b949e" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">滝新橋</text>
+    <text x="140" y="261.5" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">13m / 42ft</text>
+    <text x="140" y="310" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">南側</text>
+    <rect x="292.0" y="271.9" width="16" height="20.1" fill="#21262d" stroke="#30363d"/>
+    <line x1="242" y1="264.1" x2="358" y2="264.1" stroke="#8b949e" stroke-width="2"/>
+    <text x="300" y="256.1" fill="#8b949e" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ごみ焼却場の煙突</text>
+    <text x="300" y="240.1" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">55m / 180ft</text>
+    <text x="300" y="310" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">南東側</text>
+    <rect x="440.0" y="278" width="120" height="14" fill="#21262d" stroke="#30363d"/>
+    <rect x="448.0" y="268" width="16" height="10" fill="#30363d"/>
+    <rect x="476.0" y="260" width="16" height="18" fill="#30363d"/>
+    <rect x="504.0" y="268" width="16" height="10" fill="#30363d"/>
+    <rect x="532.0" y="260" width="16" height="18" fill="#30363d"/>
+    <line x1="442" y1="106.0" x2="558" y2="106.0" stroke="#d29922" stroke-width="2"/>
+    <text x="500" y="98.0" fill="#d29922" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">市街地</text>
+    <text x="500" y="82.0" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1,200ft</text>
+    <text x="500" y="310" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">市役所60m＋海抜30m＋300m</text>
+    <rect x="687.0" y="135.8" width="26" height="156.2" fill="#21262d" stroke="#30363d"/>
+    <line x1="642" y1="75.0" x2="758" y2="75.0" stroke="#f85149" stroke-width="2"/>
+    <text x="700" y="67.0" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">百年記念塔</text>
+    <text x="700" y="51.0" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1,400ft以上</text>
+    <text x="700" y="310" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">塔80m・海抜が高い</text>
+    <rect x="40" y="316" width="780" height="38" fill="#161b22" stroke="#30363d" rx="5"/>
+    <text x="54" y="332" fill="#93c5fd" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">最低安全高度</text>
+    <text x="150" y="332" fill="#e6edf3" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">人・家屋の密集地：水平距離600m以内の最も高い障害物の上端から＋300m</text>
+    <text x="150" y="348" fill="#e6edf3" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">それ以外の地域：地上または水面から150m　　→ 滝川では市街地1,200ftと百年記念塔1,400ftが実質の下限</text>
+    <text x="40" y="42" fill="#e6edf3" font-size="13.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">滝川滑空場 周辺の障害物</text>
+  </svg>
+  <figcaption data-tts data-text="図4-1は、滝川滑空場の周辺にある障害物を高さ順に並べたものです。南側の滝新橋が13メートル、42フィート。南東側のごみ焼却場の煙突が55メートル、180フィート。この2つは実際には低いものです。効いてくるのは残りの2つで、市街地は市役所の60メートルに海抜30メートルを足し、さらに人家密集地域の安全高度300メートルを加えて合計400メートル、1,200フィート。百年記念塔は塔そのものが80メートルで、海抜の高い位置にあるため1,400フィート以上が必要です。最低安全高度の決まりは、人または家屋の密集する地域では水平距離600メートル以内の最も高い障害物の上端から300メートル、それ以外の地域では地上または水面から150メートルです。"><span class="fig-num">図4-1</span>低いのは橋と煙突。効いてくるのは市街地の1,200ftと百年記念塔の1,400ft。</figcaption>
+</figure>
         <ul class="plist">
           <li data-tts data-text="航空路誌、エーアイピー。">航空路誌（AIP）</li>
           <li data-tts data-text="航空路誌改訂版。">航空路誌改訂版（AIP Amendments）</li>
@@ -826,6 +1127,67 @@
         <p data-tts data-text="横風時の地上滑走では、翼端保持者は風上側の翼端を少し下げます。横風時は風上側の翼端があおられないよう注意が必要ですが、風に流されたプロペラ交流が風下側の翼に当たることにより風下側の翼の揚力が増し、風上側の翼端が下がることがあることも考慮に入れておきます。">
           横風時の地上滑走では、翼端保持者は<strong>風上側の翼端を少し下げます。</strong>横風時は風上側の翼端があおられないよう注意が必要ですが、風に流されたプロペラ交流が風下側の翼に当たることで風下側の翼の揚力が増し、逆に風上側の翼端が下がることがある点も考慮しておきます。
         </p>
+<figure class="svg-fig">
+  <svg viewBox="0 0 800 360" role="img" aria-label="横風成分の早見図" style="max-width:760px">
+    <rect x="0" y="0" width="800" height="360" fill="none"/>
+    <rect x="234" y="67" width="32" height="233" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+    <line x1="250" y1="300" x2="250" y2="67" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="7 5"/>
+    <text x="250" y="59" fill="#8b949e" font-size="11.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">滑走路方向</text>
+    <line x1="250" y1="300" x2="287.3" y2="88.3" stroke="#3fb950" stroke-width="1.6" opacity=".85"/>
+    <text x="291.8" y="66.7" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2kt</text>
+    <text x="273.1" y="168.7" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">10°</text>
+    <line x1="250" y1="300" x2="212.7" y2="88.3" stroke="#3fb950" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="323.5" y2="98.0" stroke="#3fb950" stroke-width="1.6" opacity=".85"/>
+    <text x="332.4" y="77.5" fill="#3fb950" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">3kt</text>
+    <text x="295.6" y="174.7" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">20°</text>
+    <line x1="250" y1="300" x2="176.5" y2="98.0" stroke="#3fb950" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="357.5" y2="113.8" stroke="#d29922" stroke-width="1.6" opacity=".85"/>
+    <text x="370.5" y="95.3" fill="#d29922" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">5kt</text>
+    <text x="316.6" y="184.6" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">30°</text>
+    <line x1="250" y1="300" x2="142.5" y2="113.8" stroke="#d29922" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="388.2" y2="135.3" stroke="#d29922" stroke-width="1.6" opacity=".85"/>
+    <text x="404.9" y="119.4" fill="#d29922" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">6kt</text>
+    <text x="335.7" y="197.9" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">40°</text>
+    <line x1="250" y1="300" x2="111.8" y2="135.3" stroke="#d29922" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="414.7" y2="161.8" stroke="#f85149" stroke-width="1.6" opacity=".85"/>
+    <text x="434.6" y="149.1" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">8kt</text>
+    <text x="352.1" y="214.3" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">50°</text>
+    <line x1="250" y1="300" x2="85.3" y2="161.8" stroke="#f85149" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="436.2" y2="192.5" stroke="#f85149" stroke-width="1.6" opacity=".85"/>
+    <text x="458.7" y="183.5" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">10kt</text>
+    <text x="365.4" y="233.3" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">60°</text>
+    <line x1="250" y1="300" x2="63.8" y2="192.5" stroke="#f85149" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="465" y2="300" stroke="#f85149" stroke-width="1.6" opacity=".85"/>
+    <line x1="250" y1="300" x2="35" y2="300" stroke="#f85149" stroke-width="1.6" opacity=".85"/>
+    <text x="491" y="304" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">10kt</text>
+    <text x="383" y="300" fill="#8b949e" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">90°</text>
+    <circle cx="250" cy="300" r="5" fill="#e6edf3"/>
+    <text x="250" y="322" fill="#7d8590" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風速 10kt のとき</text>
+    <text x="530" y="60" fill="#e6edf3" font-size="13" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">考え方（クロックルール）</text>
+    <rect x="530" y="72" width="240" height="52" fill="#161b22" stroke="#30363d" rx="5"/>
+    <text x="650" y="94" fill="#93c5fd" font-size="13" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">横風成分 ≒ 風速 × 角度÷60</text>
+    <text x="650" y="113" fill="#8b949e" font-size="11" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">60°以上は風速をそのまま横風とみなす</text>
+    <text x="530" y="152" fill="#f85149" font-size="13" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ASK-21 の横風限界 8kt（15km/h）</text>
+    <text x="530" y="176" fill="#e6edf3" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">→ 限界に達する風速は</text>
+    <rect x="530" y="186" width="240" height="21" fill="#161b22" rx="3"/>
+    <text x="542" y="201" fill="#8b949e" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風向差 20°</text>
+    <text x="758" y="201" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風速 24kt まで</text>
+    <rect x="530" y="210" width="240" height="21" fill="#161b22" rx="3"/>
+    <text x="542" y="225" fill="#8b949e" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風向差 30°</text>
+    <text x="758" y="225" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風速 16kt まで</text>
+    <rect x="530" y="234" width="240" height="21" fill="#161b22" rx="3"/>
+    <text x="542" y="249" fill="#8b949e" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風向差 40°</text>
+    <text x="758" y="249" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風速 12kt まで</text>
+    <rect x="530" y="258" width="240" height="21" fill="#161b22" rx="3"/>
+    <text x="542" y="273" fill="#8b949e" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風向差 50°</text>
+    <text x="758" y="273" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風速 10kt まで</text>
+    <rect x="530" y="282" width="240" height="21" fill="#161b22" rx="3"/>
+    <text x="542" y="297" fill="#8b949e" font-size="12" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風向差 60°以上</text>
+    <text x="758" y="297" fill="#e6edf3" font-size="12.5" font-weight="700" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風速 8kt まで</text>
+    <text x="530" y="342" fill="#7d8590" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">緑＝余裕あり／橙＝注意／赤＝限界8kt以上</text>
+  </svg>
+  <figcaption data-tts data-text="図13-1は、横風成分の早見図です。左の扇は、風速が10ノットのときに、風向と滑走路のなす角ごとに横風成分が何ノットになるかを示しています。10度で2ノット、20度で3ノット、30度で5ノット、40度で6ノット、50度で8ノット、60度以上で10ノット。考え方はクロックルールで、横風成分はおよそ風速かける角度わる60、60度以上は風速をそのまま横風とみなします。エーエスケーにじゅういちの横風限界は8ノット、15キロメートル毎時ですから、逆算すると、風向差20度なら風速24ノットまで、30度なら16ノットまで、40度なら12ノットまで、50度なら10ノットまで、60度以上なら8ノットまでが目安になります。"><span class="fig-num">図13-1</span>風向と滑走路のなす角から横風成分を読む。ASK-21の限界は8kt。</figcaption>
+</figure>
         <p data-tts data-text="離陸滑走時のエマージェンシーで最も多いのが、翼端を落とす、そしてグランドループというパターンです。この際、一番の対処方法はグランドループする前に離脱することです。離陸滑走開始時にダイブブレーキをオープンしていると、翼端を落としてしまった際に即座にレリーズを操作できません。よって離陸時のダイブブレーキオープンは推奨しません。">
           離陸滑走時のエマージェンシーで最も多いのが、<strong>翼端を落とす→グランドループ</strong>というパターンです。この際、最優先の対処方法は、グランドループする前に索を離脱することです。離陸滑走開始時にダイブブレーキをオープンしていると、翼端を落としてしまった際に即座にレリーズを操作できないため、離陸時のダイブブレーキオープンは推奨しません。
         </p>
@@ -854,8 +1216,8 @@
         </p>
         <div class="callout amber">
           <span class="cal-label">計算式（飛行規程より）</span>
-          <p data-tts data-text="失速速度は、時速74キロメートル かける ルートエヌ。エヌは、当該機の全備重量 割る 600キログラムです。" style="margin-bottom:6px;">失速速度 ＝ 74km/h × √n　（n ＝ 当該機の全備重量 ÷ 600kg）</p>
-          <p data-tts data-text="最小沈下速度は、時速80キロメートル かける ルートエヌ。エヌは、当該機の全備重量 割る 570キログラムです。" style="margin-bottom:0;">最小沈下速度 ＝ 80km/h × √n　（n ＝ 当該機の全備重量 ÷ 570kg）</p>
+          <p data-tts data-text="失速速度は、40ノット かける ルートエヌ。エヌは、当該機の全備重量 割る 600キログラムです。" style="margin-bottom:6px;">失速速度 ＝ 40kt（74km/h）× √n　（n ＝ 当該機の全備重量 ÷ 600kg）</p>
+          <p data-tts data-text="最小沈下速度は、43ノット かける ルートエヌ。エヌは、当該機の全備重量 割る 570キログラムです。" style="margin-bottom:0;">最小沈下速度 ＝ 43kt（80km/h）× √n　（n ＝ 当該機の全備重量 ÷ 570kg）</p>
         </div>
         <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px;">
           <tr style="border-bottom:1px solid var(--line);">
@@ -877,33 +1239,319 @@
         <p data-tts data-text="最良滑空比速度は、ポーラーカーブをもとに、正対風・背風の風速と、上昇流・沈下流の値を読み取って設定します。ASK21は無風・無上昇下降で約49ノットが基準ですが、正対風が強い場合や沈下流の中では速度を増します。">
           最良滑空比速度は、<strong>ポーラーカーブ</strong>をもとに、正対風・背風の風速（気象情報、ウインドソック）と、上昇流・沈下流の値（バリオメータ）を読み取って設定します。ASK21は無風・無上昇下降でおよそ49kt（48.5〜49kt程度）が基準ですが、正対風が強い場合や沈下流の中では速度を増します。
         </p>
+<figure class="svg-fig">
+  <svg viewBox="0 0 900 380" role="img" aria-label="最良滑空比速度の早見表" style="max-width:760px">
+    <rect x="0" y="0" width="900" height="380" fill="none"/>
+    <text x="480" y="40" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">風（kt）　←追い風／向かい風→</text>
+    <text x="296" y="80" fill="#8b949e" font-size="12.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">-10</text>
+    <text x="388" y="80" fill="#8b949e" font-size="12.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+0</text>
+    <text x="480" y="80" fill="#8b949e" font-size="12.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+5</text>
+    <text x="572" y="80" fill="#8b949e" font-size="12.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+10</text>
+    <text x="664" y="80" fill="#8b949e" font-size="12.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">+20</text>
+    <text x="236" y="62" fill="#8b949e" font-size="11.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">昇降計</text>
+    <text x="236" y="78" fill="#8b949e" font-size="11.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">／大気の上下</text>
+    <text x="236" y="113" fill="#e6edf3" font-size="12.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">0</text>
+    <text x="236" y="128" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">大気 +1.7</text>
+    <rect x="250" y="92" width="89" height="43" fill="rgb(30,120,190)" opacity=".82" rx="4"/>
+    <text x="294" y="120" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">42</text>
+    <rect x="342" y="92" width="89" height="43" fill="rgb(30,120,190)" opacity=".82" rx="4"/>
+    <text x="386" y="120" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">42</text>
+    <rect x="434" y="92" width="89" height="43" fill="rgb(30,120,190)" opacity=".82" rx="4"/>
+    <text x="478" y="120" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">42</text>
+    <rect x="526" y="92" width="89" height="43" fill="rgb(30,120,190)" opacity=".82" rx="4"/>
+    <text x="570" y="120" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">42</text>
+    <rect x="618" y="92" width="89" height="43" fill="rgb(37,117,184)" opacity=".82" rx="4"/>
+    <text x="662" y="120" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">43</text>
+    <text x="236" y="159" fill="#e6edf3" font-size="12.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">-1</text>
+    <text x="236" y="174" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">大気 +0.7</text>
+    <rect x="250" y="138" width="89" height="43" fill="rgb(52,112,173)" opacity=".82" rx="4"/>
+    <text x="294" y="166" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">45</text>
+    <rect x="342" y="138" width="89" height="43" fill="rgb(67,107,162)" opacity=".82" rx="4"/>
+    <text x="386" y="166" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">47</text>
+    <rect x="434" y="138" width="89" height="43" fill="rgb(74,104,156)" opacity=".82" rx="4"/>
+    <text x="478" y="166" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">48</text>
+    <rect x="526" y="138" width="89" height="43" fill="rgb(81,101,151)" opacity=".82" rx="4"/>
+    <text x="570" y="166" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">49</text>
+    <rect x="618" y="138" width="89" height="43" fill="rgb(96,96,140)" opacity=".82" rx="4"/>
+    <text x="662" y="166" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">51</text>
+    <text x="236" y="205" fill="#e6edf3" font-size="12.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">-1.7</text>
+    <text x="236" y="220" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">大気 +0.0</text>
+    <rect x="250" y="184" width="89" height="43" fill="rgb(81,101,151)" opacity=".82" rx="4"/>
+    <text x="294" y="212" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">49</text>
+    <rect x="342" y="184" width="89" height="43" fill="rgb(96,96,140)" opacity=".82" rx="4"/>
+    <text x="386" y="212" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">51</text>
+    <rect x="434" y="184" width="89" height="43" fill="rgb(104,94,134)" opacity=".82" rx="4"/>
+    <text x="478" y="212" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">52</text>
+    <rect x="526" y="184" width="89" height="43" fill="rgb(111,91,128)" opacity=".82" rx="4"/>
+    <text x="570" y="212" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">53</text>
+    <rect x="618" y="184" width="89" height="43" fill="rgb(141,81,106)" opacity=".82" rx="4"/>
+    <text x="662" y="212" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">57</text>
+    <text x="236" y="251" fill="#e6edf3" font-size="12.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">-2.5</text>
+    <text x="236" y="266" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">大気 -0.8</text>
+    <rect x="250" y="230" width="89" height="43" fill="rgb(96,96,140)" opacity=".82" rx="4"/>
+    <text x="294" y="258" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">51</text>
+    <rect x="342" y="230" width="89" height="43" fill="rgb(126,86,117)" opacity=".82" rx="4"/>
+    <text x="386" y="258" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">55</text>
+    <rect x="434" y="230" width="89" height="43" fill="rgb(133,83,112)" opacity=".82" rx="4"/>
+    <text x="478" y="258" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">56</text>
+    <rect x="526" y="230" width="89" height="43" fill="rgb(148,78,101)" opacity=".82" rx="4"/>
+    <text x="570" y="258" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">58</text>
+    <rect x="618" y="230" width="89" height="43" fill="rgb(178,68,78)" opacity=".82" rx="4"/>
+    <text x="662" y="258" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">62</text>
+    <text x="236" y="297" fill="#e6edf3" font-size="12.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">-3.5</text>
+    <text x="236" y="312" fill="#7d8590" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">大気 -1.8</text>
+    <rect x="250" y="276" width="89" height="43" fill="rgb(118,88,123)" opacity=".82" rx="4"/>
+    <text x="294" y="304" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">54</text>
+    <rect x="342" y="276" width="89" height="43" fill="rgb(163,73,90)" opacity=".82" rx="4"/>
+    <text x="386" y="304" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">60</text>
+    <rect x="434" y="276" width="89" height="43" fill="rgb(178,68,78)" opacity=".82" rx="4"/>
+    <text x="478" y="304" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">62</text>
+    <rect x="526" y="276" width="89" height="43" fill="rgb(192,62,67)" opacity=".82" rx="4"/>
+    <text x="570" y="304" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">64</text>
+    <rect x="618" y="276" width="89" height="43" fill="rgb(230,50,40)" opacity=".82" rx="4"/>
+    <text x="662" y="304" fill="#fff" font-size="15" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">69</text>
+    <rect x="341" y="183" width="91" height="45" fill="none" stroke="#fff" stroke-width="2.5" rx="5"/>
+    <line x1="432" y1="207" x2="728" y2="207" stroke="#fff" stroke-width="1" stroke-dasharray="3 3"/>
+    <text x="734" y="211" fill="#fff" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">静穏・無風の基準</text>
+    <text x="236" y="352" fill="#7d8590" font-size="11" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">単位：kt</text>
+    <text x="250" y="352" fill="#7d8590" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">全備重量 550kg／昇降計 −1.7 が大気静穏（ASK-21の最小沈下ぶん）</text>
+    <text x="250" y="370" fill="#7d8590" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">作成：櫻井氏 EMLT講座「グライダー性能計算ツール2」による</text>
+  </svg>
+  <figcaption data-tts data-text="図15-2は、最良滑空比速度の早見表を色分けしたものです。縦が昇降計の指示、横が風で、右へ行くほど向かい風です。色が青いほど遅く、赤いほど速く飛ぶことを示します。白い枠で囲んだところが基準で、昇降計マイナス1.7、つまり大気が静穏で無風のとき、51ノットです。エーエスケーにじゅういちの最小沈下がおよそ1.7ノットぶんなので、昇降計がマイナス1.7を指していれば大気は静穏、0を指していれば大気は1.7ノットで上昇している、という読み替えになります。向かい風20ノットになると57ノット、さらに沈む空気の中では69ノットまで増速します。逆に追い風10ノットなら49ノットに落とします。"><span class="fig-num">図15-2</span>昇降計の指示と正対風から、飛ぶべき速度を読む。青いほど遅く、赤いほど速い。</figcaption>
+</figure>
+        <div class="callout amber">
+          <span class="cal-label">この表を使う</span>
+          <p data-tts data-text="図15-2は2026年8月17日に、櫻井氏のイーエムエルティー講座のグライダー性能計算ツール2で、全備重量550キログラムとして計算したものです。試験で数字を出すときは、前提の重量を添えて答えてください。" style="margin:0;">
+            図15-2は2026年8月17日に、櫻井氏 EMLT講座「グライダー性能計算ツール2」で<b>全備重量550kg</b>として計算したものです。試験で数字を出すときは、<b>前提の重量を添えて</b>答えてください。
+          </p>
+        </div>
         <figure>
           <img class="fig-img-single" src="data:image/png;base64,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" alt="ASK21型 速度ポーラーカーブ（Geschwindigkeits-Polare / Speed Polar）。横軸が対気速度(km/h)、縦軸が沈下速度(m/s)。実線がG/S=31.3kg/㎡、破線がG/S=26.1kg/㎡の場合。E=33.5は最良滑空比。">
           <p class="fig-src-note">出典：ASK21型 飛行規程 速度ポーラーカーブ（Geschwindigkeits-Polare／Speed Polar）</p>
           <figcaption><span class="fig-num">図15-1</span>横軸は対気速度（km/h）、縦軸は沈下速度（m/s）。曲線が最も寝ている＝沈下率に対して速度が伸びる付近が最良滑空比（E=33.5）。正対風・沈下流の中では、この曲線の接線が変わる分だけ速度を増すのが理論的根拠になる。</figcaption>
         </figure>
 
-        <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:10px;">
-          <tr style="border-bottom:1px solid var(--line);">
-            <th style="text-align:left; padding:5px; color:var(--cyan);">沈下(kt)</th>
-            <th style="text-align:left; padding:5px; color:var(--cyan);">無風(0kt)</th>
-            <th style="text-align:left; padding:5px; color:var(--cyan);">正対風10kt</th>
-            <th style="text-align:left; padding:5px; color:var(--cyan);">正対風20kt</th>
-          </tr>
-          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">0</td><td style="padding:5px;">48.5</td><td style="padding:5px;">50</td><td style="padding:5px;">53</td></tr>
-          <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">-1</td><td style="padding:5px;">55</td><td style="padding:5px;">58</td><td style="padding:5px;">62</td></tr>
-          <tr><td style="padding:5px;">-2</td><td style="padding:5px;">61</td><td style="padding:5px;">65</td><td style="padding:5px;">69</td></tr>
-        </table>
         <p data-tts data-text="速度を上げる根拠を聞かれたら、ポーラーカーブを検討して、この程度の増速幅が最も合理的で、これ以上増速するとかえって沈下が大きくなると判断しました、と答えます。">
           速度を上げる根拠を聞かれたら、「ポーラーカーブを検討して、この程度の増速幅が最も合理的で、これ以上増速するとかえって沈下が大きくなると判断しました」と答えます。
         </p>
         <div class="model-answer">
-          <p data-tts data-text="正対風が強いので、速度を毎時100キロメートルとしました。無風無上昇下降であれば約90キロメートル毎時ですが、ポーラーカーブから、この程度の増速幅が最も合理的と判断しました。">
-            「正対風が強いので、速度を100km/hとしました。無風・無上昇下降であれば約90km/hですが、ポーラーカーブから、この程度の増速幅が最も合理的と判断しました。」
+          <p data-tts data-text="正対風が強いので、速度を55ノットとしました。無風で静穏な大気であれば51ノットですが、ポーラーカーブから、この程度の増速幅が最も合理的と判断しました。">
+            「正対風が強いので、速度を<b>55kt</b>としました。無風・静穏大気であれば<b>51kt</b>ですが、ポーラーカーブから、この程度の増速幅が最も合理的と判断しました。」
           </p>
         </div>
       </div>
       </section>
+
+      <section id="part6" class="part-section">
+      <div class="part-divider">
+        <div class="pd-num">PART 06</div>
+        <h2>機体書類と装備品の実データ</h2>
+      </div>
+      <div class="tts-bar" id="bar-part6">
+        <button class="tts-btn primary tts-play">▶ この部を読み上げ</button>
+        <button class="tts-btn stop tts-stop">■ 停止</button>
+        <span class="tts-status">待機中</span>
+      </div>
+
+      <div class="chapter" id="ch16">
+        <h3><span class="ch-num">16</span>装備品と期限管理</h3>
+        <p data-tts data-text="装備品の期限には、年数、月数、回数の3種類があります。種類ごとに追い方が違うので、分けて管理します。">
+          装備品の期限には<strong>年数・月数・回数</strong>の3種類があります。種類ごとに追い方が違うので、分けて管理します。
+        </p>
+<figure class="svg-fig">
+  <svg viewBox="0 0 880 395" role="img" aria-label="装備品の期限管理" style="max-width:760px">
+    <rect x="0" y="0" width="880" height="395" fill="none"/>
+    <line x1="240.0" y1="84" x2="240.0" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="240.0" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2026</text>
+    <line x1="314.3" y1="84" x2="314.3" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="314.3" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2028</text>
+    <line x1="388.6" y1="84" x2="388.6" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="388.6" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2030</text>
+    <line x1="462.9" y1="84" x2="462.9" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="462.9" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2032</text>
+    <line x1="537.1" y1="84" x2="537.1" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="537.1" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2034</text>
+    <line x1="611.4" y1="84" x2="611.4" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="611.4" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2036</text>
+    <line x1="685.7" y1="84" x2="685.7" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="685.7" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2038</text>
+    <line x1="760.0" y1="84" x2="760.0" y2="288" stroke="#21262d" stroke-width="1"/>
+    <text x="760.0" y="76" fill="#7d8590" font-size="10.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2040</text>
+    <text x="226" y="116" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">高度計（前後席）</text>
+    <text x="226" y="130" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2年</text>
+    <rect x="249.7" y="104" width="74.3" height="20" fill="#3b82f6" opacity=".75" rx="4"/>
+    <line x1="323.9" y1="100" x2="323.9" y2="128" stroke="#3b82f6" stroke-width="2"/>
+    <text x="330.9" y="119" fill="#3b82f6" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2028年</text>
+    <text x="226" y="156" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">トランスポンダ</text>
+    <text x="226" y="170" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2年</text>
+    <rect x="249.7" y="144" width="74.3" height="20" fill="#3b82f6" opacity=".75" rx="4"/>
+    <line x1="323.9" y1="140" x2="323.9" y2="168" stroke="#3b82f6" stroke-width="2"/>
+    <text x="330.9" y="159" fill="#3b82f6" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2028年</text>
+    <text x="226" y="196" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">義務無線機</text>
+    <text x="226" y="210" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">12か月</text>
+    <rect x="248.2" y="184" width="37.1" height="20" fill="#3fb950" opacity=".75" rx="4"/>
+    <line x1="285.3" y1="180" x2="285.3" y2="208" stroke="#3fb950" stroke-width="2"/>
+    <text x="292.3" y="199" fill="#3fb950" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2027年</text>
+    <text x="226" y="236" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">シートベルト類</text>
+    <text x="226" y="250" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">12年</text>
+    <rect x="249.7" y="224" width="445.7" height="20" fill="#a371f7" opacity=".75" rx="4"/>
+    <line x1="695.4" y1="220" x2="695.4" y2="248" stroke="#a371f7" stroke-width="2"/>
+    <text x="702.4" y="239" fill="#a371f7" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2038年</text>
+    <text x="226" y="276" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">非常用信号灯</text>
+    <text x="226" y="290" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">メーカー期限</text>
+    <rect x="261.5" y="264" width="75.0" height="20" fill="#d29922" opacity=".75" rx="4"/>
+    <line x1="336.6" y1="260" x2="336.6" y2="288" stroke="#d29922" stroke-width="2"/>
+    <text x="343.6" y="279" fill="#d29922" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2028年</text>
+    <line x1="263.4" y1="66" x2="263.4" y2="294" stroke="#f85149" stroke-width="2"/>
+    <text x="263.4" y="60" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">今日</text>
+    <line x1="226" y1="310" x2="830" y2="310" stroke="#30363d" stroke-width="1"/>
+    <text x="226" y="336" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">曳航用レリーズ</text>
+    <text x="226" y="350" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2,000発航（回数管理）</text>
+    <rect x="240" y="324" width="520" height="22" fill="#161b22" stroke="#30363d" rx="4"/>
+    <rect x="240" y="324" width="221.3" height="22" fill="#d29922" opacity=".8" rx="4"/>
+    <text x="350.6" y="340" fill="#0d1117" font-size="11.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">851回</text>
+    <text x="768" y="340" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">残 1,149発航</text>
+    <text x="240" y="364" fill="#7d8590" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2025年6月1日 交換（TOST E75／G73）　※こちらだけカレンダーではなく航空日誌の発航回数で追う</text>
+  </svg>
+  <figcaption data-tts data-text="図16-1は、装備品の期限を1枚にしたものです。上の5本がカレンダーで管理するもので、高度計とトランスポンダが2年、義務無線機が12か月、シートベルト類が12年、非常用信号灯がメーカーの指定期限です。赤い縦線が今日の位置で、いちばん先に来るのが義務無線機の2027年3月です。下の帯だけ性質が違います。曳航用レリーズは2,000発航という回数での管理で、2025年6月1日に交換してから851回を使い、残りが1,149発航。こちらはカレンダーではなく、航空日誌の発航回数で追います。期限には年数、月数、回数の3種類がある、という整理で覚えます。"><span class="fig-num">図16-1</span>期限は年数・月数・回数の3系統。レリーズだけ回数で追う。</figcaption>
+</figure>
+        <div class="callout amber">
+          <span class="cal-label">口述での答え方</span>
+          <p data-tts data-text="最小装備品がすべて揃っているかどうやって確認していますか、と聞かれたら、飛行規程第2章の最少装備品の一覧と、実機のコクピットとを突き合わせて確認します、と答えます。速度計と高度計は目視で作動と指示を、シートベルトは4点式であることと各部の状態を、パラシュートまたはシートクッションは装着と厚みを、重量重心プラカードとデータプレートは掲示されていることを、そして飛行規程そのものが機体にあることを確認します。飛行規程が装備品の1つであることは落としやすいので、必ず現物を見ます。" style="margin:0;">
+            <b>Q. 最小装備品がすべて揃っているかどうやって確認していますか</b><br>
+            → <b>飛行規程 第2章の最少装備品リストと、実機のコクピットを突き合わせて確認します。</b>速度計・高度計は目視で作動と指示を、シートベルトは4点式であることと各部の状態を、パラシュート（またはシートクッション）は装着と厚みを、重量重心プラカードとデータプレートは掲示を、そして<b>飛行規程そのものが機体にあること</b>を確認します。飛行規程が装備品の1つであることは落としやすいので、必ず現物を見ます。
+          </p>
+        </div>
+        <div class="callout">
+          <span class="cal-label">装備品リスト（JA20HC・耐空検査準備作業報告書 2026.4.4 より）</span>
+          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:4px;">
+            <tr style="border-bottom:1px solid var(--line);">
+              <th style="text-align:left; padding:5px; color:var(--cyan);">装備品</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">型式</th>
+              <th style="text-align:left; padding:5px; color:var(--cyan);">期限</th>
+            </tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">速度計（前／後）</td><td style="padding:5px;">Winter</td><td style="padding:5px; color:var(--text-dim);">—</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">高度計（前／後）</td><td style="padding:5px;">UI 593PA3</td><td style="padding:5px;">2年　→ 2028年4月</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">昇降計（前／後）</td><td style="padding:5px;">Winter 5StV5-3</td><td style="padding:5px; color:var(--text-dim);">—</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;"><b>加速度計（前／後）</b></td><td style="padding:5px;">GM510-2</td><td style="padding:5px; color:var(--text-dim);">—</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">VHF無線機</td><td style="padding:5px;">Becker AR4201</td><td style="padding:5px;">12か月 → 2027年3月</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">トランスポンダ</td><td style="padding:5px;">Trig TT22／TC20</td><td style="padding:5px;">2年　→ 2028年4月</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">シートベルト／ハーネス／<b>ボトムストラップ</b></td><td style="padding:5px;">Gadringer</td><td style="padding:5px;">12年 → 2038年4月</td></tr>
+            <tr><td style="padding:5px;">曳航用レリーズ（AT／WT）</td><td style="padding:5px;">TOST E75／G73</td><td style="padding:5px;">2,000発航（851回使用）</td></tr>
+          </table>
+          <p data-tts data-text="この表で注目したいのが加速度計とボトムストラップです。どちらも前後席とも装備されています。飛行規程では、曲技飛行を行うために追加で必要な装備品として、前後席のフロアハーネス、前席の加速度計、前後席のラダーペダルストラップ、パラシュートの4つが挙げられています。つまりこの機体はプラカードの上で曲技飛行が可能な状態にあたります。" style="margin-top:10px; margin-bottom:0;">
+            注目したいのが<b>加速度計とボトムストラップ</b>で、どちらも<b>前後席とも装備</b>されています。飛行規程では曲技飛行の追加装備品として、フロアハーネス（前後席）・加速度計（前席）・ラダーペダルストラップ（前後席）・パラシュートの4つが挙げられているので、この機体は<b>プラカードの上で曲技飛行が可能な状態</b>にあたります。
+          </p>
+        </div>
+        <div class="callout">
+          <span class="cal-label">整備状況（2026年8月17日 時点）</span>
+          <p data-tts data-text="総飛行時間が9026時間26分、総飛行回数が25966回。耐空検査後が192時間29分で588回。前回の定期耐空証明検査が2026年4月10日。前回検査後の整備、大きな修理、サービスブレティンはいずれもなし。耐空性改善通報のTCDは、3990-2001による3000時間毎の点検を2026年4月10日に実施しています。これは機体の使用限界時間を8833時間から11833時間へ延長するためのものです。" style="margin:0;">
+            総飛行時間 <b>9,026時間26分</b>／総飛行回数 <b>25,966回</b>。耐空検査後 <b>192時間29分・588回</b>。前回の定期耐空証明検査 2026年4月10日。前回検査後の整備・大きな修理・SB は<b>いずれもなし</b>。<br>
+            TCD（耐空性改善通報）は <b>3990-2001＝3,000時間毎の点検</b>を2026年4月10日に実施。これは使用限界時間を8,833時間→11,833時間へ延長するためのものです。
+          </p>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch17">
+        <h3><span class="ch-num">17</span>無線機・トランスポンダーの操作</h3>
+        <p data-tts data-text="この機体の無線機はベッカー エーアール よん・にい・まる・いち、トランスポンダーはトリグ ティーティー にいにい です。試験で操作を問われることがあるので、モードとボタンの役割を押さえておきます。">
+          この機体の無線機は <strong>Becker AR4201</strong>、トランスポンダーは <strong>Trig TT22</strong>（コントローラー TC20）です。操作を問われることがあるので、モードとボタンの役割を押さえておきます。
+        </p>
+<figure class="svg-fig">
+  <svg viewBox="0 0 880 448" role="img" aria-label="トランスポンダーとVHF無線機の操作" style="max-width:760px">
+    <rect x="0" y="0" width="880" height="448" fill="none"/>
+    <text x="175" y="42" fill="#e6edf3" font-size="13.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">Trig TT22 トランスポンダー</text>
+    <circle cx="175" cy="150" r="78" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+    <rect x="129" y="114" width="92" height="40" fill="#0d1117" stroke="#30363d" rx="4"/>
+    <text x="171" y="136" fill="#3fb950" font-size="21" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1200</text>
+    <text x="209" y="128" fill="#3fb950" font-size="9" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">✈</text>
+    <text x="145" y="168" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ALT</text>
+    <circle cx="175" cy="194" r="17" fill="#21262d" stroke="#30363d"/>
+    <text x="175" y="198" fill="#e6edf3" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ENT</text>
+    <circle cx="101" cy="110" r="14" fill="#21262d" stroke="#30363d"/>
+    <text x="101" y="113" fill="#e6edf3" font-size="8.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">IDT</text>
+    <circle cx="249" cy="110" r="14" fill="#21262d" stroke="#30363d"/>
+    <text x="249" y="113" fill="#e6edf3" font-size="8.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">VFR</text>
+    <circle cx="249" cy="150" r="14" fill="#21262d" stroke="#30363d"/>
+    <text x="249" y="153" fill="#e6edf3" font-size="8.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">FN</text>
+    <circle cx="249" cy="190" r="14" fill="#21262d" stroke="#30363d"/>
+    <text x="249" y="193" fill="#e6edf3" font-size="8.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">CODE</text>
+    <text x="249" y="203" fill="#e6edf3" font-size="8.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">DIAL</text>
+    <text x="42" y="262" fill="#8b949e" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">SBY</text>
+    <text x="92" y="262" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">スタンバイ。暖機とコード変更のとき</text>
+    <text x="42" y="281" fill="#8b949e" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">GND</text>
+    <text x="92" y="281" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">地上作動。空港のグラウンド管制用</text>
+    <text x="42" y="300" fill="#8b949e" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ON</text>
+    <text x="92" y="300" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">作動（機影のみ）</text>
+    <text x="42" y="319" fill="#3fb950" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ALT</text>
+    <text x="92" y="319" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">作動（機影＋高度）← 飛行中はこれ</text>
+    <text x="42" y="338" fill="#3b82f6" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">VFR</text>
+    <text x="92" y="338" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1回押すと即1200／もう1回で元に戻る</text>
+    <text x="42" y="357" fill="#d29922" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">IDT</text>
+    <text x="92" y="357" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">管制官から要求されたときだけ押す</text>
+    <text x="42" y="376" fill="#7d8590" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">FN</text>
+    <text x="92" y="376" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">特に操作しない</text>
+    <text x="42" y="245" fill="#e6edf3" font-size="12" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">モードとボタン</text>
+    <text x="560" y="42" fill="#e6edf3" font-size="13.5" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">Becker AR4201 VHF無線機</text>
+    <circle cx="560" cy="150" r="78" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+    <rect x="514" y="118" width="92" height="40" fill="#0d1117" stroke="#30363d" rx="4"/>
+    <text x="560" y="139" fill="#e6edf3" font-size="17" font-weight="700" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">130.65</text>
+    <text x="590" y="153" fill="#8b949e" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">V 13.1</text>
+    <rect x="522" y="95" width="32" height="18" fill="#21262d" stroke="#30363d" rx="3"/>
+    <text x="538" y="108" fill="#e6edf3" font-size="9.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">SQL</text>
+    <rect x="566" y="95" width="32" height="18" fill="#21262d" stroke="#30363d" rx="3"/>
+    <text x="582" y="108" fill="#e6edf3" font-size="9.5" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">MDE</text>
+    <circle cx="502" cy="128" r="10" fill="#21262d" stroke="#30363d"/>
+    <circle cx="512" cy="176" r="13" fill="#21262d" stroke="#30363d"/>
+    <circle cx="610" cy="176" r="13" fill="#21262d" stroke="#30363d"/>
+    <rect x="622" y="120" width="14" height="26" fill="#21262d" stroke="#30363d" rx="3"/>
+    <line x1="502" y1="128" x2="416" y2="128" stroke="#484f58" stroke-width="1"/>
+    <text x="411" y="132" fill="#8b949e" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">バッテリー切替</text>
+    <line x1="512" y1="176" x2="426" y2="176" stroke="#484f58" stroke-width="1"/>
+    <text x="421" y="180" fill="#8b949e" font-size="10.5" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">ボリューム</text>
+    <line x1="610" y1="176" x2="706" y2="176" stroke="#484f58" stroke-width="1"/>
+    <text x="711" y="180" fill="#8b949e" font-size="10.5" text-anchor="start" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">周波数切替ノブ</text>
+    <line x1="629" y1="133" x2="725" y2="133" stroke="#484f58" stroke-width="1"/>
+    <text x="730" y="137" fill="#8b949e" font-size="10.5" text-anchor="start" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">第一/第二 切替</text>
+    <text x="420" y="245" fill="#e6edf3" font-size="12" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">MDE を押すと画面が3つで回る</text>
+    <rect x="420" y="258" width="90" height="38" fill="#0d1117" stroke="#30363d" rx="4"/>
+    <text x="465" y="277" fill="#e6edf3" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">130.65 / V 12.9</text>
+    <text x="465" y="290" fill="#7d8590" font-size="9" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">周波数＋電圧</text>
+    <text x="516" y="281" fill="#484f58" font-size="13" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">▶</text>
+    <rect x="522" y="258" width="90" height="38" fill="#0d1117" stroke="#30363d" rx="4"/>
+    <text x="567" y="277" fill="#e6edf3" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">130.65 / 121.5</text>
+    <text x="567" y="290" fill="#7d8590" font-size="9" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">第一＋第二周波数</text>
+    <text x="618" y="281" fill="#484f58" font-size="13" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">▶</text>
+    <rect x="624" y="258" width="90" height="38" fill="#0d1117" stroke="#30363d" rx="4"/>
+    <text x="669" y="277" fill="#e6edf3" font-size="10" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">130.65 / CH01</text>
+    <text x="669" y="290" fill="#7d8590" font-size="9" text-anchor="middle" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">チャンネル表示</text>
+    <text x="420" y="318" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">SQL＝スケルチ（雑音消去）　STO＝CH登録（普段は使わない）</text>
+    <text x="420" y="336" fill="#3fb950" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">飛行前のバッテリー電圧は、いちばん左の画面で読む。</text>
+    <rect x="42" y="398" width="796" height="42" fill="#0d2044" stroke="#1e3a6b" rx="6"/>
+    <text x="56" y="416" fill="#93c5fd" font-size="11.5" font-weight="700" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">イニシャルコンタクト</text>
+    <text x="56" y="432" fill="#e6edf3" font-size="11.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">札幌RDR 121.075 / 119.225（SQ 57□□）　　札幌CTRL 127.5 / 132.6　　千歳RDR 119.50（SQ 54□□）</text>
+  </svg>
+  <figcaption data-tts data-text="図17-1は、この機体のトランスポンダーと無線機の操作をまとめたものです。左がトリグ ティーティーにいにい。モードは4つで、エスビーワイがスタンバイ、ジーエヌディーが地上作動、オーエヌが機影のみ、エーエルティーが機影と高度で、飛行中はこれにします。作動していると画面に飛行機のマークが点滅します。ブイエフアールボタンは1回押すと即座に1200になり、もう1回押すと元に戻ります。アイディーティーは管制官から要求されたときだけ押します。右がベッカー エーアール、よん・にい・まる・いち。エムディーイーを押すと画面が3つの間で回り、いちばん左の画面で飛行前のバッテリー電圧を読みます。エスキューエルはスケルチ、雑音消去です。下の帯がイニシャルコンタクトの周波数で、札幌レーダーが121.075または119.225、札幌コントロールが127.5または132.6、千歳レーダーが119.50です。"><span class="fig-num">図17-1</span>Trig TT22 と Becker AR4201。飛行中のモードはALT、電圧はMDEの1画面目。</figcaption>
+</figure>
+        <div class="callout amber">
+          <span class="cal-label">押さえておく3点</span>
+          <ul class="plist" style="margin:0; padding-left:0;">
+            <li data-tts data-text="1つ目。飛行中のトランスポンダーのモードはエーエルティーです。機影だけでなく高度も送るので、相手から見えるものが変わります。作動していれば画面の飛行機マークが点滅します。" style="list-style:none; margin-bottom:8px;">① <b>飛行中は ALT</b>。機影だけでなく高度も送る。作動していれば画面の✈マークが点滅する。</li>
+            <li data-tts data-text="2つ目。アイディーティーは、管制官からリクエストされたときにだけ押します。自分の判断で押すものではありません。" style="list-style:none; margin-bottom:8px;">② <b>IDT は管制官から要求されたときだけ</b>。自分の判断で押すものではない。</li>
+            <li data-tts data-text="3つ目。飛行前のバッテリー電圧は、無線機のエムディーイーを押していちばん左の画面で読みます。" style="list-style:none;">③ <b>飛行前のバッテリー電圧は MDE の1画面目</b>で読む。</li>
+          </ul>
+        </div>
+        <div class="callout">
+          <span class="cal-label">無線局免許状（北空第86号）</span>
+          <p data-tts data-text="無線局の種別は航空機局、免許の番号は北空第86号、有効期間は無期限、運用許容時間は常時です。識別信号はジェイエー20エイチシーと、もう1つ数字の呼出名称があり、こちらはエーティーシー トランスポンダのモードSを使用する場合に限る、と注記されています。電波は、エー・さん・イー が118メガヘルツから155.975メガヘルツの帯で5ワット、ブイ・いち・ディー が1090メガヘルツで250ワット。この1090メガヘルツがモードSとエーディーエス・ビーの周波数です。" style="margin:0;">
+            種別 <b>航空機局</b>／免許の番号 <b>北空第86号</b>／有効期間 <b>無期限</b>／運用許容時間 <b>常時</b>。<br>
+            識別信号は <b>JA20HC</b> と、もう1つ数字の呼出名称があり、<b>「ATCトランスポンダ（モードS）を使用する場合に限る」</b>と注記。<br>
+            電波は A3E が118〜155.975MHz で 5W、V1D が <b>1090MHz</b> で 250W。この1090MHzが<b>モードS／ADS-B</b>の周波数です。
+          </p>
+        </div>
+      </div>
+      </section>
+
 
       <footer>
         <div>機長の出発前確認 実地資料集｜滝川滑空場 ASK-21（JA20HC）対応版</div>
@@ -1350,7 +1998,7 @@ function refreshVoiceSelects(voices){
 }
 TTS.onVoicesReady(refreshVoiceSelects);
 
-['part1','part2','part3','part4','part5'].forEach(id=>{
+['part1','part2','part3','part4','part5','part6'].forEach(id=>{
   initTTSBar(id, 'bar-'+id);
 });
 /* 初期化後、既に読み込み済みの音声リストがあれば即座にドロップダウンへ反映 */

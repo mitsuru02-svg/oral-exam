@@ -1177,6 +1177,7 @@ function ttsClean(text) {
     ['NO','ナンバー'], ['CODE','コード'],
     ['AIS','えーあいえす'], ['SWIM','すぅいむ'], ['NM','ノーティカルマイル'],
     ['TE','てぃーいー'], ['AT','えーてぃ'], ['WT','だぶりゅーてぃ'],
+    ['TEM','ティーイーエム'], ['G','ジー'],
   ].forEach(([en, ja]) => {
     text = text.replace(new RegExp('(?<![A-Za-z])' + en + '(?![A-Za-z])', 'g'), ja);
   });
@@ -1188,6 +1189,7 @@ function ttsClean(text) {
   text = text.replace(/(\d+(?:\.\d+)?)\s*kg/g,          (_, n) => numJp(n)+'キログラム');
   text = text.replace(/(\d+(?:\.\d+)?)\s*daN/g,         (_, n) => numJp(n)+'デカニュートン');
   text = text.replace(/(\d+(?:\.\d+)?)\s*km(?!\/)/g,    (_, n) => numJp(n)+'キロメートル');
+  text = text.replace(/(\d+(?:\.\d+)?)\s*mm(?![A-Za-z])/g, (_, n) => numJp(n)+'ミリメートル');
   text = text.replace(/(\d+(?:\.\d+)?)\s*(?:MHz|MHZ)/g, (_, n) => numJp(n)+'メガヘルツ');
   text = text.replace(/(\d+(?:\.\d+)?)\s*m(?![ghHz\/A-Za-z])/g, (_, n) => numJp(n)+'メートル');
   text = text.replace(/(\d+(?:\.\d+)?)\s*%/g,           (_, n) => numJp(n)+'パーセント');

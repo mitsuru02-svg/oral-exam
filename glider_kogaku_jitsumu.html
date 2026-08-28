@@ -283,9 +283,9 @@ table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;f
 .qa-q{
   display:flex;justify-content:space-between;align-items:center;gap:10px;
   padding:13px 16px;cursor:pointer;font-weight:700;font-size:14px;color:var(--text);
-  background:#fafbfc;
+  background:var(--surface-3);
 }
-.qa-q:hover{background:var(--surface-3);}
+.qa-q:hover{background:var(--line-strong, #30363d);}
 .qa-q .qmark{color:var(--accent);margin-right:6px;}
 .qa-q .arrow{transition:.2s;color:var(--ink-soft);flex-shrink:0;}
 .qa.open .qa-q .arrow{transform:rotate(180deg);}
@@ -5970,6 +5970,11 @@ var wakeLock = {
     document.querySelectorAll('.tts-reading').forEach(function(el){
       el.classList.remove('tts-reading');
     });
+    /* 読み上げが自動で開いたQ&Aだけを閉じる（手で開いたものは残す） */
+    document.querySelectorAll('.qa[data-tts-opened]').forEach(function(q){
+      q.classList.remove('open');
+      delete q.dataset.ttsOpened;
+    });
   }
 
   function highlightBlock(anchor){
@@ -5977,6 +5982,14 @@ var wakeLock = {
     var el = document.getElementById(anchor);
     if (el){
       el.classList.add('tts-reading');
+      /* 読み上げ中のブロックがQ&Aの中にあるときは、答えを自動で開く。
+         読み上げが答えの内容を読んでいるのに画面上は閉じたまま、という
+         食い違いを避けるため。利用者が手で開いたものは閉じない。 */
+      var qa = el.closest ? el.closest('.qa') : null;
+      if (qa && !qa.classList.contains('open')){
+        qa.classList.add('open');
+        qa.dataset.ttsOpened = '1';
+      }
       el.scrollIntoView({behavior:'smooth', block:'center'});
     }
   }
@@ -6077,6 +6090,16 @@ var wakeLock = {
   [/TEM/g, 'ティーイーエム'],
   [/ATC/g, 'エーティーシー'],
   [/決め方/g, 'きめかた'],
+  [/常在/g, 'じょうざい'],
+  [/偏在/g, 'へんざい'],
+  [/見える/g, 'みえる'],
+  [/見えない/g, 'みえない'],
+  [/針路/g, 'しんろ'],
+  [/犯す/g, 'おかす'],
+  [/犯し/g, 'おかし'],
+  [/限界外/g, 'げんかいがい'],
+  [/機首/g, 'きしゅ'],
+  [/答え方/g, 'こたえかた'],
   [/係る/g, 'かかわる'],
   [/係わる/g, 'かかわる'],
   [/呼出/g, 'こしゅつ'],

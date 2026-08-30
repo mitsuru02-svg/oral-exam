@@ -233,6 +233,23 @@ body {
 .btn-speak-ans:hover { border-color: #3b82f6; color: #93c5fd; }
 .btn-speak-ans.speaking { border-color: #3b82f6; color: #3b82f6; animation: pulse 1.2s infinite; }
 .model-answer-text { font-size: 14px; line-height: 1.8; color: #c9d1d9; }
+/* 模範解答の2段構え：まず簡潔版（.model-answer-text）、その下に折りたたみで詳しい版。
+   本番と同じ順序で「まず結論、聞かれたら肉付け」を練習できるようにする。 */
+.ans-more { margin-top: 12px; border-top: 1px solid #21262d; padding-top: 10px; }
+.ans-more > summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .06em; color: #8b949e;
+  border: 1px solid #30363d; border-radius: 20px; padding: 3px 11px;
+}
+.ans-more > summary::-webkit-details-marker { display: none; }
+.ans-more > summary::before { content: '▶'; font-size: 9px; transition: transform .15s; }
+.ans-more[open] > summary::before { transform: rotate(90deg); }
+.ans-more > summary:hover { border-color: #3b82f6; color: #93c5fd; }
+.ans-more-text { font-size: 13.5px; line-height: 1.85; color: #9aa4af; margin-top: 10px; }
+.ans-more .btn-speak-ans { margin-top: 10px; }
+/* 自動再生では簡潔版だけを読み上げ、詳しい版は読まずに画面に出す */
+.pb-ans-full { margin-top: 12px; padding-top: 10px; border-top: 1px solid #30363d; color: #9aa4af; font-size: .88em; }
+.pb-ans-full-label { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: #6e7681; margin-bottom: 5px; }
 /* 原典を確認できていない箇所の注記。模範解答の外に置き、読み上げ対象にしない */
 .qa-note {
   margin-top: 12px; padding: 10px 12px; border-radius: 8px;
@@ -2172,7 +2189,7 @@ function renderStatusList() {
           <span class="st-qtext">${escapeHtml(qa.q)}</span>
           <span class="st-badge ${status}">${st.icon} ${st.label}</span>
         </div>
-        <div class="st-answer">${escapeHtml(qa.a)}</div>
+        <div class="st-answer">${escapeHtml(ansShort(qa))}${qa.s ? `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>${escapeHtml(qa.a)}</div>` : ``}</div>
       </div>`;
   }).join('');
 }
@@ -2433,7 +2450,7 @@ function handleResult(result, qa, qIdx, userAns) {
         <span class="model-answer-label">▼ 模範解答</span>
         <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
       </div>
-      <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
+      ${answerBodyHtml(qa)}
       ${noteHtml(qa)}
     </div>` : ''}
   `;
@@ -2451,8 +2468,8 @@ function handleResult(result, qa, qIdx, userAns) {
     const textToSpeak = (() => {
       let msg = '';
       if (result.verdict==='正解')         msg = '正解です。' + (result.comment||'');
-      else if (result.verdict==='部分正解') msg = '部分正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
-      else                                 msg = '不正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + qa.a;
+      else if (result.verdict==='部分正解') msg = '部分正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + ansShort(qa);
+      else                                 msg = '不正解です。' + (result.comment||'') + '。模範解答は次の通りです。' + ansShort(qa);
       return msg;
     })();
     speak(textToSpeak, () => {
@@ -2460,8 +2477,34 @@ function handleResult(result, qa, qIdx, userAns) {
       if (handsFreeMode) setTimeout(() => startMic(), 400);
     });
   } else {
-    speakResult(result.verdict, result.comment || '', isCorrect ? '' : qa.a);
+    speakResult(result.verdict, result.comment || '', isCorrect ? '' : ansShort(qa));
   }
+}
+
+/* ── 模範解答の2段構え ──────────────────────────────────
+   qa.s（簡潔版）があるときは、それを最初に見せて読み上げ、qa.a（詳しい版）は
+   「詳しく」の折りたたみに入れる。未整備の設問はこれまでどおり qa.a だけを出す。 */
+function ansShort(qa){ return (qa && qa.s) ? qa.s : (qa ? qa.a : ''); }
+function hasAnsMore(qa){ return !!(qa && qa.s); }
+
+function answerBodyHtml(qa){
+  const short = `<div class="model-answer-text" id="modelAnswerText">${ansShort(qa)}</div>`;
+  if (!hasAnsMore(qa)) return short;
+  return short + `
+    <details class="ans-more">
+      <summary>詳しく</summary>
+      <div class="ans-more-text" id="modelAnswerFull">${qa.a}</div>
+      <button class="btn-speak-ans" id="btnSpeakFull" onclick="speakFullAnswer()">🔊 詳しく読み上げ</button>
+    </details>`;
+}
+
+function speakFullAnswer() {
+  const btn = document.getElementById('btnSpeakFull');
+  const el  = document.getElementById('modelAnswerFull');
+  if (!btn || !el) return;
+  if (btn.classList.contains('speaking')) { stopSpeaking(); btn.classList.remove('speaking'); return; }
+  btn.classList.add('speaking');
+  speak(el.textContent, () => btn.classList.remove('speaking'));
 }
 
 function speakModelAnswer() {
@@ -2483,7 +2526,7 @@ function showAnswer() {
           <span class="model-answer-label">▼ 模範解答</span>
           <button class="btn-speak-ans" id="btnSpeakAns" onclick="speakModelAnswer()">🔊 読み上げ</button>
         </div>
-        <div class="model-answer-text" id="modelAnswerText">${qa.a}</div>
+        ${answerBodyHtml(qa)}
         ${noteHtml(qa)}
       </div>`;
   }
@@ -2566,7 +2609,14 @@ function updatePlaybackUI() {
   setImpBadge('pbImpBadge', qa);
   document.getElementById('pbQuestionText').textContent = qa.q;
   document.getElementById('pbAnswerBox').classList.add('hidden');
-  document.getElementById('pbAnswerText').textContent = qa.a;
+  const pbAns = document.getElementById('pbAnswerText');
+  if (hasAnsMore(qa)) {
+    // 簡潔版を読み上げ、詳しい版は読まずに下へ添える
+    pbAns.innerHTML = `<div>${qa.s}</div>`
+      + `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>${qa.a}</div>`;
+  } else {
+    pbAns.textContent = qa.a;
+  }
   const pbNote = document.getElementById('pbNote');
   pbNote.innerHTML = noteHtml(qa);
   pbNote.classList.toggle('hidden', !qa.note);
@@ -2619,7 +2669,7 @@ function startAnswerPhase(myGen) {
     }
     startAnswerAutoScroll(myGen);
   });
-  speak(currentPbQA().a, () => {
+  speak(ansShort(currentPbQA()), () => {
     if (myGen !== pbGeneration || pbPaused) return;
     startGapPhase(myGen);
   });
@@ -2637,7 +2687,7 @@ function startAnswerAutoScroll(myGen) {
   const hidden = el.scrollHeight - el.clientHeight;
   if (hidden <= 4) return;                // 全部見えているならスクロール不要
 
-  const chars = (currentPbQA().a || '').length;
+  const chars = (ansShort(currentPbQA()) || '').length;
   const estMs = Math.min(Math.max(chars / 7 * 1000, 3000), 120000); // 約7文字/秒
   const pages = Math.ceil(hidden / el.clientHeight);
   const stepMs = estMs / (pages + 1);

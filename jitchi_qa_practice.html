@@ -316,6 +316,24 @@ body {
   background: #0d1117; border: 1px solid #21262d; border-radius: 20px; padding: 1px 7px;
 }
 .cat-card.selected .cat-count { color: #93c5fd; background: #0b1b3a; border-color: #1e3a6b; }
+/* 連問モード：どの連鎖を選んでいるかの説明と、出題中の帯 */
+.chain-note {
+  margin-top: 10px; padding: 10px 12px; border-radius: 8px;
+  background: rgba(59,130,246,.07); border: 1px solid #1e3a6b;
+  font-size: 12px; line-height: 1.75; color: #9aa4af;
+}
+.chain-note:empty { display: none; }
+.chain-banner {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 10px; padding: 7px 12px; border-radius: 8px;
+  background: rgba(59,130,246,.10); border: 1px solid #1e3a6b;
+  font-size: 12.5px; color: #93c5fd;
+}
+.chain-banner .cb-step {
+  font-weight: 700; background: #0b1b3a; border: 1px solid #1e3a6b;
+  border-radius: 20px; padding: 1px 9px; font-size: 11.5px;
+}
+.chain-banner.hidden { display: none; }
 
 /* ── レスポンシブ ── */
 /* スマホ：開始ボタンを画面下に固定して、長いスクロールの途中でも押せるようにする */
@@ -619,7 +637,17 @@ body {
               <div class="mode-inner"><div class="mode-icon">🔥</div>
                 <div class="mode-text"><div class="mode-name">頻出順</div></div></div>
             </div>
+            <div class="mode-card" onclick="selectMode('chain')" id="modeChain" title="報告書に記録された出題の順序どおりに、追撃質問を続けて出題します">
+              <div class="mode-inner"><div class="mode-icon">🔗</div>
+                <div class="mode-text"><div class="mode-name">連問</div></div></div>
+            </div>
           </div>
+        </section>
+
+        <section class="panel sec-chain hidden" id="chainPanel">
+          <div class="panel-title">🔗 連問<span class="panel-sub">報告書に記録された順序のまま、追撃質問が続きます</span></div>
+          <div class="cat-cards" id="chainCards"></div>
+          <div class="chain-note" id="chainNote"></div>
         </section>
 
         <section class="panel sec-examiner">
@@ -745,6 +773,7 @@ body {
 
   <!-- EXAM SCREEN -->
   <div id="examScreen" class="hidden">
+    <div class="chain-banner hidden" id="chainBanner"></div>
     <div class="exam-header">
       <div class="progress-info">
         <div>問題 <span id="qNum">1</span> / <span id="qTotal">10</span></div>
@@ -805,6 +834,7 @@ body {
 
   <!-- PLAYBACK SCREEN (聞き流しモード) -->
   <div id="playbackScreen" class="hidden">
+    <div class="chain-banner hidden" id="pbChainBanner"></div>
     <div class="exam-header">
       <div class="progress-info">
         <div>問題 <span id="pbNum">1</span> / <span id="pbTotal">10</span></div>
@@ -945,6 +975,7 @@ function initApp() {
   syncMeta        = JSON.parse(localStorage.getItem(bankKey('syncMeta'))        || '{}');
   initCatCards();
   initExaminerCards();
+  initChainCards();
   const totalEl = document.getElementById('totalQCount');
   if (totalEl) totalEl.textContent = activeQA().length;
   const headerBadge = document.querySelector('.header-badge');
@@ -956,7 +987,7 @@ function initApp() {
 }
 
 function updateCountMax() {
-  const pool = getCategoryPool();
+  const pool = (mode === 'chain' && currentChain()) ? currentChain().indices : getCategoryPool();
   const sel  = document.getElementById('countSelect');
   // 「全問」を選んでいるかは、値ではなく選択位置で見る。
   // 値は絞り込みのたびに変わるので、値で比較すると判定できない。
@@ -2005,6 +2036,63 @@ function selectMode(m) {
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   const el = document.getElementById('mode' + m[0].toUpperCase() + m.slice(1));
   if (el) el.classList.add('selected');
+  applyChainModeUI();
+}
+
+/* ── 連問モード ──────────────────────────────────────────
+   実地試験は単発の質問ではなく、ひとつの答えに追撃が重なる形で進む。
+   連問モードでは報告書どおりの順序でそのまま出題するので、出題者・カテゴリ・
+   出題数の絞り込みは効かない。該当のパネルは隠して迷わないようにする。 */
+let selectedChain = null;
+
+function applyChainModeUI() {
+  const on = (mode === 'chain');
+  const panel = document.getElementById('chainPanel');
+  if (panel) panel.classList.toggle('hidden', !on);
+  ['.sec-examiner', '.sec-category'].forEach(sel => {
+    const p = document.querySelector(sel);
+    if (p) p.classList.toggle('hidden', on);
+  });
+  const cnt = document.getElementById('countSelect');
+  if (cnt) {
+    cnt.disabled = on;
+    const row = cnt.closest('.set-row') || cnt.parentElement;
+    if (row) row.style.opacity = on ? '.45' : '';
+  }
+  if (on && !selectedChain && typeof JITCHI_CHAINS !== 'undefined' && JITCHI_CHAINS.length) {
+    selectChain(JITCHI_CHAINS[0].id);
+  }
+  updateCountMax();
+}
+
+function initChainCards() {
+  const box = document.getElementById('chainCards');
+  if (!box || typeof JITCHI_CHAINS === 'undefined') return;
+  box.innerHTML = '';
+  JITCHI_CHAINS.forEach(c => {
+    const btn = document.createElement('div');
+    btn.className = 'cat-card';
+    btn.id = 'chain-' + c.id;
+    btn.innerHTML = `<span class="cat-icon">${c.icon}</span><span>${c.title}</span><span class="cat-count">${c.indices.length}</span>`;
+    btn.onclick = () => selectChain(c.id);
+    box.appendChild(btn);
+  });
+}
+
+function selectChain(id) {
+  selectedChain = id;
+  document.querySelectorAll('#chainCards .cat-card').forEach(c => c.classList.remove('selected'));
+  const el = document.getElementById('chain-' + id);
+  if (el) el.classList.add('selected');
+  const c = JITCHI_CHAINS.find(x => x.id === id);
+  const note = document.getElementById('chainNote');
+  if (note) note.textContent = c ? c.note : '';
+  updateCountMax();
+}
+
+function currentChain() {
+  return (typeof JITCHI_CHAINS !== 'undefined')
+    ? JITCHI_CHAINS.find(c => c.id === selectedChain) : null;
 }
 
 function initCatCards() {
@@ -2261,6 +2349,11 @@ function confirmAbort() {
 }
 
 function buildExamPool() {
+  if (mode === 'chain') {
+    const c = currentChain();
+    if (!c || !c.indices.length) { alert('連問が選ばれていません。'); return null; }
+    return c.indices.slice();          // 順序が意味を持つのでシャッフルも件数制限もしない
+  }
   const count = parseInt(document.getElementById('countSelect').value);
   let pool = getCategoryPool();
   if (mode === 'checked') {
@@ -2313,12 +2406,25 @@ function startExam() {
   showQuestion();
 }
 
+/* 連問モードのとき、いまどの連鎖の何問目かを画面上部に出す。
+   追撃質問が続いていることが分かるようにするため。 */
+function updateChainBanner(barId, step) {
+  const bar = document.getElementById(barId || 'chainBanner');
+  if (!bar) return;
+  const c = (mode === 'chain') ? currentChain() : null;
+  if (!c) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = `<span class="cb-step">連問 ${(step == null ? currentIdx : step) + 1} / ${c.indices.length}</span>`
+                + `<span>${c.icon} ${c.title}</span>`;
+}
+
 function showQuestion() {
   stopSpeaking(); stopMic();
   const qIdx = examQuestions[currentIdx];
   const qa   = activeQA()[qIdx];
 
   document.getElementById('qNum').textContent       = currentIdx + 1;
+  updateChainBanner();
   document.getElementById('qNumBadge').textContent  = qIdx + 1;
   setImpBadge('impBadge', qa);
   document.getElementById('questionText').textContent = qa.q;
@@ -2605,6 +2711,7 @@ function setPbPhase(phase) {
 function updatePlaybackUI() {
   const qa = currentPbQA();
   document.getElementById('pbNum').textContent = pbIdx + 1;
+  updateChainBanner('pbChainBanner', pbIdx);
   document.getElementById('pbNumBadge').textContent = examQuestions[pbIdx] + 1;
   setImpBadge('pbImpBadge', qa);
   document.getElementById('pbQuestionText').textContent = qa.q;

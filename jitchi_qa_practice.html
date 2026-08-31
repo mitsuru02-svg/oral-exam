@@ -496,6 +496,7 @@ body {
 .st-answer { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262d; font-size: 12.5px; color: #8b949e; line-height: 1.6; }
 .st-row.open .st-answer { display: block; }
 .st-row.open .st-qtext { white-space: normal; }
+.st-filter-sub { font-size: 11px; color: #6e7681; font-weight: 400; margin-left: 8px; }
 .st-empty { text-align: center; color: #8b949e; font-size: 13px; padding: 24px 0; }
 
 /* 中断ボタン */
@@ -808,6 +809,10 @@ body {
     <div class="cat-section">
       <div class="cat-section-title">ステータスで絞り込み</div>
       <div class="cat-cards" id="stStatusFilter"></div>
+    </div>
+    <div class="cat-section">
+      <div class="cat-section-title">試験官で絞り込み<span class="st-filter-sub">出題時と同じ範囲（記録＋関連設問）で絞ります</span></div>
+      <div class="cat-cards" id="stExFilter"></div>
     </div>
     <div class="cat-section">
       <div class="cat-section-title">カテゴリで絞り込み</div>
@@ -2422,20 +2427,38 @@ const ST_STATUS_LABELS = {
 };
 let stStatusFilter = 'all';
 let stCatFilter = null;
+let stExFilter = null;
 
 function showStatusScreen() {
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('statusScreen').classList.remove('hidden');
   stStatusFilter = 'all';
   stCatFilter = null;
+  stExFilter = null;
   renderStatusFilters();
   renderStatusSummary();
   renderStatusList();
 }
 
+/* ステータス以外の絞り込み（試験官・カテゴリ）を適用した対象。
+   出題時と同じ範囲で見えるよう、試験官は poolIndices（記録＋関連設問）を使う。 */
+function stScopeIndices() {
+  let pool = [...Array(activeQA().length).keys()];
+  if (stExFilter) {
+    const g = JITCHI_EXAMINER_GROUPS.find(e => e.id === stExFilter);
+    const set = new Set(g ? (g.poolIndices || g.indices) : []);
+    pool = pool.filter(i => set.has(i));
+  }
+  if (stCatFilter) {
+    const set = new Set(activeCats().find(c => c.id === stCatFilter)?.indices || []);
+    pool = pool.filter(i => set.has(i));
+  }
+  return pool;
+}
+
 function renderStatusSummary() {
   const counts = { correct: 0, partial: 0, wrong: 0, unanswered: 0 };
-  for (let i = 0; i < activeQA().length; i++) counts[questionStatus(i)]++;
+  stScopeIndices().forEach(i => counts[questionStatus(i)]++);
   const el = document.getElementById('stSummary');
   el.innerHTML = ['correct', 'partial', 'wrong', 'unanswered'].map(s => `
     <div class="st-sum-box">
@@ -2450,22 +2473,31 @@ function renderStatusFilters() {
   statusEl.innerHTML = items.map(it => `<div class="cat-card${stStatusFilter===it.id?' selected':''}" data-status="${it.id}"><span class="cat-icon">${it.icon}</span><span>${it.label}</span></div>`).join('');
   statusEl.querySelectorAll('.cat-card').forEach(el => el.onclick = () => { stStatusFilter = el.dataset.status; renderStatusFilters(); renderStatusList(); });
 
+  const exEl = document.getElementById('stExFilter');
+  const exItems = [{ id: null, name: '全員', icon: '🔀', count: activeQA().length },
+    ...JITCHI_EXAMINER_GROUPS.map(g => ({
+      id: g.id, name: g.name, icon: g.icon,
+      // 出題時と同じ「記録＋関連設問」で数える。関連があるときは 23+42 のように出す。
+      count: (g.relatedCount ? `${g.indices.length}+${g.relatedCount}` : g.indices.length),
+      title: g.note,
+    }))];
+  exEl.innerHTML = exItems.map(e => `<div class="cat-card${stExFilter===e.id?' selected':''}"${e.title?` title="${escapeHtml(e.title)}"`:''}><span class="cat-icon">${e.icon}</span><span>${e.name}</span><span class="cat-count">${e.count}</span></div>`).join('');
+  exEl.querySelectorAll('.cat-card').forEach((el, i) => el.onclick = () => {
+    stExFilter = exItems[i].id; renderStatusFilters(); renderStatusSummary(); renderStatusList();
+  });
+
   const catEl = document.getElementById('stCatFilter');
   const catItems = [{ id: null, name: '全カテゴリ', icon: '🔀', indices: [...Array(activeQA().length).keys()] }, ...activeCats()];
   catEl.innerHTML = catItems.map(c => `<div class="cat-card${stCatFilter===c.id?' selected':''}" data-cat="${c.id ?? ''}"><span class="cat-icon">${c.icon}</span><span>${c.name}</span><span class="cat-count">${c.indices.length}</span></div>`).join('');
-  catEl.querySelectorAll('.cat-card').forEach((el, i) => el.onclick = () => { stCatFilter = catItems[i].id; renderStatusFilters(); renderStatusList(); });
+  catEl.querySelectorAll('.cat-card').forEach((el, i) => el.onclick = () => {
+    stCatFilter = catItems[i].id; renderStatusFilters(); renderStatusSummary(); renderStatusList();
+  });
 }
 
 function renderStatusList() {
   const wrap = document.getElementById('stList');
-  const catPool = stCatFilter ? new Set(activeCats().find(c => c.id === stCatFilter)?.indices || []) : null;
-  const rows = [];
-  for (let i = 0; i < activeQA().length; i++) {
-    if (catPool && !catPool.has(i)) continue;
-    const status = questionStatus(i);
-    if (stStatusFilter !== 'all' && status !== stStatusFilter) continue;
-    rows.push(i);
-  }
+  const rows = stScopeIndices().filter(i =>
+    stStatusFilter === 'all' || questionStatus(i) === stStatusFilter);
   if (rows.length === 0) {
     wrap.innerHTML = '<div class="st-empty">該当する問題がありません。</div>';
     return;

@@ -1158,6 +1158,8 @@ window.addEventListener('online',  updateNetworkBadge);
 window.addEventListener('offline', updateNetworkBadge);
 
 // ── Offline keyword scoring ───────────────────────────────────
+// 採点の対象は簡潔版（ansShort）。詳しい版と突き合わせると、口述で
+// 求められていない補足まで欠落と見なされ、短く正しい答えが落ちるため。
 function scoreOffline(userAns, modelAns) {
   if (!userAns.trim()) return { verdict:'不正解', comment:'解答が入力されていません。', score:0 };
   const kws = modelAns.replace(/[。、！？「」『』【】（）…]/g,' ').split(/[\s　]+/).filter(w=>w.length>=2);
@@ -2722,7 +2724,7 @@ async function submitAnswer() {
   if (!navigator.onLine) {
     setTimeout(() => {
       document.getElementById('loadingBox').classList.add('hidden');
-      handleResult(scoreOffline(userAns, qa.a), qa, qIdx, userAns);
+      handleResult(scoreOffline(userAns, ansShort(qa)), qa, qIdx, userAns);
     }, 300);
     return;
   }
@@ -2730,16 +2732,27 @@ async function submitAnswer() {
   // Online AI scoring
   try {
     document.getElementById('loadingText').textContent = 'AI採点中...';
-    const prompt = `あなたは自家用操縦士（上級滑空機）実地試験の口述問答の採点官です。
+    const prompt = `あなたは自家用操縦士（上級滑空機）実地試験の試験官です。受験者が口頭で答えた内容を採点します。
 
-【問題】${qa.q}
-【模範解答】${qa.a}
-${qa.hint ? '【採点観点】' + qa.hint + '\n' : ''}【受験者の解答】${userAns}
+【設問】${qa.q}
+【求める答え】${ansShort(qa)}
+${qa.s ? '【補足。言えていれば加点。欠けていても減点しない】' + qa.a + '\n' : ''}${qa.hint ? '【採点観点】' + qa.hint + '\n' : ''}【受験者の答え】${userAns}
+
+採点の前提：
+- 口述試験なので、簡潔に答えるのが正しい姿。答えが短いこと自体は減点しない。
+- 「求める答え」の要点が押さえられていれば正解。言い回し、語順、文体の違いは問わない。
+- 「補足」は言えていれば加点だが、欠けていても減点しない。
+- 音声入力なので、同音異義語の誤変換や言い間違いが混ざる。文意が通るなら汲み取る。
+  例：ブイエヌイー＝VNE、ノット＝kt、こうくうきえいこう＝航空機曳航。
+- 数値は、単位が違っても値が正しければ正解とする（151ktと280km/hは同じ）。
+- ただし数値そのものを問う設問では、値の誤りは不正解とする。
 
 採点基準：
-- 「正解」：主要なポイントを正しく含んでいる
-- 「部分正解」：一部正しいが重要な要素が欠けている
-- 「不正解」：主要なポイントが誤っているか欠けている
+- 「正解」：要点を押さえている。細部の欠落や言い回しの違いは問わない。
+- 「部分正解」：要点の一部が欠けている、または一部に誤りがある。
+- 「不正解」：要点が答えられていない、または重要な誤りがある。
+
+コメントは受験者に向けて1〜2文。足りない要点があれば、それを具体的に書く。
 
 JSON形式のみで回答（前後のテキスト不要）：
 {"verdict":"正解"|"部分正解"|"不正解","comment":"採点コメント","score":100|50|0}`;
@@ -2757,7 +2770,7 @@ JSON形式のみで回答（前後のテキスト不要）：
     handleResult(result, qa, qIdx, userAns);
   } catch(e) {
     document.getElementById('loadingBox').classList.add('hidden');
-    const r = scoreOffline(userAns, qa.a);
+    const r = scoreOffline(userAns, ansShort(qa));
     r.comment = '（AI接続エラー・自動採点）' + r.comment;
     handleResult(r, qa, qIdx, userAns);
   }

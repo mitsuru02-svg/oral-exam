@@ -366,6 +366,15 @@ body {
 .num-foot { margin-top: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .num-hint { font-size: 11.5px; color: #6e7681; }
 .num-done-msg { text-align: center; padding: 30px 10px; font-size: 15px; color: #7ee787; line-height: 2; }
+/* 答え方の型（まずYes/No）の助言。内容の採点とは別枠で出す */
+.yn-tip {
+  margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.8;
+  background: rgba(210,153,34,.08); border: 1px solid #5c3d00; color: #e3b341;
+}
+.yn-tip.ok { background: rgba(63,185,80,.08); border-color: #1f6f2b; color: #7ee787; }
+.yn-tip.ng { background: rgba(248,81,73,.08); border-color: #6e2b28; color: #ff9a94; }
+.yn-tip b { color: inherit; font-weight: 700; }
+.yn-label { font-weight: 700; margin-right: 8px; letter-spacing: .04em; }
 @media (max-width: 520px) {
   .num-q { font-size: 17px; }
   .num-a { font-size: 23px; }
@@ -2745,6 +2754,7 @@ function handleResult(result, qa, qIdx, userAns) {
       <span class="result-title ${cls}">${title}</span>
     </div>
     <div class="result-body">${result.comment || (isCorrect ? 'よくできました！' : '')}</div>
+    ${ynAdviceHtml(qa, userAns)}
     ${!isCorrect ? `
     <div class="model-answer">
       <div class="model-answer-label-row">
@@ -2780,6 +2790,54 @@ function handleResult(result, qa, qIdx, userAns) {
   } else {
     speakResult(result.verdict, result.comment || '', isCorrect ? '' : ansShort(qa));
   }
+}
+
+/* ── 答え方の型（まずYes/No、それから理由）────────────────────
+   Fuka先生の講義の要点。理由から話し始めると、結局どちらなのかが伝わらず、
+   試験官に「で、できるの？できないの？」と聞き返される。
+   模範解答の最初の一文が言い切りになっている設問だけを対象に、受験者の答えも
+   言い切りから始まっているかを見る。内容の採点とは別枠の助言として出す。 */
+const YN_NEG = ['いいえ','いえ、','ではありません','必要はありません','ありません','できません','言えません',
+                '要りません','いりません','入りません','なりません','つながりません','矛盾しません',
+                '直結しません','限りません','違います','ダメです','だめです','無理です','不要です',
+                'ないです','できないです','必要ない','要らない','いりません'];
+const YN_POS = ['はい','ええ、','そうです','できます','可能です','必要です','できると思います'];
+
+/* 最初の一文（。、で区切る前まで）が言い切りで終わっているかを見る。
+   「7つあります」のような個数の答えを拾わないよう、末尾一致に限っている。 */
+function ynPolarity(text) {
+  if (!text) return null;
+  const clause = String(text).replace(/^[「『]/, '').split(/[。\n]/)[0].split('、')[0].trim();
+  if (!clause || clause.length > 24) {
+    // 読点で切れない長い言い回しは、先頭24文字までで判断する
+    const head = String(text).slice(0, 24);
+    for (const w of YN_NEG) if (head.startsWith(w)) return 'no';
+    for (const w of YN_POS) if (head.startsWith(w)) return 'yes';
+    return null;
+  }
+  for (const w of YN_NEG) if (clause === w || clause.endsWith(w)) return 'no';
+  for (const w of YN_POS) if (clause === w || clause.endsWith(w)) return 'yes';
+  return null;
+}
+
+function ynAdviceHtml(qa, userAns) {
+  const want = ynPolarity(ansShort(qa));
+  if (!want) return '';                                  // Yes/Noで答える設問ではない
+  const got  = ynPolarity(userAns);
+  if (got === want) {
+    return `<div class="yn-tip ok"><span class="yn-label">答え方 ○</span>`
+         + `結論を先に言えています。この形を保ってください。</div>`;
+  }
+  if (got && got !== want) {
+    return `<div class="yn-tip ng"><span class="yn-label">答え方 ✕</span>`
+         + `結論が模範解答と逆に見えます。言い方の違いかもしれませんが、まずどちらなのかを確かめてください。</div>`;
+  }
+  // 「いいえ」と一律に言うより、模範解答が実際に使っている言い切りを見せるほうが役に立つ
+  const opener = String(ansShort(qa)).split(/[。\n]/)[0].split('、')[0].trim();
+  return `<div class="yn-tip"><span class="yn-label">答え方 △</span>`
+       + `この設問は言い切りから入る形です。模範解答は「${opener}」から始めています。`
+       + `理由から話し始めると、結局どちらなのかが伝わらず、「で、できるのですか」と聞き返されます。`
+       + `<b>まずYes/No、それから理由</b>の順で言い直してみてください。</div>`;
 }
 
 /* ── 模範解答の2段構え ──────────────────────────────────

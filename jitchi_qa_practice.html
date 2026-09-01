@@ -704,6 +704,10 @@ body {
               <div class="mode-inner"><div class="mode-icon">🆕</div>
                 <div class="mode-text"><div class="mode-name">未正解</div></div></div>
             </div>
+            <div class="mode-card" onclick="selectMode('unanswered')" id="modeUnanswered" title="まだ一度も解答していない問題だけを出題します（正解・不正解のついた問題は出ません）">
+              <div class="mode-inner"><div class="mode-icon">⚪</div>
+                <div class="mode-text"><div class="mode-name">未回答</div></div></div>
+            </div>
             <div class="mode-card" onclick="selectMode('checked')" id="modeChecked">
               <div class="mode-inner"><div class="mode-icon">⭐</div>
                 <div class="mode-text"><div class="mode-name">チェック</div></div></div>
@@ -2153,6 +2157,10 @@ function selectMode(m) {
     alert('未正解の問題はありません。全問正解済みです！');
     return;
   }
+  if (m === 'unanswered' && getUnansweredIndices().length === 0) {
+    alert('未回答の問題はありません。全問に一度は解答済みです！');
+    return;
+  }
   mode = m;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   const el = document.getElementById('mode' + m[0].toUpperCase() + m.slice(1));
@@ -2319,13 +2327,25 @@ function updateWrongModeLabel() {
     const umNameEl = umEl.querySelector('.mode-name');
     if (umNameEl) umNameEl.textContent = `未正解(${unmasteredN})`;
   }
+
+  // 未回答（一度も手をつけていない問題）
+  const unansweredN = getUnansweredIndices().length;
+  const uaEl = document.getElementById('modeUnanswered');
+  if (uaEl) {
+    const uaNameEl = uaEl.querySelector('.mode-name');
+    if (uaNameEl) uaNameEl.textContent = `未回答(${unansweredN})`;
+  }
 }
 
 // 苦手（不正解・部分正解・スキップのまま）＋一度も解答していない問題
 function getUnmasteredIndices() {
+  return [...new Set([...wrongIndices, ...getUnansweredIndices()])];
+}
+
+// まだ一度も解答していない問題だけ。手つかずの範囲を潰したいときに使う。
+function getUnansweredIndices() {
   const answeredSet = new Set(answeredIndices);
-  const never = [...Array(activeQA().length).keys()].filter(i => !answeredSet.has(i));
-  return [...new Set([...wrongIndices, ...never])];
+  return [...Array(activeQA().length).keys()].filter(i => !answeredSet.has(i));
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2645,6 +2665,10 @@ function buildExamPool() {
     const unmasteredInCat = getUnmasteredIndices().filter(i => pool.includes(i));
     if (unmasteredInCat.length > 0) pool = unmasteredInCat;
     else { alert('このカテゴリに未正解の問題がありません。全問から始めます。'); }
+  } else if (mode === 'unanswered') {
+    const unansweredInCat = getUnansweredIndices().filter(i => pool.includes(i));
+    if (unansweredInCat.length > 0) pool = unansweredInCat;
+    else { alert('このカテゴリに未回答の問題がありません。全問から始めます。'); }
   }
   if (mode === 'importance') {
     // ★★★→★★→★の順。同じ重要度の中はシャッフル（sortは安定なので順序が保たれる）

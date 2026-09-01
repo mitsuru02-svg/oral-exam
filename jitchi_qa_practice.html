@@ -389,6 +389,24 @@ body {
 .sj-btn:hover { border-color: #30475f; color: #c9d1d9; }
 .sj-btn.on { background: #0b1b3a; border-color: #1e3a6b; color: #93c5fd; font-weight: 700; }
 .sj-note { font-size: 11px; color: #565f6a; margin-left: 2px; }
+/* 設問ヘッダの回答状況。押すと付け替えパネルが開く（聞き流し画面は読み取り専用） */
+.q-status {
+  font-size: 11px; font-weight: 700; border-radius: 20px; padding: 2px 9px;
+  border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+}
+.q-status.readonly { cursor: default; }
+.q-status.correct    { background: #0d2818; color: #7ee787; border-color: #1f6f2b; }
+.q-status.partial    { background: #2b230a; color: #e3b341; border-color: #5c3d00; }
+.q-status.incorrect  { background: #2a1215; color: #ff9a94; border-color: #6e2b28; }
+.q-status.unanswered { background: #21262d; color: #8b949e; border-color: #30363d; }
+.q-status.correct:hover, .q-status.partial:hover,
+.q-status.incorrect:hover, .q-status.unanswered:hover { filter: brightness(1.25); }
+.q-status-picker {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin: 0 0 12px; padding: 9px 11px; border-radius: 8px;
+  background: rgba(255,255,255,.03); border: 1px solid #21262d;
+}
+.q-status-picker.hidden { display: none; }
 @media (max-width: 520px) { .sj-note { flex-basis: 100%; margin-left: 0; } }
 @media (max-width: 520px) {
   .num-q { font-size: 17px; }
@@ -892,6 +910,7 @@ body {
         <div style="display:flex;gap:8px;align-items:center;">
           <div class="q-label">問 <span id="qNumBadge">1</span></div>
           <span id="impBadge" class="imp-badge hidden"></span>
+          <span id="qStatusBadge" class="q-status" onclick="toggleQStatusPicker()"></span>
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
           <button class="btn-check" id="btnCheck" onclick="toggleCheck()">☆</button>
@@ -900,6 +919,7 @@ body {
           </button>
         </div>
       </div>
+      <div class="q-status-picker hidden" id="qStatusPicker"></div>
       <div class="question-text" id="questionText"></div>
     </div>
 
@@ -948,6 +968,7 @@ body {
         <div style="display:flex;gap:8px;align-items:center;">
           <div class="q-label">問 <span id="pbNumBadge">1</span></div>
           <span id="pbImpBadge" class="imp-badge hidden"></span>
+          <span id="pbStatusBadge" class="q-status readonly"></span>
         </div>
         <div class="pb-phase-label" id="pbPhaseLabel">🔊 読み上げ中</div>
       </div>
@@ -2680,6 +2701,8 @@ function showQuestion() {
   updateChainBanner();
   document.getElementById('qNumBadge').textContent  = qIdx + 1;
   setImpBadge('impBadge', qa);
+  renderQStatusBadge('qStatusBadge', qIdx, true);
+  document.getElementById('qStatusPicker').classList.add('hidden');
   document.getElementById('questionText').textContent = qa.q;
   document.getElementById('userAnswer').value = '';
   document.getElementById('userAnswer').disabled = false;
@@ -2793,6 +2816,67 @@ JSON形式のみで回答（前後のテキスト不要）：
     r.comment = '（AI接続エラー・自動採点）' + r.comment;
     handleResult(r, qa, qIdx, userAns);
   }
+}
+
+/* ── 設問ヘッダの回答状況 ────────────────────────────────
+   その設問を前に解いたときの結果を、問題を表示した時点で見せる。
+   バッジを押すと付け替えパネルが開き、部分正解を正解に直すなどができる。
+   ここで変えるのは端末に保存された状態（ステータス一覧・苦手問題）だけで、
+   いま解いている回の正解数には触れない。今回の分は、採点後の自己判定で扱う。 */
+const Q_STATUS_LABEL = {
+  correct:    { label: '正解',    icon: '✅', verdict: '正解' },
+  partial:    { label: '部分正解', icon: '⚠️', verdict: '部分正解' },
+  incorrect:  { label: '不正解',   icon: '❌', verdict: '不正解' },
+  unanswered: { label: '未回答',   icon: '⚪', verdict: null },
+};
+
+function renderQStatusBadge(badgeId, qIdx, editable) {
+  const el = document.getElementById(badgeId);
+  if (!el) return;
+  const st = questionStatus(qIdx);
+  const d  = Q_STATUS_LABEL[st];
+  el.className = 'q-status ' + st + (editable ? '' : ' readonly');
+  el.textContent = d.icon + ' ' + d.label;
+  el.title = editable ? '押すと回答状況を付け替えられます' : '';
+}
+
+function toggleQStatusPicker() {
+  const box = document.getElementById('qStatusPicker');
+  if (!box) return;
+  if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
+  const qIdx = examQuestions[currentIdx];
+  const cur  = questionStatus(qIdx);
+  const items = ['correct', 'partial', 'incorrect', 'unanswered'];
+  box.innerHTML = `<span class="sj-label">回答状況</span>`
+    + items.map(k => {
+        const d = Q_STATUS_LABEL[k];
+        return `<button class="sj-btn${k===cur?' on':''}" onclick="setQStatus('${k}')">${d.icon} ${d.label}</button>`;
+      }).join('')
+    + `<span class="sj-note">この設問の記録を直します。いま解いている回の正解数は変わりません</span>`;
+  box.classList.remove('hidden');
+}
+
+function setQStatus(key) {
+  const qIdx = examQuestions[currentIdx];
+  const verdict = Q_STATUS_LABEL[key].verdict;
+  if (verdict) {
+    touchSyncMeta(qIdx, { verdict });
+    if (verdict === '正解') wrongIndices = wrongIndices.filter(i => i !== qIdx);
+    else if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
+    if (!answeredIndices.includes(qIdx)) {
+      answeredIndices.push(qIdx);
+      localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices));
+    }
+  } else {
+    // 未回答へ戻す：記録を消し、苦手からも外す
+    touchSyncMeta(qIdx, { verdict: null });
+    wrongIndices    = wrongIndices.filter(i => i !== qIdx);
+    answeredIndices = answeredIndices.filter(i => i !== qIdx);
+    localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices));
+  }
+  localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  renderQStatusBadge('qStatusBadge', qIdx, true);
+  document.getElementById('qStatusPicker').classList.add('hidden');
 }
 
 /* ── 自己判定 ────────────────────────────────────────────
@@ -3082,6 +3166,7 @@ function updatePlaybackUI() {
   updateChainBanner('pbChainBanner', pbIdx);
   document.getElementById('pbNumBadge').textContent = examQuestions[pbIdx] + 1;
   setImpBadge('pbImpBadge', qa);
+  renderQStatusBadge('pbStatusBadge', examQuestions[pbIdx], false);
   document.getElementById('pbQuestionText').textContent = qa.q;
   document.getElementById('pbAnswerBox').classList.add('hidden');
   const pbAns = document.getElementById('pbAnswerText');

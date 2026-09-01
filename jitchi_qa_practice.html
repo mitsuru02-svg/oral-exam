@@ -375,6 +375,21 @@ body {
 .yn-tip.ng { background: rgba(248,81,73,.08); border-color: #6e2b28; color: #ff9a94; }
 .yn-tip b { color: inherit; font-weight: 700; }
 .yn-label { font-weight: 700; margin-right: 8px; letter-spacing: .04em; }
+/* 自己判定：AI採点の判定を自分で付け替える */
+.self-judge {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin-top: 12px; padding: 9px 11px; border-radius: 8px;
+  background: rgba(255,255,255,.03); border: 1px solid #21262d;
+}
+.sj-label { font-size: 11.5px; font-weight: 700; color: #8b949e; letter-spacing: .06em; margin-right: 2px; }
+.sj-btn {
+  border: 1px solid #30363d; background: #161b22; color: #8b949e;
+  border-radius: 20px; padding: 3px 11px; font-size: 12px; cursor: pointer;
+}
+.sj-btn:hover { border-color: #30475f; color: #c9d1d9; }
+.sj-btn.on { background: #0b1b3a; border-color: #1e3a6b; color: #93c5fd; font-weight: 700; }
+.sj-note { font-size: 11px; color: #565f6a; margin-left: 2px; }
+@media (max-width: 520px) { .sj-note { flex-basis: 100%; margin-left: 0; } }
 @media (max-width: 520px) {
   .num-q { font-size: 17px; }
   .num-a { font-size: 23px; }
@@ -2780,16 +2795,67 @@ JSON形式のみで回答（前後のテキスト不要）：
   }
 }
 
+/* ── 自己判定 ────────────────────────────────────────────
+   AI採点の判定は、こちらの言い回しや答えの短さで実態とずれることがある。
+   受験者自身が「これは部分正解にしておこう」と付け替えられるようにする。
+   付け替えると、正解数・苦手問題・ステータス一覧のすべてに反映される。 */
+let lastResultCtx = null;
+
+function selfJudgeHtml(verdict) {
+  const items = [['正解','✅'], ['部分正解','⚠️'], ['不正解','❌']];
+  return `<div class="self-judge">
+    <span class="sj-label">自己判定</span>
+    ${items.map(([v, ic]) => `<button class="sj-btn${v===verdict?' on':''}" data-v="${v}" onclick="setSelfVerdict('${v}')">${ic} ${v}</button>`).join('')}
+    <span class="sj-note">採点に納得できないときは、ここで付け替えられます</span>
+  </div>`;
+}
+
+function setSelfVerdict(v) {
+  if (!lastResultCtx || lastResultCtx.verdict === v) return;
+  const { qIdx } = lastResultCtx;
+  applyVerdictCounts(lastResultCtx.verdict, qIdx, -1);   // 前の判定を取り消す
+  applyVerdictCounts(v, qIdx, +1);                       // 新しい判定を入れる
+  lastResultCtx.verdict = v;
+  touchSyncMeta(qIdx, { verdict: v });
+  const last = results[results.length - 1];
+  if (last && last.qIdx === qIdx) last.verdict = v;
+
+  // 見た目（枠の色・アイコン・見出し・選択中のボタン）を差し替える
+  const cls  = v === '正解' ? 'correct' : v === '部分正解' ? 'partial' : 'incorrect';
+  const icon = v === '正解' ? '✅' : v === '部分正解' ? '⚠️' : '❌';
+  const box  = document.getElementById('resultBox');
+  box.className = `result-box ${cls}`;
+  const badge = box.querySelector('.result-badge');
+  const title = box.querySelector('.result-title');
+  if (badge) badge.textContent = icon;
+  if (title) { title.textContent = v === '正解' ? '正解！' : v; title.className = `result-title ${cls}`; }
+  box.querySelectorAll('.sj-btn').forEach(btn => btn.classList.toggle('on', btn.dataset.v === v));
+
+  document.getElementById('scoreDisplay').textContent = correctCount + partialCount;
+}
+
+/* 判定を集計へ反映する。sign=+1 で加算、-1 で取り消し。
+   自己判定で付け替えるとき、まず古い判定を -1 で取り消してから新しい判定を +1 する。 */
+function applyVerdictCounts(verdict, qIdx, sign) {
+  if (verdict === '正解')          correctCount += sign;
+  else if (verdict === '部分正解') partialCount += sign;
+  else                             wrongCount   += sign;
+  if (sign > 0) {
+    if (verdict === '正解') wrongIndices = wrongIndices.filter(i => i !== qIdx);
+    else if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx);
+    localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  }
+}
+
 function handleResult(result, qa, qIdx, userAns) {
   const isCorrect = result.verdict === '正解';
   const isPartial = result.verdict === '部分正解';
   answered++;
-  if (isCorrect) { correctCount++; wrongIndices = wrongIndices.filter(i=>i!==qIdx); }
-  else { if (isPartial) partialCount++; else wrongCount++; if (!wrongIndices.includes(qIdx)) wrongIndices.push(qIdx); }
-  localStorage.setItem(bankKey('wrongIndices'), JSON.stringify(wrongIndices));
+  applyVerdictCounts(result.verdict, qIdx, +1);
   touchSyncMeta(qIdx, { verdict: result.verdict });
   if (!answeredIndices.includes(qIdx)) { answeredIndices.push(qIdx); localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices)); }
   results.push({qIdx, verdict:result.verdict, userAns});
+  lastResultCtx = { qa, qIdx, userAns, verdict: result.verdict, comment: result.comment || '' };
 
   const cls   = isCorrect ? 'correct' : isPartial ? 'partial' : 'incorrect';
   const icon  = isCorrect ? '✅' : isPartial ? '⚠️' : '❌';
@@ -2804,7 +2870,7 @@ function handleResult(result, qa, qIdx, userAns) {
     </div>
     <div class="result-body">${result.comment || (isCorrect ? 'よくできました！' : '')}</div>
     ${ynAdviceHtml(qa, userAns)}
-    ${!isCorrect ? `
+    ${selfJudgeHtml(result.verdict)}
     <div class="model-answer">
       <div class="model-answer-label-row">
         <span class="model-answer-label">▼ 模範解答</span>
@@ -2812,7 +2878,7 @@ function handleResult(result, qa, qIdx, userAns) {
       </div>
       ${answerBodyHtml(qa)}
       ${noteHtml(qa)}
-    </div>` : ''}
+    </div>
   `;
   box.classList.remove('hidden');
   document.getElementById('scoreDisplay').textContent    = correctCount + partialCount;
@@ -2820,8 +2886,8 @@ function handleResult(result, qa, qIdx, userAns) {
 
   const nextRow = document.getElementById('nextRow');
   nextRow.classList.remove('hidden');
-  const showAnsBtn = document.getElementById('btnShowAns');
-  showAnsBtn.style.display = isCorrect ? 'none' : '';
+  // 模範解答は判定にかかわらず常に表示するので、「模範解答を見る」ボタンは出さない
+  document.getElementById('btnShowAns').style.display = 'none';
 
   // Auto-speak result → 読み上げ完了後にハンズフリーならマイク再開
   if (handsFreeMode) {

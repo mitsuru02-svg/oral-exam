@@ -1396,7 +1396,7 @@
     <line x1="323.9" y1="140" x2="323.9" y2="168" stroke="#3b82f6" stroke-width="2"/>
     <text x="330.9" y="159" fill="#3b82f6" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2028年</text>
     <text x="226" y="196" fill="#e6edf3" font-size="12" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">義務無線機</text>
-    <text x="226" y="210" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">12か月</text>
+    <text x="226" y="210" fill="#7d8590" font-size="10" text-anchor="end" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">1年</text>
     <rect x="248.2" y="184" width="37.1" height="20" fill="#3fb950" opacity=".75" rx="4"/>
     <line x1="285.3" y1="180" x2="285.3" y2="208" stroke="#3fb950" stroke-width="2"/>
     <text x="292.3" y="199" fill="#3fb950" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2027年</text>
@@ -1421,7 +1421,7 @@
     <text x="768" y="340" fill="#8b949e" font-size="11" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">残 1,149発航</text>
     <text x="240" y="364" fill="#7d8590" font-size="10.5" style="font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif">2025年6月1日 交換（TOST E75／G73）　※こちらだけカレンダーではなく航空日誌の発航回数で追う</text>
   </svg>
-  <figcaption data-tts data-text="図16-1は、装備品の期限を1枚にしたものです。上の5本がカレンダーで管理するもので、高度計とトランスポンダが2年、義務無線機が12か月、シートベルト類が12年、非常用信号灯がメーカーの指定期限です。赤い縦線が今日の位置で、いちばん先に来るのが義務無線機の2027年3月です。下の帯だけ性質が違います。曳航用レリーズは2,000発航という回数での管理で、2025年6月1日に交換してから851回を使い、残りが1,149発航。こちらはカレンダーではなく、航空日誌の発航回数で追います。期限には年数、月数、回数の3種類がある、という整理で覚えます。"><span class="fig-num">図16-1</span>期限は年数・月数・回数の3系統。レリーズだけ回数で追う。</figcaption>
+  <figcaption data-tts data-text="図16-1は、装備品の期限を1枚にしたものです。上の5本がカレンダーで管理するもので、義務無線機が1年、高度計とトランスポンダが2年、シートベルト類が12年、非常用信号灯がメーカーの指定期限です。赤い縦線が今日の位置で、いちばん先に来るのが義務無線機の2027年3月です。下の帯だけ性質が違います。曳航用レリーズは2,000発航という回数での管理で、2025年6月1日に交換してから851回を使い、残りが1,149発航。こちらはカレンダーではなく、航空日誌の発航回数で追います。期限は、カレンダーで追うものと発航回数で追うものの2種類、という整理で覚えます。"><span class="fig-num">図16-1</span>期限はカレンダーと発航回数の2系統。レリーズだけ回数で追う。</figcaption>
 </figure>
         <div class="callout amber">
           <span class="cal-label">口述での答え方</span>
@@ -1442,7 +1442,7 @@
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">高度計（前／後）</td><td style="padding:5px;">UI 593PA3</td><td style="padding:5px;">2年　→ 2028年4月</td></tr>
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">昇降計（前／後）</td><td style="padding:5px;">Winter 5StV5-3</td><td style="padding:5px; color:var(--text-dim);">—</td></tr>
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;"><b>加速度計（前／後）</b></td><td style="padding:5px;">GM510-2</td><td style="padding:5px; color:var(--text-dim);">—</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">VHF無線機</td><td style="padding:5px;">Becker AR4201</td><td style="padding:5px;">12か月 → 2027年3月</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">VHF無線機</td><td style="padding:5px;">Becker AR4201</td><td style="padding:5px;">1年 → 2027年3月</td></tr>
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">トランスポンダ</td><td style="padding:5px;">Trig TT22／TC20</td><td style="padding:5px;">2年　→ 2028年4月</td></tr>
             <tr style="border-bottom:1px solid var(--line-soft);"><td style="padding:5px;">シートベルト／ハーネス／<b>ボトムストラップ</b></td><td style="padding:5px;">Gadringer</td><td style="padding:5px;">12年 → 2038年4月</td></tr>
             <tr><td style="padding:5px;">曳航用レリーズ（AT／WT）</td><td style="padding:5px;">TOST E75／G73</td><td style="padding:5px;">2,000発航（851回使用）</td></tr>
@@ -1752,6 +1752,13 @@ const TTS = (function(){
     [/積載物/g, 'せきさいぶつ'],
     [/搭載物/g, 'とうさいぶつ'],
     [/動圧孔/g, 'どうあつこう'],
+    [/表れ/g, 'あらわれ'],
+    [/表さ/g, 'あらわさ'],
+    [/表し/g, 'あらわし'],
+    [/表す/g, 'あらわす'],
+    [/表せ/g, 'あらわせ'],
+    [/表そ/g, 'あらわそ'],
+    [/表/g,   'ひょう'],
     [/全圧孔/g, 'ぜんあつこう'],
     [/静圧孔/g, 'せいあつこう'],
     [/離脱/g, 'りだつ'],

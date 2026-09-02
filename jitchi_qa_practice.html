@@ -2909,11 +2909,20 @@ const Q_STATUS_LABEL = {
   unanswered: { label: '未回答',   icon: '⚪', verdict: null },
 };
 
+/* questionStatus() は不正解を 'wrong' で返す（ステータス一覧の絞り込みが
+   その名前を使っている）。バッジ側のキーは 'incorrect' なので、ここで
+   合わせる。合わせ忘れると Q_STATUS_LABEL の引きが undefined になり、
+   showQuestion() がバッジの行で落ちて設問の表示が途中で止まる。 */
+function qStatusKey(qIdx) {
+  const st = questionStatus(qIdx);
+  return st === 'wrong' ? 'incorrect' : st;
+}
+
 function renderQStatusBadge(badgeId, qIdx, editable) {
   const el = document.getElementById(badgeId);
   if (!el) return;
-  const st = questionStatus(qIdx);
-  const d  = Q_STATUS_LABEL[st];
+  const st = qStatusKey(qIdx);
+  const d  = Q_STATUS_LABEL[st] || Q_STATUS_LABEL.unanswered;
   el.className = 'q-status ' + st + (editable ? '' : ' readonly');
   el.textContent = d.icon + ' ' + d.label;
   el.title = editable ? '押すと回答状況を付け替えられます' : '';
@@ -2924,7 +2933,7 @@ function toggleQStatusPicker() {
   if (!box) return;
   if (!box.classList.contains('hidden')) { box.classList.add('hidden'); return; }
   const qIdx = examQuestions[currentIdx];
-  const cur  = questionStatus(qIdx);
+  const cur  = qStatusKey(qIdx);
   const items = ['correct', 'partial', 'incorrect', 'unanswered'];
   box.innerHTML = `<span class="sj-label">回答状況</span>`
     + items.map(k => {

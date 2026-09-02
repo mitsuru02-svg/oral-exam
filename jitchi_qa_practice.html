@@ -1096,6 +1096,7 @@ function initApp() {
   wrongIndices    = JSON.parse(localStorage.getItem(bankKey('wrongIndices'))    || '[]');
   answeredIndices = JSON.parse(localStorage.getItem(bankKey('answeredIndices')) || '[]');
   syncMeta        = JSON.parse(localStorage.getItem(bankKey('syncMeta'))        || '{}');
+  pruneStaleIndices();
   initCatCards();
   initExaminerCards();
   initChainCards();
@@ -2033,6 +2034,7 @@ function applyMergedSyncState(data) {
   }
   wrongIndices   = Object.keys(syncMeta).filter(k => syncMeta[k].verdict && syncMeta[k].verdict !== '正解').map(Number);
   checkedIndices = Object.keys(syncMeta).filter(k => syncMeta[k].checked).map(Number);
+  pruneStaleIndices();   // 別端末が古い設問数のまま記録していることがある
 
   localStorage.setItem(bankKey('totalCorrect'),   sessionCorrect);
   localStorage.setItem(bankKey('totalAnswered'),  sessionTotal);
@@ -2327,6 +2329,28 @@ function updateCheckedCount() {
   renderWrongBreakdown();
 }
 
+/* ── 設問数が減ったあとの後始末 ────────────────────────────
+   学習履歴は設問の番号で持っている。設問を削除すると総数が減るので、
+   古い記録には存在しない番号が残ることがある。放っておくとカードの
+   件数だけがその分だけ多く出て、実際に出題すると少ない、という食い違いに
+   なる（出題プールは存在する設問だけを見るため）。読み込み時に落とす。 */
+function pruneStaleIndices() {
+  const n = activeQA().length;
+  const valid = i => Number.isInteger(i) && i >= 0 && i < n;
+  const before = wrongIndices.length + answeredIndices.length + checkedIndices.length;
+
+  wrongIndices    = wrongIndices.filter(valid);
+  answeredIndices = answeredIndices.filter(valid);
+  checkedIndices  = checkedIndices.filter(valid);
+  Object.keys(syncMeta).forEach(k => { if (!valid(Number(k))) delete syncMeta[k]; });
+
+  if (before === wrongIndices.length + answeredIndices.length + checkedIndices.length) return;
+  localStorage.setItem(bankKey('wrongIndices'),    JSON.stringify(wrongIndices));
+  localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices));
+  localStorage.setItem(bankKey('checkedIndices'),  JSON.stringify(checkedIndices));
+  localStorage.setItem(bankKey('syncMeta'),        JSON.stringify(syncMeta));
+}
+
 /* ── まだ正解していない問題の3分割 ────────────────────────────
    不正解・部分正解・未回答は、詰め方がそれぞれ違う。不正解は一から
    覚え直し、部分正解は模範解答との差分を埋める、未回答は手つかずを
@@ -2353,16 +2377,24 @@ function verdictOf(qIdx) {
   return (m && m.verdict) ? m.verdict : null;
 }
 
+/* 存在する設問だけに絞る。同期で取り込んだ記録など、pruneStaleIndices を
+   通っていない経路もあるので、件数を数える側でも必ず通す。ここを外すと
+   カードの件数と実際の出題数がずれる。 */
+function existingOnly(indices) {
+  const n = activeQA().length;
+  return indices.filter(i => Number.isInteger(i) && i >= 0 && i < n);
+}
+
 // 部分正解のまま残っている問題
 function getPartialIndices() {
-  return wrongIndices.filter(i => verdictOf(i) === '部分正解');
+  return existingOnly(wrongIndices).filter(i => verdictOf(i) === '部分正解');
 }
 
 /* 不正解のまま残っている問題。スキップと、判定が記録されていない
    古いデータもこちらに寄せて、部分正解との合計が必ず wrongIndices に
    一致するようにしている。 */
 function getIncorrectIndices() {
-  return wrongIndices.filter(i => verdictOf(i) !== '部分正解');
+  return existingOnly(wrongIndices).filter(i => verdictOf(i) !== '部分正解');
 }
 
 // まだ一度も解答していない問題だけ。手つかずの範囲を潰したいときに使う。

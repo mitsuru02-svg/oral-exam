@@ -469,7 +469,7 @@ body {
   .start-icon { font-size: 42px; }
 }
 
-/* 苦手問題の内訳 */
+/* 不正解・部分正解の内訳 */
 .wb-details {
   background: #161b22; border: 1px solid #21262d; border-radius: 10px;
   padding: 12px 16px; margin-bottom: 20px; text-align: left;
@@ -696,13 +696,13 @@ body {
               <div class="mode-inner"><div class="mode-icon">🔀</div>
                 <div class="mode-text"><div class="mode-name">ランダム</div></div></div>
             </div>
-            <div class="mode-card" onclick="selectMode('wrong')" id="modeWrong">
-              <div class="mode-inner"><div class="mode-icon">🎯</div>
-                <div class="mode-text"><div class="mode-name">苦手問題</div></div></div>
+            <div class="mode-card" onclick="selectMode('incorrect')" id="modeIncorrect" title="不正解、またはスキップのまま残っている問題だけを出題します。一から覚え直す練習用">
+              <div class="mode-inner"><div class="mode-icon">❌</div>
+                <div class="mode-text"><div class="mode-name">不正解</div></div></div>
             </div>
-            <div class="mode-card" onclick="selectMode('unmastered')" id="modeUnmastered" title="不正解・部分正解・スキップのまま残っている問題に加え、一度も解答していない問題も含みます">
-              <div class="mode-inner"><div class="mode-icon">🆕</div>
-                <div class="mode-text"><div class="mode-name">未正解</div></div></div>
+            <div class="mode-card" onclick="selectMode('partial')" id="modePartial" title="部分正解のまま残っている問題だけを出題します。言えてはいるが要素が足りない問題を、模範解答との差分を埋める形で潰す練習用">
+              <div class="mode-inner"><div class="mode-icon">⚠️</div>
+                <div class="mode-text"><div class="mode-name">部分正解</div></div></div>
             </div>
             <div class="mode-card" onclick="selectMode('unanswered')" id="modeUnanswered" title="まだ一度も解答していない問題だけを出題します（正解・不正解のついた問題は出ません）">
               <div class="mode-inner"><div class="mode-icon">⚪</div>
@@ -744,7 +744,7 @@ body {
         </section>
 
         <details class="wb-details sec-breakdown">
-          <summary>🎯 苦手問題の内訳（カテゴリ別・出題者別）</summary>
+          <summary>🎯 不正解・部分正解の内訳（カテゴリ別・出題者別）</summary>
           <div id="wrongBreakdownWrap"></div>
         </details>
 
@@ -820,7 +820,7 @@ body {
             <button class="btn-secondary" style="padding:8px 14px;font-size:13px;" onclick="saveSyncId()">設定</button>
           </div>
           <div id="syncStatus" style="font-size:11.5px;color:#8b949e;margin-top:8px;line-height:1.7;">
-            同じIDを別の端末でも入力すると、正解数・苦手問題・チェックを引き継げます。
+            同じIDを別の端末でも入力すると、正解数・未正解の記録・チェックを引き継げます。
           </div>
         </details>
 
@@ -2114,7 +2114,7 @@ async function loadSyncList() {
       return `
         <div class="sl-row${isMe ? ' sl-row-me' : ''}">
           <div class="sl-id">${isMe ? '👤 ' : ''}${escapeHtml(row.id)}</div>
-          <div class="sl-stats">正解 ${row.totalCorrect}/${row.totalAnswered}（${pct}%）・苦手 ${row.wrongCount}・⭐ ${row.checkedCount}</div>
+          <div class="sl-stats">正解 ${row.totalCorrect}/${row.totalAnswered}（${pct}%）・未正解 ${row.wrongCount}・⭐ ${row.checkedCount}</div>
           <div class="sl-time">${when}</div>
           ${isMe ? `<button class="sl-del" title="このIDを削除" data-id="${escapeHtml(row.id)}"
                   onclick="deleteSyncId(this.dataset.id)">🗑 削除</button>` : ''}
@@ -2135,7 +2135,7 @@ async function deleteSyncId(id) {
     alert('削除できるのは、この端末で使用中の同期IDだけです。');
     return;
   }
-  const msg = `同期ID「${id}」を削除します。\n\nサーバー上の記録（正解数・苦手問題・チェック）が消え、元に戻せません。\nこのIDは現在この端末で使用中のため、同期の紐づけも解除されます。\n（この端末に保存された学習履歴は残ります）\n\n削除しますか？`;
+  const msg = `同期ID「${id}」を削除します。\n\nサーバー上の記録（正解数・未正解の記録・チェック）が消え、元に戻せません。\nこのIDは現在この端末で使用中のため、同期の紐づけも解除されます。\n（この端末に保存された学習履歴は残ります）\n\n削除しますか？`;
   if (!confirm(msg)) return;
 
   const wrap = document.getElementById('syncListWrap');
@@ -2164,8 +2164,12 @@ function selectMode(m) {
     alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
     return;
   }
-  if (m === 'unmastered' && getUnmasteredIndices().length === 0) {
-    alert('未正解の問題はありません。全問正解済みです！');
+  if (m === 'incorrect' && getIncorrectIndices().length === 0) {
+    alert('不正解のまま残っている問題はありません。');
+    return;
+  }
+  if (m === 'partial' && getPartialIndices().length === 0) {
+    alert('部分正解のまま残っている問題はありません。');
     return;
   }
   if (m === 'unanswered' && getUnansweredIndices().length === 0) {
@@ -2323,34 +2327,42 @@ function updateCheckedCount() {
   renderWrongBreakdown();
 }
 
-// ── 苦手問題の内訳（カテゴリ別・試験官別）─────────────────────────
+/* ── まだ正解していない問題の3分割 ────────────────────────────
+   不正解・部分正解・未回答は、詰め方がそれぞれ違う。不正解は一から
+   覚え直し、部分正解は模範解答との差分を埋める、未回答は手つかずを
+   潰す。混ぜて出すと時間の使い方を誤るので、重ならない3つに分けて
+   別々に回せるようにしてある。
+   3つは互いに素で、合計が「まだ正解していない問題」になる。 */
 function updateWrongModeLabel() {
-  const n = wrongIndices.length;
-  const modeEl = document.getElementById('modeWrong');
-  if (!modeEl) return;
-  const nameEl = modeEl.querySelector('.mode-name');
-  if (nameEl) nameEl.textContent = n > 0 ? `苦手問題(${n})` : '苦手問題';
-
-  // 未正解（苦手＋未回答）
-  const unmasteredN = getUnmasteredIndices().length;
-  const umEl = document.getElementById('modeUnmastered');
-  if (umEl) {
-    const umNameEl = umEl.querySelector('.mode-name');
-    if (umNameEl) umNameEl.textContent = `未正解(${unmasteredN})`;
-  }
-
-  // 未回答（一度も手をつけていない問題）
-  const unansweredN = getUnansweredIndices().length;
-  const uaEl = document.getElementById('modeUnanswered');
-  if (uaEl) {
-    const uaNameEl = uaEl.querySelector('.mode-name');
-    if (uaNameEl) uaNameEl.textContent = `未回答(${unansweredN})`;
-  }
+  const set = [
+    ['modeIncorrect',  '不正解',   getIncorrectIndices().length],
+    ['modePartial',    '部分正解', getPartialIndices().length],
+    ['modeUnanswered', '未回答',   getUnansweredIndices().length],
+  ];
+  set.forEach(([id, label, n]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const nameEl = el.querySelector('.mode-name');
+    if (nameEl) nameEl.textContent = `${label}(${n})`;
+  });
 }
 
-// 苦手（不正解・部分正解・スキップのまま）＋一度も解答していない問題
-function getUnmasteredIndices() {
-  return [...new Set([...wrongIndices, ...getUnansweredIndices()])];
+// 記録されている判定。付いていなければ null。
+function verdictOf(qIdx) {
+  const m = syncMeta[qIdx];
+  return (m && m.verdict) ? m.verdict : null;
+}
+
+// 部分正解のまま残っている問題
+function getPartialIndices() {
+  return wrongIndices.filter(i => verdictOf(i) === '部分正解');
+}
+
+/* 不正解のまま残っている問題。スキップと、判定が記録されていない
+   古いデータもこちらに寄せて、部分正解との合計が必ず wrongIndices に
+   一致するようにしている。 */
+function getIncorrectIndices() {
+  return wrongIndices.filter(i => verdictOf(i) !== '部分正解');
 }
 
 // まだ一度も解答していない問題だけ。手つかずの範囲を潰したいときに使う。
@@ -2592,7 +2604,7 @@ function renderWrongBreakdown() {
   if (!wrapEl) return;
   const wrongSet = new Set(wrongIndices);
   if (wrongSet.size === 0) {
-    wrapEl.innerHTML = `<div style="font-size:12.5px;color:#8b949e;text-align:center;padding:6px 0;">まだ苦手問題はありません。練習を進めると、ここにカテゴリ別・試験官別の内訳が表示されます。</div>`;
+    wrapEl.innerHTML = `<div style="font-size:12.5px;color:#8b949e;text-align:center;padding:6px 0;">まだ不正解・部分正解の問題はありません。練習を進めると、ここにカテゴリ別・試験官別の内訳が表示されます。</div>`;
     return;
   }
   const countIn = indices => indices.reduce((n, i) => n + (wrongSet.has(i) ? 1 : 0), 0);
@@ -2668,14 +2680,14 @@ function buildExamPool() {
       alert('チェックした問題がありません。\n問題画面の ☆ ボタンでチェックできます。');
       return null;
     }
-  } else if (mode === 'wrong') {
-    const wrongInCat = wrongIndices.filter(i => pool.includes(i));
-    if (wrongInCat.length > 0) pool = wrongInCat;
-    else { alert('このカテゴリに間違えた問題がありません。全問から始めます。'); }
-  } else if (mode === 'unmastered') {
-    const unmasteredInCat = getUnmasteredIndices().filter(i => pool.includes(i));
-    if (unmasteredInCat.length > 0) pool = unmasteredInCat;
-    else { alert('このカテゴリに未正解の問題がありません。全問から始めます。'); }
+  } else if (mode === 'incorrect') {
+    const incorrectInCat = getIncorrectIndices().filter(i => pool.includes(i));
+    if (incorrectInCat.length > 0) pool = incorrectInCat;
+    else { alert('このカテゴリに不正解の問題がありません。全問から始めます。'); }
+  } else if (mode === 'partial') {
+    const partialInCat = getPartialIndices().filter(i => pool.includes(i));
+    if (partialInCat.length > 0) pool = partialInCat;
+    else { alert('このカテゴリに部分正解の問題がありません。全問から始めます。'); }
   } else if (mode === 'unanswered') {
     const unansweredInCat = getUnansweredIndices().filter(i => pool.includes(i));
     if (unansweredInCat.length > 0) pool = unansweredInCat;
@@ -3162,7 +3174,7 @@ function showFinalScreen() {
   document.getElementById('fsCorrect').textContent  = correctCount;
   document.getElementById('fsPartial').textContent  = partialCount;
   document.getElementById('fsWrong').textContent    = wrongCount;
-  const grade = pct>=80 ? '合格圏内！よくできました。' : pct>=60 ? 'あと少しです。苦手問題を復習しましょう。' : '要復習です。もう一度練習しましょう。';
+  const grade = pct>=80 ? '合格圏内！よくできました。' : pct>=60 ? 'あと少しです。不正解と部分正解を復習しましょう。' : '要復習です。もう一度練習しましょう。';
   speak(`試験終了。正答率${pct}パーセント。${grade}`);
 }
 
@@ -3423,10 +3435,15 @@ if ('mediaSession' in navigator) {
   navigator.mediaSession.setActionHandler('nexttrack',     () => { if (appMode === 'playback') pbNext(); });
 }
 
+/* 結果画面の「間違えた問題をもう一度」。不正解が残っていればそちらを、
+   なければ部分正解を拾う。どちらも空なら何もしない。 */
 function reviewWrong() {
-  if (!wrongIndices.length) { alert('間違えた問題はありません！'); return; }
-  mode = 'wrong'; document.getElementById('countSelect').value = Math.min(wrongIndices.length,10);
-  showStart(); setTimeout(()=>selectMode('wrong'), 50);
+  const incorrect = getIncorrectIndices(), partial = getPartialIndices();
+  const target = incorrect.length ? 'incorrect' : partial.length ? 'partial' : null;
+  if (!target) { alert('間違えた問題はありません！'); return; }
+  const n = (target === 'incorrect' ? incorrect : partial).length;
+  mode = target; document.getElementById('countSelect').value = Math.min(n, 10);
+  showStart(); setTimeout(() => selectMode(target), 50);
 }
 
 function showStart() {

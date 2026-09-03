@@ -480,6 +480,18 @@ body {
 .wb-details[open] summary::before { content: '▾ '; }
 .wb-details[open] summary { margin-bottom: 10px; }
 .wb-section-title { font-size: 11px; color: #8b949e; letter-spacing: 0.05em; margin-bottom: 6px; }
+/* 記録のリセット。押し間違いが致命的なので、開いてから押す形にしてある */
+.reset-note { font-size: 12.5px; color: #8b949e; line-height: 1.7; margin: 0 0 12px; }
+.btn-reset {
+  width: 100%; padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  background: #161b22; border: 1px solid #30363d; color: #c9d1d9;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+}
+.btn-reset:hover { border-color: #6e1a1a; color: #f85149; background: rgba(248,81,73,.06); }
+.btn-reset.danger { border-color: #6e1a1a; color: #f85149; }
+.btn-reset.danger:hover { background: #2d0f0f; }
+.reset-sub { font-size: 11.5px; color: #7d8590; line-height: 1.6; margin: 6px 0 16px; }
+.reset-sub:last-child { margin-bottom: 0; }
 .wb-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12.5px; }
 .wb-icon { flex-shrink: 0; width: 18px; text-align: center; }
 .wb-name { flex-shrink: 0; width: 112px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c9d1d9; }
@@ -857,6 +869,15 @@ body {
     </div>
 
     <div id="stList"></div>
+
+    <details class="wb-details" style="margin-top:20px;">
+      <summary>🧹 記録をリセット</summary>
+      <p class="reset-note">この端末に保存された学習記録を消します。設問そのものは消えません。元に戻せないので、消す範囲を選んでから実行してください。</p>
+      <button class="btn-reset" onclick="resetRecords('verdicts')">回答状況だけ消す</button>
+      <div class="reset-sub">正解・部分正解・不正解・スキップの記録と、回答済みの記録を消します。⭐チェックと数値カードの記録は残ります。</div>
+      <button class="btn-reset danger" onclick="resetRecords('all')">すべての学習記録を消す</button>
+      <div class="reset-sub">上に加えて、⭐チェック、数値カードの「覚えた」記録、累計の正解数・解答数も消します。</div>
+    </details>
   </div>
 
   <!-- NUMBER CARD SCREEN -->
@@ -1585,6 +1606,9 @@ function ttsClean(text) {
     ['曳航',    'えいこう'],
     ['滑空機',  'かっくうき'],
     ['滑空場',  'かっくうじょう'],
+    ['錐揉',    'きりもみ'],
+    ['実用U',   'じつようユー'],
+    ['曲技A',   'きょくぎエー'],
     ['耐空証明書','たいくうしょうめいしょ'],
     ['耐空証明','たいくうしょうめい'],
     ['証明書',  'しょうめいしょ'],
@@ -2382,6 +2406,50 @@ function updateWrongModeLabel() {
     const nameEl = el.querySelector('.mode-name');
     if (nameEl) nameEl.textContent = `${label}(${n})`;
   });
+}
+
+/* ── 記録のリセット ──────────────────────────────────────
+   scope 'verdicts' … 回答状況と回答済みだけ。⭐チェックと数値カードは残す
+   scope 'all'      … 上に加えて⭐チェック・数値カード・累計も消す
+
+   syncMeta のキーは消さずに、判定を外した記録を今の時刻で上書きする。
+   同期のマージが「タイムスタンプの新しい方を採用」なので、キーごと
+   消すとローカルに無い＝サーバー側が勝ち、次の同期で消したはずの
+   記録が戻ってきてしまう。 */
+function resetRecords(scope) {
+  const all = (scope === 'all');
+  const lines = all
+    ? '・回答状況（正解／部分正解／不正解／スキップ）\n・回答済みの記録\n・⭐チェック\n・数値カードの「覚えた」記録\n・累計の正解数と解答数'
+    : '・回答状況（正解／部分正解／不正解／スキップ）\n・回答済みの記録';
+  let msg = `次の記録を消します。\n\n${lines}\n\n元に戻せません。実行しますか？`;
+  if (syncId) msg += `\n\n※ 同期ID「${syncId}」を使っているので、消した状態が他の端末にも反映されます。`;
+  if (!confirm(msg)) return;
+
+  const now = Date.now();
+  Object.keys(syncMeta).forEach(k => {
+    const prev = syncMeta[k] || {};
+    syncMeta[k] = { verdict: undefined, checked: all ? false : !!prev.checked, t: now };
+  });
+  wrongIndices = [];
+  answeredIndices = [];
+  if (all) {
+    checkedIndices = [];
+    try { localStorage.removeItem(numMasteredKey()); } catch (e) {}
+    sessionCorrect = 0; sessionTotal = 0;
+    localStorage.setItem(bankKey('totalCorrect'),  '0');
+    localStorage.setItem(bankKey('totalAnswered'), '0');
+  }
+  localStorage.setItem(bankKey('syncMeta'),        JSON.stringify(syncMeta));
+  localStorage.setItem(bankKey('wrongIndices'),    JSON.stringify(wrongIndices));
+  localStorage.setItem(bankKey('answeredIndices'), JSON.stringify(answeredIndices));
+  localStorage.setItem(bankKey('checkedIndices'),  JSON.stringify(checkedIndices));
+
+  const sc = document.getElementById('savedCorrect'); if (sc) sc.textContent = sessionCorrect;
+  const st = document.getElementById('savedTotal');   if (st) st.textContent = sessionTotal;
+  updateCheckedCount();
+  renderStatusSummary(); renderStatusFilters(); renderStatusList();
+  if (syncId) syncPush(true);
+  alert(all ? 'すべての学習記録を消しました。' : '回答状況を消しました。⭐チェックと数値カードの記録は残っています。');
 }
 
 // 記録されている判定。付いていなければ null。

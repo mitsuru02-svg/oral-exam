@@ -486,17 +486,11 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <div class="step-hd-t"><b>METAR / TAF</b><span>近傍空港の実況と予報。数字で裏を取る</span></div>
       <div class="step-scale">RJEC/RJCO/RJCC</div>
     </div>
-    <a class="open-btn" id="mtOpen" href="https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&amp;Area=0&amp;Port=RJEC" target="_blank" rel="noopener">METAR / TAF を開く <span class="ext">↗</span></a>
+    <a class="open-btn" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener">METAR / TAF を開く <span class="ext">↗</span></a>
     <div class="shot">
-      <div class="ft-tabs" id="mtTabs">
-        <button data-src="RJEC" data-on="1" onclick="setMetarSrc('RJEC')">旭川</button>
-        <button data-src="RJCO" data-on="0" onclick="setMetarSrc('RJCO')">丘珠</button>
-        <button data-src="RJCC" data-on="0" onclick="setMetarSrc('RJCC')">新千歳</button>
-        <button data-src="AWC"  data-on="0" onclick="setMetarSrc('AWC')">生電文</button>
-      </div>
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-metar">—</span><button onclick="loadShot('metar',true)">再読込</button></div>
-      <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川です。いずれも滝川そのものではないので傾向として読みます。枠内に出ないソースがあれば、別のタブか、下の貼り付け欄をお使いください。</div>
+      <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
 
     <div class="paste-tool">
@@ -796,20 +790,6 @@ const FRAME_URLS = {
   vis:   'https://www.jma.go.jp/bosai/map.html#6/43.0/142.0/&elem=vis&contents=himawari',
   sigwx: 'https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2',
 };
-/* METAR/TAF の取り込み先。imoc は素朴なモバイル向けページなので、
-   枠内表示を拒否していない見込みがある。AWCと気象庁は拒否された。 */
-const METAR_SRC = {
-  RJEC: { name: '旭川',   url: 'https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&Area=0&Port=RJEC' },
-  RJCO: { name: '丘珠',   url: 'https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&Area=0&Port=RJCO' },
-  RJCC: { name: '新千歳', url: 'https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&Area=0&Port=RJCC' },
-  AWC:  { name: '生電文', url: 'https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&taf=1' },
-};
-let metarSrc = localStorage.getItem('tenkizu_metarSrc') || 'RJEC';
-function setMetarSrc(k) {
-  metarSrc = k;
-  try { localStorage.setItem('tenkizu_metarSrc', k); } catch (e) {}
-  loadShot('metar', true);
-}
 const METAR_URL = 'https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true';
 const URL_KEY = 'tenkizu_customUrls';
 function customUrls() {
@@ -980,42 +960,33 @@ async function loadShot(key, manual) {
 
   if (key === 'metar') {
     box.classList.remove('zoom'); box.onclick = null;
-    const src = METAR_SRC[metarSrc] || METAR_SRC.RJEC;
-    document.querySelectorAll('#mtTabs button').forEach(bt => bt.dataset.on = (bt.dataset.src === metarSrc) ? '1' : '0');
-    const openA = document.getElementById('mtOpen');
-    if (openA) openA.href = src.url;
-
     const stamp = () => {
       const d = new Date();
-      tsEl.textContent = `${src.name}・${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      tsEl.textContent = `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 取得`;
     };
-
-    /* AWC の生電文だけは、通れば整形して自前の見た目で出せる（https配信時）。
-       file:// では fetch が止まるので、その場合は下の iframe に落ちる。 */
-    if (metarSrc === 'AWC') {
-      try {
-        const r = await fetch(METAR_URL, { cache: 'no-store' });
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        const txt = (await r.text()).trim();
-        if (!txt) throw new Error('空です');
-        box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
-        stamp();
-        return;
-      } catch (e) { /* iframe へ */ }
-    }
+    /* まず fetch。整形して自前の見た目で出せるが、file:// から開いていると
+       ブラウザが他サイトへの fetch を止めるので、その場合は下の iframe に落とす。 */
+    try {
+      const r = await fetch(METAR_URL, { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const txt = (await r.text()).trim();
+      if (!txt) throw new Error('空です');
+      box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
+      stamp();
+      return;
+    } catch (e) { /* iframe へ */ }
 
     /* iframe は中身を読まずに表示するだけなので、fetch と違って
-       相手サイトの許可（CORS）が要らない。ただし相手が枠内表示を
-       拒否していると空になるので、そのときは別タブか貼り付け欄へ。 */
+       相手サイトの許可（CORS）が要らない。file:// から開いていても出る。 */
     const fr = document.createElement('iframe');
     fr.className = 'wxframe';
-    fr.src = src.url;
+    fr.src = METAR_URL;
     fr.referrerPolicy = 'no-referrer';
     box.innerHTML = '';
     box.appendChild(fr);
     const note = document.createElement('div');
     note.className = 'wxframe-note';
-    note.textContent = '取り込み表示。空のままなら、そのサイトが枠内表示を拒否しています。別のタブを試すか、下の貼り付け欄へ。';
+    note.textContent = '取り込み表示。出ないときは「開く」で表示し、本文をコピーして下の貼り付け欄へ。';
     box.appendChild(note);
     stamp();
     return;

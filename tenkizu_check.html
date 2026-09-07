@@ -171,6 +171,47 @@ iframe.wxframe.tall { height:420px; }
   font-size:10.5px; color:#7d8590; padding:7px 10px; line-height:1.6;
   background:#0d1117; border-top:1px solid #21262d;
 }
+/* 貼り付け判定。取り込みが塞がれていても、これは確実に動く */
+.paste-tool { margin:0 14px 14px; }
+.paste-tool textarea {
+  width:100%; min-height:88px; padding:10px 12px; border-radius:10px;
+  border:1px solid #30363d; background:#0d1117; color:#e6edf3;
+  font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.7;
+  resize:vertical;
+}
+.paste-tool textarea::placeholder { color:#4d5560; }
+.pt-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.pt-row label { font-size:11.5px; color:#8b949e; white-space:nowrap; }
+.pt-row input {
+  width:74px; padding:7px 9px; border-radius:8px; border:1px solid #30363d;
+  background:#0d1117; color:#e6edf3; font-size:12.5px; font-family:inherit;
+  font-variant-numeric:tabular-nums; text-align:center;
+}
+.pt-row button {
+  border:1px solid #1f4b8f; background:#0d2044; color:#79c0ff;
+  border-radius:8px; padding:8px 14px; font-size:12.5px; font-weight:700;
+  cursor:pointer; font-family:inherit;
+}
+.pt-row button.ghost { border-color:#30363d; background:#161b22; color:#8b949e; font-weight:400; }
+.pt-out { margin-top:10px; }
+.pt-card {
+  border:1px solid #21262d; border-radius:10px; padding:10px 12px; margin-bottom:8px;
+  background:#0d1117;
+}
+.pt-card.ng { border-color:#6e1a1a; background:#1c0f0f; }
+.pt-card.ok { border-color:#1f5c33; background:#0e1b12; }
+.pt-st { font-size:13px; font-weight:700; margin-bottom:6px; font-variant-numeric:tabular-nums; }
+.pt-st .tag { font-size:10.5px; font-weight:700; border-radius:20px; padding:2px 8px; margin-left:7px; }
+.pt-st .tag.ok { background:#132d1c; color:#3fb950; border:1px solid #2ea043; }
+.pt-st .tag.ng { background:#2d0f0f; color:#f85149; border:1px solid #c9302c; }
+.pt-g { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.pt-i { background:#161b22; border:1px solid #21262d; border-radius:8px; padding:7px 8px; }
+.pt-i.bad { border-color:#6e1a1a; }
+.pt-i .k { font-size:9.5px; color:#7d8590; letter-spacing:.04em; }
+.pt-i .v { font-size:13.5px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; }
+.pt-i.bad .v { color:#f85149; }
+.pt-i .n { font-size:10px; color:#7d8590; margin-top:1px; }
+.pt-warn { font-size:11px; color:#e3b341; margin-top:7px; line-height:1.6; }
 pre.wx {
   width:100%; margin:0; padding:12px 13px; text-align:left;
   font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
@@ -445,11 +486,30 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <div class="step-hd-t"><b>METAR / TAF</b><span>近傍空港の実況と予報。数字で裏を取る</span></div>
       <div class="step-scale">RJEC/RJCO/RJCC</div>
     </div>
-    <a class="open-btn" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener">METAR / TAF を開く <span class="ext">↗</span></a>
+    <a class="open-btn" id="mtOpen" href="https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&amp;Area=0&amp;Port=RJEC" target="_blank" rel="noopener">METAR / TAF を開く <span class="ext">↗</span></a>
     <div class="shot">
+      <div class="ft-tabs" id="mtTabs">
+        <button data-src="RJEC" data-on="1" onclick="setMetarSrc('RJEC')">旭川</button>
+        <button data-src="RJCO" data-on="0" onclick="setMetarSrc('RJCO')">丘珠</button>
+        <button data-src="RJCC" data-on="0" onclick="setMetarSrc('RJCC')">新千歳</button>
+        <button data-src="AWC"  data-on="0" onclick="setMetarSrc('AWC')">生電文</button>
+      </div>
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-metar">—</span><button onclick="loadShot('metar',true)">再読込</button></div>
-      <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
+      <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川です。いずれも滝川そのものではないので傾向として読みます。枠内に出ないソースがあれば、別のタブか、下の貼り付け欄をお使いください。</div>
+    </div>
+
+    <div class="paste-tool">
+      <div class="look-t" style="margin-bottom:6px;">▸ 貼り付けて自動判定</div>
+      <textarea id="ptIn" placeholder="「開く」で表示した METAR / TAF を全部コピーして、ここに貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+      <div class="pt-row">
+        <label>滑走路方位</label>
+        <input type="number" id="ptRwy" min="0" max="360" placeholder="例 350">
+        <button onclick="ptRun()">判定</button>
+        <button class="ghost" onclick="ptClear()">消去</button>
+      </div>
+      <div class="pt-out" id="ptOut"></div>
+      <div class="shot-note">通信が使えなくても、貼り付ければ横風成分・視程・雲底をしきい値と突き合わせます。滑走路方位は一度入れると覚えます。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -559,6 +619,130 @@ table.xw td.hit { color:#f85149; font-weight:700; }
 /* ── 判断チェック項目 ──────────────────────────────────────
    「見た」ではなく「その項目が飛べる側か」で答える。1つでもNGがあれば
    中止側に倒す。全部OKで初めてGO側に出す。曖昧なまま飛ばないための道具。 */
+/* ══════════════════════════════════════════════════════════════
+   METAR / TAF 貼り付け判定
+
+   file:// から開いていると、ブラウザは他サイトへの fetch を止め、
+   相手サイトも iframe での取り込みを拒否する。取ってくる手段が両方
+   塞がっているので、開いたページから本文をコピーして貼ってもらい、
+   こちらでしきい値と突き合わせる。通信が要らないので確実に動く。
+   ══════════════════════════════════════════════════════════════ */
+const PT_KEY = 'tenkizu_paste';
+const LIM = { xwind: 8, vis: 5000, ceil: 1000 };   /* kt / m / ft */
+
+function ptSave() {
+  try {
+    localStorage.setItem(PT_KEY, JSON.stringify({
+      date: today(),
+      txt: document.getElementById('ptIn').value,
+      rwy: document.getElementById('ptRwy').value,
+    }));
+  } catch (e) {}
+}
+function ptLoad() {
+  try {
+    const r = JSON.parse(localStorage.getItem(PT_KEY) || '{}');
+    if (r.rwy) document.getElementById('ptRwy').value = r.rwy;   /* 方位は日をまたいでも残す */
+    if (r.date === today() && r.txt) {
+      document.getElementById('ptIn').value = r.txt;
+      ptRun();
+    }
+  } catch (e) {}
+}
+function ptClear() {
+  document.getElementById('ptIn').value = '';
+  document.getElementById('ptOut').innerHTML = '';
+  ptSave();
+}
+
+/* 1本の電文から、風・視程・雲底を取り出す */
+function parseMetar(line) {
+  const o = { raw: line };
+  const st = line.match(/\b([A-Z]{4})\b/);
+  o.station = st ? st[1] : '';
+
+  const w = line.match(/\b(\d{3}|VRB)(\d{2,3})(?:G(\d{2,3}))?KT\b/);
+  if (w) {
+    o.windDir = w[1] === 'VRB' ? 'VRB' : +w[1];
+    o.windSpd = +w[2];
+    o.gust    = w[3] ? +w[3] : null;
+  }
+  if (/\bCAVOK\b/.test(line)) { o.vis = 9999; o.cavok = true; }
+  else {
+    const v = line.match(/\b(\d{4})\b(?!\/)/);
+    if (v) o.vis = +v[1];
+  }
+  const cl = [...line.matchAll(/\b(FEW|SCT|BKN|OVC)(\d{3})\b/g)]
+    .map(m => ({ amt: m[1], ft: +m[2] * 100 }));
+  o.clouds = cl;
+  const ceilL = cl.filter(c => c.amt === 'BKN' || c.amt === 'OVC').sort((a, b) => a.ft - b.ft)[0];
+  o.ceil = ceilL ? ceilL.ft : null;
+  return o;
+}
+
+/* 横風成分。風向と滑走路方位の差の正弦。ガストがあればガストで見る */
+function xwind(o, rwy) {
+  if (o.windDir === undefined || rwy === null) return null;
+  const spd = o.gust != null ? o.gust : o.windSpd;
+  if (o.windDir === 'VRB') return { kt: spd, ang: null, vrb: true };
+  let d = Math.abs(o.windDir - rwy) % 360;
+  if (d > 180) d = 360 - d;
+  return { kt: Math.round(spd * Math.abs(Math.sin(d * Math.PI / 180)) * 10) / 10, ang: d, vrb: false };
+}
+
+function ptRun() {
+  const txt = document.getElementById('ptIn').value || '';
+  const rwyRaw = document.getElementById('ptRwy').value;
+  const rwy = rwyRaw === '' ? null : ((+rwyRaw % 360) + 360) % 360;
+  const out = document.getElementById('ptOut');
+  ptSave();
+
+  /* 空行区切りで固まりにし、METARらしい行だけ拾う */
+  const lines = txt.split(/\n/).map(l => l.trim()).filter(Boolean)
+    .filter(l => /\b\d{6}Z\b/.test(l) && /KT\b/.test(l));
+  if (!lines.length) {
+    out.innerHTML = txt.trim()
+      ? '<div class="pt-card"><div class="pt-st">読み取れませんでした</div><div class="shot-note" style="margin:0;">METAR の行（例 RJEC 070100Z 36010KT 9999 FEW030 …）が含まれているか確かめてください。</div></div>'
+      : '';
+    return;
+  }
+
+  out.innerHTML = lines.map(line => {
+    const o = parseMetar(line);
+    const xw = xwind(o, rwy);
+    const bad = [];
+
+    const xwBad = xw && xw.kt > LIM.xwind;
+    if (xwBad) bad.push('横風');
+    const visBad = o.vis != null && o.vis < LIM.vis;
+    if (visBad) bad.push('視程');
+    const ceilBad = o.ceil != null && o.ceil < LIM.ceil;
+    if (ceilBad) bad.push('雲底');
+
+    const windTxt = o.windSpd === undefined ? '—'
+      : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0') + '°')
+        + ' ' + o.windSpd + 'kt' + (o.gust != null ? ' G' + o.gust : '');
+    const xwTxt = !xw ? '—' : (xw.vrb ? '最大 ' + xw.kt : xw.kt) + 'kt';
+    const xwNote = !xw ? (rwy === null ? '滑走路方位を入力' : '')
+      : (xw.vrb ? '風向不定。全量で見る' : '滑走路との角度 ' + xw.ang + '°');
+    const visTxt = o.vis == null ? '—' : (o.vis >= 9999 ? '10km以上' : (o.vis / 1000).toFixed(1) + 'km');
+    const ceilTxt = o.ceil == null ? 'なし' : o.ceil.toLocaleString() + 'ft';
+    const ceilNote = o.ceil == null ? 'BKN/OVCなし' : '約' + Math.round(o.ceil * 0.3048) + 'm';
+
+    return `<div class="pt-card ${bad.length ? 'ng' : 'ok'}">
+      <div class="pt-st">${o.station || '—'}
+        <span class="tag ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + 'が条件外' : '条件内'}</span></div>
+      <div class="pt-g">
+        <div class="pt-i${xwBad ? ' bad' : ''}"><div class="k">横風成分</div><div class="v">${xwTxt}</div><div class="n">${xwNote}</div></div>
+        <div class="pt-i${visBad ? ' bad' : ''}"><div class="k">視程</div><div class="v">${visTxt}</div><div class="n">${o.cavok ? 'CAVOK' : '限界5km'}</div></div>
+        <div class="pt-i${ceilBad ? ' bad' : ''}"><div class="k">雲底</div><div class="v">${ceilTxt}</div><div class="n">${ceilNote}</div></div>
+      </div>
+      <div class="shot-note" style="margin-top:7px;">風 ${windTxt}</div>
+      ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風はガスト値で見ています</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
 const CHECKS = [
   { id:'synop', t:'総観場：低気圧・前線が飛行時間帯に滝川へかからない',
     s:'天気図と予想図の両方で確認。等圧線が混んでいないこと' },
@@ -612,6 +796,20 @@ const FRAME_URLS = {
   vis:   'https://www.jma.go.jp/bosai/map.html#6/43.0/142.0/&elem=vis&contents=himawari',
   sigwx: 'https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2',
 };
+/* METAR/TAF の取り込み先。imoc は素朴なモバイル向けページなので、
+   枠内表示を拒否していない見込みがある。AWCと気象庁は拒否された。 */
+const METAR_SRC = {
+  RJEC: { name: '旭川',   url: 'https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&Area=0&Port=RJEC' },
+  RJCO: { name: '丘珠',   url: 'https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&Area=0&Port=RJCO' },
+  RJCC: { name: '新千歳', url: 'https://www.imoc.co.jp/SmartPhone/d/metar.php?Lang=Jpn&Area=0&Port=RJCC' },
+  AWC:  { name: '生電文', url: 'https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&taf=1' },
+};
+let metarSrc = localStorage.getItem('tenkizu_metarSrc') || 'RJEC';
+function setMetarSrc(k) {
+  metarSrc = k;
+  try { localStorage.setItem('tenkizu_metarSrc', k); } catch (e) {}
+  loadShot('metar', true);
+}
 const METAR_URL = 'https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true';
 const URL_KEY = 'tenkizu_customUrls';
 function customUrls() {
@@ -782,33 +980,42 @@ async function loadShot(key, manual) {
 
   if (key === 'metar') {
     box.classList.remove('zoom'); box.onclick = null;
+    const src = METAR_SRC[metarSrc] || METAR_SRC.RJEC;
+    document.querySelectorAll('#mtTabs button').forEach(bt => bt.dataset.on = (bt.dataset.src === metarSrc) ? '1' : '0');
+    const openA = document.getElementById('mtOpen');
+    if (openA) openA.href = src.url;
+
     const stamp = () => {
       const d = new Date();
-      tsEl.textContent = `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 取得`;
+      tsEl.textContent = `${src.name}・${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
-    /* まず fetch。整形して自前の見た目で出せるが、file:// から開いていると
-       ブラウザが他サイトへの fetch を止めるので、その場合は下の iframe に落とす。 */
-    try {
-      const r = await fetch(METAR_URL, { cache: 'no-store' });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const txt = (await r.text()).trim();
-      if (!txt) throw new Error('空です');
-      box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
-      stamp();
-      return;
-    } catch (e) { /* iframe へ */ }
+
+    /* AWC の生電文だけは、通れば整形して自前の見た目で出せる（https配信時）。
+       file:// では fetch が止まるので、その場合は下の iframe に落ちる。 */
+    if (metarSrc === 'AWC') {
+      try {
+        const r = await fetch(METAR_URL, { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const txt = (await r.text()).trim();
+        if (!txt) throw new Error('空です');
+        box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
+        stamp();
+        return;
+      } catch (e) { /* iframe へ */ }
+    }
 
     /* iframe は中身を読まずに表示するだけなので、fetch と違って
-       相手サイトの許可（CORS）が要らない。file:// から開いていても出る。 */
+       相手サイトの許可（CORS）が要らない。ただし相手が枠内表示を
+       拒否していると空になるので、そのときは別タブか貼り付け欄へ。 */
     const fr = document.createElement('iframe');
     fr.className = 'wxframe';
-    fr.src = METAR_URL;
+    fr.src = src.url;
     fr.referrerPolicy = 'no-referrer';
     box.innerHTML = '';
     box.appendChild(fr);
     const note = document.createElement('div');
     note.className = 'wxframe-note';
-    note.textContent = '取り込み表示。枠の中を指でスクロールできます。出ないときは上の「開く」から。';
+    note.textContent = '取り込み表示。空のままなら、そのサイトが枠内表示を拒否しています。別のタブを試すか、下の貼り付け欄へ。';
     box.appendChild(note);
     stamp();
     return;
@@ -941,7 +1148,7 @@ function tick() {
 }
 
 load(); render(); tick(); setInterval(tick, 10000);
-syncSwitch(); loadAllShots();
+syncSwitch(); loadAllShots(); ptLoad();
 /* 日をまたいだ状態でアプリに戻ってきたときに備える */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
 </script>

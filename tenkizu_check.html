@@ -388,6 +388,11 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <a class="open-btn" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener">天気図を開く <span class="ext">↗</span></a>
     <div class="shot">
+      <div class="ft-tabs" id="chartTabs">
+        <button data-ck="now" data-on="1" onclick="setChart('now')">実況</button>
+        <button data-ck="h24" data-on="0" onclick="setChart('h24')">24時間後</button>
+        <button data-ck="h48" data-on="0" onclick="setChart('h48')">48時間後</button>
+      </div>
       <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
       <div class="urlset" id="url-chart">
@@ -395,7 +400,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button onclick="saveUrl('chart')">保存</button>
         <button onclick="clearUrl('chart')">解除</button>
       </div>
-      <div class="shot-note">速報天気図。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して、⚙ URL に貼り付けると以後ここに表示されます。画像をタップで拡大。最新かどうかは必ず時刻で確かめてください。</div>
+      <div class="shot-note"><b>実況</b>でいまの気圧配置をつかみ、<b>24時間後・48時間後</b>で前線や低気圧がどう動くかを見ます。飛ぶ日が明日以降なら、そちらのコマが本番です。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して ⚙ URL に貼り付けてください。画像をタップで拡大。<b>図の中の時刻</b>で必ず確かめること。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -1162,28 +1167,62 @@ function chartUrlOf(name) {
 }
 
 /* list.json の中身の形は公開仕様ではないので、キーを決め打ちで掘らずに
-   全体を舐めて .png に見える文字列を集める。形が変わっても壊れない */
-function collectPng(node, out) {
-  if (typeof node === 'string') { if (/\.png($|\?)/i.test(node)) out.push(node); return; }
-  if (Array.isArray(node)) { node.forEach(n => collectPng(n, out)); return; }
-  if (node && typeof node === 'object') { Object.keys(node).forEach(k => collectPng(node[k], out)); }
+   全体を舐めて .png に見える文字列を集める。形が変わっても壊れない。
+   このとき、どのキーの下にあったか（path）も一緒に覚えておく。
+   実況・24時間後・48時間後の区別に使う */
+function collectPng(node, out, path) {
+  if (typeof node === 'string') {
+    if (/\.png($|\?)/i.test(node)) out.push({ name: node, path: path || '' });
+    return;
+  }
+  if (Array.isArray(node)) { node.forEach(n => collectPng(n, out, path)); return; }
+  if (node && typeof node === 'object') {
+    Object.keys(node).forEach(k => collectPng(node[k], out, path ? path + '.' + k : k));
+  }
 }
 
-async function chartFromList() {
-  const names = [];
-  collectPng(await getJson(CHART_LIST), names);
-  if (!names.length) throw new Error('list.json に画像名がありません');
+/* 実況か、24時間後か、48時間後か。
+   ファイル名には日付の数字（…0924…など）が入るので、名前ではなく
+   キーの並びで判断する。キーで分からないときだけ名前の目印を見る */
+function chartKindOf(it) {
+  const p = String(it.path || '');
+  if (/48/.test(p)) return 'h48';
+  if (/24/.test(p)) return 'h24';
+  if (/(^|[._])(now|jp|near|far|asas|jitu|実況)/i.test(p)) return 'now';
+  const n = String(it.name || '');
+  if (/(_|-)(h?48|48h)(_|-|\.)/i.test(n)) return 'h48';
+  if (/(_|-)(h?24|24h)(_|-|\.)/i.test(n)) return 'h24';
+  return 'now';
+}
 
-  /* 予想図は先の時刻を持つので、いまより後のものは実況として出さない */
+const CHART_KIND_LABEL = { now: '実況', h24: '24時間後の予想', h48: '48時間後の予想' };
+
+async function chartFromList(kind) {
+  const items = [];
+  collectPng(await getJson(CHART_LIST), items, '');
+  if (!items.length) throw new Error('list.json に画像名がありません');
+
+  /* 同じ絵が何度も出てくることがあるので、名前で重複を落とす */
+  const seen = new Set();
+  const uniq = items.filter(it => (seen.has(it.name) ? false : (seen.add(it.name), true)));
+
+  const mine = uniq.filter(it => chartKindOf(it) === kind);
+  if (!mine.length) throw new Error(CHART_KIND_LABEL[kind] + 'が見つかりません');
+
+  /* 実況は、いまより先の時刻のものを混ぜない。予想図はそのまま新しい順 */
   const d = new Date();
   const nowTs = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate())
     + pad(d.getUTCHours()) + pad(d.getUTCMinutes());
+  const use = (kind === 'now')
+    ? mine.filter(it => { const t = chartStamp(it.name); return !t || t <= nowTs; })
+    : mine;
+  if (!use.length) throw new Error('実況の天気図が見つかりません');
 
-  return [...new Set(names)]
-    .filter(n => { const t = chartStamp(n); return !t || t <= nowTs; })
-    .sort((a, b) => chartStamp(b).localeCompare(chartStamp(a)))
+  const tail = '　' + CHART_KIND_LABEL[kind] + '　※図中の時刻も確認';
+  return use
+    .sort((a, b) => chartStamp(b.name).localeCompare(chartStamp(a.name)))
     .slice(0, 6)
-    .map(n => ({ url: chartUrlOf(n), label: chartLabel(chartStamp(n), '　※図中の時刻も確認') }));
+    .map(it => ({ url: chartUrlOf(it.name), label: chartLabel(chartStamp(it.name), tail) }));
 }
 
 /* list.json が読めないとき用。UTCの00/06/12/18時ぶんを、ありうる
@@ -1470,17 +1509,24 @@ async function loadShot(key, manual) {
     return;
   }
   if (key === 'chart') {
-    /* list.json が読めればそれが最優先。読めなければ総当たりに落ちる */
+    document.querySelectorAll('#chartTabs button').forEach(bt => {
+      bt.dataset.on = (bt.dataset.ck === chartKind) ? '1' : '0';
+    });
+    /* list.json が読めればそれが最優先。読めないときの総当たりは、
+       ファイル名の付け方が分かっている実況にだけ効かせる */
     let cands = [];
-    try { cands = await chartFromList(); } catch (e) { /* 総当たりへ */ }
-    tryImages(cands.concat(chartCandidates()),
+    try { cands = await chartFromList(chartKind); } catch (e) { /* 総当たりへ */ }
+    if (chartKind === 'now') cands = cands.concat(chartCandidates());
+    tryImages(cands,
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
       },
-      () => fallback(box, tsEl, '天気図を取得できませんでした。', key));
+      () => fallback(box, tsEl,
+        chartKind === 'now' ? '天気図を取得できませんでした。'
+          : CHART_KIND_LABEL[chartKind] + 'を取得できませんでした。', key));
     return;
   }
   /* ①気象衛星センターの1枚画像（fetch が要らないので file:// でも出る）
@@ -1497,6 +1543,9 @@ async function loadShot(key, manual) {
 }
 
 function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }
+
+let chartKind = 'now';
+function setChart(k) { chartKind = k; loadShot('chart', true); }
 
 function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'metar'].forEach(k => loadShot(k)); }
 

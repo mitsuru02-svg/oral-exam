@@ -132,6 +132,13 @@ body {
 }
 .shot-box.zoom img, .shot-box.zoom .tiles { cursor:zoom-in; }
 .shot-note { font-size:10.5px; color:#6e7681; margin-top:5px; line-height:1.6; }
+.ft-tabs { display:flex; gap:6px; margin-bottom:7px; }
+.ft-tabs button {
+  flex:1; padding:8px 4px; border-radius:8px; border:1px solid #30363d;
+  background:#0d1117; color:#8b949e; font-size:12px; font-weight:600;
+  font-family:inherit; cursor:pointer; font-variant-numeric:tabular-nums;
+}
+.ft-tabs button[data-on="1"] { background:#0d2044; border-color:#1f4b8f; color:#79c0ff; }
 pre.wx {
   width:100%; margin:0; padding:12px 13px; text-align:left;
   font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
@@ -354,9 +361,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <a class="open-btn" href="https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2" target="_blank" rel="noopener">下層悪天予想図を開く <span class="ext">↗</span></a>
     <div class="shot">
+      <div class="ft-tabs" id="ftTabs">
+        <button data-ft="3" data-on="1" onclick="setFT(3)">3時間後</button>
+        <button data-ft="6" data-on="0" onclick="setFT(6)">6時間後</button>
+        <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
+      </div>
       <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="loadShot('sigwx',true)">再読込</button></div>
-      <div class="shot-note">国内悪天予想図。図の種類と時刻が多いので、飛ぶ時間帯のコマは気象庁のページで選びます。</div>
+      <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -365,7 +377,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <li><b>視程</b>。<span class="hi">5km</span> を割ると同じく条件外。降水・霧・下層雲の記号に注意。</li>
         <li><b>乱気流・着氷の領域</b>が滝川（半径9km・4,000ft MSL以下）にかかっていないか。</li>
         <li><b>風</b>。矢羽根から風向・風速を読み、<span class="hi">滑走路との角度で横風成分</span>を出す（下の早見表）。</li>
-        <li>この図は<b>予想図</b>。飛ぶ時間帯のコマを見る。</li>
+        <li>この図は<b>予想図</b>。3・6・9時間後の3枚があるので、<span class="hi">飛ぶ時間帯にいちばん近いコマ</span>を見る。</li>
       </ul>
     </div>
     <div class="stop">
@@ -529,9 +541,14 @@ const CHECKS = [
    ・悪天予想図 … 直リンクが安定しないため、リンク誘導のみ
    ══════════════════════════════════════════════════════════════ */
 
-/* 下層悪天予想図の画像URL。分かったらここに追記すれば埋め込まれる。
-   例: 'https://www.data.jma.go.jp/airinfo/data/awfo/xxxx.png' */
-const SIGWX_URLS = [];
+/* 下層悪天予想図。3・6・9時間先の3枚で、URLは固定（気象庁が最新版に差し替える）。
+   時刻がURLに入らないのでJSONを引く必要がなく、CORSの影響も受けない。 */
+const SIGWX_URLS = {
+  3: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp03.png',
+  6: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp06.png',
+  9: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp09.png',
+};
+let sigwxFT = 3;
 
 const IMG_KEY = 'tenkizu_images';
 let imagesOn = (localStorage.getItem(IMG_KEY) ?? '1') === '1';
@@ -650,20 +667,13 @@ async function loadShot(key, manual) {
     return;
   }
   if (key === 'sigwx') {
-    /* 画像の直URLが分かったらここに足すだけで埋め込まれる。
-       気象庁のページで図を長押し →「画像アドレスをコピー」で取れる。 */
-    const cands = SIGWX_URLS.map(u => ({ url: u, label: '下層悪天予想図' }));
-    if (!cands.length) {
-      box.classList.remove('zoom'); box.onclick = null;
-      box.innerHTML = '<div class="shot-msg"><b>この図はリンクで開きます</b>図の直URLが未設定です。気象庁のページで図を長押しして<br>「画像アドレスをコピー」したものを設定すれば、ここに表示されます</div>';
-      return;
-    }
-    tryImages(cands,
+    document.querySelectorAll('#ftTabs button').forEach(bt => bt.dataset.on = (+bt.dataset.ft === sigwxFT) ? '1' : '0');
+    tryImages([{ url: SIGWX_URLS[sigwxFT], label: sigwxFT + '時間後の予想' }],
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
-        tsEl.textContent = label;
+        tsEl.textContent = label + '（図中の時刻を確認）';
       },
       () => fallback(box, tsEl, '悪天予想図を取得できませんでした。'));
     return;
@@ -685,6 +695,8 @@ async function loadShot(key, manual) {
     fallback(box, tsEl, '衛星画像の取得が遮断されました。');
   }
 }
+
+function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }
 
 function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'metar'].forEach(k => loadShot(k)); }
 

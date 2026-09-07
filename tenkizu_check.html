@@ -228,7 +228,7 @@ iframe.wxframe.tall { height:420px; }
   color:#c9d1d9; background:#010409; border:1px solid #21262d; border-radius:8px;
   padding:8px 10px; margin:7px 0 0; white-space:pre-wrap; word-break:break-word;
 }
-.pt-raw .lb { display:block; font-family:inherit; font-size:9.5px; font-weight:700; color:#79c0ff; letter-spacing:.1em; margin-bottom:4px; }
+.pt-raw .rawlb { display:block; font-family:inherit; font-size:9.5px; font-weight:700; color:#79c0ff; letter-spacing:.1em; margin-bottom:4px; }
 .pt-fr { font-size:10.5px; font-weight:700; border-radius:20px; padding:2px 8px; margin-left:6px; border:1px solid; }
 .pt-fr.VFR  { color:#3fb950; border-color:#2ea043; background:#132d1c; }
 .pt-fr.MVFR { color:#58a6ff; border-color:#1f6feb; background:#0d2044; }
@@ -254,6 +254,8 @@ pre.wx {
 }
 
 /* 拡大表示 */
+/* 拡大表示の全画面オーバーレイ。この名前を他で使い回すと、
+   その要素がページ全体を覆い隠してしまうので注意 */
 .lb {
   position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.94);
   display:none; align-items:center; justify-content:center; padding:12px;
@@ -919,7 +921,7 @@ function tafWhen(t) {
 function avwxTafRows(taf, rwy) {
   if (!taf) return '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
   const rawTxt = (taf.raw || '').trim();
-  const raw = rawTxt ? `<pre class="pt-raw"><span class="lb">TAF</span>${esc(rawTxt)}</pre>` : '';
+  const raw = rawTxt ? `<pre class="pt-raw"><span class="rawlb">TAF</span>${esc(rawTxt)}</pre>` : '';
   const fc = Array.isArray(taf.forecast) ? taf.forecast : [];
   if (!fc.length) {
     return raw || '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
@@ -977,7 +979,7 @@ async function avwxLoad(box) {
     const o = avwxToObj(r.m);
     o.station = r.ic + ' ' + nm;
     const rawTxt = (r.m.raw || '').trim();
-    const raw = rawTxt ? `<pre class="pt-raw"><span class="lb">METAR</span>${esc(rawTxt)}</pre>` : '';
+    const raw = rawTxt ? `<pre class="pt-raw"><span class="rawlb">METAR</span>${esc(rawTxt)}</pre>` : '';
     return ptCard(o, rwy, raw + avwxTafRows(r.t, rwy));
   }).join('') + '</div>';
 }

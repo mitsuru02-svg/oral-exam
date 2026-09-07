@@ -189,6 +189,13 @@ iframe.wxframe.tall { height:420px; }
   cursor:pointer; font-family:inherit;
 }
 .pt-row button.ghost { border-color:#30363d; background:#161b22; color:#8b949e; font-weight:400; }
+/* 「いま」「これから」の区切り */
+.wx-sec {
+  font-size:11.5px; color:#8b949e; letter-spacing:.06em;
+  margin:14px 0 7px; padding-bottom:5px; border-bottom:1px solid #21262d;
+}
+.wx-sec:first-child { margin-top:0; }
+.wx-sec b { color:#e6edf3; font-size:13px; letter-spacing:0; }
 .pt-card {
   border:1px solid #21262d; border-radius:10px; padding:10px 12px; margin-bottom:8px;
   background:#0d1117;
@@ -271,7 +278,6 @@ iframe.wxframe.tall { height:420px; }
 .avwx-msg.ng { color:#e3b341; }
 .shot-box .wxdata {
   align-self:stretch; width:100%; padding:12px 12px 4px; text-align:left;
-  max-height:62vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
 }
 .shot-box .wxdata .pt-card:last-child { margin-bottom:0; }
 /* AVWX から直接取ったときの表示 */
@@ -293,9 +299,10 @@ iframe.wxframe.tall { height:420px; }
 .taf-r:last-child { border-bottom:0; }
 /* 時刻は折り返さず1行に収める。値は次の行へ回す */
 .taf-r .hd { display:flex; align-items:baseline; gap:8px; }
+/* 時刻は削らない。判定が長いときは、そちらを折り返す */
 .taf-r .w {
-  flex:1; min-width:0; color:#8b949e; font-weight:700; font-size:12.5px;
-  letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  flex:0 0 auto; color:#8b949e; font-weight:700; font-size:12.5px;
+  letter-spacing:.02em; white-space:nowrap;
 }
 .taf-r .w .jst { color:#7d8590; font-weight:400; }
 .taf-r .d {
@@ -303,7 +310,7 @@ iframe.wxframe.tall { height:420px; }
   font-size:12.5px; line-height:1.8; margin-top:2px;
 }
 .taf-r.bad .d { color:#f85149; }
-.taf-r .j { flex-shrink:0; font-size:11.5px; font-weight:700; white-space:nowrap; }
+.taf-r .j { flex:1 1 auto; text-align:right; font-size:11.5px; font-weight:700; line-height:1.5; }
 .taf-r .j.ok { color:#3fb950; }
 .taf-r .j.ng { color:#f85149; }
 pre.wx {
@@ -1085,19 +1092,45 @@ async function avwxLoad(box) {
     throw new Error(res.map(r => r.ic + ' ' + (r.err || '電文が空')).join(' / '));
   }
 
+  /* 「いまどうか」を3空港ぶん並べてから、「これからどうなるか」を3空港ぶん。
+     空港ごとに実況と予報が入り混じるより、この順のほうが頭に入る */
   box.classList.remove('zoom'); box.onclick = null;
-  box.innerHTML = '<div class="wxdata">' + res.map(r => {
-    const nm = AVWX_NAME[r.ic] || '';
-    if (r.err) {
-      return `<div class="pt-card"><div class="pt-st">${r.ic} ${nm}</div>
-        <div class="shot-note" style="margin:0;">取得できませんでした（${esc(r.err)}）</div></div>`;
-    }
-    const o = avwxToObj(r.m);
-    o.station = r.ic + ' ' + nm;
-    const rawTxt = (r.m.raw || '').trim();
-    const raw = rawTxt ? `<pre class="pt-raw"><span class="rawlb">METAR</span>${esc(rawTxt)}</pre>` : '';
-    return ptCard(o, rwy, raw + avwxTafRows(r.t, rwy));
-  }).join('') + '</div>';
+  box.innerHTML = '<div class="wxdata">'
+    + '<div class="wx-sec"><b>いま</b>　METAR（実況）</div>'
+    + res.map(r => avwxMetarCard(r, rwy)).join('')
+    + '<div class="wx-sec"><b>これから</b>　TAF（予報）</div>'
+    + res.map(r => avwxTafCard(r, rwy)).join('')
+    + '</div>';
+}
+
+function avwxErrCard(r) {
+  const nm = AVWX_NAME[r.ic] || '';
+  return `<div class="pt-card"><div class="pt-st">${esc(r.ic + ' ' + nm)}</div>
+    <div class="shot-note" style="margin:0;">取得できませんでした（${esc(r.err)}）</div></div>`;
+}
+
+function avwxMetarCard(r, rwy) {
+  if (r.err) return avwxErrCard(r);
+  const o = avwxToObj(r.m);
+  o.station = r.ic + ' ' + (AVWX_NAME[r.ic] || '');
+  const rawTxt = (r.m.raw || '').trim();
+  const raw = rawTxt ? `<pre class="pt-raw"><span class="rawlb">METAR</span>${esc(rawTxt)}</pre>` : '';
+  return ptCard(o, rwy, raw);
+}
+
+function avwxTafCard(r, rwy) {
+  if (r.err) return '';
+  const nm = AVWX_NAME[r.ic] || '';
+  /* 予報の期間のどれかが条件外なら、カードごと目立たせる */
+  const fc = (r.t && Array.isArray(r.t.forecast)) ? r.t.forecast : [];
+  const anyBad = fc.some(f => judge(avwxToObj(f), rwy).bad.length);
+  const tag = fc.length
+    ? `<span class="tag ${anyBad ? 'ng' : 'ok'}">${anyBad ? '条件外の時間帯あり' : '通して条件内'}</span>`
+    : '';
+  return `<div class="pt-card ${fc.length ? (anyBad ? 'ng' : 'ok') : ''}">
+    <div class="pt-st">${esc(r.ic + ' ' + nm)}${tag}</div>
+    ${avwxTafRows(r.t, rwy)}
+  </div>`;
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -1,0 +1,9 @@
+# 配信しないもの（Cloudflare Workers の静的ファイル配布から除外）
+worker.js
+wrangler.jsonc
+.assetsignore
+lib/
+functions/
+.github/
+node_modules/
+DEPLOY.md

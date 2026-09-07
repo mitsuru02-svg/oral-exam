@@ -1,0 +1,20 @@
+{
+  // Cloudflare Workers の設定。`npx wrangler deploy` がこれを読む。
+  //
+  // name は Cloudflare 側で作った Worker の名前と一致させること。
+  // 違う名前で作っていたら、ここを書き換える。
+  "name": "takikawa-wx",
+  "main": "worker.js",
+  "compatibility_date": "2025-09-01",
+
+  // リポジトリの中身をそのまま静的ファイルとして配る。
+  // 除外するものは .assetsignore に書く。
+  // 静的ファイルが先に返され、見つからなかった要求だけ worker.js に渡る。
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS"
+  }
+
+  // AVWX_TOKEN はここには書かない。
+  // Cloudflare の画面で Secret として登録する（DEPLOY.md 参照）。
+}

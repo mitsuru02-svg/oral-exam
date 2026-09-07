@@ -213,6 +213,10 @@ iframe.wxframe.tall { height:420px; }
 .pt-i .n { font-size:10px; color:#7d8590; margin-top:1px; }
 .pt-warn { font-size:11px; color:#e3b341; margin-top:7px; line-height:1.6; }
 .shot-note a.lnk { color:#58a6ff; text-decoration:none; border-bottom:1px solid #1f4b8f; }
+.avwx-msg { font-size:11px; line-height:1.6; margin-top:7px; }
+.avwx-msg:empty { display:none; }
+.avwx-msg.ok { color:#3fb950; }
+.avwx-msg.ng { color:#e3b341; }
 .shot-box .wxdata {
   align-self:stretch; width:100%; padding:12px 12px 4px; text-align:left;
   max-height:62vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
@@ -531,6 +535,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button onclick="avwxSave()">保存</button>
         <button class="ghost" onclick="avwxForget()">削除</button>
       </div>
+      <div class="avwx-msg" id="avwxMsg"></div>
       <div class="shot-note">avwx.rest の無料プラン（Hobby／1日4,000回）で METAR・TAF が取れます。<a class="lnk" href="https://account.avwx.rest/plans" target="_blank" rel="noopener">プラン↗</a> で登録してトークンを貼り付けてください。トークンは<b>この端末の中だけ</b>に保存され、HTMLファイルには書き込まれません。保存すると上の枠が生電文＋自動判定に切り替わり、TAF は時間帯ごとに分解して出ます。</div>
     </div>
 
@@ -827,12 +832,43 @@ function avwxFillInput() {
   if (el) el.value = avwxToken();
 }
 
+/* ⑤の下に出す状況表示。うまくいかないとき、何が起きたのかを画面で言う */
+function avwxSay(msg, ok) {
+  const el = document.getElementById('avwxMsg');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.className = 'avwx-msg' + (msg ? (ok ? ' ok' : ' ng') : '');
+}
+
+/* 中身のある電文が返ってきたかを見る。AVWX は HTTP 200 のまま
+   エラーの入れ物だけ返すことがあり、それを電文として扱うと画面が空になる */
+function avwxHasData(d) {
+  if (!d || typeof d !== 'object') return false;
+  if (typeof d.raw === 'string' && d.raw.trim()) return true;
+  return !!(d.wind_speed && d.wind_speed.value != null);
+}
+
 async function avwxGet(kind, icao, token) {
-  const u = 'https://avwx.rest/api/' + kind + '/' + icao
-    + '?format=json&onfail=cache&token=' + encodeURIComponent(token);
-  const r = await fetch(u, { cache: 'no-store' });
-  if (!r.ok) throw new Error(kind + ' ' + icao + ' HTTP ' + r.status);
-  return r.json();
+  const base = 'https://avwx.rest/api/' + kind + '/' + icao + '?format=json&onfail=cache';
+  let last = '';
+  /* ①トークンをクエリで渡す（ヘッダを足さないので file:// でも通りやすい）
+     ②だめならヘッダで渡す（https で配信したときの保険） */
+  for (const mode of ['query', 'header']) {
+    try {
+      const opt = { cache: 'no-store' };
+      if (mode === 'header') opt.headers = { Authorization: token };
+      const r = await fetch(base + (mode === 'query' ? '&token=' + encodeURIComponent(token) : ''), opt);
+      const txt = await r.text();
+      let j = null;
+      try { j = JSON.parse(txt); } catch (e) {}
+      const emsg = j && (j.error || j.detail || j.message);
+      if (!r.ok) { last = 'HTTP ' + r.status + (emsg ? '：' + emsg : ''); continue; }
+      if (!j) { last = '応答がJSONではありません'; continue; }
+      if (!avwxHasData(j)) { last = emsg ? String(emsg) : '電文が空です'; continue; }
+      return j;
+    } catch (e) { last = (e && e.message) || String(e); }
+  }
+  throw new Error(last || '取得できません');
 }
 
 /* 雲量の表記ゆれを吸収する。AVWX は BKN と返すこともあれば broken と返すことも
@@ -882,10 +918,12 @@ function tafWhen(t) {
 /* TAF を時間帯ごとに分解して並べる。「11時以降に風が変わる」を目で拾えるように */
 function avwxTafRows(taf, rwy) {
   if (!taf) return '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
-  const raw = taf.raw
-    ? `<pre class="pt-raw"><span class="lb">TAF</span>${esc(taf.raw)}</pre>` : '';
+  const rawTxt = (taf.raw || '').trim();
+  const raw = rawTxt ? `<pre class="pt-raw"><span class="lb">TAF</span>${esc(rawTxt)}</pre>` : '';
   const fc = Array.isArray(taf.forecast) ? taf.forecast : [];
-  if (!fc.length) return raw;
+  if (!fc.length) {
+    return raw || '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
+  }
 
   const rows = fc.map(f => {
     const o = avwxToObj(f);
@@ -922,8 +960,12 @@ async function avwxLoad(box) {
     } catch (e) { return { ic, err: e.message || String(e) }; }
   }));
 
-  /* 3空港とも取れなければ AVWX は使えていない。呼び出し元で次の手段に落とす */
-  if (res.every(r => r.err)) throw new Error(res[0].err);
+  /* 使える電文が1局も無ければ AVWX は機能していない。呼び出し元で次の手段に落とす。
+     ここを「全局がエラーなら」にしていると、中身が空の応答が来たときに
+     見出しだけの空っぽの画面になってしまう */
+  if (!res.some(r => !r.err && avwxHasData(r.m))) {
+    throw new Error(res.map(r => r.ic + ' ' + (r.err || '電文が空')).join(' / '));
+  }
 
   box.classList.remove('zoom'); box.onclick = null;
   box.innerHTML = '<div class="wxdata">' + res.map(r => {
@@ -934,7 +976,8 @@ async function avwxLoad(box) {
     }
     const o = avwxToObj(r.m);
     o.station = r.ic + ' ' + nm;
-    const raw = r.m.raw ? `<pre class="pt-raw"><span class="lb">METAR</span>${esc(r.m.raw)}</pre>` : '';
+    const rawTxt = (r.m.raw || '').trim();
+    const raw = rawTxt ? `<pre class="pt-raw"><span class="lb">METAR</span>${esc(rawTxt)}</pre>` : '';
     return ptCard(o, rwy, raw + avwxTafRows(r.t, rwy));
   }).join('') + '</div>';
 }
@@ -1129,13 +1172,62 @@ const HIMA = {
 };
 const TILE = { z: 6, x0: 56, x1: 58, y0: 22, y1: 23 };
 
+const HIMA_BASE = 'https://www.jma.go.jp/bosai/himawari/data/satimg/';
+
+function himaTileUrl(t, cfg, x, y) {
+  return HIMA_BASE + t.b + '/fd/' + t.v + '/' + cfg.band + '/' + cfg.prod
+    + '/' + TILE.z + '/' + x + '/' + y + '.jpg';
+}
+
+/* 1枚だけ読み込んでみて、その時刻の画像があるかを確かめる */
+function probeImg(url) {
+  return new Promise(ok => {
+    const im = new Image();
+    im.referrerPolicy = 'no-referrer';
+    im.onload = () => ok(true);
+    im.onerror = () => ok(false);
+    im.src = url;
+  });
+}
+
+/* ひまわりは10分ごと。いまから遡って候補時刻を新しい順に並べる。
+   配信までに20分ほど遅れるので、3時間ぶん見ておけば必ずどれかに当たる */
+function himaTimes(n) {
+  const out = [];
+  const d = new Date();
+  d.setUTCSeconds(0, 0);
+  d.setUTCMinutes(Math.floor(d.getUTCMinutes() / 10) * 10);
+  for (let i = 0; i < n; i++) {
+    const t = new Date(d.getTime() - i * 10 * 60000);
+    const ts = t.getUTCFullYear() + pad(t.getUTCMonth() + 1) + pad(t.getUTCDate())
+      + pad(t.getUTCHours()) + pad(t.getUTCMinutes()) + '00';
+    out.push({ b: ts, v: ts });
+  }
+  return out;
+}
+
 async function loadHimawari(key, box, tsEl) {
   const cfg = HIMA[key];
-  const res = await fetch('https://www.jma.go.jp/bosai/himawari/data/satimg/targetTimes_fd.json', { cache: 'no-store' });
-  if (!res.ok) throw new Error('targetTimes ' + res.status);
-  const list = await res.json();
-  const t = list[list.length - 1];
-  if (!t || !t.basetime || !t.validtime) throw new Error('形式が違います');
+
+  /* ① targetTimes.json が読めれば確実。file:// では読めないので ② に落ちる */
+  let times = [];
+  try {
+    const res = await fetch(HIMA_BASE + 'targetTimes_fd.json', { cache: 'no-store' });
+    if (res.ok) {
+      const list = await res.json();
+      times = (Array.isArray(list) ? list : []).slice(-4).reverse()
+        .filter(t => t && t.basetime && t.validtime)
+        .map(t => ({ b: t.basetime, v: t.validtime }));
+    }
+  } catch (e) { /* ② へ */ }
+
+  /* ② 時刻を当てにいく。まず左上の1枚だけを候補ぶん同時に試し、
+     読めた中でいちばん新しい時刻を採用してから全タイルを並べる */
+  if (!times.length) times = himaTimes(18);
+
+  const oks = await Promise.all(times.map(t => probeImg(himaTileUrl(t, cfg, TILE.x0, TILE.y0))));
+  const hit = times[oks.indexOf(true)];
+  if (!hit) throw new Error('タイルを取得できません');
 
   const cols = TILE.x1 - TILE.x0 + 1;
   const grid = document.createElement('div');
@@ -1148,7 +1240,7 @@ async function loadHimawari(key, box, tsEl) {
       const im = new Image();
       im.referrerPolicy = 'no-referrer';
       jobs.push(new Promise(ok => { im.onload = () => ok(true); im.onerror = () => ok(false); }));
-      im.src = `https://www.jma.go.jp/bosai/himawari/data/satimg/${t.basetime}/fd/${t.validtime}/${cfg.band}/${cfg.prod}/${TILE.z}/${x}/${y}.jpg`;
+      im.src = himaTileUrl(hit, cfg, x, y);
       grid.appendChild(im);
     }
   }
@@ -1159,7 +1251,7 @@ async function loadHimawari(key, box, tsEl) {
   box.appendChild(grid);
   box.classList.add('zoom');
   box.onclick = () => openLb(grid.cloneNode(true));
-  const vt = t.validtime.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2}).*$/, (_, Y, M, D, h, m) => {
+  const vt = hit.v.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2}).*$/, (_, Y, M, D, h, m) => {
     const d = new Date(Date.UTC(+Y, +M - 1, +D, +h, +m));
     return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST`;
   });
@@ -1235,8 +1327,13 @@ async function loadShot(key, manual) {
       try {
         await avwxLoad(box);
         stamp();
+        avwxSay('AVWX から取得しました', true);
         return;
-      } catch (e) { /* ② へ */ }
+      } catch (e) {
+        avwxSay('AVWX から取れませんでした（' + ((e && e.message) || e) + '）。AWC の取り込みに切り替えます', false);
+      }
+    } else {
+      avwxSay('', false);
     }
 
     /* ② AWC を fetch。整形して自前の見た目で出せるが、file:// から開いていると

@@ -143,13 +143,6 @@ body {
 /* 読み込み中。前の図は消さず、薄くして待っていることだけ伝える */
 .shot-box.busy img, .shot-box.busy .tiles { opacity:.4; transition:opacity .12s; }
 .shot-note { font-size:12px; color:#6e7681; margin-top:5px; line-height:1.6; }
-.ft-tabs { display:flex; gap:6px; margin-top:9px; }
-.ft-tabs button {
-  flex:1; padding:8px 4px; border-radius:8px; border:1px solid #30363d;
-  background:#0d1117; color:#8b949e; font-size:12px; font-weight:600;
-  font-family:inherit; cursor:pointer; font-variant-numeric:tabular-nums;
-}
-.ft-tabs button[data-on="1"] { background:#0d2044; border-color:#1f4b8f; color:#79c0ff; }
 /* 画像URLの手入力。気象庁がURLを変えても、貼り直せば動き続ける */
 .urlset { margin-top:7px; display:none; gap:6px; }
 .urlset.on { display:flex; }
@@ -599,10 +592,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="shot">
       <div class="shot-time" id="ts-sigwx">—</div>
       <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
-      <div class="ft-tabs" id="ftTabs">
-        <button data-ft="3" data-on="1" onclick="setFT(3)">3時間後</button>
-        <button data-ft="6" data-on="0" onclick="setFT(6)">6時間後</button>
-        <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
+      <div class="tslide">
+        <input type="range" min="0" max="2" step="1" value="0" id="sigwxRange"
+               aria-label="下層悪天予想図の時刻" oninput="setSigwxIdx(this.value)">
+        <div class="tslide-lab" id="sigwxLab">
+          <span data-ft="3" data-on="1">3時間後</span>
+          <span data-ft="6" data-on="0">6時間後</span>
+          <span data-ft="9" data-on="0">9時間後</span>
+        </div>
       </div>
       <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
@@ -847,10 +844,10 @@ function judge(o, rwy) {
 function wxRow(headHtml, o, rwy) {
   const { xw, bad } = judge(o, rwy);
   const wind = o.windSpd === undefined ? '—'
-    : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0'))
+    : (o.windDir === 'VRB' ? 'VRB（風向不定）' : String(o.windDir).padStart(3, '0'))
       + '/' + o.windSpd + (o.gust != null ? 'G' + o.gust : '') + 'kt';
-  const vis = o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km');
-  const cei = o.ceil == null ? '雲底なし' : o.ceil.toLocaleString() + 'ft';
+  const vis = '視程' + (o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km'));
+  const cei = o.ceil == null ? '雲底なし' : ('雲底' + o.ceil.toLocaleString() + 'ft');
   const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
   return `<div class="taf-r${bad.length ? ' bad' : ''}">
     <div class="hd">
@@ -1146,6 +1143,11 @@ function avwxMetarCard(r, rwy) {
 
 function avwxTafCard(r, rwy) {
   if (r.err) return '';
+  /* TAF を出していない空港（丘珠など）は、カードごと出さない。
+     「取得できませんでした」と並べても読む人の役に立たない */
+  const hasRaw = !!((r.t && r.t.raw) || '').trim();
+  const hasFc = !!(r.t && Array.isArray(r.t.forecast) && r.t.forecast.length);
+  if (!hasRaw && !hasFc) return '';
   const nm = AVWX_NAME[r.ic] || '';
   /* 予報の期間のどれかが条件外なら、カードごと目立たせる */
   const fc = (r.t && Array.isArray(r.t.forecast)) ? r.t.forecast : [];
@@ -2054,7 +2056,7 @@ async function loadShot(key, manual) {
     return;
   }
   if (key === 'sigwx') {
-    document.querySelectorAll('#ftTabs button').forEach(bt => bt.dataset.on = (+bt.dataset.ft === sigwxFT) ? '1' : '0');
+    syncSigwxSlider();
     tryImages([{ url: SIGWX_URLS[sigwxFT], label: sigwxFT + '時間後の予想' }],
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
@@ -2109,7 +2111,16 @@ async function loadShot(key, manual) {
   fallback(box, tsEl, '衛星画像の取得が遮断されました。', key);
 }
 
+const SIGWX_FTS = [3, 6, 9];
 function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }
+function setSigwxIdx(i) { setFT(SIGWX_FTS[+i] || 3); }
+function syncSigwxSlider() {
+  const r = document.getElementById('sigwxRange');
+  if (r) r.value = String(Math.max(0, SIGWX_FTS.indexOf(sigwxFT)));
+  document.querySelectorAll('#sigwxLab span').forEach(sp => {
+    sp.dataset.on = (+sp.dataset.ft === sigwxFT) ? '1' : '0';
+  });
+}
 
 const CHART_KINDS = ['now', 'h24', 'h48'];
 let chartKind = 'now';
@@ -2220,7 +2231,7 @@ function tick() {
 }
 
 load(); render(); tick(); setInterval(tick, 10000);
-syncSwitch(); syncChartSlider(); avwxFillInput(); ptLoad(); loadAllShots();
+syncSwitch(); syncChartSlider(); syncSigwxSlider(); avwxFillInput(); ptLoad(); loadAllShots();
 /* 日をまたいだ状態でアプリに戻ってきたときに備える */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
 </script>

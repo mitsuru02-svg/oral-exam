@@ -1188,6 +1188,36 @@ async function chartImagesForExplain() {
   return out;
 }
 
+/* 衛星は1枚では動きが分からない。最新から20分おきに10枚を、
+   古い順に並べて渡す。3時間20分ぶんの流れが1回で読める */
+const SAT_EXPLAIN_N = 10;
+const SAT_EXPLAIN_STEP = 2;          /* 2コマ＝20分おき */
+
+async function satImagesForExplain(key) {
+  const { times, urls, newest } = await satFrames(key);
+  if (newest < 0) return [];
+  const picked = [];
+  for (let n = 0; n < SAT_EXPLAIN_N; n++) {
+    const i = newest + n * SAT_EXPLAIN_STEP;
+    if (i >= urls.length) break;
+    picked.push({ i, url: urls[i], at: times[i] });
+  }
+  /* 抜けているコマは落とす。並列に確かめる */
+  const ok = await Promise.all(picked.map(x => probeImg(x.url)));
+  const use = picked.filter((x, n) => ok[n]);
+  if (!use.length) return [];
+
+  /* 古い順に並べ替えて渡す。時刻を添えないと流れが読めない */
+  return use.reverse().map(x => {
+    const back = (x.i - newest) * 10;
+    return {
+      label: pad(x.at.getHours()) + ':' + pad(x.at.getMinutes()) + ' JST'
+        + (back ? '（' + satAgo(back / 10) + '前）' : '（最新）'),
+      url: x.url,
+    };
+  });
+}
+
 async function explainShot(key) {
   const px = avwxProxy();
   if (!px) {
@@ -1200,6 +1230,10 @@ async function explainShot(key) {
   if (key === 'chart') {
     expShow(key, '<p>天気図をそろえています…</p>');
     images = await chartImagesForExplain();
+  } else if (key === 'ir' || key === 'vis') {
+    expShow(key, '<p>直近' + SAT_EXPLAIN_N + '枚の画像をそろえています…</p>');
+    images = await satImagesForExplain(key);
+    if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
   } else {
     images = shownUrl[key] ? [{ label: '', url: shownUrl[key] }] : [];
   }
@@ -1233,8 +1267,10 @@ async function explainShot(key) {
 }
 
 function expFoot(cached, images) {
-  const src = (images && images.length > 1)
-    ? '実況と24時間後の2枚をもとにした説明です。表示するコマを切り替えても内容は変わりません。<br>' : '';
+  const n = (images && images.length) || 0;
+  const src = n > 2
+    ? n + '枚を古い順に並べて、動きを読ませた説明です。表示するコマを切り替えても内容は変わりません。<br>'
+    : (n === 2 ? '実況と24時間後の2枚をもとにした説明です。表示するコマを切り替えても内容は変わりません。<br>' : '');
   return '<div class="exp-foot">' + src + '図から読み取れることの説明です。'
     + '<b>飛べるかどうかの判断はしていません</b>。最終的な可否はご自身で、'
     + '現地の観天望気と合わせて判断してください。読み違いの可能性もあるので、'
@@ -1602,14 +1638,20 @@ async function satNewestIndex(key, urls) {
   return probeFirst(urls, 6);
 }
 
-async function loadMsc(key, box, tsEl) {
+/* コマの一覧と、そのうちどれが最新か。表示にも解説にも使う */
+async function satFrames(key) {
   const band = MSC_BAND[key];
   if (!band) throw new Error('band が分かりません');
   const times = satTimes(SAT_STEPS + 18);      /* 遡る余地を持たせる */
   const urls = times.map(d => MSC_BASE + 'jpn_' + band + '_'
     + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '.jpg');
-
   const newest = await satNewestIndex(key, urls);
+  return { times, urls, newest };
+}
+
+async function loadMsc(key, box, tsEl) {
+  const band = MSC_BAND[key];
+  const { times, urls, newest } = await satFrames(key);
   if (newest < 0) throw new Error('画像が見つかりません');
   satAnchor[band] = Object.assign({}, satAnchor[band], { at: times[newest] });
 
@@ -1782,9 +1824,9 @@ async function loadShot(key, manual) {
     tsEl.textContent = '—';
   }
   /* 別の図の解説が残らないように消す。ただし天気図だけは例外で、
-     実況と24時間をまとめて解説しているので、表示するコマを
-     切り替えても内容は変わらない */
-  if (key !== 'chart') {
+     天気図は実況と24時間を、衛星は直近10枚をまとめて解説しているので、
+     表示するコマを切り替えても内容は変わらない */
+  if (key === 'sigwx') {
     const ex = document.getElementById('exp-' + key);
     if (ex) ex.innerHTML = '';
   }

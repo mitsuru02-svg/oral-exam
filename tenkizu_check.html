@@ -213,6 +213,36 @@ iframe.wxframe.tall { height:420px; }
 .pt-i .n { font-size:10px; color:#7d8590; margin-top:1px; }
 .pt-warn { font-size:11px; color:#e3b341; margin-top:7px; line-height:1.6; }
 .shot-note a.lnk { color:#58a6ff; text-decoration:none; border-bottom:1px solid #1f4b8f; }
+/* 時間を送るスライドバー */
+.tslide { margin-bottom:8px; }
+.tslide input[type=range] {
+  width:100%; margin:0; height:26px; background:transparent;
+  -webkit-appearance:none; appearance:none; cursor:pointer;
+}
+.tslide input[type=range]::-webkit-slider-runnable-track {
+  height:5px; border-radius:3px; background:#21262d; border:1px solid #30363d;
+}
+.tslide input[type=range]::-moz-range-track {
+  height:5px; border-radius:3px; background:#21262d; border:1px solid #30363d;
+}
+.tslide input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none; margin-top:-9px;
+  width:22px; height:22px; border-radius:50%;
+  background:#1f6feb; border:2px solid #79c0ff; box-shadow:0 1px 4px rgba(0,0,0,.6);
+}
+.tslide input[type=range]::-moz-range-thumb {
+  width:20px; height:20px; border-radius:50%;
+  background:#1f6feb; border:2px solid #79c0ff; box-shadow:0 1px 4px rgba(0,0,0,.6);
+}
+.tslide-lab { display:flex; justify-content:space-between; margin-top:1px; }
+.tslide-lab span {
+  font-size:11.5px; color:#7d8590; font-variant-numeric:tabular-nums;
+  flex:1; text-align:center;
+}
+.tslide-lab span:first-child { text-align:left; }
+.tslide-lab span:last-child { text-align:right; }
+.tslide-lab span[data-on="1"] { color:#79c0ff; font-weight:700; }
+
 /* 解説パネル */
 .exp {
   margin-top:8px; border:1px solid #21262d; border-radius:10px;
@@ -406,10 +436,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <a class="open-btn" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener">天気図を開く <span class="ext">↗</span></a>
     <div class="shot">
-      <div class="ft-tabs" id="chartTabs">
-        <button data-ck="now" data-on="1" onclick="setChart('now')">実況</button>
-        <button data-ck="h24" data-on="0" onclick="setChart('h24')">24時間</button>
-        <button data-ck="h48" data-on="0" onclick="setChart('h48')">48時間</button>
+      <div class="tslide">
+        <input type="range" min="0" max="2" step="1" value="0" id="chartRange"
+               aria-label="天気図の時刻" oninput="setChartIdx(this.value)">
+        <div class="tslide-lab" id="chartLab">
+          <span data-ck="now" data-on="1">実況</span>
+          <span data-ck="h24" data-on="0">24時間</span>
+          <span data-ck="h48" data-on="0">48時間</span>
+        </div>
       </div>
       <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button><button class="exp-btn" onclick="explainShot('chart')">🔎 解説</button></div>
@@ -1113,12 +1147,22 @@ function expShow(key, html) {
   if (el) el.innerHTML = html;
 }
 
-async function explainShot(key) {
-  const url = shownUrl[key];
-  if (!url) {
-    expShow(key, '<div class="exp-err">図が表示されていないので解説できません。先に図を出してください。</div>');
-    return;
+/* 天気図は、実況と24時間後の2枚をまとめて渡す。1枚だけ見ても
+   「今どうか」しか分からず、知りたいのは「これからどう変わるか」なので */
+async function chartImagesForExplain() {
+  const out = [];
+  for (const [k, label] of [['now', '実況天気図'], ['h24', '24時間後の予想天気図']]) {
+    let cands = [];
+    try { cands = await chartFromList(k); } catch (e) { /* 次へ */ }
+    if (k === 'now') cands = cands.concat(chartCandidates());
+    if (!cands.length) continue;
+    const i = await probeFirst(cands.map(c => c.url), 4);
+    if (i >= 0) out.push({ label, url: cands[i].url });
   }
+  return out;
+}
+
+async function explainShot(key) {
   const px = avwxProxy();
   if (!px) {
     expShow(key, '<div class="exp-err">解説には中継サーバーが要ります。'
@@ -1126,15 +1170,28 @@ async function explainShot(key) {
     return;
   }
 
-  const cached = expCache()[url];
-  if (cached) { expShow(key, expRender(cached.text) + expFoot(true)); return; }
+  let images;
+  if (key === 'chart') {
+    expShow(key, '<p>天気図をそろえています…</p>');
+    images = await chartImagesForExplain();
+  } else {
+    images = shownUrl[key] ? [{ label: '', url: shownUrl[key] }] : [];
+  }
+  if (!images.length) {
+    expShow(key, '<div class="exp-err">図が表示されていないので解説できません。先に図を出してください。</div>');
+    return;
+  }
+
+  const ck = images.map(i => i.url).join('|');
+  const cached = expCache()[ck];
+  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images)); return; }
 
   expShow(key, '<p>' + EXP_TITLE[key] + 'を読んでいます…</p>');
   try {
     const r = await fetch(px + '/explain', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url, kind: key }),
+      body: JSON.stringify({ images, kind: key }),
     });
     const j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.text) {
@@ -1142,15 +1199,17 @@ async function explainShot(key) {
       expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc(m) + '）</div>');
       return;
     }
-    expRemember(url, j.text);
-    expShow(key, expRender(j.text) + expFoot(false));
+    expRemember(ck, j.text);
+    expShow(key, expRender(j.text) + expFoot(false, images));
   } catch (e) {
     expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc((e && e.message) || e) + '）</div>');
   }
 }
 
-function expFoot(cached) {
-  return '<div class="exp-foot">図から読み取れることの説明です。'
+function expFoot(cached, images) {
+  const src = (images && images.length > 1)
+    ? '実況と24時間後の2枚をもとにした説明です。表示するコマを切り替えても内容は変わりません。<br>' : '';
+  return '<div class="exp-foot">' + src + '図から読み取れることの説明です。'
     + '<b>飛べるかどうかの判断はしていません</b>。最終的な可否はご自身で、'
     + '現地の観天望気と合わせて判断してください。読み違いの可能性もあるので、'
     + '数値は必ず図そのもので確かめること。'
@@ -1319,7 +1378,7 @@ function chartKindOf(it) {
   return 'now';
 }
 
-const CHART_KIND_LABEL = { now: '実況', h24: '24時間後の予想', h48: '48時間後の予想' };
+const CHART_KIND_LABEL = { now: '実況', h24: '24時間後', h48: '48時間後' };
 
 async function chartFromList(kind) {
   const items = [];
@@ -1342,7 +1401,8 @@ async function chartFromList(kind) {
     : mine;
   if (!use.length) throw new Error('実況の天気図が見つかりません');
 
-  const tail = '　' + CHART_KIND_LABEL[kind] + '　※図中の時刻も確認';
+  /* ボタンが並ぶ細い行に出るので短く。時刻を図で確かめる注意は下の説明文にある */
+  const tail = '　' + CHART_KIND_LABEL[kind];
   /* 日本付近を先に、そのうえで新しい順 */
   return use
     .sort((a, b) => (chartAreaScore(a) - chartAreaScore(b))
@@ -1564,8 +1624,13 @@ async function loadShot(key, manual) {
   }
   box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
   tsEl.textContent = '—';
-  const ex = document.getElementById('exp-' + key);
-  if (ex) ex.innerHTML = '';       /* 別の図の解説が残らないように */
+  /* 別の図の解説が残らないように消す。ただし天気図だけは例外で、
+     実況と24時間をまとめて解説しているので、表示するコマを
+     切り替えても内容は変わらない */
+  if (key !== 'chart') {
+    const ex = document.getElementById('exp-' + key);
+    if (ex) ex.innerHTML = '';
+  }
 
   /* 手で設定されたURLがあれば、それを最優先で使う */
   const custom = customUrls()[key];
@@ -1642,9 +1707,7 @@ async function loadShot(key, manual) {
     return;
   }
   if (key === 'chart') {
-    document.querySelectorAll('#chartTabs button').forEach(bt => {
-      bt.dataset.on = (bt.dataset.ck === chartKind) ? '1' : '0';
-    });
+    syncChartSlider();
     /* list.json が読めればそれが最優先。読めないときの総当たりは、
        ファイル名の付け方が分かっている実況にだけ効かせる */
     let cands = [];
@@ -1677,7 +1740,17 @@ async function loadShot(key, manual) {
 
 function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }
 
+const CHART_KINDS = ['now', 'h24', 'h48'];
 let chartKind = 'now';
+
+function syncChartSlider() {
+  const r = document.getElementById('chartRange');
+  if (r) r.value = String(Math.max(0, CHART_KINDS.indexOf(chartKind)));
+  document.querySelectorAll('#chartLab span').forEach(sp => {
+    sp.dataset.on = (sp.dataset.ck === chartKind) ? '1' : '0';
+  });
+}
+function setChartIdx(i) { setChart(CHART_KINDS[+i] || 'now'); }
 function setChart(k) { chartKind = k; loadShot('chart', true); }
 
 function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'metar'].forEach(k => loadShot(k)); }
@@ -1776,7 +1849,7 @@ function tick() {
 }
 
 load(); render(); tick(); setInterval(tick, 10000);
-syncSwitch(); avwxFillInput(); ptLoad(); loadAllShots();
+syncSwitch(); syncChartSlider(); avwxFillInput(); ptLoad(); loadAllShots();
 /* 日をまたいだ状態でアプリに戻ってきたときに備える */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
 </script>

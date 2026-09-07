@@ -533,12 +533,23 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="paste-tool" style="margin-bottom:12px;">
       <div class="look-t" style="margin-bottom:6px;">▸ AVWX から直接取る（任意・無料）</div>
       <div class="pt-row">
-        <input type="password" id="avwxTok" placeholder="AVWX の API トークン" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:auto;flex:1;min-width:0;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;">
+        <input type="text" id="avwxPx" placeholder="中継サーバーのURL（例 https://…/api）" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:auto;flex:1;min-width:0;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;">
+      </div>
+      <div class="pt-row">
+        <input type="password" id="avwxTok" placeholder="AVWX の API トークン（中継を使うなら不要）" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:auto;flex:1;min-width:0;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;">
         <button onclick="avwxSave()">保存</button>
         <button class="ghost" onclick="avwxForget()">削除</button>
       </div>
       <div class="avwx-msg" id="avwxMsg"></div>
-      <div class="shot-note">avwx.rest の無料プラン（Hobby／1日4,000回）で METAR・TAF が取れます。<a class="lnk" href="https://account.avwx.rest/plans" target="_blank" rel="noopener">プラン↗</a> で登録してトークンを貼り付けてください。トークンは<b>この端末の中だけ</b>に保存され、HTMLファイルには書き込まれません。保存すると上の枠が生電文＋自動判定に切り替わり、TAF は時間帯ごとに分解して出ます。</div>
+      <div class="shot-note">
+        <b>中継サーバーに置く場合（おすすめ）</b>：トークンをサーバー側に隠せるので、
+        端末には何も入れずに済みます。置き方は同梱の <b>DEPLOY.md</b> のとおり。
+        このページ自体を中継サーバーから開けば、上の欄は<b>空のままで動きます</b>。<br>
+        <b>この端末だけで使う場合</b>：<a class="lnk" href="https://account.avwx.rest/plans" target="_blank" rel="noopener">avwx.rest のプラン↗</a>
+        の無料枠（Hobby／1日4,000回）で登録し、トークンを下の欄へ。
+        トークンは<b>この端末の中だけ</b>に保存され、HTMLファイルには書き込まれません。<br>
+        どちらでも、上の枠が生電文＋自動判定に切り替わり、TAF は時間帯ごとに分解して出ます。
+      </div>
     </div>
 
     <div class="paste-tool">
@@ -814,24 +825,59 @@ function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&
    トークンは localStorage にだけ置く。HTMLファイルには書かないので、
    ファイルを誰かに渡してもトークンは付いていかない。
    ══════════════════════════════════════════════════════════════ */
-const AVWX_KEY = 'tenkizu_avwxToken';
+const AVWX_KEY  = 'tenkizu_avwxToken';
+const PROXY_KEY = 'tenkizu_proxy';
+
+/* 中継サーバーの場所。ページを https で配信していれば、同じ場所の /api を
+   既定にするので設定は要らない。手元のファイルから開くときだけ、
+   下の欄に中継サーバーのURLを入れてもらう */
+function avwxProxy() {
+  try {
+    const v = (localStorage.getItem(PROXY_KEY) || '').trim();
+    if (v) return v.replace(/\/+$/, '');
+  } catch (e) {}
+  if (location.protocol === 'https:' || location.protocol === 'http:') {
+    return location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'api';
+  }
+  return '';
+}
+
+/* JSON を取りにいく。直に取れないときは中継サーバー越しにもう一度試す */
+async function getJson(url) {
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    if (r.ok) return await r.json();
+  } catch (e) { /* 中継へ */ }
+  const px = avwxProxy();
+  if (!px) throw new Error('取得できません');
+  const r2 = await fetch(px + '/jma/' + url.replace(/^https?:\/\/[^/]+\//, ''), { cache: 'no-store' });
+  if (!r2.ok) throw new Error('中継 HTTP ' + r2.status);
+  return r2.json();
+}
+
 const AVWX_ST  = ['RJEC', 'RJCO', 'RJCC'];
 const AVWX_NAME = { RJEC: '旭川', RJCO: '丘珠', RJCC: '新千歳' };
 
 function avwxToken() { try { return (localStorage.getItem(AVWX_KEY) || '').trim(); } catch (e) { return ''; } }
 function avwxSave() {
-  const v = (document.getElementById('avwxTok').value || '').trim();
-  try { v ? localStorage.setItem(AVWX_KEY, v) : localStorage.removeItem(AVWX_KEY); } catch (e) {}
+  const tok = (document.getElementById('avwxTok').value || '').trim();
+  const px  = (document.getElementById('avwxPx').value || '').trim();
+  try {
+    tok ? localStorage.setItem(AVWX_KEY, tok)  : localStorage.removeItem(AVWX_KEY);
+    px  ? localStorage.setItem(PROXY_KEY, px)  : localStorage.removeItem(PROXY_KEY);
+  } catch (e) {}
   loadShot('metar', true);
 }
 function avwxForget() {
-  try { localStorage.removeItem(AVWX_KEY); } catch (e) {}
-  const el = document.getElementById('avwxTok'); if (el) el.value = '';
+  try { localStorage.removeItem(AVWX_KEY); localStorage.removeItem(PROXY_KEY); } catch (e) {}
+  ['avwxTok', 'avwxPx'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   loadShot('metar', true);
 }
 function avwxFillInput() {
-  const el = document.getElementById('avwxTok');
-  if (el) el.value = avwxToken();
+  const t = document.getElementById('avwxTok');
+  if (t) t.value = avwxToken();
+  const p = document.getElementById('avwxPx');
+  if (p) { try { p.value = localStorage.getItem(PROXY_KEY) || ''; } catch (e) {} }
 }
 
 /* ⑤の下に出す状況表示。うまくいかないとき、何が起きたのかを画面で言う */
@@ -852,21 +898,29 @@ function avwxHasData(d) {
 
 async function avwxGet(kind, icao, token) {
   const base = 'https://avwx.rest/api/' + kind + '/' + icao + '?format=json&onfail=cache';
+  const px = avwxProxy();
   let last = '';
-  /* ①トークンをクエリで渡す（ヘッダを足さないので file:// でも通りやすい）
-     ②だめならヘッダで渡す（https で配信したときの保険） */
-  for (const mode of ['query', 'header']) {
+  /* ①中継サーバー越し（トークンは向こうに置いてあるので、この端末には要らない）
+     ②トークンをクエリで渡す（ヘッダを足さないので file:// でも通りやすい）
+     ③だめならヘッダで渡す */
+  const modes = [];
+  if (px) modes.push('proxy');
+  if (token) modes.push('query', 'header');
+  for (const mode of modes) {
     try {
       const opt = { cache: 'no-store' };
       if (mode === 'header') opt.headers = { Authorization: token };
-      const r = await fetch(base + (mode === 'query' ? '&token=' + encodeURIComponent(token) : ''), opt);
+      const u = mode === 'proxy' ? (px + '/' + kind + '/' + icao)
+        : base + (mode === 'query' ? '&token=' + encodeURIComponent(token) : '');
+      const r = await fetch(u, opt);
       const txt = await r.text();
       let j = null;
       try { j = JSON.parse(txt); } catch (e) {}
       const emsg = j && (j.error || j.detail || j.message);
-      if (!r.ok) { last = 'HTTP ' + r.status + (emsg ? '：' + emsg : ''); continue; }
-      if (!j) { last = '応答がJSONではありません'; continue; }
-      if (!avwxHasData(j)) { last = emsg ? String(emsg) : '電文が空です'; continue; }
+      const via = mode === 'proxy' ? '中継 ' : '';
+      if (!r.ok) { last = via + 'HTTP ' + r.status + (emsg ? '：' + emsg : ''); continue; }
+      if (!j) { last = via + '応答がJSONではありません'; continue; }
+      if (!avwxHasData(j)) { last = via + (emsg ? String(emsg) : '電文が空です'); continue; }
       return j;
     } catch (e) { last = (e && e.message) || String(e); }
   }
@@ -949,7 +1003,7 @@ function avwxTafRows(taf, rwy) {
 
 async function avwxLoad(box) {
   const token = avwxToken();
-  if (!token) throw new Error('トークン未設定');
+  if (!token && !avwxProxy()) throw new Error('トークンも中継サーバーも未設定');
   const rwyEl = document.getElementById('ptRwy');
   const rwyRaw = rwyEl ? rwyEl.value : '';
   const rwy = rwyRaw === '' ? null : (((+rwyRaw % 360) + 360) % 360);
@@ -1116,10 +1170,8 @@ function collectPng(node, out) {
 }
 
 async function chartFromList() {
-  const r = await fetch(CHART_LIST, { cache: 'no-store' });
-  if (!r.ok) throw new Error('list.json ' + r.status);
   const names = [];
-  collectPng(await r.json(), names);
+  collectPng(await getJson(CHART_LIST), names);
   if (!names.length) throw new Error('list.json に画像名がありません');
 
   /* 予想図は先の時刻を持つので、いまより後のものは実況として出さない */
@@ -1174,6 +1226,44 @@ const HIMA = {
 };
 const TILE = { z: 6, x0: 56, x1: 58, y0: 22, y1: 23 };
 
+/* 気象衛星センターの静止画。タイルと違って1枚の JPEG で、ファイル名は
+   UTC の時分だけ。日付が入らないので取り違えが起きず、fetch も要らない。
+   タイル方式は時刻の指定が細かく当てにくいので、こちらを第一手にする */
+const MSC_BASE = 'https://www.data.jma.go.jp/mscweb/data/himawari/img/jpn/';
+const MSC_BAND = { ir: 'b13', vis: 'b03' };
+
+/* ひまわりは10分ごと。配信の遅れを見て3時間ぶん、新しい順に候補を作る */
+function satTimes(n) {
+  const out = [];
+  const d = new Date();
+  d.setUTCSeconds(0, 0);
+  d.setUTCMinutes(Math.floor(d.getUTCMinutes() / 10) * 10);
+  for (let i = 0; i < n; i++) out.push(new Date(d.getTime() - i * 10 * 60000));
+  return out;
+}
+function satLabel(d) {
+  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST 現在`;
+}
+
+async function loadMsc(key, box, tsEl) {
+  const band = MSC_BAND[key];
+  if (!band) throw new Error('band が分かりません');
+  const times = satTimes(18);
+  const urls = times.map(d => MSC_BASE + 'jpn_' + band + '_'
+    + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '.jpg');
+
+  const i = await probeFirst(urls, 6);
+  if (i < 0) throw new Error('画像が見つかりません');
+
+  const im = new Image();
+  im.referrerPolicy = 'no-referrer';
+  im.src = urls[i];
+  box.innerHTML = ''; box.appendChild(im);
+  box.classList.add('zoom');
+  box.onclick = () => openLb(im.cloneNode(true));
+  tsEl.textContent = satLabel(times[i]);
+}
+
 const HIMA_BASE = 'https://www.jma.go.jp/bosai/himawari/data/satimg/';
 
 function himaTileUrl(t, cfg, x, y) {
@@ -1192,20 +1282,26 @@ function probeImg(url) {
   });
 }
 
+/* 候補を先頭から数個ずつ試し、当たった時点で打ち切る。
+   ふつうは最初の一組で当たるので、気象庁に無駄な問い合わせを投げずに済む */
+async function probeFirst(urls, wave) {
+  for (let i = 0; i < urls.length; i += wave) {
+    const part = urls.slice(i, i + wave);
+    const oks = await Promise.all(part.map(u => probeImg(u)));
+    const j = oks.indexOf(true);
+    if (j >= 0) return i + j;
+  }
+  return -1;
+}
+
 /* ひまわりは10分ごと。いまから遡って候補時刻を新しい順に並べる。
    配信までに20分ほど遅れるので、3時間ぶん見ておけば必ずどれかに当たる */
 function himaTimes(n) {
-  const out = [];
-  const d = new Date();
-  d.setUTCSeconds(0, 0);
-  d.setUTCMinutes(Math.floor(d.getUTCMinutes() / 10) * 10);
-  for (let i = 0; i < n; i++) {
-    const t = new Date(d.getTime() - i * 10 * 60000);
+  return satTimes(n).map(t => {
     const ts = t.getUTCFullYear() + pad(t.getUTCMonth() + 1) + pad(t.getUTCDate())
       + pad(t.getUTCHours()) + pad(t.getUTCMinutes()) + '00';
-    out.push({ b: ts, v: ts });
-  }
-  return out;
+    return { b: ts, v: ts };
+  });
 }
 
 async function loadHimawari(key, box, tsEl) {
@@ -1214,21 +1310,17 @@ async function loadHimawari(key, box, tsEl) {
   /* ① targetTimes.json が読めれば確実。file:// では読めないので ② に落ちる */
   let times = [];
   try {
-    const res = await fetch(HIMA_BASE + 'targetTimes_fd.json', { cache: 'no-store' });
-    if (res.ok) {
-      const list = await res.json();
-      times = (Array.isArray(list) ? list : []).slice(-4).reverse()
-        .filter(t => t && t.basetime && t.validtime)
-        .map(t => ({ b: t.basetime, v: t.validtime }));
-    }
+    const list = await getJson(HIMA_BASE + 'targetTimes_fd.json');
+    times = (Array.isArray(list) ? list : []).slice(-4).reverse()
+      .filter(t => t && t.basetime && t.validtime)
+      .map(t => ({ b: t.basetime, v: t.validtime }));
   } catch (e) { /* ② へ */ }
 
   /* ② 時刻を当てにいく。まず左上の1枚だけを候補ぶん同時に試し、
      読めた中でいちばん新しい時刻を採用してから全タイルを並べる */
   if (!times.length) times = himaTimes(18);
 
-  const oks = await Promise.all(times.map(t => probeImg(himaTileUrl(t, cfg, TILE.x0, TILE.y0))));
-  const hit = times[oks.indexOf(true)];
+  const hit = times[await probeFirst(times.map(t => himaTileUrl(t, cfg, TILE.x0, TILE.y0)), 6)];
   if (!hit) throw new Error('タイルを取得できません');
 
   const cols = TILE.x1 - TILE.x0 + 1;
@@ -1325,7 +1417,7 @@ async function loadShot(key, manual) {
     };
     /* ① AVWX。トークンが入っていればまずここ。生電文に加えて風・視程・雲底が
        すでに解いてあるので、TAF を時間帯ごとに分けて出せる。 */
-    if (avwxToken()) {
+    if (avwxToken() || avwxProxy()) {
       try {
         await avwxLoad(box);
         stamp();
@@ -1391,6 +1483,12 @@ async function loadShot(key, manual) {
       () => fallback(box, tsEl, '天気図を取得できませんでした。', key));
     return;
   }
+  /* ①気象衛星センターの1枚画像（fetch が要らないので file:// でも出る）
+     ②気象庁のタイル ③案内 */
+  try {
+    await loadMsc(key, box, tsEl);
+    return;
+  } catch (e) { /* ② へ */ }
   try {
     await loadHimawari(key, box, tsEl);
   } catch (e) {

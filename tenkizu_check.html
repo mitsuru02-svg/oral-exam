@@ -790,7 +790,12 @@ const FRAME_URLS = {
   vis:   'https://www.jma.go.jp/bosai/map.html#6/43.0/142.0/&elem=vis&contents=himawari',
   sigwx: 'https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2',
 };
-const METAR_URL = 'https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true';
+/* METAR/TAF は2つのURLを使い分ける。
+   API は fetch 用。中身が生電文だけなので整形して自前の見た目で出せるが、
+   枠内表示（iframe）は相手が拒否するらしく空になる。
+   人が見るページのほうは枠内表示が通るので、iframe にはこちらを使う。 */
+const METAR_API  = 'https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true';
+const METAR_PAGE = 'https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&taf=1';
 const URL_KEY = 'tenkizu_customUrls';
 function customUrls() {
   try { return JSON.parse(localStorage.getItem(URL_KEY) || '{}'); } catch (e) { return {}; }
@@ -967,7 +972,7 @@ async function loadShot(key, manual) {
     /* まず fetch。整形して自前の見た目で出せるが、file:// から開いていると
        ブラウザが他サイトへの fetch を止めるので、その場合は下の iframe に落とす。 */
     try {
-      const r = await fetch(METAR_URL, { cache: 'no-store' });
+      const r = await fetch(METAR_API, { cache: 'no-store' });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const txt = (await r.text()).trim();
       if (!txt) throw new Error('空です');
@@ -980,13 +985,13 @@ async function loadShot(key, manual) {
        相手サイトの許可（CORS）が要らない。file:// から開いていても出る。 */
     const fr = document.createElement('iframe');
     fr.className = 'wxframe';
-    fr.src = METAR_URL;
+    fr.src = METAR_PAGE;
     fr.referrerPolicy = 'no-referrer';
     box.innerHTML = '';
     box.appendChild(fr);
     const note = document.createElement('div');
     note.className = 'wxframe-note';
-    note.textContent = '取り込み表示。出ないときは「開く」で表示し、本文をコピーして下の貼り付け欄へ。';
+    note.textContent = '気象庁ではなく AWC のページを取り込んでいます。枠の中を指で操作できます。出ないときは「開く」で表示し、本文をコピーして下の貼り付け欄へ。';
     box.appendChild(note);
     stamp();
     return;

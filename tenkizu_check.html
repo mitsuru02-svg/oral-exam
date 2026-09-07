@@ -126,7 +126,15 @@ body {
   display:flex; align-items:center; gap:8px; margin-top:7px;
   font-size:10.5px; color:#7d8590;
 }
-.shot-bar .t { flex:1; min-width:0; font-variant-numeric:tabular-nums; }
+/* 時刻は図の上に置く。どの時刻の図を見ているのかを、
+   図に目を移す前に頭に入れてもらうため */
+.shot-time {
+  font-size:12.5px; color:#8b949e; line-height:1.6; margin-bottom:6px;
+  font-variant-numeric:tabular-nums;
+}
+.shot-bar { justify-content:flex-end; }
+.shot-bar button.playbtn { border-color:#1f4b8f; background:#0d2044; color:#79c0ff; font-weight:700; }
+.shot-bar button.playbtn[data-on="1"] { border-color:#9e6a03; background:#2b1d02; color:#e3b341; }
 .shot-bar button {
   border:1px solid #30363d; background:#161b22; color:#8b949e;
   border-radius:7px; padding:5px 10px; font-size:10.5px; cursor:pointer; font-family:inherit;
@@ -135,7 +143,7 @@ body {
 /* 読み込み中。前の図は消さず、薄くして待っていることだけ伝える */
 .shot-box.busy img, .shot-box.busy .tiles { opacity:.4; transition:opacity .12s; }
 .shot-note { font-size:12px; color:#6e7681; margin-top:5px; line-height:1.6; }
-.ft-tabs { display:flex; gap:6px; margin-bottom:7px; }
+.ft-tabs { display:flex; gap:6px; margin-top:9px; }
 .ft-tabs button {
   flex:1; padding:8px 4px; border-radius:8px; border:1px solid #30363d;
   background:#0d1117; color:#8b949e; font-size:12px; font-weight:600;
@@ -216,7 +224,7 @@ iframe.wxframe.tall { height:420px; }
 .pt-warn { font-size:12.5px; color:#e3b341; margin-top:7px; line-height:1.6; }
 .shot-note a.lnk { color:#58a6ff; text-decoration:none; border-bottom:1px solid #1f4b8f; }
 /* 時間を送るスライドバー */
-.tslide { margin-bottom:8px; }
+.tslide { margin-top:9px; }
 .tslide input[type=range] {
   width:100%; margin:0; height:26px; background:transparent;
   -webkit-appearance:none; appearance:none; cursor:pointer;
@@ -272,6 +280,13 @@ iframe.wxframe.tall { height:420px; }
   cursor:pointer;
 }
 .exp-go:active { background:#0d2044; }
+/* 上部のまとめボタン。ページの主役なので一段強く */
+.brief { margin:0 14px 16px; }
+.brief-go {
+  margin-top:0; padding:16px 12px; font-size:16px;
+  background:#1f6feb; border-color:#79c0ff; color:#fff;
+}
+.brief-go:active { background:#1a5fd0; }
 .avwx-msg { font-size:11px; line-height:1.6; margin-top:7px; }
 .avwx-msg:empty { display:none; }
 .avwx-msg.ok { color:#3fb950; }
@@ -443,6 +458,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <span class="imgsw-t"><b>気象庁の画像を読み込む</b><span id="imgSwNote">通信します。オフや圏外のときは各カードの「開く」から</span></span>
   </button>
 
+  <div class="brief">
+    <button class="exp-go brief-go" onclick="explainAll()">🔎 ①〜⑤をまとめて分析する</button>
+    <div class="exp" id="exp-all"></div>
+    <div class="shot-note">天気図・衛星・下層悪天・近傍空港の電文をまとめて読み、1つの筋にして返します。最後に「試験官への説明の組み立て」も付きます。<b>読み込みに20〜30秒</b>かかります。</div>
+  </div>
+
   <div class="sec-t">読む順序</div>
 
   <!-- STEP 1 -->
@@ -453,6 +474,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener" aria-label="天気図を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="shot-time" id="ts-chart">—</div>
+      <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
       <div class="tslide">
         <input type="range" min="0" max="2" step="1" value="0" id="chartRange"
                aria-label="天気図の時刻" oninput="setChartIdx(this.value)">
@@ -462,8 +485,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
           <span data-ck="h48" data-on="0">48時間</span>
         </div>
       </div>
-      <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
+      <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-chart"></div>
       <div class="urlset" id="url-chart">
@@ -496,13 +518,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener" aria-label="赤外画像を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="shot-time" id="ts-ir">—</div>
+      <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
       <div class="tslide">
         <input type="range" min="0" max="35" step="1" value="35" id="satRange-ir"
                aria-label="赤外画像の時刻" oninput="setSat('ir', this.value)">
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
       </div>
-      <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
+      <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-ir"></div>
       <div class="urlset" id="url-ir">
@@ -510,7 +533,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button onclick="saveUrl('ir')">保存</button>
         <button onclick="clearUrl('ir')">解除</button>
       </div>
-      <div class="shot-note">ひまわり赤外（B13）。<b>スライドバーで6時間前まで遡れます</b>。1枚で見ずに動かして、雲域が滝川へ近づいているのか離れているのかを見てください。</div>
+      <div class="shot-note">ひまわり赤外（B13）。<b>スライドバーで6時間前まで遡れます</b>。<b>▶ 自動送り</b>を押すと古いほうから順に再生します。1枚で見ずに動かして、雲域が滝川へ近づいているのか離れているのかを見てください。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -534,13 +557,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener" aria-label="可視画像を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="shot-time" id="ts-vis">—</div>
+      <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
       <div class="tslide">
         <input type="range" min="0" max="35" step="1" value="35" id="satRange-vis"
                aria-label="可視画像の時刻" oninput="setSat('vis', this.value)">
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
       </div>
-      <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
+      <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-vis"></div>
       <div class="urlset" id="url-vis">
@@ -573,13 +597,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2" target="_blank" rel="noopener" aria-label="下層悪天予想図を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="shot-time" id="ts-sigwx">—</div>
+      <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
       <div class="ft-tabs" id="ftTabs">
         <button data-ft="3" data-on="1" onclick="setFT(3)">3時間後</button>
         <button data-ft="6" data-on="0" onclick="setFT(6)">6時間後</button>
         <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
       </div>
-      <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-sigwx"></div>
       <div class="urlset" id="url-sigwx">
@@ -613,8 +638,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener" aria-label="METAR / TAF を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="shot-time" id="ts-metar">—</div>
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-metar">—</span><button onclick="loadShot('metar',true)">再読込</button></div>
+      <div class="shot-bar"><button onclick="loadShot('metar',true)">再読込</button></div>
       <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
 
@@ -1226,6 +1252,99 @@ async function satImagesForExplain(key) {
   });
 }
 
+/* ①〜⑤をまとめて読む。
+   図は全部は送らない。総観場（天気図2枚）、雲の動き（赤外3枚）、
+   いまの雲（可視1枚）、下層の予想（悪天図1枚）の7枚に絞る。
+   ⑤の電文は画像ではなく文字で渡す（そのほうが正確で安い）。 */
+async function briefImages() {
+  const out = [];
+  try {
+    const c = await chartImagesForExplain();
+    c.forEach(x => out.push({ label: '①天気図　' + x.label, url: x.url }));
+  } catch (e) {}
+
+  for (const [k, nm, n] of [['ir', '②赤外衛星', 3], ['vis', '③可視衛星', 1]]) {
+    try {
+      const all = await satImagesForExplain(k);
+      /* 新しいほうから n 枚。並びは古い順のまま保つ */
+      all.slice(-n).forEach(x => out.push({ label: nm + '　' + x.label, url: x.url }));
+    } catch (e) {}
+  }
+
+  if (shownUrl.sigwx) {
+    out.push({ label: '④下層悪天予想図　' + sigwxFT + '時間後', url: shownUrl.sigwx });
+  }
+  return out;
+}
+
+/* ⑤に出ている生電文を、そのまま文字で渡す */
+function briefText() {
+  const pres = [...document.querySelectorAll('#box-metar .pt-raw')];
+  if (!pres.length) return '';
+  const rwyEl = document.getElementById('ptRwy');
+  const rwy = rwyEl && rwyEl.value ? ('\n滑走路方位は ' + rwyEl.value + ' 度です。') : '';
+  /* 見出し（METAR / TAF）と本文がくっつかないよう、間を空ける */
+  const lines = pres.map(e => {
+    const c = e.cloneNode(true);
+    const lb = c.querySelector('.rawlb');
+    const label = lb ? lb.textContent.trim() : '';
+    if (lb) lb.remove();
+    return (label ? label + ' ' : '') + c.textContent.trim();
+  });
+  return '⑤近傍空港の電文（旭川 RJEC・丘珠 RJCO・新千歳 RJCC）\n'
+    + lines.join('\n') + rwy;
+}
+
+async function explainAll() {
+  const key = 'all';
+  const px = avwxProxy();
+  if (!px) {
+    expShow(key, '<div class="exp-err">分析には中継サーバーが要ります。</div>');
+    return;
+  }
+  expShow(key, '<p>①〜⑤の資料をそろえています…</p>');
+  const images = await briefImages();
+  const text = briefText();
+  if (!images.length && !text) {
+    expShow(key, '<div class="exp-err">読み込める資料がありませんでした。'
+      + '上の「気象庁の画像を読み込む」がオンか確かめてください。</div>');
+    return;
+  }
+
+  const ck = 'brief|' + images.map(i => i.url).join('|') + '|' + text.length;
+  const cached = expCache()[ck];
+  if (cached) { expShow(key, expRender(cached.text) + briefFoot(true, images, text)); return; }
+
+  expShow(key, '<p>' + images.length + '枚の図と電文を読んでいます…（20〜30秒）</p>');
+  try {
+    const r = await fetch(px + '/explain', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ images, text, kind: 'brief' }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || !j.text) {
+      const m = (j && j.error) ? j.error : 'HTTP ' + r.status;
+      expShow(key, '<div class="exp-err">分析できませんでした（' + esc(m) + '）</div>');
+      return;
+    }
+    expRemember(ck, j.text);
+    expShow(key, expRender(j.text) + briefFoot(false, images, text));
+  } catch (e) {
+    expShow(key, '<div class="exp-err">分析できませんでした（' + esc((e && e.message) || e) + '）</div>');
+  }
+}
+
+function briefFoot(cached, images, text) {
+  return '<div class="exp-foot">図' + images.length + '枚'
+    + (text ? 'と近傍空港の電文' : '') + 'をもとにした説明です。'
+    + '<b>飛べるかどうかの判断はしていません</b>。最終的な可否はご自身で、'
+    + '現地の観天望気と合わせて判断してください。読み違いの可能性もあるので、'
+    + '数値は必ず図と電文そのもので確かめること。'
+    + (cached ? '<br>（前に取った分析を表示しています。図を再読込すると取り直します）' : '')
+    + '</div>';
+}
+
 async function explainShot(key) {
   const px = avwxProxy();
   if (!px) {
@@ -1594,7 +1713,39 @@ const SAT_STEPS = 36;
 const satBack = { ir: 0, vis: 0 };
 const satTimer = {};
 
+/* 自動送り。古いほうから最新へ1コマずつ進める。
+   雲域が近づいているのか離れているのかは、動かして初めて分かる */
+const satPlay = {};
+
+function setSatPlayBtn(key, on) {
+  const b = document.getElementById('satPlay-' + key);
+  if (!b) return;
+  b.dataset.on = on ? '1' : '0';
+  b.textContent = on ? '⏸ 停止' : '▶ 自動送り';
+}
+function stopSatPlay(key) {
+  if (!satPlay[key]) return;
+  satPlay[key] = false;
+  setSatPlayBtn(key, false);
+}
+async function toggleSatPlay(key) {
+  if (satPlay[key]) { stopSatPlay(key); return; }
+  /* 最新まで来ていたら、いちばん古いところへ戻してから始める */
+  if ((satBack[key] || 0) <= 0) satBack[key] = SAT_STEPS - 1;
+  satPlay[key] = true;
+  setSatPlayBtn(key, true);
+  while (satPlay[key]) {
+    satPreview(key);
+    await loadShot(key, true);
+    if (!satPlay[key]) break;
+    if ((satBack[key] || 0) <= 0) { stopSatPlay(key); break; }   /* 最新まで来たら止まる */
+    satBack[key] = satBack[key] - 1;
+    await new Promise(r => setTimeout(r, 320));
+  }
+}
+
 function setSat(key, v) {
+  stopSatPlay(key);                            /* 手で動かしたら自動送りは止める */
   satBack[key] = (SAT_STEPS - 1) - (+v);       /* 右へ動かすほど新しい */
   /* 指を動かしている間に何度も読みにいかない。止まってから取りにいく */
   clearTimeout(satTimer[key]);
@@ -1826,7 +1977,7 @@ async function loadShot(key, manual) {
      画像が消えて文字が出るのは目に障るので、次の図が来るまで前の図を残す */
   const hadImg = !!box.querySelector('img');
   if (hadImg) {
-    box.classList.add('busy');
+    if (!satPlay[key]) box.classList.add('busy');   /* 自動送り中はちらつくので薄くしない */
   } else {
     box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
     tsEl.textContent = '—';

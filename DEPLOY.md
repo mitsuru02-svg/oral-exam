@@ -262,6 +262,23 @@ METAR は2分、気象庁の JSON は5分だけ Cloudflare 側に保持します
 
 ---
 
+## 中継サーバーの場所について
+
+`tenkizu_check.html` の `DEFAULT_PROXY` に中継サーバーの場所が書いてあります。
+
+```js
+const DEFAULT_PROXY = 'https://takikawa-wx.mitsuru02.workers.dev/api';
+```
+
+このページは GitHub Pages（`mitsuru02-svg.github.io/oral-exam/…`）や手元の
+ファイルからも開けますが、**そこには中継の仕組みがありません**。同じ場所の
+`/api` を当てにすると静的なホストに POST してしまい `HTTP 405` で断られます。
+そのため、中継が動いている Cloudflare 側を既定の宛先にしてあります。
+
+Worker の名前や URL を変えたときは、**ここも書き換えてください**。
+
+---
+
 ## 手元のファイルのまま使いたいとき
 
 サーバーに置いたうえで、**手元の HTML からその中継だけを使う**こともできます。

@@ -132,6 +132,8 @@ body {
   border-radius:7px; padding:5px 10px; font-size:10.5px; cursor:pointer; font-family:inherit;
 }
 .shot-box.zoom img, .shot-box.zoom .tiles { cursor:zoom-in; }
+/* 読み込み中。前の図は消さず、薄くして待っていることだけ伝える */
+.shot-box.busy img, .shot-box.busy .tiles { opacity:.4; transition:opacity .12s; }
 .shot-note { font-size:12px; color:#6e7681; margin-top:5px; line-height:1.6; }
 .ft-tabs { display:flex; gap:6px; margin-bottom:7px; }
 .ft-tabs button {
@@ -496,9 +498,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="shot">
       <div class="tslide">
-        <input type="range" min="0" max="17" step="1" value="17" id="satRange-ir"
+        <input type="range" min="0" max="35" step="1" value="35" id="satRange-ir"
                aria-label="赤外画像の時刻" oninput="setSat('ir', this.value)">
-        <div class="tslide-lab"><span>3時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
+        <div class="tslide-lab"><span>6時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
       </div>
       <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
@@ -509,7 +511,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button onclick="saveUrl('ir')">保存</button>
         <button onclick="clearUrl('ir')">解除</button>
       </div>
-      <div class="shot-note">ひまわり赤外（B13）。北海道周辺を切り出しています。動きは気象庁のページで。</div>
+      <div class="shot-note">ひまわり赤外（B13）。<b>スライドバーで6時間前まで遡れます</b>。1枚で見ずに動かして、雲域が滝川へ近づいているのか離れているのかを見てください。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -534,9 +536,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="shot">
       <div class="tslide">
-        <input type="range" min="0" max="17" step="1" value="17" id="satRange-vis"
+        <input type="range" min="0" max="35" step="1" value="35" id="satRange-vis"
                aria-label="可視画像の時刻" oninput="setSat('vis', this.value)">
-        <div class="tslide-lab"><span>3時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
+        <div class="tslide-lab"><span>6時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
       </div>
       <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
@@ -897,18 +899,25 @@ function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&
 const AVWX_KEY  = 'tenkizu_avwxToken';
 const PROXY_KEY = 'tenkizu_proxy';
 
-/* 中継サーバーの場所。ページを https で配信していれば、同じ場所の /api を
-   既定にするので設定は要らない。手元のファイルから開くときだけ、
-   下の欄に中継サーバーのURLを入れてもらう */
+/* 中継サーバーの場所。
+   このページは GitHub Pages からも、手元のファイルからも開ける。
+   そこには中継の仕組みが無いので、同じ場所の /api を当てにすると
+   静的なホストに POST してしまい 405 で断られる。
+   中継が動いているのは Cloudflare 側だけなので、そこを既定にする。 */
+const DEFAULT_PROXY = 'https://takikawa-wx.mitsuru02.workers.dev/api';
+
 function avwxProxy() {
+  /* ①手で設定したものが最優先（avwxSet({proxy:'…'}) で入れる） */
   try {
     const v = (localStorage.getItem(PROXY_KEY) || '').trim();
     if (v) return v.replace(/\/+$/, '');
   } catch (e) {}
-  if (location.protocol === 'https:' || location.protocol === 'http:') {
-    return location.href.replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'api';
+  /* ②中継サーバー自身から配られたページなら、同じ場所を使う */
+  if (/\.workers\.dev$|\.pages\.dev$/.test(location.hostname)) {
+    return location.origin + '/api';
   }
-  return '';
+  /* ③それ以外（GitHub Pages・手元のファイル）は既定の中継サーバーへ */
+  return DEFAULT_PROXY;
 }
 
 /* JSON を取りにいく。直に取れないときは中継サーバー越しにもう一度試す */
@@ -1536,30 +1545,86 @@ function satLabel(d) {
   return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST 現在`;
 }
 
-/* スライドバーの位置。0 が3時間前、17 が最新。カードごとに持つ */
+/* スライドバーの位置。0 が6時間前、35 が最新。カードごとに持つ */
+const SAT_STEPS = 36;
 const satBack = { ir: 0, vis: 0 };
+const satTimer = {};
+
 function setSat(key, v) {
-  satBack[key] = 17 - (+v);          /* 右へ動かすほど新しい */
-  loadShot(key, true);
+  satBack[key] = (SAT_STEPS - 1) - (+v);       /* 右へ動かすほど新しい */
+  /* 指を動かしている間に何度も読みにいかない。止まってから取りにいく */
+  clearTimeout(satTimer[key]);
+  satTimer[key] = setTimeout(() => loadShot(key, true), 220);
+  satPreview(key);
+}
+
+/* 指を動かしている最中は、まだ読んでいなくても目盛りだけ先に動かす */
+function satPreview(key) {
+  const back = satBack[key] || 0;
+  const d = new Date(satNewestAt(key).getTime() - back * 600000);
+  const n = document.getElementById('satNow-' + key);
+  if (n) n.textContent = back <= 0 ? '最新'
+    : (pad(d.getHours()) + ':' + pad(d.getMinutes()) + '（' + satAgo(back) + '前）');
+}
+function satAgo(back) {
+  const m = back * 10;
+  return m < 60 ? (m + '分') : (Math.floor(m / 60) + '時間' + (m % 60 ? (m % 60) + '分' : ''));
+}
+
+/* 本当の最新コマ。ファイル名に日付が無いため、まだ今日のぶんが出ていない
+   コマは昨日の画像が返ってくる。ブラウザからは区別できないので、
+   中継サーバーに更新日時を見てもらう。中継が無ければ従来どおり総当たり */
+const satAnchor = {};
+function satNewestAt(key) { return (satAnchor[MSC_BAND[key]] || {}).at || new Date(); }
+
+async function satNewestIndex(key, urls) {
+  const band = MSC_BAND[key];
+  const c = satAnchor[band];
+  if (c && Date.now() - c.got < 5 * 60000) {
+    const k = urls.indexOf(c.url);
+    if (k >= 0) return k;
+  }
+  const px = avwxProxy();
+  if (px) {
+    try {
+      const r = await fetch(px + '/satlatest/' + band, { cache: 'no-store' });
+      const j = await r.json();
+      if (j && j.hhmm) {
+        const k = urls.findIndex(u => u.endsWith('_' + j.hhmm + '.jpg'));
+        if (k >= 0) {
+          satAnchor[band] = { url: urls[k], got: Date.now(),
+            at: new Date(Date.now() - (j.minutes_old || 0) * 60000) };
+          return k;
+        }
+      }
+    } catch (e) { /* 総当たりへ */ }
+  }
+  return probeFirst(urls, 6);
 }
 
 async function loadMsc(key, box, tsEl) {
   const band = MSC_BAND[key];
   if (!band) throw new Error('band が分かりません');
-  const times = satTimes(18 + 18);   /* 遡る余地を持たせる */
+  const times = satTimes(SAT_STEPS + 18);      /* 遡る余地を持たせる */
   const urls = times.map(d => MSC_BASE + 'jpn_' + band + '_'
     + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '.jpg');
 
-  /* まず「いま出ている最新のコマ」を見つけ、そこから指定ぶん遡る */
-  const newest = await probeFirst(urls, 6);
+  const newest = await satNewestIndex(key, urls);
   if (newest < 0) throw new Error('画像が見つかりません');
+  satAnchor[band] = Object.assign({}, satAnchor[band], { at: times[newest] });
+
   let i = newest + (satBack[key] || 0);
   if (i >= urls.length) i = urls.length - 1;
-  if (!(await probeImg(urls[i]))) i = newest;   /* 抜けているコマは最新に戻す */
 
   const im = new Image();
   im.referrerPolicy = 'no-referrer';
-  im.src = urls[i];
+  const ok = await new Promise(done => {
+    im.onload = () => done(true);
+    im.onerror = () => done(false);
+    im.src = urls[i];
+  });
+  if (!ok) throw new Error('そのコマは配信されていません');
+
   shownUrl[key] = urls[i];
   box.innerHTML = ''; box.appendChild(im);
   box.classList.add('zoom');
@@ -1569,11 +1634,12 @@ async function loadMsc(key, box, tsEl) {
 }
 
 function syncSatSlider(key, back, d) {
+  satBack[key] = Math.max(0, Math.min(SAT_STEPS - 1, back));
   const r = document.getElementById('satRange-' + key);
-  if (r) r.value = String(17 - Math.max(0, Math.min(17, back)));
+  if (r) r.value = String((SAT_STEPS - 1) - satBack[key]);
   const n = document.getElementById('satNow-' + key);
-  if (n) n.textContent = back <= 0 ? '最新'
-    : (pad(d.getHours()) + ':' + pad(d.getMinutes()) + '（' + (back * 10) + '分前）');
+  if (n) n.textContent = satBack[key] <= 0 ? '最新'
+    : (pad(d.getHours()) + ':' + pad(d.getMinutes()) + '（' + satAgo(satBack[key]) + '前）');
 }
 
 const HIMA_BASE = 'https://www.jma.go.jp/bosai/himawari/data/satimg/';
@@ -1666,6 +1732,7 @@ async function loadHimawari(key, box, tsEl) {
 
 function fallback(box, tsEl, why, key) {
   box.classList.remove('zoom');
+  box.classList.remove('busy');
   box.onclick = null;
   if (key) delete shownUrl[key];   /* 出せなかった図の解説は頼めない */
 
@@ -1705,8 +1772,15 @@ async function loadShot(key, manual) {
     tsEl.textContent = '—';
     return;
   }
-  box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
-  tsEl.textContent = '—';
+  /* すでに図が出ているなら消さない。スライドバーを動かすたびに
+     画像が消えて文字が出るのは目に障るので、次の図が来るまで前の図を残す */
+  const hadImg = !!box.querySelector('img');
+  if (hadImg) {
+    box.classList.add('busy');
+  } else {
+    box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
+    tsEl.textContent = '—';
+  }
   /* 別の図の解説が残らないように消す。ただし天気図だけは例外で、
      実況と24時間をまとめて解説しているので、表示するコマを
      切り替えても内容は変わらない */
@@ -1721,6 +1795,7 @@ async function loadShot(key, manual) {
     tryImages([{ url: custom, label: '設定したURL' }],
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
+        box.classList.remove('busy');
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
@@ -1782,6 +1857,7 @@ async function loadShot(key, manual) {
     tryImages([{ url: SIGWX_URLS[sigwxFT], label: sigwxFT + '時間後の予想' }],
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
+        box.classList.remove('busy');
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
@@ -1800,6 +1876,7 @@ async function loadShot(key, manual) {
     tryImages(cands,
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
+        box.classList.remove('busy');
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
@@ -1814,13 +1891,21 @@ async function loadShot(key, manual) {
      ②気象庁のタイル ③案内 */
   try {
     await loadMsc(key, box, tsEl);
+    box.classList.remove('busy');
     return;
   } catch (e) { /* ② へ */ }
   try {
     await loadHimawari(key, box, tsEl);
-  } catch (e) {
-    fallback(box, tsEl, '衛星画像の取得が遮断されました。', key);
+    box.classList.remove('busy');
+    return;
+  } catch (e) { /* ③ へ */ }
+  box.classList.remove('busy');
+  if (hadImg) {
+    /* 前の図は残したまま、そのコマが無いことだけ伝える */
+    tsEl.textContent = 'そのコマは配信されていません（前の画像のまま）';
+    return;
   }
+  fallback(box, tsEl, '衛星画像の取得が遮断されました。', key);
 }
 
 function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }

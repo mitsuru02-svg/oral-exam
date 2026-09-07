@@ -294,15 +294,22 @@ iframe.wxframe.tall { height:420px; }
 .pt-fr.LIFR { color:#db61a2; border-color:#a03b7a; background:#2b0f22; }
 .taf-per { margin-top:7px; border-top:1px solid #21262d; padding-top:7px; }
 .taf-r {
-  display:grid; grid-template-columns:92px 1fr auto; gap:8px; align-items:baseline;
-  font-size:12.5px; line-height:1.8; padding:3px 0; border-bottom:1px dashed #1b2027;
-  font-variant-numeric:tabular-nums;
+  padding:5px 0; border-bottom:1px dashed #1b2027; font-variant-numeric:tabular-nums;
 }
 .taf-r:last-child { border-bottom:0; }
-.taf-r .w { color:#7d8590; font-weight:700; font-size:11.5px; letter-spacing:.03em; }
-.taf-r .d { color:#c9d1d9; font-family:'SF Mono',Menlo,Consolas,monospace; }
+/* 時刻は折り返さず1行に収める。値は次の行へ回す */
+.taf-r .hd { display:flex; align-items:baseline; gap:8px; }
+.taf-r .w {
+  flex:1; min-width:0; color:#8b949e; font-weight:700; font-size:12.5px;
+  letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.taf-r .w .jst { color:#7d8590; font-weight:400; }
+.taf-r .d {
+  color:#c9d1d9; font-family:'SF Mono',Menlo,Consolas,monospace;
+  font-size:12.5px; line-height:1.8; margin-top:2px;
+}
 .taf-r.bad .d { color:#f85149; }
-.taf-r .j { font-size:11.5px; font-weight:700; white-space:nowrap; }
+.taf-r .j { flex-shrink:0; font-size:11.5px; font-weight:700; white-space:nowrap; }
 .taf-r .j.ok { color:#3fb950; }
 .taf-r .j.ng { color:#f85149; }
 pre.wx {
@@ -488,6 +495,11 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener" aria-label="赤外画像を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="tslide">
+        <input type="range" min="0" max="17" step="1" value="17" id="satRange-ir"
+               aria-label="赤外画像の時刻" oninput="setSat('ir', this.value)">
+        <div class="tslide-lab"><span>3時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
+      </div>
       <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
@@ -521,6 +533,11 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <a class="step-open" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener" aria-label="可視画像を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
+      <div class="tslide">
+        <input type="range" min="0" max="17" step="1" value="17" id="satRange-vis"
+               aria-label="可視画像の時刻" oninput="setSat('vis', this.value)">
+        <div class="tslide-lab"><span>3時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
+      </div>
       <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
       <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
@@ -1016,11 +1033,18 @@ function avwxToObj(d) {
   return o;
 }
 
-/* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある */
+/* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある。
+   世界時のままでは飛ぶ時刻と結びつかないので、日本時間を添える */
 function tafWhen(t) {
   const d = String((t && t.repr) || '').replace(/[^0-9]/g, '');
-  if (d.length < 4) return '—';
-  return d.slice(0, 2) + '日' + d.slice(2, 4) + 'Z';
+  if (d.length < 4) return { z: '—', jst: '' };
+  const day = +d.slice(0, 2), h = +d.slice(2, 4);
+  const jh = (h + 9) % 24;
+  const rolled = h + 9 >= 24;
+  return {
+    z: pad(day) + '日' + pad(h) + 'Z',
+    jst: rolled ? (pad(day + 1) + '日' + pad(jh) + '時JST') : (pad(jh) + '時JST'),
+  };
 }
 
 /* TAF を時間帯ごとに分解して並べる。「11時以降に風が変わる」を目で拾えるように */
@@ -1036,7 +1060,7 @@ function avwxTafRows(taf, rwy) {
   const rows = fc.map(f => {
     const o = avwxToObj(f);
     const { xw, bad } = judge(o, rwy);
-    const when = tafWhen(f.start_time);
+    const w = tafWhen(f.start_time);
     const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
     const wind = o.windSpd === undefined ? '—'
       : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0'))
@@ -1045,9 +1069,11 @@ function avwxTafRows(taf, rwy) {
     const cei = o.ceil == null ? '雲底なし' : o.ceil.toLocaleString() + 'ft';
     const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
     return `<div class="taf-r${bad.length ? ' bad' : ''}">
-      <div class="w">${esc(kind)} ${esc(when)}</div>
+      <div class="hd">
+        <div class="w">${esc(kind)} ${esc(w.z)}${w.jst ? '<span class="jst">（' + esc(w.jst) + '）</span>' : ''}</div>
+        <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
+      </div>
       <div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(xwt)}</div>
-      <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
     </div>`;
   }).join('');
   return raw + '<div class="taf-per">' + rows + '</div>';
@@ -1206,6 +1232,52 @@ function expFoot(cached, images) {
     + '数値は必ず図そのもので確かめること。'
     + (cached ? '<br>（前に取った解説を表示しています。図を再読込すると取り直します）' : '')
     + '</div>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   図に印字された時刻の読み取り
+
+   ファイル名から組み立てた時刻は、発表時刻と有効時刻がずれることがある。
+   図そのものに書かれている時刻を正とするため、中継サーバー越しに
+   読み取ってもらう。同じ図について何度も呼ばないよう端末側で覚える。
+   読めなければ、ファイル名から作った表示のまま静かに終わる。
+   ══════════════════════════════════════════════════════════════ */
+const IMGT_KEY = 'tenkizu_imgtime';
+
+function imgTimeCache() { try { return JSON.parse(localStorage.getItem(IMGT_KEY) || '{}'); } catch (e) { return {}; } }
+function imgTimeRemember(url, text) {
+  try {
+    const c = imgTimeCache();
+    c[url] = { text, t: Date.now() };
+    const ks = Object.keys(c).sort((a, b) => c[b].t - c[a].t).slice(0, 40);
+    const keep = {}; ks.forEach(k => keep[k] = c[k]);
+    localStorage.setItem(IMGT_KEY, JSON.stringify(keep));
+  } catch (e) {}
+}
+
+async function showImgTime(key, url, tail) {
+  const tsEl = document.getElementById('ts-' + key);
+  if (!tsEl || !url) return;
+  const put = t => {
+    /* 途中で図が切り替わっていたら書かない */
+    if (shownUrl[key] !== url) return;
+    tsEl.textContent = t + (tail ? '　' + tail : '') + '　※図から読取';
+  };
+  const c = imgTimeCache()[url];
+  if (c) { if (c.text) put(c.text); return; }
+
+  const px = avwxProxy();
+  if (!px) return;
+  try {
+    const r = await fetch(px + '/imgtime', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j) return;
+    imgTimeRemember(url, j.text || '');
+    if (j.text) put(j.text);
+  } catch (e) { /* 読めなければファイル名からの表示のまま */ }
 }
 
 const CHECKS = [
@@ -1464,15 +1536,26 @@ function satLabel(d) {
   return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST 現在`;
 }
 
+/* スライドバーの位置。0 が3時間前、17 が最新。カードごとに持つ */
+const satBack = { ir: 0, vis: 0 };
+function setSat(key, v) {
+  satBack[key] = 17 - (+v);          /* 右へ動かすほど新しい */
+  loadShot(key, true);
+}
+
 async function loadMsc(key, box, tsEl) {
   const band = MSC_BAND[key];
   if (!band) throw new Error('band が分かりません');
-  const times = satTimes(18);
+  const times = satTimes(18 + 18);   /* 遡る余地を持たせる */
   const urls = times.map(d => MSC_BASE + 'jpn_' + band + '_'
     + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '.jpg');
 
-  const i = await probeFirst(urls, 6);
-  if (i < 0) throw new Error('画像が見つかりません');
+  /* まず「いま出ている最新のコマ」を見つけ、そこから指定ぶん遡る */
+  const newest = await probeFirst(urls, 6);
+  if (newest < 0) throw new Error('画像が見つかりません');
+  let i = newest + (satBack[key] || 0);
+  if (i >= urls.length) i = urls.length - 1;
+  if (!(await probeImg(urls[i]))) i = newest;   /* 抜けているコマは最新に戻す */
 
   const im = new Image();
   im.referrerPolicy = 'no-referrer';
@@ -1482,6 +1565,15 @@ async function loadMsc(key, box, tsEl) {
   box.classList.add('zoom');
   box.onclick = () => openLb(im.cloneNode(true));
   tsEl.textContent = satLabel(times[i]);
+  syncSatSlider(key, i - newest, times[i]);
+}
+
+function syncSatSlider(key, back, d) {
+  const r = document.getElementById('satRange-' + key);
+  if (r) r.value = String(17 - Math.max(0, Math.min(17, back)));
+  const n = document.getElementById('satNow-' + key);
+  if (n) n.textContent = back <= 0 ? '最新'
+    : (pad(d.getHours()) + ':' + pad(d.getMinutes()) + '（' + (back * 10) + '分前）');
 }
 
 const HIMA_BASE = 'https://www.jma.go.jp/bosai/himawari/data/satimg/';
@@ -1692,7 +1784,8 @@ async function loadShot(key, manual) {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
-        tsEl.textContent = label + '（図中の時刻を確認）';
+        tsEl.textContent = label;
+        showImgTime(key, shownUrl[key], sigwxFT + '時間後の予想');
       },
       () => fallback(box, tsEl, '悪天予想図を取得できませんでした。', key), key);
     return;
@@ -1710,6 +1803,7 @@ async function loadShot(key, manual) {
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
+        showImgTime(key, shownUrl[key], CHART_KIND_LABEL[chartKind]);
       },
       () => fallback(box, tsEl,
         chartKind === 'now' ? '天気図を取得できませんでした。'

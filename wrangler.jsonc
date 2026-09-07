@@ -1,5 +1,5 @@
 {
-  // Cloudflare Workers の設定。`npx wrangler deploy` がこれを読む。
+  // Cloudflare Workers の設定。ビルド時の `npx wrangler …` がこれを読む。
   //
   // name は Cloudflare 側で作った Worker の名前と一致させること。
   // 違う名前で作っていたら、ここを書き換える。
@@ -8,13 +8,20 @@
   "compatibility_date": "2025-09-01",
 
   // リポジトリの中身をそのまま静的ファイルとして配る。
-  // 除外するものは .assetsignore に書く。
+  // 除外するものは .assetsignore に書く（.git を外し忘れると
+  // サイズ超過でデプロイごと失敗する）。
   // 静的ファイルが先に返され、見つからなかった要求だけ worker.js に渡る。
   "assets": {
     "directory": "./",
     "binding": "ASSETS"
-  }
+  },
 
-  // AVWX_TOKEN はここには書かない。
-  // Cloudflare の画面で Secret として登録する（DEPLOY.md 参照）。
+  // 画面で登録した変数を、デプロイのたびに消されないようにする。
+  "keep_vars": true
+
+  // AVWX_TOKEN はここには書かない。書くとリポジトリに残ってしまう。
+  // Cloudflare の画面の「Settings → Runtime → Variables and Secrets」に
+  // Secret として登録する。
+  // ⚠ Builds の側にある同名の欄はビルド中だけのもので、
+  //    そちらに入れても動いている Worker からは見えない。
 }

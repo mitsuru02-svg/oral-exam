@@ -83,7 +83,26 @@ claude/glider-pilot-exam-app-ugm9wt
 
 ## STEP 4W ── トークンを隠す
 
-Worker → **Settings** → **Variables and Secrets** → **Add**
+### ⚠ 入れる場所を間違えやすい
+
+**Settings** の右側にサイドバーがあり、区画が分かれています。
+
+```
+Observability
+Runtime      ← ★ こちらに入れる（Worker が動くときの設定）
+Builds       ← ✗ こちらではない（ビルド中だけの設定）
+Triggers
+General
+```
+
+**Builds の側にも同じ名前の「Variables and secrets」があります**が、そちらは
+`npx wrangler` に渡すためのもので、**出来上がった Worker からは見えません**。
+入れても `/api/health` は `未設定` のままになります。
+
+### 入れかた
+
+Worker → **Settings** → **Runtime** → **Variables and Secrets** → **Add**
+（上のタブの **Bindings** からでも同じところに行けます）
 
 | 欄 | 入れる値 |
 |---|---|
@@ -96,6 +115,7 @@ Worker → **Settings** → **Variables and Secrets** → **Add**
 ### ⚠ 保存しただけでは効きません
 
 **Deployments** タブ → 一番上のデプロイの **…** → **Retry deployment**
+（または右上の **New deployment**）
 
 ## STEP 5W ── 開く
 
@@ -143,13 +163,30 @@ https://<プロジェクト名>.pages.dev/tenkizu_check.html
 ⑤ METAR / TAF の下に **緑色で「AVWX から取得しました」** と出れば成功です。
 **トークンの入力欄は空のままで構いません。**
 
-中継だけを直接叩いて確かめることもできます。ブラウザで
+### `/api/health` で切り分ける
+
+```
+https://<あなたのURL>/api/health
+```
+
+AVWX に問い合わせないので、無料枠の回数を消費しません。
+
+| 返り値 | 意味 |
+|---|---|
+| `"avwx_token":"設定済み"` | ✅ 完了 |
+| `"env_keys":["ASSETS"]` だけ | トークンが Worker に届いていない（→ STEP 4W の場所を確認） |
+| `"version"` が古い | 新しいビルドがまだ配信されていない |
+| 404 | worker.js が配信されていない。ビルドのログを確認 |
+
+値は返しません（名前と文字数だけ）。
+
+電文まで見たいときは
 
 ```
 https://<あなたのURL>/api/metar/RJEC
 ```
 
-を開いて、`{"raw":"RJEC 0701...` のような電文が返れば正常です。
+で `{"raw":"RJEC 0701...` が返れば正常です。
 
 ### スマホのホーム画面に置く
 
@@ -164,7 +201,7 @@ https://<あなたのURL>/api/metar/RJEC
 |---|---|
 | デプロイが**失敗**する | `wrangler.jsonc` の `name` が Cloudflare 側の Worker 名と一致しているか |
 | ページが **404** | Workers なら Root directory が `/` か。Pages なら Build output directory が `/` か |
-| **「サーバーに AVWX_TOKEN が設定されていません」** | Secret 未登録、または **Retry deployment をしていない** |
+| **「サーバーに AVWX_TOKEN が設定されていません」** | Secret 未登録、**Builds 側に入れてしまっている**、または **Retry deployment をしていない**。`/api/health` の `env_keys` に `AVWX_TOKEN` が出るか確認 |
 | `/api/metar/RJEC` が **404** | Workers なら `wrangler.jsonc` と `worker.js` が push されているか。Pages なら `functions/` が push されているか |
 | **内容が古い** | **Production branch** が `claude/glider-pilot-exam-app-ugm9wt` になっているか |
 | METAR は出るが**天気図が出ない** | 中継とは別系統です。画像を直接取りにいくので、時間をおいて再読込 |

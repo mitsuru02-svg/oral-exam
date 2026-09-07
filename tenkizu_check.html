@@ -158,6 +158,19 @@ body {
   color:#79c0ff; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:600;
   cursor:pointer; font-family:inherit;
 }
+iframe.wxframe {
+  width:100%; height:300px; border:0; display:block; background:#fff;
+}
+iframe.wxframe.tall { height:420px; }
+.shot-msg .setbtn.small, .wxframe-note .setbtn {
+  margin:6px 0 0 0; padding:5px 10px; font-size:11px;
+  border:1px solid #1f4b8f; background:#0d2044; color:#79c0ff;
+  border-radius:7px; cursor:pointer; font-family:inherit; font-weight:600;
+}
+.wxframe-note {
+  font-size:10.5px; color:#7d8590; padding:7px 10px; line-height:1.6;
+  background:#0d1117; border-top:1px solid #21262d;
+}
 pre.wx {
   width:100%; margin:0; padding:12px 13px; text-align:left;
   font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
@@ -591,6 +604,15 @@ let sigwxFT = 3;
 
 /* 手で設定した画像URL。気象庁のページで図を長押し →「画像アドレスをコピー」して
    貼り付けると、以後そのURLを最優先で使う。URLが変わっても貼り直せば動き続ける。 */
+/* fetch や画像URLがだめだったとき、ページごと iframe で取り込む先。
+   iframe は中身を読まないので相手サイトの許可（CORS）が要らない。 */
+const FRAME_URLS = {
+  chart: 'https://www.jma.go.jp/bosai/weather_map/',
+  ir:    'https://www.jma.go.jp/bosai/map.html#5/43.0/142.0/&elem=ir&contents=himawari',
+  vis:   'https://www.jma.go.jp/bosai/map.html#6/43.0/142.0/&elem=vis&contents=himawari',
+  sigwx: 'https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2',
+};
+const METAR_URL = 'https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true';
 const URL_KEY = 'tenkizu_customUrls';
 function customUrls() {
   try { return JSON.parse(localStorage.getItem(URL_KEY) || '{}'); } catch (e) { return {}; }
@@ -704,6 +726,25 @@ async function loadHimawari(key, box, tsEl) {
 function fallback(box, tsEl, why, key) {
   box.classList.remove('zoom');
   box.onclick = null;
+
+  /* 画像を直接出せなくても、ページごと iframe で取り込めば中は見られる。
+     iframe は相手サイトの許可が要らないので、file:// から開いていても動く。 */
+  const fu = key && FRAME_URLS[key];
+  if (fu) {
+    box.innerHTML = '';
+    const fr = document.createElement('iframe');
+    fr.className = 'wxframe tall';
+    fr.src = fu;
+    fr.referrerPolicy = 'no-referrer';
+    box.appendChild(fr);
+    const note = document.createElement('div');
+    note.className = 'wxframe-note';
+    note.innerHTML = '画像を直接出せなかったので、気象庁のページを取り込んでいます。枠の中を操作できます。'
+      + `<button class="setbtn small" onclick="toggleUrlSet('${key}')">画像URLを設定</button>`;
+    box.appendChild(note);
+    tsEl.textContent = 'ページ取り込み';
+    return;
+  }
   const btn = key
     ? `<br><button class="setbtn" onclick="toggleUrlSet('${key}')">画像URLを貼り付けて表示する</button>`
     : '';
@@ -740,18 +781,36 @@ async function loadShot(key, manual) {
   }
 
   if (key === 'metar') {
+    box.classList.remove('zoom'); box.onclick = null;
+    const stamp = () => {
+      const d = new Date();
+      tsEl.textContent = `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 取得`;
+    };
+    /* まず fetch。整形して自前の見た目で出せるが、file:// から開いていると
+       ブラウザが他サイトへの fetch を止めるので、その場合は下の iframe に落とす。 */
     try {
-      const r = await fetch('https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true', { cache: 'no-store' });
+      const r = await fetch(METAR_URL, { cache: 'no-store' });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const txt = (await r.text()).trim();
       if (!txt) throw new Error('空です');
-      box.classList.remove('zoom'); box.onclick = null;
       box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
-      const d = new Date();
-      tsEl.textContent = `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 取得`;
-    } catch (e) {
-      fallback(box, tsEl, 'METAR/TAF の取得が遮断されました。');
-    }
+      stamp();
+      return;
+    } catch (e) { /* iframe へ */ }
+
+    /* iframe は中身を読まずに表示するだけなので、fetch と違って
+       相手サイトの許可（CORS）が要らない。file:// から開いていても出る。 */
+    const fr = document.createElement('iframe');
+    fr.className = 'wxframe';
+    fr.src = METAR_URL;
+    fr.referrerPolicy = 'no-referrer';
+    box.innerHTML = '';
+    box.appendChild(fr);
+    const note = document.createElement('div');
+    note.className = 'wxframe-note';
+    note.textContent = '取り込み表示。枠の中を指でスクロールできます。出ないときは上の「開く」から。';
+    box.appendChild(note);
+    stamp();
     return;
   }
   if (key === 'sigwx') {

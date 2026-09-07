@@ -139,6 +139,25 @@ body {
   font-family:inherit; cursor:pointer; font-variant-numeric:tabular-nums;
 }
 .ft-tabs button[data-on="1"] { background:#0d2044; border-color:#1f4b8f; color:#79c0ff; }
+/* 画像URLの手入力。気象庁がURLを変えても、貼り直せば動き続ける */
+.urlset { margin-top:7px; display:none; gap:6px; }
+.urlset.on { display:flex; }
+.urlset input {
+  flex:1; min-width:0; padding:8px 10px; border-radius:8px;
+  border:1px solid #30363d; background:#0d1117; color:#e6edf3;
+  font-size:12px; font-family:inherit;
+}
+.urlset input::placeholder { color:#4d5560; }
+.urlset button {
+  border:1px solid #1f4b8f; background:#0d2044; color:#79c0ff;
+  border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600;
+  cursor:pointer; font-family:inherit; white-space:nowrap;
+}
+.shot-msg .setbtn {
+  display:inline-block; margin-top:9px; border:1px solid #1f4b8f; background:#0d2044;
+  color:#79c0ff; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:600;
+  cursor:pointer; font-family:inherit;
+}
 pre.wx {
   width:100%; margin:0; padding:12px 13px; text-align:left;
   font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
@@ -279,8 +298,13 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <a class="open-btn" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener">天気図を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="loadShot('chart',true)">再読込</button></div>
-      <div class="shot-note">速報天気図。表示できたら画像をタップで拡大。最新かどうかは必ず時刻で確かめる。</div>
+      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
+      <div class="urlset" id="url-chart">
+        <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('chart')">保存</button>
+        <button onclick="clearUrl('chart')">解除</button>
+      </div>
+      <div class="shot-note">速報天気図。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して、⚙ URL に貼り付けると以後ここに表示されます。画像をタップで拡大。最新かどうかは必ず時刻で確かめてください。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -307,7 +331,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener">赤外画像を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="loadShot('ir',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
+      <div class="urlset" id="url-ir">
+        <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('ir')">保存</button>
+        <button onclick="clearUrl('ir')">解除</button>
+      </div>
       <div class="shot-note">ひまわり赤外（B13）。北海道周辺を切り出しています。動きは気象庁のページで。</div>
     </div>
     <div class="look">
@@ -334,7 +363,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener">可視画像を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="loadShot('vis',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
+      <div class="urlset" id="url-vis">
+        <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('vis')">保存</button>
+        <button onclick="clearUrl('vis')">解除</button>
+      </div>
       <div class="shot-note">ひまわり可視（B03）。夜間は真っ暗になるので赤外で判断します。</div>
     </div>
     <div class="look">
@@ -367,7 +401,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
       </div>
       <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <div class="urlset" id="url-sigwx">
+        <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('sigwx')">保存</button>
+        <button onclick="clearUrl('sigwx')">解除</button>
+      </div>
       <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
     </div>
     <div class="look">
@@ -550,6 +589,38 @@ const SIGWX_URLS = {
 };
 let sigwxFT = 3;
 
+/* 手で設定した画像URL。気象庁のページで図を長押し →「画像アドレスをコピー」して
+   貼り付けると、以後そのURLを最優先で使う。URLが変わっても貼り直せば動き続ける。 */
+const URL_KEY = 'tenkizu_customUrls';
+function customUrls() {
+  try { return JSON.parse(localStorage.getItem(URL_KEY) || '{}'); } catch (e) { return {}; }
+}
+function toggleUrlSet(key) {
+  const box = document.getElementById('url-' + key);
+  if (!box) return;
+  const on = box.classList.toggle('on');
+  if (on) {
+    const inp = document.getElementById('urlin-' + key);
+    inp.value = customUrls()[key] || '';
+    inp.focus();
+  }
+}
+function saveUrl(key) {
+  const v = (document.getElementById('urlin-' + key).value || '').trim();
+  const all = customUrls();
+  if (v) all[key] = v; else delete all[key];
+  try { localStorage.setItem(URL_KEY, JSON.stringify(all)); } catch (e) {}
+  document.getElementById('url-' + key).classList.remove('on');
+  loadShot(key, true);
+}
+function clearUrl(key) {
+  const all = customUrls(); delete all[key];
+  try { localStorage.setItem(URL_KEY, JSON.stringify(all)); } catch (e) {}
+  document.getElementById('urlin-' + key).value = '';
+  document.getElementById('url-' + key).classList.remove('on');
+  loadShot(key, true);
+}
+
 const IMG_KEY = 'tenkizu_images';
 let imagesOn = (localStorage.getItem(IMG_KEY) ?? '1') === '1';
 
@@ -630,10 +701,13 @@ async function loadHimawari(key, box, tsEl) {
   tsEl.textContent = vt + ' 現在';
 }
 
-function fallback(box, tsEl, why) {
+function fallback(box, tsEl, why, key) {
   box.classList.remove('zoom');
   box.onclick = null;
-  box.innerHTML = `<div class="shot-msg"><b>この端末では画像を出せません</b>${why}<br>上の「開く」から気象庁のページでご覧ください</div>`;
+  const btn = key
+    ? `<br><button class="setbtn" onclick="toggleUrlSet('${key}')">画像URLを貼り付けて表示する</button>`
+    : '';
+  box.innerHTML = `<div class="shot-msg"><b>この端末では画像を出せません</b>${why}<br>上の「開く」から気象庁のページでご覧ください${btn}</div>`;
   tsEl.textContent = '—';
 }
 
@@ -650,6 +724,20 @@ async function loadShot(key, manual) {
   }
   box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
   tsEl.textContent = '—';
+
+  /* 手で設定されたURLがあれば、それを最優先で使う */
+  const custom = customUrls()[key];
+  if (custom) {
+    tryImages([{ url: custom, label: '設定したURL' }],
+      (im, label) => {
+        box.innerHTML = ''; box.appendChild(im);
+        box.classList.add('zoom');
+        box.onclick = () => openLb(im.cloneNode(true));
+        tsEl.textContent = label;
+      },
+      () => fallback(box, tsEl, '設定したURLから取得できませんでした。', key));
+    return;
+  }
 
   if (key === 'metar') {
     try {
@@ -675,7 +763,7 @@ async function loadShot(key, manual) {
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label + '（図中の時刻を確認）';
       },
-      () => fallback(box, tsEl, '悪天予想図を取得できませんでした。'));
+      () => fallback(box, tsEl, '悪天予想図を取得できませんでした。', key));
     return;
   }
   if (key === 'chart') {
@@ -686,13 +774,13 @@ async function loadShot(key, manual) {
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
       },
-      () => fallback(box, tsEl, '天気図を取得できませんでした。'));
+      () => fallback(box, tsEl, '天気図を取得できませんでした。', key));
     return;
   }
   try {
     await loadHimawari(key, box, tsEl);
   } catch (e) {
-    fallback(box, tsEl, '衛星画像の取得が遮断されました。');
+    fallback(box, tsEl, '衛星画像の取得が遮断されました。', key);
   }
 }
 

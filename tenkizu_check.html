@@ -419,7 +419,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button onclick="saveUrl('chart')">保存</button>
         <button onclick="clearUrl('chart')">解除</button>
       </div>
-      <div class="shot-note"><b>実況</b>でいまの気圧配置をつかみ、<b>24時間後・48時間後</b>で前線や低気圧がどう動くかを見ます。飛ぶ日が明日以降なら、そちらのコマが本番です。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して ⚙ URL に貼り付けてください。画像をタップで拡大。<b>図の中の時刻</b>で必ず確かめること。</div>
+      <div class="shot-note"><b>日本付近のカラー図</b>を出しています。<b>実況</b>でいまの気圧配置をつかみ、<b>24時間後・48時間後</b>で前線や低気圧がどう動くかを見ます。飛ぶ日が明日以降なら、そちらのコマが本番です。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して ⚙ URL に貼り付けてください。画像をタップで拡大。<b>図の中の時刻</b>で必ず確かめること。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -1296,6 +1296,15 @@ function collectPng(node, out, path) {
   }
 }
 
+/* どの範囲の図か。日本付近のカラー図を優先し、アジア太平洋の広域図
+   （ASAS などの白黒図）は後回しにする。滝川の判断に使うのは前者 */
+function chartAreaScore(it) {
+  const t = (String(it.path || '') + ' ' + String(it.name || '')).toLowerCase();
+  if (/asas|aupq|axfe|asia|\bfar\b/.test(t)) return 2;   /* 広域・白黒。後回し */
+  if (/near|japan|\bjp\b/.test(t)) return 0;             /* 日本付近。これを優先 */
+  return 1;
+}
+
 /* 実況か、24時間後か、48時間後か。
    ファイル名には日付の数字（…0924…など）が入るので、名前ではなく
    キーの並びで判断する。キーで分からないときだけ名前の目印を見る */
@@ -1334,8 +1343,10 @@ async function chartFromList(kind) {
   if (!use.length) throw new Error('実況の天気図が見つかりません');
 
   const tail = '　' + CHART_KIND_LABEL[kind] + '　※図中の時刻も確認';
+  /* 日本付近を先に、そのうえで新しい順 */
   return use
-    .sort((a, b) => chartStamp(b.name).localeCompare(chartStamp(a.name)))
+    .sort((a, b) => (chartAreaScore(a) - chartAreaScore(b))
+      || chartStamp(b.name).localeCompare(chartStamp(a.name)))
     .slice(0, 6)
     .map(it => ({ url: chartUrlOf(it.name), label: chartLabel(chartStamp(it.name), tail) }));
 }

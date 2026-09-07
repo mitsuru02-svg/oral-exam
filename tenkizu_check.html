@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d1117">
+<title>天気図確認 — 滝川エリア</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id=%22g%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%233b82f6%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%231e40af%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2216%22%20fill=%22url(%23g)%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M32%2011c1.9%200%203.1%201.9%203.1%204.4v9.1l17.4%2010.4v4.6L35.1%2034v10.6l6.2%204.3v3.6L32%2050l-9.3%202.5v-3.6l6.2-4.3V34L11.5%2039.5v-4.6l17.4-10.4v-9.1C28.9%2012.9%2030.1%2011%2032%2011z%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/icon180.png?v=2">
+<meta name="apple-mobile-web-app-title" content="天気図確認">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family:'Helvetica Neue','Hiragino Kaku Gothic ProN','メイリオ',sans-serif;
+  background:#0d1117; color:#e6edf3; min-height:100vh;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom));
+  -webkit-text-size-adjust:100%;
+}
+.wrap { max-width:760px; margin:0 auto; padding:0 14px; }
+
+/* ── ヘッダー ── */
+.hdr {
+  position:sticky; top:0; z-index:30; background:rgba(13,17,23,.94);
+  backdrop-filter:blur(10px); border-bottom:1px solid #21262d;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+}
+.hdr-row { max-width:760px; margin:0 auto; display:flex; align-items:center; gap:10px; }
+.back {
+  flex-shrink:0; width:34px; height:34px; border-radius:9px; border:1px solid #30363d;
+  background:#161b22; color:#c9d1d9; font-size:17px; line-height:32px; text-align:center;
+  text-decoration:none;
+}
+.hdr-t { flex:1; min-width:0; }
+.hdr-t b { display:block; font-size:15px; font-weight:700; letter-spacing:.01em; }
+.hdr-t span { display:block; font-size:11px; color:#8b949e; margin-top:1px; }
+.clock {
+  flex-shrink:0; text-align:right; font-size:12px; color:#8b949e; line-height:1.35;
+  font-variant-numeric:tabular-nums;
+}
+.clock b { display:block; font-size:16px; color:#e6edf3; font-weight:700; }
+
+/* ── 目的 ── */
+.lead {
+  margin:16px 0 6px; padding:13px 15px; border-radius:12px;
+  background:linear-gradient(180deg,#101a2b,#0f1620); border:1px solid #1d3350;
+  font-size:12.8px; line-height:1.8; color:#c9d1d9;
+}
+.lead b { color:#79c0ff; }
+
+/* ── セクション見出し ── */
+.sec-t {
+  display:flex; align-items:baseline; gap:8px;
+  margin:26px 0 10px; font-size:11px; color:#8b949e; letter-spacing:.09em;
+}
+.sec-t::after { content:''; flex:1; height:1px; background:#21262d; }
+
+/* ── ステップカード ── */
+.step {
+  background:#161b22; border:1px solid #21262d; border-radius:14px;
+  margin-bottom:12px; overflow:hidden;
+}
+.step-hd { display:flex; align-items:center; gap:11px; padding:13px 14px 11px; }
+.step-no {
+  flex-shrink:0; width:30px; height:30px; border-radius:9px;
+  background:#0d2044; border:1px solid #1f4b8f; color:#79c0ff;
+  font-size:14px; font-weight:700; line-height:28px; text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.step-hd-t { flex:1; min-width:0; }
+.step-hd-t b { display:block; font-size:14.5px; font-weight:700; }
+.step-hd-t span { display:block; font-size:11.5px; color:#8b949e; margin-top:2px; }
+.step-scale {
+  flex-shrink:0; font-size:10px; color:#7d8590; border:1px solid #30363d;
+  border-radius:20px; padding:3px 9px; white-space:nowrap;
+}
+
+.open-btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin:0 14px 12px; padding:13px; border-radius:10px;
+  background:#1f6feb; color:#fff; text-decoration:none;
+  font-size:14px; font-weight:700; letter-spacing:.02em;
+}
+.open-btn:active { background:#1a5fd0; }
+.open-btn .ext { font-size:12px; opacity:.85; font-weight:400; }
+
+.look { padding:0 14px 12px; }
+.look-t {
+  font-size:10.5px; color:#8b949e; letter-spacing:.07em; margin-bottom:6px;
+  display:flex; align-items:center; gap:6px;
+}
+.look ul { list-style:none; }
+.look li {
+  position:relative; padding-left:16px; margin-bottom:6px;
+  font-size:12.8px; line-height:1.75; color:#c9d1d9;
+}
+.look li::before { content:''; position:absolute; left:4px; top:9px; width:4px; height:4px; border-radius:50%; background:#484f58; }
+.look li b { color:#e6edf3; }
+.look li .hi { color:#79c0ff; }
+
+.stop {
+  margin:0 14px 14px; padding:10px 12px; border-radius:9px;
+  background:#2d0f0f; border:1px solid #6e1a1a;
+}
+.stop-t { font-size:10.5px; color:#f85149; letter-spacing:.07em; margin-bottom:5px; font-weight:700; }
+.stop p { font-size:12.3px; line-height:1.75; color:#ffb4ae; }
+
+/* ── 画像の埋め込み ──
+   気象庁の画像URLは時刻ごとに変わり、JSON経由でしか辿れないものが多い。
+   file:// から取りに行くとCORSで弾かれる端末もあるので、必ず取得を試みて
+   だめならリンクに落ちる形にしてある。壊れた画像は絶対に見せない。 */
+.shot { margin:0 14px 12px; }
+.shot-box {
+  position:relative; border-radius:10px; overflow:hidden;
+  background:#0d1117; border:1px solid #21262d; min-height:96px;
+  display:flex; align-items:center; justify-content:center;
+}
+.shot-box img, .shot-box .tiles { display:block; width:100%; }
+.shot-box .tiles { display:grid; line-height:0; }
+.shot-box .tiles img { width:100%; height:auto; }
+.shot-msg { padding:22px 16px; text-align:center; font-size:12px; color:#7d8590; line-height:1.7; }
+.shot-msg b { color:#8b949e; display:block; margin-bottom:3px; font-size:12.5px; }
+.shot-bar {
+  display:flex; align-items:center; gap:8px; margin-top:7px;
+  font-size:10.5px; color:#7d8590;
+}
+.shot-bar .t { flex:1; min-width:0; font-variant-numeric:tabular-nums; }
+.shot-bar button {
+  border:1px solid #30363d; background:#161b22; color:#8b949e;
+  border-radius:7px; padding:5px 10px; font-size:10.5px; cursor:pointer; font-family:inherit;
+}
+.shot-box.zoom img, .shot-box.zoom .tiles { cursor:zoom-in; }
+.shot-note { font-size:10.5px; color:#6e7681; margin-top:5px; line-height:1.6; }
+.ft-tabs { display:flex; gap:6px; margin-bottom:7px; }
+.ft-tabs button {
+  flex:1; padding:8px 4px; border-radius:8px; border:1px solid #30363d;
+  background:#0d1117; color:#8b949e; font-size:12px; font-weight:600;
+  font-family:inherit; cursor:pointer; font-variant-numeric:tabular-nums;
+}
+.ft-tabs button[data-on="1"] { background:#0d2044; border-color:#1f4b8f; color:#79c0ff; }
+pre.wx {
+  width:100%; margin:0; padding:12px 13px; text-align:left;
+  font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
+  color:#c9d1d9; white-space:pre-wrap; word-break:break-word;
+}
+
+/* 拡大表示 */
+.lb {
+  position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.94);
+  display:none; align-items:center; justify-content:center; padding:12px;
+}
+.lb.on { display:flex; }
+.lb img, .lb .tiles { max-width:100%; max-height:88vh; object-fit:contain; }
+.lb .tiles { display:grid; }
+.lb .tiles img { max-height:none; }
+.lb-x {
+  position:absolute; top:calc(10px + env(safe-area-inset-top)); right:12px;
+  width:38px; height:38px; border-radius:10px; border:1px solid #30363d;
+  background:rgba(22,27,34,.9); color:#c9d1d9; font-size:19px; cursor:pointer;
+}
+/* 画像読み込みの一括スイッチ */
+.imgsw {
+  display:flex; align-items:center; gap:10px; margin:14px 0 0;
+  padding:11px 13px; border-radius:11px; background:#161b22; border:1px solid #21262d;
+  cursor:pointer; font-family:inherit; color:inherit; width:100%; text-align:left;
+}
+.imgsw-b {
+  flex-shrink:0; width:42px; height:24px; border-radius:20px; background:#30363d;
+  position:relative; transition:background .15s;
+}
+.imgsw-b::after {
+  content:''; position:absolute; top:3px; left:3px; width:18px; height:18px;
+  border-radius:50%; background:#8b949e; transition:transform .15s,background .15s;
+}
+.imgsw[data-on="1"] .imgsw-b { background:#1f6feb; }
+.imgsw[data-on="1"] .imgsw-b::after { transform:translateX(18px); background:#fff; }
+.imgsw-t { flex:1; min-width:0; }
+.imgsw-t b { display:block; font-size:13px; font-weight:600; }
+.imgsw-t span { display:block; font-size:11px; color:#8b949e; margin-top:2px; line-height:1.55; }
+
+/* ── しきい値カード ── */
+.lim-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:9px; }
+.lim {
+  background:#161b22; border:1px solid #21262d; border-radius:11px; padding:11px 13px;
+}
+.lim-k { font-size:10.5px; color:#8b949e; letter-spacing:.05em; }
+.lim-v { font-size:17px; font-weight:700; margin:3px 0 2px; font-variant-numeric:tabular-nums; }
+.lim-n { font-size:11px; color:#7d8590; line-height:1.6; }
+.lim.warn { border-color:#5c3d00; background:#1c1608; }
+.lim.warn .lim-v { color:#e3b341; }
+
+table.xw { width:100%; border-collapse:collapse; font-size:12.5px; margin-top:4px; }
+table.xw th, table.xw td { padding:6px 4px; border-bottom:1px solid #21262d; text-align:center; }
+table.xw th { color:#8b949e; font-size:10.5px; font-weight:500; }
+table.xw td { font-variant-numeric:tabular-nums; }
+table.xw td.hit { color:#f85149; font-weight:700; }
+
+/* ── チェックシート ── */
+.chk {
+  display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+  background:#161b22; border:1px solid #21262d; border-radius:11px;
+  padding:12px 13px; margin-bottom:8px; cursor:pointer;
+  font-family:inherit; color:inherit;
+}
+.chk-box {
+  flex-shrink:0; width:26px; height:26px; border-radius:7px;
+  border:1.5px solid #30363d; background:#0d1117;
+  font-size:14px; line-height:23px; text-align:center; color:#484f58;
+}
+.chk-t { flex:1; min-width:0; }
+.chk-t b { display:block; font-size:13.2px; font-weight:600; line-height:1.5; }
+.chk-t span { display:block; font-size:11px; color:#8b949e; margin-top:2px; line-height:1.55; }
+.chk[data-s="ok"]  { border-color:#1f5c33; background:#0e1b12; }
+.chk[data-s="ok"] .chk-box { border-color:#2ea043; background:#132d1c; color:#3fb950; }
+.chk[data-s="ng"]  { border-color:#6e1a1a; background:#1c0f0f; }
+.chk[data-s="ng"] .chk-box { border-color:#c9302c; background:#2d0f0f; color:#f85149; }
+.chk-hint { font-size:10.5px; color:#6e7681; margin:-2px 0 12px 37px; line-height:1.6; }
+
+/* ── 総合判定バー ── */
+.verdict {
+  position:fixed; left:0; right:0; bottom:0; z-index:40;
+  background:rgba(13,17,23,.96); backdrop-filter:blur(10px);
+  border-top:1px solid #21262d;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+}
+.verdict-in {
+  max-width:760px; margin:0 auto; display:flex; align-items:center; gap:12px;
+}
+.v-badge {
+  flex-shrink:0; padding:9px 15px; border-radius:10px; font-size:14px; font-weight:700;
+  border:1px solid; white-space:nowrap;
+}
+.v-badge.none { background:#161b22; border-color:#30363d; color:#8b949e; }
+.v-badge.go   { background:#132d1c; border-color:#2ea043; color:#3fb950; }
+.v-badge.stop { background:#2d0f0f; border-color:#c9302c; color:#f85149; }
+.v-txt { flex:1; min-width:0; font-size:11.5px; color:#8b949e; line-height:1.55; }
+.v-reset {
+  flex-shrink:0; border:1px solid #30363d; background:#161b22; color:#8b949e;
+  border-radius:8px; padding:8px 11px; font-size:11.5px; cursor:pointer; font-family:inherit;
+}
+
+.foot { font-size:11px; color:#6e7681; line-height:1.8; margin:22px 0 6px; }
+.foot a { color:#58a6ff; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-row">
+    <a class="back" href="./index.html">‹</a>
+    <div class="hdr-t"><b>🌤 天気図確認</b><span>滝川エリア・飛べる状況かを判断する</span></div>
+    <div class="clock"><b id="clkT">--:--</b><span id="clkD">----/--/--</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="lead">
+    大きい場から小さい場へ、<b>①総観 → ②雲の全体像 → ③下層の実況 → ④効いてくる予想 → ⑤近傍空港の数字</b> の順に見ます。
+    順番が大事で、いきなり下層悪天予想図だけを見ても「なぜそうなるのか」が分からず、
+    <b>その先どう変わるか</b>を読めません。最後に現地の観天望気で答え合わせをします。
+  </div>
+
+  <button class="imgsw" id="imgSw" onclick="toggleImages()">
+    <span class="imgsw-b"></span>
+    <span class="imgsw-t"><b>気象庁の画像を読み込む</b><span id="imgSwNote">通信します。オフや圏外のときは各カードの「開く」から</span></span>
+  </button>
+
+  <div class="sec-t">読む順序</div>
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <div class="step-hd">
+      <div class="step-no">1</div>
+      <div class="step-hd-t"><b>気象庁 天気図</b><span>地上・予想天気図（総観場をつかむ）</span></div>
+      <div class="step-scale">数百km〜</div>
+    </div>
+    <a class="open-btn" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener">天気図を開く <span class="ext">↗</span></a>
+    <div class="shot">
+      <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
+      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="loadShot('chart',true)">再読込</button></div>
+      <div class="shot-note">速報天気図。表示できたら画像をタップで拡大。最新かどうかは必ず時刻で確かめる。</div>
+    </div>
+    <div class="look">
+      <div class="look-t">▸ 何を見るか</div>
+      <ul>
+        <li><b>気圧配置</b>。滝川が<span class="hi">高気圧の圏内</span>なら安定、<span class="hi">気圧の谷・低気圧の前面</span>なら下り坂。</li>
+        <li><b>等圧線の混み具合</b>。北海道付近で線が詰まっているほど風が強い。西高東低が締まると北西風。</li>
+        <li><b>前線の位置と動き</b>。寒冷前線の通過前後は風向が急変し、突風・シアーが出る。</li>
+        <li><b>予想図（12・24時間先）</b>で、<span class="hi">飛ぶ時間帯にどう変わるか</span>を必ず見る。今の図だけで決めない。</li>
+      </ul>
+    </div>
+    <div class="stop">
+      <div class="stop-t">⚠ ここで警戒</div>
+      <p>低気圧・前線が飛行時間帯に北海道へかかる／等圧線が明らかに混んでいる。この時点で怪しければ、以降は「飛べるか」ではなく「いつ中止を決めるか」を見る目に切り替えます。</p>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step">
+    <div class="step-hd">
+      <div class="step-no">2</div>
+      <div class="step-hd-t"><b>赤外画像（ひまわり）</b><span>雲頂の高さ・雲の厚み。夜間も見える</span></div>
+      <div class="step-scale">広域</div>
+    </div>
+    <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener">赤外画像を開く <span class="ext">↗</span></a>
+    <div class="shot">
+      <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
+      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="loadShot('ir',true)">再読込</button></div>
+      <div class="shot-note">ひまわり赤外（B13）。北海道周辺を切り出しています。動きは気象庁のページで。</div>
+    </div>
+    <div class="look">
+      <div class="look-t">▸ 何を見るか</div>
+      <ul>
+        <li><b>白いほど雲頂が高い＝背が高い雲</b>。積乱雲や前線の雲域はここで見分ける。</li>
+        <li><b>動かして時系列で見る</b>。雲域が滝川へ近づいているか、離れているか。発達しているか衰えているか。</li>
+        <li>赤外は<span class="hi">低い雲・薄い雲が写りにくい</span>。下層の雲は次の可視画像で確かめる。</li>
+      </ul>
+    </div>
+    <div class="stop">
+      <div class="stop-t">⚠ ここで警戒</div>
+      <p>石狩平野へ向かって真っ白な雲域が移動している。時間を追って明るさが増している（発達中）。</p>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step">
+    <div class="step-hd">
+      <div class="step-no">3</div>
+      <div class="step-hd-t"><b>可視画像（ひまわり）</b><span>下層雲・対流雲の様子。日中のみ</span></div>
+      <div class="step-scale">北海道</div>
+    </div>
+    <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener">可視画像を開く <span class="ext">↗</span></a>
+    <div class="shot">
+      <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
+      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="loadShot('vis',true)">再読込</button></div>
+      <div class="shot-note">ひまわり可視（B03）。夜間は真っ暗になるので赤外で判断します。</div>
+    </div>
+    <div class="look">
+      <div class="look-t">▸ 何を見るか</div>
+      <ul>
+        <li><b>積雲の粒々が見えるか</b>。きれいに散らばっていればサーマルが立っている目安。</li>
+        <li><b>雲量と広がり</b>。一面に覆われていれば日射が入らず、サーマルは弱い。</li>
+        <li><b>ぼこぼこと盛り上がってきていないか</b>。対流が強すぎると突風・シアーの側に振れる。</li>
+        <li><span class="hi">滝川は西に樺戸山地・増毛山地、東に夕張山地</span>。山沿いの雲の出方で、リッジやウェーブの有無、山越えの風の強さを推し量る。</li>
+      </ul>
+    </div>
+    <div class="stop">
+      <div class="stop-t">⚠ ここで警戒</div>
+      <p>石狩平野が一面の雲に覆われている（＝雲底が低い可能性）。積雲が急速に立ち上がっている。夜間・薄明は可視画像が使えないので、赤外で判断する。</p>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step">
+    <div class="step-hd">
+      <div class="step-no">4</div>
+      <div class="step-hd-t"><b>下層悪天予想図（北海道）</b><span>実際に効く数字がここに出る</span></div>
+      <div class="step-scale">FL100以下</div>
+    </div>
+    <a class="open-btn" href="https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2" target="_blank" rel="noopener">下層悪天予想図を開く <span class="ext">↗</span></a>
+    <div class="shot">
+      <div class="ft-tabs" id="ftTabs">
+        <button data-ft="3" data-on="1" onclick="setFT(3)">3時間後</button>
+        <button data-ft="6" data-on="0" onclick="setFT(6)">6時間後</button>
+        <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
+      </div>
+      <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
+      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
+    </div>
+    <div class="look">
+      <div class="look-t">▸ 何を見るか</div>
+      <ul>
+        <li><b>雲底の高さ</b>。ここが <span class="hi">300m（約1,000ft）</span> を割ると運航の気象条件に触れる。</li>
+        <li><b>視程</b>。<span class="hi">5km</span> を割ると同じく条件外。降水・霧・下層雲の記号に注意。</li>
+        <li><b>乱気流・着氷の領域</b>が滝川（半径9km・4,000ft MSL以下）にかかっていないか。</li>
+        <li><b>風</b>。矢羽根から風向・風速を読み、<span class="hi">滑走路との角度で横風成分</span>を出す（下の早見表）。</li>
+        <li>この図は<b>予想図</b>。3・6・9時間後の3枚があるので、<span class="hi">飛ぶ時間帯にいちばん近いコマ</span>を見る。</li>
+      </ul>
+    </div>
+    <div class="stop">
+      <div class="stop-t">⚠ 中止側の判断</div>
+      <p>雲底300m未満／視程5km未満／横風成分8kt超のいずれかに当たれば飛べません。乱気流・着氷域がかかっていれば、かからない時間帯・高度に限るか中止します。</p>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step">
+    <div class="step-hd">
+      <div class="step-no">5</div>
+      <div class="step-hd-t"><b>METAR / TAF</b><span>近傍空港の実況と予報。数字で裏を取る</span></div>
+      <div class="step-scale">RJEC/RJCO/RJCC</div>
+    </div>
+    <a class="open-btn" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener">METAR / TAF を開く <span class="ext">↗</span></a>
+    <div class="shot">
+      <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
+      <div class="shot-bar"><span class="t" id="ts-metar">—</span><button onclick="loadShot('metar',true)">再読込</button></div>
+      <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
+    </div>
+    <div class="look">
+      <div class="look-t">▸ 何を見るか</div>
+      <ul>
+        <li><b>風</b>。<span class="hi">36010KT</span> なら360度から10kt。滑走路との角度で横風成分を出す。<span class="hi">G</span>（ガスト）が付いていたら突風。</li>
+        <li><b>視程</b>。<span class="hi">9999</span> は10km以上。<span class="hi">5000</span> を割ると運航の気象条件に触れる。</li>
+        <li><b>雲</b>。<span class="hi">BKN010</span> は雲量5〜7で1,000ft＝約300m。<span class="hi">OVC</span>／<span class="hi">BKN</span> の高さが雲底の目安。</li>
+        <li><b>天気</b>。<span class="hi">RA</span>雨 <span class="hi">SN</span>雪 <span class="hi">BR</span>もや <span class="hi">FG</span>霧 <span class="hi">TS</span>雷。頭の <span class="hi">-</span>は弱い、<span class="hi">+</span>は強い。</li>
+        <li><b>TAF</b> で飛ぶ時間帯を見る。<span class="hi">TEMPO</span>は一時的、<span class="hi">BECMG</span>は移り変わり、<span class="hi">PROB30</span>は確率30%。</li>
+      </ul>
+    </div>
+    <div class="stop">
+      <div class="stop-t">⚠ 中止側の判断</div>
+      <p>近傍空港で視程5,000m未満、BKN/OVCが1,000ft（約300m）未満、風がガストを含めて横風成分8ktを超える。TAFで飛行時間帯にそれらがTEMPO以上で予想されている場合も、余裕を持って見送ります。</p>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step">
+    <div class="step-hd">
+      <div class="step-no">6</div>
+      <div class="step-hd-t"><b>現地で答え合わせ</b><span>観天望気・吹き流し・実測</span></div>
+      <div class="step-scale">滝川</div>
+    </div>
+    <div class="look">
+      <div class="look-t">▸ 何を見るか</div>
+      <ul>
+        <li><b>吹き流し</b>。真横に水平まで上がっていれば <span class="hi">およそ15kt以上</span>。滑走路との角度から横風成分を出す。</li>
+        <li><b>雲底の見え方</b>。周りの山（暑寒別岳・ピンネシリ・芦別岳）に雲がかかっているかは高さの物差しになる。</li>
+        <li><b>視程</b>。見えている山や目標物までの距離で1,500m・5,000mの感覚を確かめる。</li>
+        <li><b>予想と違っていないか</b>。ここで食い違ったら、予想のほうを疑って早めに切り上げる判断に寄せる。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── しきい値 ── -->
+  <div class="sec-t">効いてくる数字</div>
+
+  <div class="lim-grid">
+    <div class="lim warn">
+      <div class="lim-k">横風限界（機体）</div>
+      <div class="lim-v">8 kt</div>
+      <div class="lim-n">飛行規程2-5。運航者の条件は20ktだが、<b>先に効くのはこちら</b></div>
+    </div>
+    <div class="lim">
+      <div class="lim-k">雲底 / 視程（運航者）</div>
+      <div class="lim-v">300 m / 5 km</div>
+      <div class="lim-n">正対風30kt・横風20ktとあわせて運航者の条件</div>
+    </div>
+    <div class="lim">
+      <div class="lim-k">VMC 地表300m以下・管制区外</div>
+      <div class="lim-v">視程 1,500 m</div>
+      <div class="lim-n">雲から離れて飛行できること</div>
+    </div>
+    <div class="lim">
+      <div class="lim-k">VMC 300m以上（管制区）</div>
+      <div class="lim-v">視程 5,000 m</div>
+      <div class="lim-n">雲から上150m・下300m・水平600m</div>
+    </div>
+    <div class="lim">
+      <div class="lim-k">92条許可の空域</div>
+      <div class="lim-v">9 km / 4,000 ft</div>
+      <div class="lim-n">たきかわスカイパーク中心・MSL以下、日の出〜日没</div>
+    </div>
+    <div class="lim">
+      <div class="lim-k">雨中飛行後の進入速度</div>
+      <div class="lim-v">+5 kt</div>
+      <div class="lim-n">49kt → 54kt。雨天後は増速</div>
+    </div>
+  </div>
+
+  <div class="sec-t">横風成分 早見表</div>
+  <div class="lim" style="padding:12px 13px;">
+    <table class="xw">
+      <tr><th>滑走路との角度</th><th>10°</th><th>20°</th><th>30°</th><th>40°</th><th>50°</th><th>60°〜</th></tr>
+      <tr><th>風速に対する割合</th><td>2割</td><td>3割</td><td>5割</td><td>6割</td><td>8割</td><td>10割</td></tr>
+      <tr><th>8ktになる風速</th><td>40kt</td><td>26kt</td><td>16kt</td><td>13kt</td><td>10kt</td><td class="hit">8kt</td></tr>
+    </table>
+    <div class="lim-n" style="margin-top:9px;">
+      下段が<b>限界に達する風速</b>。真横（60°以上）からなら風速8ktで、もう横風限界です。
+    </div>
+  </div>
+
+  <!-- ── チェックシート ── -->
+  <div class="sec-t">判断チェック<span style="font-size:10px;letter-spacing:0;color:#6e7681;">（タップで 未確認 → OK → NG）</span></div>
+
+  <div id="chkList"></div>
+
+  <div class="foot">
+    リンク先はいずれも気象庁の公開ページです。画像はこのページに取り込まず、
+    毎回<b>気象庁の最新版を開いて</b>確認してください（古い図で判断しないため）。<br>
+    チェックの状態はこの端末に保存され、日付が変わると自動でリセットされます。
+  </div>
+</div>
+
+<div class="lb" id="lb" onclick="closeLb(event)"><button class="lb-x" onclick="closeLb(event)">✕</button><div id="lbIn"></div></div>
+
+<div class="verdict">
+  <div class="verdict-in">
+    <div class="v-badge none" id="vBadge">未確認</div>
+    <div class="v-txt" id="vTxt">5つのステップを確認してください</div>
+    <button class="v-reset" onclick="resetChecks()">リセット</button>
+  </div>
+</div>
+
+<script>
+/* ── 判断チェック項目 ──────────────────────────────────────
+   「見た」ではなく「その項目が飛べる側か」で答える。1つでもNGがあれば
+   中止側に倒す。全部OKで初めてGO側に出す。曖昧なまま飛ばないための道具。 */
+const CHECKS = [
+  { id:'synop', t:'総観場：低気圧・前線が飛行時間帯に滝川へかからない',
+    s:'天気図と予想図の両方で確認。等圧線が混んでいないこと' },
+  { id:'sat',   t:'衛星：発達中の雲域が滝川へ向かっていない',
+    s:'赤外で背の高い雲、可視で対流の急発達がないこと' },
+  { id:'base',  t:'雲底 300m（約1,000ft）以上',
+    s:'下層悪天予想図。割ると運航の気象条件に触れる' },
+  { id:'vis',   t:'視程 5km 以上',
+    s:'下層悪天予想図。降水・霧の記号にも注意' },
+  { id:'wind',  t:'横風成分 8kt 以下',
+    s:'風向と滑走路の角度から早見表で換算。機体の限界' },
+  { id:'turb',  t:'乱気流・着氷の領域が飛行空域にかからない',
+    s:'半径9km・4,000ft MSL以下の範囲で判断' },
+  { id:'metar', t:'METAR / TAF：近傍空港が飛行時間帯に条件を満たす',
+    s:'視程5,000m以上、BKN/OVCが1,000ft以上、ガスト込みで横風8kt以下' },
+  { id:'vmc',   t:'VMC を満たせる見込み',
+    s:'300m以上は管制区で視程5,000m・雲から水平600m' },
+  { id:'local', t:'現地の観天望気が予想と食い違っていない',
+    s:'吹き流し、山の雲、見通し。違えば予想を疑う' },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   気象庁の画像の取り込み
+
+   気象庁の画像URLは発表時刻ごとに変わり、多くはJSONを引かないと辿れない。
+   このページは file:// から開かれるので、そのJSON取得がCORSで弾かれる端末が
+   ある。そこで「取れたら出す・取れなければリンクに落とす」を徹底し、
+   壊れた画像やリンク切れのアイコンは絶対に出さない設計にしてある。
+
+   ・天気図   … 発表時刻を推定して候補URLを順に試す（JSON不要）
+   ・ひまわり … targetTimes を引いてタイルを並べる（JSONが要る）
+   ・悪天予想図 … 直リンクが安定しないため、リンク誘導のみ
+   ══════════════════════════════════════════════════════════════ */
+
+/* 下層悪天予想図。3・6・9時間先の3枚で、URLは固定（気象庁が最新版に差し替える）。
+   時刻がURLに入らないのでJSONを引く必要がなく、CORSの影響も受けない。 */
+const SIGWX_URLS = {
+  3: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp03.png',
+  6: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp06.png',
+  9: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp09.png',
+};
+let sigwxFT = 3;
+
+const IMG_KEY = 'tenkizu_images';
+let imagesOn = (localStorage.getItem(IMG_KEY) ?? '1') === '1';
+
+const pad = n => String(n).padStart(2, '0');
+
+/* 速報天気図。UTCの00/06/12/18時発表を新しい順に候補として並べる */
+function chartCandidates() {
+  const out = [];
+  const now = new Date();
+  for (let back = 0; back < 4; back++) {
+    const d = new Date(now.getTime() - back * 6 * 3600 * 1000);
+    const h = Math.floor(d.getUTCHours() / 6) * 6;
+    const ts = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + pad(h) + '0000';
+    out.push({
+      url: 'https://www.jma.go.jp/bosai/weather_map/data/png/' + ts + '.png',
+      label: `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${pad(h)}UTC（${pad((h + 9) % 24)}JST）発表`
+    });
+  }
+  return out;
+}
+
+/* 1枚ずつ試して、最初に読めたものを採用する */
+function tryImages(cands, onOk, onFail) {
+  let i = 0;
+  const next = () => {
+    if (i >= cands.length) { onFail(); return; }
+    const c = cands[i++];
+    const im = new Image();
+    im.onload  = () => onOk(im, c.label);
+    im.onerror = next;
+    im.referrerPolicy = 'no-referrer';
+    im.src = c.url + (c.url.includes('?') ? '&' : '?') + 'cb=' + Date.now();
+  };
+  next();
+}
+
+/* ひまわりのタイル。z=6 で北海道まわりを 3×2 枚 */
+const HIMA = {
+  ir:  { band: 'B13', prod: 'TBB'  },
+  vis: { band: 'B03', prod: 'ALBD' },
+};
+const TILE = { z: 6, x0: 56, x1: 58, y0: 22, y1: 23 };
+
+async function loadHimawari(key, box, tsEl) {
+  const cfg = HIMA[key];
+  const res = await fetch('https://www.jma.go.jp/bosai/himawari/data/satimg/targetTimes_fd.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('targetTimes ' + res.status);
+  const list = await res.json();
+  const t = list[list.length - 1];
+  if (!t || !t.basetime || !t.validtime) throw new Error('形式が違います');
+
+  const cols = TILE.x1 - TILE.x0 + 1;
+  const grid = document.createElement('div');
+  grid.className = 'tiles';
+  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+
+  const jobs = [];
+  for (let y = TILE.y0; y <= TILE.y1; y++) {
+    for (let x = TILE.x0; x <= TILE.x1; x++) {
+      const im = new Image();
+      im.referrerPolicy = 'no-referrer';
+      jobs.push(new Promise(ok => { im.onload = () => ok(true); im.onerror = () => ok(false); }));
+      im.src = `https://www.jma.go.jp/bosai/himawari/data/satimg/${t.basetime}/fd/${t.validtime}/${cfg.band}/${cfg.prod}/${TILE.z}/${x}/${y}.jpg`;
+      grid.appendChild(im);
+    }
+  }
+  const okCount = (await Promise.all(jobs)).filter(Boolean).length;
+  if (!okCount) throw new Error('タイルを取得できません');
+
+  box.innerHTML = '';
+  box.appendChild(grid);
+  box.classList.add('zoom');
+  box.onclick = () => openLb(grid.cloneNode(true));
+  const vt = t.validtime.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2}).*$/, (_, Y, M, D, h, m) => {
+    const d = new Date(Date.UTC(+Y, +M - 1, +D, +h, +m));
+    return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST`;
+  });
+  tsEl.textContent = vt + ' 現在';
+}
+
+function fallback(box, tsEl, why) {
+  box.classList.remove('zoom');
+  box.onclick = null;
+  box.innerHTML = `<div class="shot-msg"><b>この端末では画像を出せません</b>${why}<br>上の「開く」から気象庁のページでご覧ください</div>`;
+  tsEl.textContent = '—';
+}
+
+async function loadShot(key, manual) {
+  const box  = document.getElementById('box-' + key);
+  const tsEl = document.getElementById('ts-' + key);
+  if (!box) return;
+
+  if (!imagesOn && !manual) {
+    box.classList.remove('zoom'); box.onclick = null;
+    box.innerHTML = '<div class="shot-msg">画像の読み込みはオフです</div>';
+    tsEl.textContent = '—';
+    return;
+  }
+  box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
+  tsEl.textContent = '—';
+
+  if (key === 'metar') {
+    try {
+      const r = await fetch('https://aviationweather.gov/api/data/metar?ids=RJEC%2CRJCO%2CRJCC&hours=0&sep=true&taf=true', { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const txt = (await r.text()).trim();
+      if (!txt) throw new Error('空です');
+      box.classList.remove('zoom'); box.onclick = null;
+      box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
+      const d = new Date();
+      tsEl.textContent = `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 取得`;
+    } catch (e) {
+      fallback(box, tsEl, 'METAR/TAF の取得が遮断されました。');
+    }
+    return;
+  }
+  if (key === 'sigwx') {
+    document.querySelectorAll('#ftTabs button').forEach(bt => bt.dataset.on = (+bt.dataset.ft === sigwxFT) ? '1' : '0');
+    tryImages([{ url: SIGWX_URLS[sigwxFT], label: sigwxFT + '時間後の予想' }],
+      (im, label) => {
+        box.innerHTML = ''; box.appendChild(im);
+        box.classList.add('zoom');
+        box.onclick = () => openLb(im.cloneNode(true));
+        tsEl.textContent = label + '（図中の時刻を確認）';
+      },
+      () => fallback(box, tsEl, '悪天予想図を取得できませんでした。'));
+    return;
+  }
+  if (key === 'chart') {
+    tryImages(chartCandidates(),
+      (im, label) => {
+        box.innerHTML = ''; box.appendChild(im);
+        box.classList.add('zoom');
+        box.onclick = () => openLb(im.cloneNode(true));
+        tsEl.textContent = label;
+      },
+      () => fallback(box, tsEl, '天気図を取得できませんでした。'));
+    return;
+  }
+  try {
+    await loadHimawari(key, box, tsEl);
+  } catch (e) {
+    fallback(box, tsEl, '衛星画像の取得が遮断されました。');
+  }
+}
+
+function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }
+
+function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'metar'].forEach(k => loadShot(k)); }
+
+function toggleImages() {
+  imagesOn = !imagesOn;
+  localStorage.setItem(IMG_KEY, imagesOn ? '1' : '0');
+  syncSwitch();
+  loadAllShots();
+}
+function syncSwitch() {
+  const sw = document.getElementById('imgSw');
+  if (sw) sw.dataset.on = imagesOn ? '1' : '0';
+  const n = document.getElementById('imgSwNote');
+  if (n) n.textContent = imagesOn
+    ? '通信します。オフや圏外のときは各カードの「開く」から'
+    : 'オフ。各カードの「開く」から気象庁のページへ';
+}
+
+/* 拡大表示 */
+function openLb(node) {
+  const inn = document.getElementById('lbIn');
+  inn.innerHTML = ''; inn.appendChild(node);
+  document.getElementById('lb').classList.add('on');
+}
+function closeLb(e) { if (e) e.stopPropagation(); document.getElementById('lb').classList.remove('on'); }
+
+const KEY = 'tenkizu_checks';
+let state = {};
+
+function today() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+/* 日付が変わったら自動で白紙に戻す。前日の判断を引きずらせない */
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) || '{}');
+    state = (raw.date === today()) ? (raw.s || {}) : {};
+  } catch (e) { state = {}; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify({ date: today(), s: state })); } catch (e) {}
+}
+
+function render() {
+  document.getElementById('chkList').innerHTML = CHECKS.map(c => {
+    const s = state[c.id] || '';
+    const mark = s === 'ok' ? '✓' : s === 'ng' ? '✕' : '';
+    return `<button class="chk"${s?` data-s="${s}"`:''} onclick="cycle('${c.id}')">
+      <span class="chk-box">${mark}</span>
+      <span class="chk-t"><b>${c.t}</b><span>${c.s}</span></span>
+    </button>`;
+  }).join('');
+  updateVerdict();
+}
+
+function cycle(id) {
+  const cur = state[id] || '';
+  state[id] = cur === '' ? 'ok' : cur === 'ok' ? 'ng' : '';
+  if (!state[id]) delete state[id];
+  save(); render();
+}
+
+function resetChecks() {
+  if (!Object.keys(state).length) return;
+  if (!confirm('チェックをすべて消します。よろしいですか？')) return;
+  state = {}; save(); render();
+}
+
+function updateVerdict() {
+  const ng = CHECKS.filter(c => state[c.id] === 'ng');
+  const ok = CHECKS.filter(c => state[c.id] === 'ok');
+  const badge = document.getElementById('vBadge');
+  const txt   = document.getElementById('vTxt');
+  if (ng.length) {
+    badge.className = 'v-badge stop'; badge.textContent = '中止';
+    txt.innerHTML = `<b style="color:#f85149;">${ng.length}件が条件外</b>：` + ng.map(c => c.t.split('：').pop()).join(' / ');
+  } else if (ok.length === CHECKS.length) {
+    badge.className = 'v-badge go'; badge.textContent = '条件内';
+    txt.textContent = '8項目すべて条件内。ただし現地で変わるので、飛行中も見直します';
+  } else {
+    badge.className = 'v-badge none'; badge.textContent = '未確認';
+    txt.textContent = `残り ${CHECKS.length - ok.length} 項目。未確認のまま飛ばないこと`;
+  }
+}
+
+function tick() {
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  document.getElementById('clkT').textContent = p(d.getHours()) + ':' + p(d.getMinutes());
+  document.getElementById('clkD').textContent =
+    d.getFullYear() + '/' + p(d.getMonth()+1) + '/' + p(d.getDate()) +
+    ' (' + '日月火水木金土'[d.getDay()] + ')';
+}
+
+load(); render(); tick(); setInterval(tick, 10000);
+syncSwitch(); loadAllShots();
+/* 日をまたいだ状態でアプリに戻ってきたときに備える */
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
+</script>
+</body>
+</html>

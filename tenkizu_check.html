@@ -176,13 +176,6 @@ iframe.wxframe.tall { height:420px; }
 }
 /* 貼り付け判定。取り込みが塞がれていても、これは確実に動く */
 .paste-tool { margin:0 14px 14px; }
-.paste-tool textarea {
-  width:100%; min-height:88px; padding:10px 12px; border-radius:10px;
-  border:1px solid #30363d; background:#0d1117; color:#e6edf3;
-  font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.7;
-  resize:vertical;
-}
-.paste-tool textarea::placeholder { color:#4d5560; }
 .pt-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
 .pt-row label { font-size:11.5px; color:#8b949e; white-space:nowrap; }
 .pt-row input {
@@ -196,7 +189,6 @@ iframe.wxframe.tall { height:420px; }
   cursor:pointer; font-family:inherit;
 }
 .pt-row button.ghost { border-color:#30363d; background:#161b22; color:#8b949e; font-weight:400; }
-.pt-out { margin-top:10px; }
 .pt-card {
   border:1px solid #21262d; border-radius:10px; padding:10px 12px; margin-bottom:8px;
   background:#0d1117;
@@ -624,16 +616,11 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
 
     <div class="paste-tool">
-      <div class="look-t" style="margin-bottom:6px;">▸ 貼り付けて自動判定</div>
-      <textarea id="ptIn" placeholder="「開く」で表示した METAR / TAF を全部コピーして、ここに貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
       <div class="pt-row">
         <label>滑走路方位</label>
-        <input type="number" id="ptRwy" min="0" max="360" placeholder="例 350">
-        <button onclick="ptRun()">判定</button>
-        <button class="ghost" onclick="ptClear()">消去</button>
+        <input type="number" id="ptRwy" min="0" max="360" placeholder="例 350" onchange="ptRwyChanged()">
       </div>
-      <div class="pt-out" id="ptOut"></div>
-      <div class="shot-note">通信が使えなくても、貼り付ければ横風成分・視程・雲底をしきい値と突き合わせます。滑走路方位は一度入れると覚えます。</div>
+      <div class="shot-note">横風成分を出すのに使います。一度入れると覚えます。空欄だと横風は出ません。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -748,40 +735,30 @@ table.xw td.hit { color:#f85149; font-weight:700; }
    「見た」ではなく「その項目が飛べる側か」で答える。1つでもNGがあれば
    中止側に倒す。全部OKで初めてGO側に出す。曖昧なまま飛ばないための道具。 */
 /* ══════════════════════════════════════════════════════════════
-   METAR / TAF 貼り付け判定
+   METAR / TAF の判定
 
-   file:// から開いていると、ブラウザは他サイトへの fetch を止め、
-   相手サイトも iframe での取り込みを拒否する。取ってくる手段が両方
-   塞がっているので、開いたページから本文をコピーして貼ってもらい、
-   こちらでしきい値と突き合わせる。通信が要らないので確実に動く。
+   横風成分・視程・雲底をしきい値と突き合わせる。滑走路方位だけは
+   人にしか分からないので、入力してもらって覚えておく。
    ══════════════════════════════════════════════════════════════ */
 const PT_KEY = 'tenkizu_paste';
 const LIM = { xwind: 8, vis: 5000, ceil: 1000 };   /* kt / m / ft */
 
+/* 滑走路方位だけを覚える。横風成分の計算に使う */
 function ptSave() {
   try {
-    localStorage.setItem(PT_KEY, JSON.stringify({
-      date: today(),
-      txt: document.getElementById('ptIn').value,
-      rwy: document.getElementById('ptRwy').value,
-    }));
+    const el = document.getElementById('ptRwy');
+    localStorage.setItem(PT_KEY, JSON.stringify({ rwy: el ? el.value : '' }));
   } catch (e) {}
 }
 function ptLoad() {
   try {
     const r = JSON.parse(localStorage.getItem(PT_KEY) || '{}');
-    if (r.rwy) document.getElementById('ptRwy').value = r.rwy;   /* 方位は日をまたいでも残す */
-    if (r.date === today() && r.txt) {
-      document.getElementById('ptIn').value = r.txt;
-      ptRun();
-    }
+    const el = document.getElementById('ptRwy');
+    if (el && r.rwy) el.value = r.rwy;   /* 方位は日をまたいでも残す */
   } catch (e) {}
 }
-function ptClear() {
-  document.getElementById('ptIn').value = '';
-  document.getElementById('ptOut').innerHTML = '';
-  ptSave();
-}
+/* 方位を変えたら、横風成分を出し直す */
+function ptRwyChanged() { ptSave(); loadShot('metar', true); }
 
 /* 1本の電文から、風・視程・雲底を取り出す */
 function parseMetar(line) {
@@ -818,26 +795,6 @@ function xwind(o, rwy) {
   return { kt: Math.round(spd * Math.abs(Math.sin(d * Math.PI / 180)) * 10) / 10, ang: d, vrb: false };
 }
 
-function ptRun() {
-  const txt = document.getElementById('ptIn').value || '';
-  const rwyRaw = document.getElementById('ptRwy').value;
-  const rwy = rwyRaw === '' ? null : ((+rwyRaw % 360) + 360) % 360;
-  const out = document.getElementById('ptOut');
-  ptSave();
-
-  /* 空行区切りで固まりにし、METARらしい行だけ拾う */
-  const lines = txt.split(/\n/).map(l => l.trim()).filter(Boolean)
-    .filter(l => /\b\d{6}Z\b/.test(l) && /KT\b/.test(l));
-  if (!lines.length) {
-    out.innerHTML = txt.trim()
-      ? '<div class="pt-card"><div class="pt-st">読み取れませんでした</div><div class="shot-note" style="margin:0;">METAR の行（例 RJEC 070100Z 36010KT 9999 FEW030 …）が含まれているか確かめてください。</div></div>'
-      : '';
-    return;
-  }
-
-  out.innerHTML = lines.map(line => ptCard(parseMetar(line), rwy)).join('');
-}
-
 /* しきい値との突き合わせ。貼り付け・AVWX のどちらからでも同じ結果になるよう
    ここ1か所に寄せてある */
 function judge(o, rwy) {
@@ -852,13 +809,42 @@ function judge(o, rwy) {
   return { xw, bad, xwBad, visBad, ceilBad };
 }
 
+/* 電文1本ぶんの行。時刻 → 風 → 視程 → 雲底 → 横風 の順に並べる。
+   METAR も TAF の各期間も同じ形にして、目が迷わないようにする */
+function wxRow(headHtml, o, rwy) {
+  const { xw, bad } = judge(o, rwy);
+  const wind = o.windSpd === undefined ? '—'
+    : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0'))
+      + '/' + o.windSpd + (o.gust != null ? 'G' + o.gust : '') + 'kt';
+  const vis = o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km');
+  const cei = o.ceil == null ? '雲底なし' : o.ceil.toLocaleString() + 'ft';
+  const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
+  return `<div class="taf-r${bad.length ? ' bad' : ''}">
+    <div class="hd">
+      <div class="w">${headHtml}</div>
+      <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
+    </div>
+    <div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(xwt)}</div>
+  </div>`;
+}
+
+/* METAR の観測時刻。電文の 070100Z を拾って日本時間を添える */
+function metarWhen(raw) {
+  const m = String(raw || '').match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+  if (!m) return 'METAR';
+  const day = +m[1], h = +m[2], mi = m[3];
+  const jh = (h + 9) % 24;
+  const rolled = h + 9 >= 24;
+  const jst = rolled ? (pad(day + 1) + '日' + pad(jh) + ':' + mi + 'JST')
+                     : (pad(jh) + ':' + mi + 'JST');
+  return 'METAR ' + pad(day) + '日' + pad(h) + ':' + mi + 'Z'
+    + '<span class="jst">（' + jst + '）</span>';
+}
+
 /* 1本ぶんの判定カード。extra には生電文やTAFの内訳を差し込む */
 function ptCard(o, rwy, extra) {
   const { xw, bad, xwBad, visBad, ceilBad } = judge(o, rwy);
 
-  const windTxt = o.windSpd === undefined ? '—'
-    : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0') + '°')
-      + ' ' + o.windSpd + 'kt' + (o.gust != null ? ' G' + o.gust : '');
   const xwTxt = !xw ? '—' : (xw.vrb ? '最大 ' + xw.kt : xw.kt) + 'kt';
   const xwNote = !xw ? (rwy === null ? '滑走路方位を入力' : '')
     : (xw.vrb ? '風向不定。全量で見る' : '滑走路との角度 ' + xw.ang + '°');
@@ -870,12 +856,12 @@ function ptCard(o, rwy, extra) {
   return `<div class="pt-card ${bad.length ? 'ng' : 'ok'}">
     <div class="pt-st">${esc(o.station || '—')}
       <span class="tag ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + 'が条件外' : '条件内'}</span>${frTag}</div>
+    ${wxRow(metarWhen(o.raw), o, rwy)}
     <div class="pt-g">
       <div class="pt-i${xwBad ? ' bad' : ''}"><div class="k">横風成分</div><div class="v">${xwTxt}</div><div class="n">${xwNote}</div></div>
       <div class="pt-i${visBad ? ' bad' : ''}"><div class="k">視程</div><div class="v">${visTxt}</div><div class="n">${o.cavok ? 'CAVOK' : '限界5km'}</div></div>
       <div class="pt-i${ceilBad ? ' bad' : ''}"><div class="k">雲底</div><div class="v">${ceilTxt}</div><div class="n">${ceilNote}</div></div>
     </div>
-    <div class="shot-note" style="margin-top:7px;">風 ${windTxt}</div>
     ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風はガスト値で見ています</div>' : ''}
     ${extra || ''}
   </div>`;
@@ -1068,22 +1054,11 @@ function avwxTafRows(taf, rwy) {
 
   const rows = fc.map(f => {
     const o = avwxToObj(f);
-    const { xw, bad } = judge(o, rwy);
     const w = tafWhen(f.start_time);
     const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
-    const wind = o.windSpd === undefined ? '—'
-      : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0'))
-        + '/' + o.windSpd + (o.gust != null ? 'G' + o.gust : '') + 'kt';
-    const vis = o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km');
-    const cei = o.ceil == null ? '雲底なし' : o.ceil.toLocaleString() + 'ft';
-    const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
-    return `<div class="taf-r${bad.length ? ' bad' : ''}">
-      <div class="hd">
-        <div class="w">${esc(kind)} ${esc(w.z)}${w.jst ? '<span class="jst">（' + esc(w.jst) + '）</span>' : ''}</div>
-        <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
-      </div>
-      <div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(xwt)}</div>
-    </div>`;
+    const head = esc(kind) + ' ' + esc(w.z)
+      + (w.jst ? '<span class="jst">（' + esc(w.jst) + '）</span>' : '');
+    return wxRow(head, o, rwy);
   }).join('');
   return raw + '<div class="taf-per">' + rows + '</div>';
 }

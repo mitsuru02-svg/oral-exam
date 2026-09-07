@@ -112,6 +112,20 @@ Worker → **Settings** → **Runtime** → **Variables and Secrets** → **Add*
 
 **Deploy** / **Save** を押します。
 
+### 図の解説を使う場合（任意）
+
+天気図・衛星画像の「🔎 解説」を使うには、もう1つ Secret が要ります。
+
+| 欄 | 入れる値 |
+|---|---|
+| **Type** | **Secret** |
+| **Variable name** | `ANTHROPIC_API_KEY` |
+| **Value** | https://console.anthropic.com で取得した API キー |
+
+**こちらは従量課金です**（無料枠ではありません）。1回の解説で数円程度。
+同じ図の解説は端末側に取っておくので、何度見ても課金は1回だけです。
+入れなければ解説ボタンだけが使えないだけで、他の機能はすべて動きます。
+
 ### ⚠ 保存しただけでは効きません
 
 **Deployments** タブ → 一番上のデプロイの **…** → **Retry deployment**
@@ -173,7 +187,8 @@ AVWX に問い合わせないので、無料枠の回数を消費しません。
 
 | 返り値 | 意味 |
 |---|---|
-| `"avwx_token":"設定済み"` | ✅ 完了 |
+| `"avwx_token":"設定済み"` | ✅ METAR/TAF が使える |
+| `"anthropic_key":"設定済み"` | ✅ 図の解説が使える（任意機能） |
 | `"env_keys":["ASSETS"]` だけ | トークンが Worker に届いていない（→ STEP 4W の場所を確認） |
 | `"version"` が古い | 新しいビルドがまだ配信されていない |
 | 404 | worker.js が配信されていない。ビルドのログを確認 |
@@ -226,6 +241,10 @@ https://<あなたのURL>/api/metar/RJEC
 | `/api/taf/<ICAO>` | AVWX の TAF |
 | `/api/station/<ICAO>` | AVWX の空港情報 |
 | `/api/jma/bosai/….json` | 気象庁の JSON（天気図・衛星の時刻表） |
+| `/api/explain`（POST） | 天気図・衛星画像の解説。画像は送らず URL だけ渡す |
+
+`/api/explain` は気象庁の画像だけを対象にし、それ以外の URL は拒否します。
+解説は「図から読み取れることの説明」までで、**飛べるかどうかの判断はしません**。
 
 METAR は2分、気象庁の JSON は5分だけ Cloudflare 側に保持します。
 無料枠（1日4,000回）を使い切らないための措置です。
@@ -235,6 +254,7 @@ METAR は2分、気象庁の JSON は5分だけ Cloudflare 側に保持します
 | ファイル | 役割 |
 |---|---|
 | `lib/proxy.js` | 中継の中身（Workers / Pages 共通） |
+| `lib/explain.js` | 図の解説（Anthropic API を呼ぶ） |
 | `worker.js` | Workers の入口 |
 | `wrangler.jsonc` | Workers の設定 |
 | `functions/api/[[route]].js` | Pages の入口 |

@@ -213,6 +213,24 @@ iframe.wxframe.tall { height:420px; }
 .pt-i .n { font-size:10px; color:#7d8590; margin-top:1px; }
 .pt-warn { font-size:11px; color:#e3b341; margin-top:7px; line-height:1.6; }
 .shot-note a.lnk { color:#58a6ff; text-decoration:none; border-bottom:1px solid #1f4b8f; }
+/* 解説パネル */
+.exp {
+  margin-top:8px; border:1px solid #21262d; border-radius:10px;
+  background:#0d1117; padding:11px 13px; font-size:12.5px; line-height:1.85; color:#c9d1d9;
+}
+.exp:empty { display:none; }
+.exp h3 { font-size:12.5px; color:#79c0ff; margin:10px 0 4px; }
+.exp h3:first-child { margin-top:0; }
+.exp p { margin:0 0 7px; }
+.exp ul { margin:0 0 7px; padding-left:1.2em; }
+.exp li { margin-bottom:3px; }
+.exp b { color:#e6edf3; }
+.exp .exp-foot {
+  margin-top:9px; padding-top:8px; border-top:1px solid #21262d;
+  font-size:10px; color:#7d8590; line-height:1.6;
+}
+.exp .exp-err { color:#e3b341; }
+.shot-bar button.exp-btn { border-color:#1f4b8f; background:#0d2044; color:#79c0ff; font-weight:700; }
 .avwx-msg { font-size:11px; line-height:1.6; margin-top:7px; }
 .avwx-msg:empty { display:none; }
 .avwx-msg.ok { color:#3fb950; }
@@ -394,7 +412,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button data-ck="h48" data-on="0" onclick="setChart('h48')">48時間後</button>
       </div>
       <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button><button class="exp-btn" onclick="explainShot('chart')">🔎 解説</button></div>
+      <div class="exp" id="exp-chart"></div>
       <div class="urlset" id="url-chart">
         <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('chart')">保存</button>
@@ -427,7 +446,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener">赤外画像を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button><button class="exp-btn" onclick="explainShot('ir')">🔎 解説</button></div>
+      <div class="exp" id="exp-ir"></div>
       <div class="urlset" id="url-ir">
         <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('ir')">保存</button>
@@ -459,7 +479,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener">可視画像を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button><button class="exp-btn" onclick="explainShot('vis')">🔎 解説</button></div>
+      <div class="exp" id="exp-vis"></div>
       <div class="urlset" id="url-vis">
         <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('vis')">保存</button>
@@ -497,7 +518,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
       </div>
       <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button><button class="exp-btn" onclick="explainShot('sigwx')">🔎 解説</button></div>
+      <div class="exp" id="exp-sigwx"></div>
       <div class="urlset" id="url-sigwx">
         <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('sigwx')">保存</button>
@@ -1043,6 +1065,99 @@ async function avwxLoad(box) {
   }).join('') + '</div>';
 }
 
+/* ══════════════════════════════════════════════════════════════
+   図の解説
+
+   画像そのものは送らず、URLだけを中継サーバーに渡す。取りにいくのも
+   読ませるのもサーバー側で、APIキーは端末に来ない。
+
+   同じ図を何度も読ませると費用がかさむので、一度出した解説は
+   その画像URLごと覚えておき、二度目からは取っておいたものを出す。
+   ══════════════════════════════════════════════════════════════ */
+const EXP_KEY = 'tenkizu_explain';
+const EXP_TITLE = { chart:'天気図', ir:'赤外画像', vis:'可視画像', sigwx:'下層悪天予想図' };
+
+function expCache() { try { return JSON.parse(localStorage.getItem(EXP_KEY) || '{}'); } catch (e) { return {}; } }
+function expRemember(url, text) {
+  try {
+    const c = expCache();
+    c[url] = { text, t: Date.now() };
+    /* 古いものから落として、貯め込みすぎないようにする */
+    const ks = Object.keys(c).sort((a, b) => c[b].t - c[a].t).slice(0, 12);
+    const keep = {}; ks.forEach(k => keep[k] = c[k]);
+    localStorage.setItem(EXP_KEY, JSON.stringify(keep));
+  } catch (e) {}
+}
+
+/* 見出し・箇条書き・太字だけの、ごく簡単な整形 */
+function expRender(md) {
+  const esc1 = t => esc(t);
+  const inline = t => esc1(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  const out = [];
+  let ul = false;
+  String(md).split(/\n/).forEach(raw => {
+    const l = raw.trim();
+    const li = l.match(/^(?:[-*・]|\d+\.)\s+(.*)$/);
+    if (li) { if (!ul) { out.push('<ul>'); ul = true; } out.push('<li>' + inline(li[1]) + '</li>'); return; }
+    if (ul) { out.push('</ul>'); ul = false; }
+    if (!l) return;
+    const h = l.match(/^#{1,6}\s+(.*)$/);
+    out.push(h ? '<h3>' + inline(h[1]) + '</h3>' : '<p>' + inline(l) + '</p>');
+  });
+  if (ul) out.push('</ul>');
+  return out.join('');
+}
+
+function expShow(key, html) {
+  const el = document.getElementById('exp-' + key);
+  if (el) el.innerHTML = html;
+}
+
+async function explainShot(key) {
+  const url = shownUrl[key];
+  if (!url) {
+    expShow(key, '<div class="exp-err">図が表示されていないので解説できません。先に図を出してください。</div>');
+    return;
+  }
+  const px = avwxProxy();
+  if (!px) {
+    expShow(key, '<div class="exp-err">解説には中継サーバーが要ります。'
+      + '⑤の「中継サーバーのURL」を設定するか、中継サーバーから開いたページでお使いください。</div>');
+    return;
+  }
+
+  const cached = expCache()[url];
+  if (cached) { expShow(key, expRender(cached.text) + expFoot(true)); return; }
+
+  expShow(key, '<p>' + EXP_TITLE[key] + 'を読んでいます…</p>');
+  try {
+    const r = await fetch(px + '/explain', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url, kind: key }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || !j.text) {
+      const m = (j && j.error) ? j.error : 'HTTP ' + r.status;
+      expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc(m) + '）</div>');
+      return;
+    }
+    expRemember(url, j.text);
+    expShow(key, expRender(j.text) + expFoot(false));
+  } catch (e) {
+    expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc((e && e.message) || e) + '）</div>');
+  }
+}
+
+function expFoot(cached) {
+  return '<div class="exp-foot">図から読み取れることの説明です。'
+    + '<b>飛べるかどうかの判断はしていません</b>。最終的な可否はご自身で、'
+    + '現地の観天望気と合わせて判断してください。読み違いの可能性もあるので、'
+    + '数値は必ず図そのもので確かめること。'
+    + (cached ? '<br>（前に取った解説を表示しています。図を再読込すると取り直します）' : '')
+    + '</div>';
+}
+
 const CHECKS = [
   { id:'synop', t:'総観場：低気圧・前線が飛行時間帯に滝川へかからない',
     s:'天気図と予想図の両方で確認。等圧線が混んでいないこと' },
@@ -1244,13 +1359,16 @@ function chartCandidates() {
 }
 
 /* 1枚ずつ試して、最初に読めたものを採用する */
-function tryImages(cands, onOk, onFail) {
+/* いま表示している画像のURL。解説を頼むときに使う */
+const shownUrl = {};
+
+function tryImages(cands, onOk, onFail, key) {
   let i = 0;
   const next = () => {
     if (i >= cands.length) { onFail(); return; }
     const c = cands[i++];
     const im = new Image();
-    im.onload  = () => onOk(im, c.label);
+    im.onload  = () => { if (key) shownUrl[key] = c.url; onOk(im, c.label); };
     im.onerror = next;
     im.referrerPolicy = 'no-referrer';
     im.src = c.url + (c.url.includes('?') ? '&' : '?') + 'cb=' + Date.now();
@@ -1297,6 +1415,7 @@ async function loadMsc(key, box, tsEl) {
   const im = new Image();
   im.referrerPolicy = 'no-referrer';
   im.src = urls[i];
+  shownUrl[key] = urls[i];
   box.innerHTML = ''; box.appendChild(im);
   box.classList.add('zoom');
   box.onclick = () => openLb(im.cloneNode(true));
@@ -1394,6 +1513,7 @@ async function loadHimawari(key, box, tsEl) {
 function fallback(box, tsEl, why, key) {
   box.classList.remove('zoom');
   box.onclick = null;
+  if (key) delete shownUrl[key];   /* 出せなかった図の解説は頼めない */
 
   /* 画像を直接出せなくても、ページごと iframe で取り込めば中は見られる。
      iframe は相手サイトの許可が要らないので、file:// から開いていても動く。 */
@@ -1433,6 +1553,8 @@ async function loadShot(key, manual) {
   }
   box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
   tsEl.textContent = '—';
+  const ex = document.getElementById('exp-' + key);
+  if (ex) ex.innerHTML = '';       /* 別の図の解説が残らないように */
 
   /* 手で設定されたURLがあれば、それを最優先で使う */
   const custom = customUrls()[key];
@@ -1444,7 +1566,7 @@ async function loadShot(key, manual) {
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
       },
-      () => fallback(box, tsEl, '設定したURLから取得できませんでした。', key));
+      () => fallback(box, tsEl, '設定したURLから取得できませんでした。', key), key);
     return;
   }
 
@@ -1505,7 +1627,7 @@ async function loadShot(key, manual) {
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label + '（図中の時刻を確認）';
       },
-      () => fallback(box, tsEl, '悪天予想図を取得できませんでした。', key));
+      () => fallback(box, tsEl, '悪天予想図を取得できませんでした。', key), key);
     return;
   }
   if (key === 'chart') {
@@ -1526,7 +1648,7 @@ async function loadShot(key, manual) {
       },
       () => fallback(box, tsEl,
         chartKind === 'now' ? '天気図を取得できませんでした。'
-          : CHART_KIND_LABEL[chartKind] + 'を取得できませんでした。', key));
+          : CHART_KIND_LABEL[chartKind] + 'を取得できませんでした。', key), key);
     return;
   }
   /* ①気象衛星センターの1枚画像（fetch が要らないので file:// でも出る）

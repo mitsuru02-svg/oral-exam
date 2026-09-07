@@ -8,7 +8,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
       const seg = url.pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean);
-      return handleApi(seg, env, request.method);
+      return handleApi(seg, env, request.method, request);
     }
     /* 念のため。通常はここまで来ない */
     if (env.ASSETS) return env.ASSETS.fetch(request);

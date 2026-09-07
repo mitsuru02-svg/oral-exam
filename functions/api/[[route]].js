@@ -6,3 +6,4 @@ const seg = params => (Array.isArray(params.route) ? params.route : [params.rout
 
 export const onRequestOptions = ({ params }) => handleApi(seg(params), {}, 'OPTIONS');
 export const onRequestGet = ({ params, env }) => handleApi(seg(params), env, 'GET');
+export const onRequestPost = ({ params, env, request }) => handleApi(seg(params), env, 'POST', request);

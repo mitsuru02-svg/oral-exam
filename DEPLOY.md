@@ -11,10 +11,10 @@
 
 ## 手順
 
-### 1. このリポジトリを GitHub に push する
+### 1. GitHub に push する（**完了済み**）
 
-いま手元にあるファイルを、`mitsuru02-svg/oral-exam` の
-`claude/glider-pilot-exam-app-ugm9wt` ブランチに push してください。
+`mitsuru02-svg/oral-exam` の `claude/glider-pilot-exam-app-ugm9wt` ブランチに
+反映済みです。
 
 ### 2. AVWX のトークンを取る
 
@@ -33,7 +33,16 @@ https://account.avwx.rest/plans で **Hobby（無料・1日4,000回）** に登�
    | Build command | **（空欄）** |
    | Build output directory | **`/`** |
 
-4. **Save and Deploy**
+4. **Production branch** を **`claude/glider-pilot-exam-app-ugm9wt`** にする
+
+   ここが要注意です。既定では `main` が本番になりますが、作業は上のブランチに
+   あるので、`main` のままだと**古い内容が公開されます**。
+   作成画面で選べない場合は、作成後に
+   **Settings → Build → Production branch** で変更してください。
+
+   （将来この作業を `main` に取り込んだら、ここを `main` に戻して構いません）
+
+5. **Save and Deploy**
 
 ### 4. トークンを環境変数に入れる
 

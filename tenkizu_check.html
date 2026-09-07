@@ -75,15 +75,16 @@ body {
   flex-shrink:0; font-size:10px; color:#7d8590; border:1px solid #30363d;
   border-radius:20px; padding:3px 9px; white-space:nowrap;
 }
-
-.open-btn {
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  margin:0 14px 12px; padding:13px; border-radius:10px;
-  background:#1f6feb; color:#fff; text-decoration:none;
-  font-size:14px; font-weight:700; letter-spacing:.02em;
+/* 見出しの右に置く「開く」ボタン。全幅の帯をやめて、
+   図までの距離を詰めるためにここへ移した */
+.step-open {
+  flex-shrink:0; display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; font-weight:700; text-decoration:none; white-space:nowrap;
+  background:#1f6feb; color:#fff; border-radius:20px; padding:7px 13px;
 }
-.open-btn:active { background:#1a5fd0; }
-.open-btn .ext { font-size:12px; opacity:.85; font-weight:400; }
+.step-open:active { background:#1a5fd0; }
+.step-open .ext { font-size:10.5px; opacity:.85; font-weight:400; }
+
 
 .look { padding:0 14px 12px; }
 .look-t {
@@ -260,7 +261,16 @@ iframe.wxframe.tall { height:420px; }
   font-size:10px; color:#7d8590; line-height:1.6;
 }
 .exp .exp-err { color:#e3b341; }
-.shot-bar button.exp-btn { border-color:#1f4b8f; background:#0d2044; color:#79c0ff; font-weight:700; }
+/* 解説ボタン。狭いボタン行に混ぜると押しにくく目立たないので、
+   独立した1本の帯にして大きくしてある */
+.exp-go {
+  display:block; width:100%; margin-top:8px; padding:13px 12px;
+  border:1px solid #1f6feb; border-radius:10px;
+  background:#122b4d; color:#79c0ff;
+  font-size:15px; font-weight:700; font-family:inherit; letter-spacing:.02em;
+  cursor:pointer;
+}
+.exp-go:active { background:#0d2044; }
 .avwx-msg { font-size:11px; line-height:1.6; margin-top:7px; }
 .avwx-msg:empty { display:none; }
 .avwx-msg.ok { color:#3fb950; }
@@ -432,9 +442,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="step-hd">
       <div class="step-no">1</div>
       <div class="step-hd-t"><b>気象庁 天気図</b><span>地上・予想天気図（総観場をつかむ）</span></div>
-      <div class="step-scale">数百km〜</div>
+      <a class="step-open" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener" aria-label="天気図を開く">開く <span class="ext">↗</span></a>
     </div>
-    <a class="open-btn" href="https://www.jma.go.jp/bosai/weather_map/" target="_blank" rel="noopener">天気図を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="tslide">
         <input type="range" min="0" max="2" step="1" value="0" id="chartRange"
@@ -446,7 +455,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         </div>
       </div>
       <div class="shot-box" id="box-chart"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button><button class="exp-btn" onclick="explainShot('chart')">🔎 解説</button></div>
+      <div class="shot-bar"><span class="t" id="ts-chart">—</span><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
+      <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-chart"></div>
       <div class="urlset" id="url-chart">
         <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -475,12 +485,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="step-hd">
       <div class="step-no">2</div>
       <div class="step-hd-t"><b>赤外画像（ひまわり）</b><span>雲頂の高さ・雲の厚み。夜間も見える</span></div>
-      <div class="step-scale">広域</div>
+      <a class="step-open" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener" aria-label="赤外画像を開く">開く <span class="ext">↗</span></a>
     </div>
-    <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#5/35.996/124.343/&amp;elem=ir&amp;contents=himawari" target="_blank" rel="noopener">赤外画像を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-ir"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button><button class="exp-btn" onclick="explainShot('ir')">🔎 解説</button></div>
+      <div class="shot-bar"><span class="t" id="ts-ir">—</span><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
+      <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-ir"></div>
       <div class="urlset" id="url-ir">
         <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -508,12 +518,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="step-hd">
       <div class="step-no">3</div>
       <div class="step-hd-t"><b>可視画像（ひまわり）</b><span>下層雲・対流雲の様子。日中のみ</span></div>
-      <div class="step-scale">北海道</div>
+      <a class="step-open" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener" aria-label="可視画像を開く">開く <span class="ext">↗</span></a>
     </div>
-    <a class="open-btn" href="https://www.jma.go.jp/bosai/map.html#6/41.195/143.448/&amp;elem=vis&amp;contents=himawari" target="_blank" rel="noopener">可視画像を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-vis"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button><button class="exp-btn" onclick="explainShot('vis')">🔎 解説</button></div>
+      <div class="shot-bar"><span class="t" id="ts-vis">—</span><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
+      <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-vis"></div>
       <div class="urlset" id="url-vis">
         <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -542,9 +552,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="step-hd">
       <div class="step-no">4</div>
       <div class="step-hd-t"><b>下層悪天予想図（北海道）</b><span>実際に効く数字がここに出る</span></div>
-      <div class="step-scale">FL100以下</div>
+      <a class="step-open" href="https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2" target="_blank" rel="noopener" aria-label="下層悪天予想図を開く">開く <span class="ext">↗</span></a>
     </div>
-    <a class="open-btn" href="https://www.data.jma.go.jp/airinfo/data/awfo_low-level_sigwx.html#contents_area2" target="_blank" rel="noopener">下層悪天予想図を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="ft-tabs" id="ftTabs">
         <button data-ft="3" data-on="1" onclick="setFT(3)">3時間後</button>
@@ -552,7 +561,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <button data-ft="9" data-on="0" onclick="setFT(9)">9時間後</button>
       </div>
       <div class="shot-box" id="box-sigwx"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button><button class="exp-btn" onclick="explainShot('sigwx')">🔎 解説</button></div>
+      <div class="shot-bar"><span class="t" id="ts-sigwx">—</span><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
       <div class="exp" id="exp-sigwx"></div>
       <div class="urlset" id="url-sigwx">
         <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
@@ -582,9 +592,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="step-hd">
       <div class="step-no">5</div>
       <div class="step-hd-t"><b>METAR / TAF</b><span>近傍空港の実況と予報。数字で裏を取る</span></div>
-      <div class="step-scale">RJEC/RJCO/RJCC</div>
+      <a class="step-open" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener" aria-label="METAR / TAF を開く">開く <span class="ext">↗</span></a>
     </div>
-    <a class="open-btn" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener">METAR / TAF を開く <span class="ext">↗</span></a>
     <div class="shot">
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><span class="t" id="ts-metar">—</span><button onclick="loadShot('metar',true)">再読込</button></div>
@@ -592,25 +601,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
 
     <div class="paste-tool" style="margin-bottom:12px;">
-      <div class="look-t" style="margin-bottom:6px;">▸ AVWX から直接取る（任意・無料）</div>
-      <div class="pt-row">
-        <input type="text" id="avwxPx" placeholder="中継サーバーのURL（例 https://…/api）" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:auto;flex:1;min-width:0;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;">
-      </div>
-      <div class="pt-row">
-        <input type="password" id="avwxTok" placeholder="AVWX の API トークン（中継を使うなら不要）" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:auto;flex:1;min-width:0;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;">
-        <button onclick="avwxSave()">保存</button>
-        <button class="ghost" onclick="avwxForget()">削除</button>
-      </div>
       <div class="avwx-msg" id="avwxMsg"></div>
-      <div class="shot-note">
-        <b>中継サーバーに置く場合（おすすめ）</b>：トークンをサーバー側に隠せるので、
-        端末には何も入れずに済みます。置き方は同梱の <b>DEPLOY.md</b> のとおり。
-        このページ自体を中継サーバーから開けば、上の欄は<b>空のままで動きます</b>。<br>
-        <b>この端末だけで使う場合</b>：<a class="lnk" href="https://account.avwx.rest/plans" target="_blank" rel="noopener">avwx.rest のプラン↗</a>
-        の無料枠（Hobby／1日4,000回）で登録し、トークンを下の欄へ。
-        トークンは<b>この端末の中だけ</b>に保存され、HTMLファイルには書き込まれません。<br>
-        どちらでも、上の枠が生電文＋自動判定に切り替わり、TAF は時間帯ごとに分解して出ます。
-      </div>
     </div>
 
     <div class="paste-tool">
@@ -920,26 +911,26 @@ const AVWX_ST  = ['RJEC', 'RJCO', 'RJCC'];
 const AVWX_NAME = { RJEC: '旭川', RJCO: '丘珠', RJCC: '新千歳' };
 
 function avwxToken() { try { return (localStorage.getItem(AVWX_KEY) || '').trim(); } catch (e) { return ''; } }
-function avwxSave() {
-  const tok = (document.getElementById('avwxTok').value || '').trim();
-  const px  = (document.getElementById('avwxPx').value || '').trim();
+/* 画面から設定する欄は外してある。中継サーバーから開けば場所は自動で
+   決まるので、ふだんは何も要らない。手元のファイルから使うなど、
+   どうしても指定したいときのために、コンソールから呼べる形で残す。
+     avwxSet({ proxy:'https://…/api' })   中継サーバーの場所
+     avwxSet({ token:'…' })               AVWX のトークンを直に持つ
+     avwxSet({})                          どちらも消す */
+function avwxSet(o) {
+  o = o || {};
   try {
-    tok ? localStorage.setItem(AVWX_KEY, tok)  : localStorage.removeItem(AVWX_KEY);
-    px  ? localStorage.setItem(PROXY_KEY, px)  : localStorage.removeItem(PROXY_KEY);
+    ('proxy' in o ? (o.proxy ? localStorage.setItem(PROXY_KEY, String(o.proxy).trim())
+                             : localStorage.removeItem(PROXY_KEY)) : 0);
+    ('token' in o ? (o.token ? localStorage.setItem(AVWX_KEY, String(o.token).trim())
+                             : localStorage.removeItem(AVWX_KEY)) : 0);
+    if (!('proxy' in o) && !('token' in o)) {
+      localStorage.removeItem(PROXY_KEY); localStorage.removeItem(AVWX_KEY);
+    }
   } catch (e) {}
   loadShot('metar', true);
 }
-function avwxForget() {
-  try { localStorage.removeItem(AVWX_KEY); localStorage.removeItem(PROXY_KEY); } catch (e) {}
-  ['avwxTok', 'avwxPx'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  loadShot('metar', true);
-}
-function avwxFillInput() {
-  const t = document.getElementById('avwxTok');
-  if (t) t.value = avwxToken();
-  const p = document.getElementById('avwxPx');
-  if (p) { try { p.value = localStorage.getItem(PROXY_KEY) || ''; } catch (e) {} }
-}
+function avwxFillInput() { /* 入力欄は無くなったので何もしない */ }
 
 /* ⑤の下に出す状況表示。うまくいかないとき、何が起きたのかを画面で言う */
 function avwxSay(msg, ok) {

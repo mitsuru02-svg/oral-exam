@@ -634,8 +634,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   <div id="chkList"></div>
 
   <div class="foot">
-    リンク先はいずれも気象庁の公開ページです。画像はこのページに取り込まず、
-    毎回<b>気象庁の最新版を開いて</b>確認してください（古い図で判断しないため）。<br>
+    出典：<a href="https://www.jma.go.jp/" target="_blank" rel="noopener">気象庁ホームページ</a>
+    （天気図・衛星画像・下層悪天予想図）／
+    <a href="https://aviationweather.gov/" target="_blank" rel="noopener">NOAA Aviation Weather Center</a>・
+    <a href="https://avwx.rest/" target="_blank" rel="noopener">AVWX</a>（METAR・TAF）。<br>
+    画像は表示のたびに取りに行きますが、<b>古い図が出ていないか図中の時刻を必ず確認</b>してください。
+    判断に迷ったら各カードの「開く」から本家の最新版で見直すこと。<br>
     チェックの状態はこの端末に保存され、日付が変わると自動でリセットされます。
   </div>
 </div>
@@ -1029,18 +1033,76 @@ let imagesOn = (localStorage.getItem(IMG_KEY) ?? '1') === '1';
 
 const pad = n => String(n).padStart(2, '0');
 
-/* 速報天気図。UTCの00/06/12/18時発表を新しい順に候補として並べる */
+/* ══════════════════════════════════════════════════════════════
+   天気図の取り込み
+
+   気象庁は list.json に最新の画像名を並べている。これが読めれば
+   ファイル名を当てにいく必要がなく、確実に最新が出る。ただし読むには
+   fetch が要るので、file:// から開いていると使えない。
+   そこで list.json → だめならファイル名を組み立てて総当たり、の二段構え。
+   画像そのものは <img> なので file:// でも出る。ここが分かれ目。
+   ══════════════════════════════════════════════════════════════ */
+const CHART_HOST = 'https://www.jma.go.jp';
+const CHART_BASE = CHART_HOST + '/bosai/weather_map/data/png/';
+const CHART_LIST = CHART_HOST + '/bosai/weather_map/data/list.json';
+
+/* 12桁の時刻から見出しを作る。UTCとJSTを併記して取り違えを防ぐ */
+function chartLabel(ts12, tail) {
+  if (!ts12) return tail || '最新';
+  const M = +ts12.slice(4, 6), D = +ts12.slice(6, 8), H = +ts12.slice(8, 10);
+  return `${M}/${D} ${pad(H)}UTC（${pad((H + 9) % 24)}JST）` + (tail || '');
+}
+function chartStamp(name) {
+  const m = String(name).match(/(\d{12})/);
+  return m ? m[1] : '';
+}
+function chartUrlOf(name) {
+  if (/^https?:\/\//i.test(name)) return name;
+  if (name.charAt(0) === '/') return CHART_HOST + name;
+  return CHART_BASE + name;
+}
+
+/* list.json の中身の形は公開仕様ではないので、キーを決め打ちで掘らずに
+   全体を舐めて .png に見える文字列を集める。形が変わっても壊れない */
+function collectPng(node, out) {
+  if (typeof node === 'string') { if (/\.png($|\?)/i.test(node)) out.push(node); return; }
+  if (Array.isArray(node)) { node.forEach(n => collectPng(n, out)); return; }
+  if (node && typeof node === 'object') { Object.keys(node).forEach(k => collectPng(node[k], out)); }
+}
+
+async function chartFromList() {
+  const r = await fetch(CHART_LIST, { cache: 'no-store' });
+  if (!r.ok) throw new Error('list.json ' + r.status);
+  const names = [];
+  collectPng(await r.json(), names);
+  if (!names.length) throw new Error('list.json に画像名がありません');
+
+  /* 予想図は先の時刻を持つので、いまより後のものは実況として出さない */
+  const d = new Date();
+  const nowTs = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate())
+    + pad(d.getUTCHours()) + pad(d.getUTCMinutes());
+
+  return [...new Set(names)]
+    .filter(n => { const t = chartStamp(n); return !t || t <= nowTs; })
+    .sort((a, b) => chartStamp(b).localeCompare(chartStamp(a)))
+    .slice(0, 6)
+    .map(n => ({ url: chartUrlOf(n), label: chartLabel(chartStamp(n), '　※図中の時刻も確認') }));
+}
+
+/* list.json が読めないとき用。UTCの00/06/12/18時ぶんを、ありうる
+   ファイル名の付け方すべてで並べる。読めた1枚目を採用するので、
+   外れが混じっていても害はない */
 function chartCandidates() {
   const out = [];
   const now = new Date();
-  for (let back = 0; back < 4; back++) {
+  for (let back = 0; back < 5; back++) {
     const d = new Date(now.getTime() - back * 6 * 3600 * 1000);
     const h = Math.floor(d.getUTCHours() / 6) * 6;
-    const ts = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + pad(h) + '0000';
-    out.push({
-      url: 'https://www.jma.go.jp/bosai/weather_map/data/png/' + ts + '.png',
-      label: `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${pad(h)}UTC（${pad((h + 9) % 24)}JST）発表`
-    });
+    const ymd = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate());
+    const t12 = ymd + pad(h) + '00';
+    const label = chartLabel(t12, ' 発表');
+    [t12 + '00.png', t12 + '-00.png', t12 + '.png', t12 + '00-00.png']
+      .forEach(f => out.push({ url: CHART_BASE + f, label }));
   }
   return out;
 }
@@ -1217,7 +1279,10 @@ async function loadShot(key, manual) {
     return;
   }
   if (key === 'chart') {
-    tryImages(chartCandidates(),
+    /* list.json が読めればそれが最優先。読めなければ総当たりに落ちる */
+    let cands = [];
+    try { cands = await chartFromList(); } catch (e) { /* 総当たりへ */ }
+    tryImages(cands.concat(chartCandidates()),
       (im, label) => {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.add('zoom');

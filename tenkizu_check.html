@@ -212,6 +212,37 @@ iframe.wxframe.tall { height:420px; }
 .pt-i.bad .v { color:#f85149; }
 .pt-i .n { font-size:10px; color:#7d8590; margin-top:1px; }
 .pt-warn { font-size:11px; color:#e3b341; margin-top:7px; line-height:1.6; }
+.shot-note a.lnk { color:#58a6ff; text-decoration:none; border-bottom:1px solid #1f4b8f; }
+.shot-box .wxdata {
+  align-self:stretch; width:100%; padding:12px 12px 4px; text-align:left;
+  max-height:62vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+.shot-box .wxdata .pt-card:last-child { margin-bottom:0; }
+/* AVWX から直接取ったときの表示 */
+.pt-raw {
+  font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11px; line-height:1.65;
+  color:#c9d1d9; background:#010409; border:1px solid #21262d; border-radius:8px;
+  padding:8px 10px; margin:7px 0 0; white-space:pre-wrap; word-break:break-word;
+}
+.pt-raw .lb { display:block; font-family:inherit; font-size:9.5px; font-weight:700; color:#79c0ff; letter-spacing:.1em; margin-bottom:4px; }
+.pt-fr { font-size:10.5px; font-weight:700; border-radius:20px; padding:2px 8px; margin-left:6px; border:1px solid; }
+.pt-fr.VFR  { color:#3fb950; border-color:#2ea043; background:#132d1c; }
+.pt-fr.MVFR { color:#58a6ff; border-color:#1f6feb; background:#0d2044; }
+.pt-fr.IFR  { color:#f85149; border-color:#c9302c; background:#2d0f0f; }
+.pt-fr.LIFR { color:#db61a2; border-color:#a03b7a; background:#2b0f22; }
+.taf-per { margin-top:7px; border-top:1px solid #21262d; padding-top:7px; }
+.taf-r {
+  display:grid; grid-template-columns:78px 1fr auto; gap:8px; align-items:baseline;
+  font-size:11px; line-height:1.7; padding:3px 0; border-bottom:1px dashed #1b2027;
+  font-variant-numeric:tabular-nums;
+}
+.taf-r:last-child { border-bottom:0; }
+.taf-r .w { color:#7d8590; font-weight:700; font-size:10px; letter-spacing:.03em; }
+.taf-r .d { color:#c9d1d9; font-family:'SF Mono',Menlo,Consolas,monospace; }
+.taf-r.bad .d { color:#f85149; }
+.taf-r .j { font-size:10px; font-weight:700; white-space:nowrap; }
+.taf-r .j.ok { color:#3fb950; }
+.taf-r .j.ng { color:#f85149; }
 pre.wx {
   width:100%; margin:0; padding:12px 13px; text-align:left;
   font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
@@ -493,6 +524,16 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
 
+    <div class="paste-tool" style="margin-bottom:12px;">
+      <div class="look-t" style="margin-bottom:6px;">▸ AVWX から直接取る（任意・無料）</div>
+      <div class="pt-row">
+        <input type="password" id="avwxTok" placeholder="AVWX の API トークン" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:auto;flex:1;min-width:0;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px;">
+        <button onclick="avwxSave()">保存</button>
+        <button class="ghost" onclick="avwxForget()">削除</button>
+      </div>
+      <div class="shot-note">avwx.rest の無料プラン（Hobby／1日4,000回）で METAR・TAF が取れます。<a class="lnk" href="https://account.avwx.rest/plans" target="_blank" rel="noopener">プラン↗</a> で登録してトークンを貼り付けてください。トークンは<b>この端末の中だけ</b>に保存され、HTMLファイルには書き込まれません。保存すると上の枠が生電文＋自動判定に切り替わり、TAF は時間帯ごとに分解して出ます。</div>
+    </div>
+
     <div class="paste-tool">
       <div class="look-t" style="margin-bottom:6px;">▸ 貼り付けて自動判定</div>
       <textarea id="ptIn" placeholder="「開く」で表示した METAR / TAF を全部コピーして、ここに貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
@@ -701,40 +742,197 @@ function ptRun() {
     return;
   }
 
-  out.innerHTML = lines.map(line => {
-    const o = parseMetar(line);
-    const xw = xwind(o, rwy);
-    const bad = [];
+  out.innerHTML = lines.map(line => ptCard(parseMetar(line), rwy)).join('');
+}
 
-    const xwBad = xw && xw.kt > LIM.xwind;
-    if (xwBad) bad.push('横風');
-    const visBad = o.vis != null && o.vis < LIM.vis;
-    if (visBad) bad.push('視程');
-    const ceilBad = o.ceil != null && o.ceil < LIM.ceil;
-    if (ceilBad) bad.push('雲底');
+/* しきい値との突き合わせ。貼り付け・AVWX のどちらからでも同じ結果になるよう
+   ここ1か所に寄せてある */
+function judge(o, rwy) {
+  const xw = xwind(o, rwy);
+  const bad = [];
+  const xwBad = !!(xw && xw.kt > LIM.xwind);
+  if (xwBad) bad.push('横風');
+  const visBad = o.vis != null && o.vis < LIM.vis;
+  if (visBad) bad.push('視程');
+  const ceilBad = o.ceil != null && o.ceil < LIM.ceil;
+  if (ceilBad) bad.push('雲底');
+  return { xw, bad, xwBad, visBad, ceilBad };
+}
 
-    const windTxt = o.windSpd === undefined ? '—'
-      : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0') + '°')
-        + ' ' + o.windSpd + 'kt' + (o.gust != null ? ' G' + o.gust : '');
-    const xwTxt = !xw ? '—' : (xw.vrb ? '最大 ' + xw.kt : xw.kt) + 'kt';
-    const xwNote = !xw ? (rwy === null ? '滑走路方位を入力' : '')
-      : (xw.vrb ? '風向不定。全量で見る' : '滑走路との角度 ' + xw.ang + '°');
-    const visTxt = o.vis == null ? '—' : (o.vis >= 9999 ? '10km以上' : (o.vis / 1000).toFixed(1) + 'km');
-    const ceilTxt = o.ceil == null ? 'なし' : o.ceil.toLocaleString() + 'ft';
-    const ceilNote = o.ceil == null ? 'BKN/OVCなし' : '約' + Math.round(o.ceil * 0.3048) + 'm';
+/* 1本ぶんの判定カード。extra には生電文やTAFの内訳を差し込む */
+function ptCard(o, rwy, extra) {
+  const { xw, bad, xwBad, visBad, ceilBad } = judge(o, rwy);
 
-    return `<div class="pt-card ${bad.length ? 'ng' : 'ok'}">
-      <div class="pt-st">${o.station || '—'}
-        <span class="tag ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + 'が条件外' : '条件内'}</span></div>
-      <div class="pt-g">
-        <div class="pt-i${xwBad ? ' bad' : ''}"><div class="k">横風成分</div><div class="v">${xwTxt}</div><div class="n">${xwNote}</div></div>
-        <div class="pt-i${visBad ? ' bad' : ''}"><div class="k">視程</div><div class="v">${visTxt}</div><div class="n">${o.cavok ? 'CAVOK' : '限界5km'}</div></div>
-        <div class="pt-i${ceilBad ? ' bad' : ''}"><div class="k">雲底</div><div class="v">${ceilTxt}</div><div class="n">${ceilNote}</div></div>
-      </div>
-      <div class="shot-note" style="margin-top:7px;">風 ${windTxt}</div>
-      ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風はガスト値で見ています</div>' : ''}
+  const windTxt = o.windSpd === undefined ? '—'
+    : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0') + '°')
+      + ' ' + o.windSpd + 'kt' + (o.gust != null ? ' G' + o.gust : '');
+  const xwTxt = !xw ? '—' : (xw.vrb ? '最大 ' + xw.kt : xw.kt) + 'kt';
+  const xwNote = !xw ? (rwy === null ? '滑走路方位を入力' : '')
+    : (xw.vrb ? '風向不定。全量で見る' : '滑走路との角度 ' + xw.ang + '°');
+  const visTxt = o.vis == null ? '—' : (o.vis >= 9999 ? '10km以上' : (o.vis / 1000).toFixed(1) + 'km');
+  const ceilTxt = o.ceil == null ? 'なし' : o.ceil.toLocaleString() + 'ft';
+  const ceilNote = o.ceil == null ? 'BKN/OVCなし' : '約' + Math.round(o.ceil * 0.3048) + 'm';
+  const frTag = o.fr ? `<span class="pt-fr ${esc(o.fr)}">${esc(o.fr)}</span>` : '';
+
+  return `<div class="pt-card ${bad.length ? 'ng' : 'ok'}">
+    <div class="pt-st">${esc(o.station || '—')}
+      <span class="tag ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + 'が条件外' : '条件内'}</span>${frTag}</div>
+    <div class="pt-g">
+      <div class="pt-i${xwBad ? ' bad' : ''}"><div class="k">横風成分</div><div class="v">${xwTxt}</div><div class="n">${xwNote}</div></div>
+      <div class="pt-i${visBad ? ' bad' : ''}"><div class="k">視程</div><div class="v">${visTxt}</div><div class="n">${o.cavok ? 'CAVOK' : '限界5km'}</div></div>
+      <div class="pt-i${ceilBad ? ' bad' : ''}"><div class="k">雲底</div><div class="v">${ceilTxt}</div><div class="n">${ceilNote}</div></div>
+    </div>
+    <div class="shot-note" style="margin-top:7px;">風 ${windTxt}</div>
+    ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風はガスト値で見ています</div>' : ''}
+    ${extra || ''}
+  </div>`;
+}
+
+function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ══════════════════════════════════════════════════════════════
+   AVWX（avwx.rest）から直接取る
+
+   無料の Hobby プランで METAR・TAF が取れる。トークンは URL のクエリに
+   乗せられるので、ヘッダを足さない「ふつうのGET」になる。ヘッダを足すと
+   ブラウザが事前問い合わせ（preflight）を挟み、file:// から開いていると
+   まず通らない。クエリ方式ならその関門が1つ減る。
+   それでも file:// では止められることがあるので、失敗したら
+   AWC の fetch → iframe → 貼り付け、と順に落ちる。
+
+   トークンは localStorage にだけ置く。HTMLファイルには書かないので、
+   ファイルを誰かに渡してもトークンは付いていかない。
+   ══════════════════════════════════════════════════════════════ */
+const AVWX_KEY = 'tenkizu_avwxToken';
+const AVWX_ST  = ['RJEC', 'RJCO', 'RJCC'];
+const AVWX_NAME = { RJEC: '旭川', RJCO: '丘珠', RJCC: '新千歳' };
+
+function avwxToken() { try { return (localStorage.getItem(AVWX_KEY) || '').trim(); } catch (e) { return ''; } }
+function avwxSave() {
+  const v = (document.getElementById('avwxTok').value || '').trim();
+  try { v ? localStorage.setItem(AVWX_KEY, v) : localStorage.removeItem(AVWX_KEY); } catch (e) {}
+  loadShot('metar', true);
+}
+function avwxForget() {
+  try { localStorage.removeItem(AVWX_KEY); } catch (e) {}
+  const el = document.getElementById('avwxTok'); if (el) el.value = '';
+  loadShot('metar', true);
+}
+function avwxFillInput() {
+  const el = document.getElementById('avwxTok');
+  if (el) el.value = avwxToken();
+}
+
+async function avwxGet(kind, icao, token) {
+  const u = 'https://avwx.rest/api/' + kind + '/' + icao
+    + '?format=json&onfail=cache&token=' + encodeURIComponent(token);
+  const r = await fetch(u, { cache: 'no-store' });
+  if (!r.ok) throw new Error(kind + ' ' + icao + ' HTTP ' + r.status);
+  return r.json();
+}
+
+/* 雲量の表記ゆれを吸収する。AVWX は BKN と返すこともあれば broken と返すことも
+   あり、生電文（repr）にしか入っていないこともある。どれで来ても3文字に直す */
+function cloudAmt(c) {
+  const t = String((c && (c.type || c.repr)) || '').toUpperCase();
+  if (/^(OVC|OVERCAST)/.test(t)) return 'OVC';
+  if (/^(BKN|BROKEN)/.test(t))   return 'BKN';
+  if (/^(SCT|SCATTERED)/.test(t)) return 'SCT';
+  if (/^(FEW)/.test(t))          return 'FEW';
+  if (/^(VV|OBSCURED)/.test(t))  return 'OVC';   /* 鉛直視程は雲底なしより厳しい側で見る */
+  return t.slice(0, 3);
+}
+
+/* AVWX の JSON を、貼り付け判定と同じ形にそろえる */
+function avwxToObj(d) {
+  const o = { raw: (d && d.raw) || '', station: (d && d.station) || '' };
+  const num = x => (x && x.value != null) ? x.value : undefined;
+  const wd = d.wind_direction;
+  if (wd) o.windDir = (String(wd.repr).toUpperCase() === 'VRB') ? 'VRB' : num(wd);
+  o.windSpd = num(d.wind_speed);
+  const g = num(d.wind_gust);
+  o.gust = (g == null) ? null : g;
+
+  const vu = (d.units && d.units.visibility) || 'm';
+  const v = num(d.visibility);
+  if (v != null) o.vis = (vu === 'sm') ? Math.round(v * 1609.34) : v;
+  if (/\bCAVOK\b/.test(o.raw)) { o.vis = 9999; o.cavok = true; }
+
+  o.clouds = (d.clouds || []).map(c => ({
+    amt: cloudAmt(c),
+    ft: (c.altitude != null ? c.altitude * 100 : null),
+  })).filter(c => c.ft != null);
+  const ce = o.clouds.filter(c => c.amt === 'BKN' || c.amt === 'OVC').sort((a, b) => a.ft - b.ft)[0];
+  o.ceil = ce ? ce.ft : null;
+  o.fr = d.flight_rules || null;
+  return o;
+}
+
+/* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある */
+function tafWhen(t) {
+  const d = String((t && t.repr) || '').replace(/[^0-9]/g, '');
+  if (d.length < 4) return '—';
+  return d.slice(0, 2) + '日' + d.slice(2, 4) + 'Z';
+}
+
+/* TAF を時間帯ごとに分解して並べる。「11時以降に風が変わる」を目で拾えるように */
+function avwxTafRows(taf, rwy) {
+  if (!taf) return '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
+  const raw = taf.raw
+    ? `<pre class="pt-raw"><span class="lb">TAF</span>${esc(taf.raw)}</pre>` : '';
+  const fc = Array.isArray(taf.forecast) ? taf.forecast : [];
+  if (!fc.length) return raw;
+
+  const rows = fc.map(f => {
+    const o = avwxToObj(f);
+    const { xw, bad } = judge(o, rwy);
+    const when = tafWhen(f.start_time);
+    const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
+    const wind = o.windSpd === undefined ? '—'
+      : (o.windDir === 'VRB' ? 'VRB' : String(o.windDir).padStart(3, '0'))
+        + '/' + o.windSpd + (o.gust != null ? 'G' + o.gust : '') + 'kt';
+    const vis = o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km');
+    const cei = o.ceil == null ? '雲底なし' : o.ceil.toLocaleString() + 'ft';
+    const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
+    return `<div class="taf-r${bad.length ? ' bad' : ''}">
+      <div class="w">${esc(kind)} ${esc(when)}</div>
+      <div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(xwt)}</div>
+      <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
     </div>`;
   }).join('');
+  return raw + '<div class="taf-per">' + rows + '</div>';
+}
+
+async function avwxLoad(box) {
+  const token = avwxToken();
+  if (!token) throw new Error('トークン未設定');
+  const rwyEl = document.getElementById('ptRwy');
+  const rwyRaw = rwyEl ? rwyEl.value : '';
+  const rwy = rwyRaw === '' ? null : (((+rwyRaw % 360) + 360) % 360);
+
+  const res = await Promise.all(AVWX_ST.map(async ic => {
+    try {
+      const m = await avwxGet('metar', ic, token);
+      const t = await avwxGet('taf', ic, token).catch(() => null);
+      return { ic, m, t };
+    } catch (e) { return { ic, err: e.message || String(e) }; }
+  }));
+
+  /* 3空港とも取れなければ AVWX は使えていない。呼び出し元で次の手段に落とす */
+  if (res.every(r => r.err)) throw new Error(res[0].err);
+
+  box.classList.remove('zoom'); box.onclick = null;
+  box.innerHTML = '<div class="wxdata">' + res.map(r => {
+    const nm = AVWX_NAME[r.ic] || '';
+    if (r.err) {
+      return `<div class="pt-card"><div class="pt-st">${r.ic} ${nm}</div>
+        <div class="shot-note" style="margin:0;">取得できませんでした（${esc(r.err)}）</div></div>`;
+    }
+    const o = avwxToObj(r.m);
+    o.station = r.ic + ' ' + nm;
+    const raw = r.m.raw ? `<pre class="pt-raw"><span class="lb">METAR</span>${esc(r.m.raw)}</pre>` : '';
+    return ptCard(o, rwy, raw + avwxTafRows(r.t, rwy));
+  }).join('') + '</div>';
 }
 
 const CHECKS = [
@@ -969,7 +1167,17 @@ async function loadShot(key, manual) {
       const d = new Date();
       tsEl.textContent = `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} 取得`;
     };
-    /* まず fetch。整形して自前の見た目で出せるが、file:// から開いていると
+    /* ① AVWX。トークンが入っていればまずここ。生電文に加えて風・視程・雲底が
+       すでに解いてあるので、TAF を時間帯ごとに分けて出せる。 */
+    if (avwxToken()) {
+      try {
+        await avwxLoad(box);
+        stamp();
+        return;
+      } catch (e) { /* ② へ */ }
+    }
+
+    /* ② AWC を fetch。整形して自前の見た目で出せるが、file:// から開いていると
        ブラウザが他サイトへの fetch を止めるので、その場合は下の iframe に落とす。 */
     try {
       const r = await fetch(METAR_API, { cache: 'no-store' });
@@ -1124,7 +1332,7 @@ function tick() {
 }
 
 load(); render(); tick(); setInterval(tick, 10000);
-syncSwitch(); loadAllShots(); ptLoad();
+syncSwitch(); avwxFillInput(); ptLoad(); loadAllShots();
 /* 日をまたいだ状態でアプリに戻ってきたときに備える */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
 </script>

@@ -1,10 +1,20 @@
 # 配信しないもの（Cloudflare Workers の静的ファイル配布から除外）
+# 書き方は .gitignore と同じ。
+#
+# 注意：.git を除外しないと、リポジトリ内部の巨大なファイルが
+# 配信対象に入り「Asset too large」でデプロイごと失敗する。
+.git/
+.github/
+
+# サーバー側で動かすもの（配ってはいけない・配る必要がない）
 worker.js
 wrangler.jsonc
 .assetsignore
 lib/
 functions/
-.github/
 node_modules/
+.wrangler/
+
+# 手順書とバックアップ
 DEPLOY.md
 oralexam32commits.bundle

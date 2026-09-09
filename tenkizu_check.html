@@ -1431,8 +1431,13 @@ function hasTaf(r) {
    TAF は1本が複数行にわたることがある。空港どうしを1行あけで区切って、
    どこからどこまでが1本なのかが分かるようにする */
 function avwxRawBlock(list, label, get) {
-  /* trim は前後だけ。電文の途中の改行も、続き行の字下げもそのまま残る */
-  const lines = list.map(r => (get(r) || '').trim()).filter(Boolean);
+  /* trim は前後だけ。電文の途中の改行も、続き行の字下げもそのまま残る。
+     ただし頭の「METAR」「TAF」の有無だけは揃える。AVWX が返す原文は
+     配信元によって付いていたり付いていなかったりし（例：3空港のうち
+     RJCOだけ「METAR」付きで来る、など）、並べたときにばらつくと
+     読みにくい。中身（時刻・風・視程等）には一切触れない */
+  const lines = list.map(r => (get(r) || '').trim()).filter(Boolean)
+    .map(t => (new RegExp('^' + label + '\\b', 'i').test(t)) ? t : label + ' ' + t);
   if (!lines.length) return '';
   const multi = lines.some(t => t.includes('\n'));
   /* 「METAR 原文」の見出しは出さない。すぐ上に METAR / TAF の見出しがあり、
@@ -1471,8 +1476,12 @@ function avwxTafCard(r) {
   const tag = fc.length
     ? `<span class="tag ${anyBad ? 'ng' : 'ok'}">${anyBad ? '条件外の時間帯あり' : '通して条件内'}</span>`
     : '';
+  /* TAFそのものの発表時刻（電文冒頭の090500Zなど）。各期間の開始時刻とは別物で、
+     「このTAFはいつ出されたものか」が今まで読み解きのどこにも出ていなかった */
+  const issued = metarTime((r.t && r.t.raw) || '');
   return `<div class="pt-card ${fc.length ? (anyBad ? 'ng' : 'ok') : ''}">
     <div class="pt-st">${esc(r.ic + ' ' + nm)}${tag}</div>
+    ${issued ? '<div class="pt-when">発表：' + issued + '</div>' : ''}
     ${avwxTafRows(r.t, true)}
   </div>`;
 }
@@ -1505,6 +1514,9 @@ const TTS_FIX = [
   /* 漢字のままだと読みを外す語。かなにして渡す */
   [/赤外/g, 'せきがい'], [/雲頂/g, 'うんちょう'], [/雲塊/g, 'うんかい'],
   [/雲底/g, 'うんてい'], [/露点/g, 'ろてん'],
+  /* 「衰えてはいません」の「は」は助詞（発音は「わ」）なのに、
+     読み上げでは字のまま「は」と読まれてしまう */
+  [/衰えてはいません/g, 'おとろえてわいません'],
   [/総観場/g, 'そうかんば'], [/東海上/g, 'ひがしかいじょう'],
   [/道東/g, 'どうとう'], [/道南/g, 'どうなん'],
   [/積雲/g, 'せきうん'], [/層雲/g, 'そううん'], [/雲帯/g, 'うんたい'],
@@ -2328,6 +2340,44 @@ async function satFrames(key) {
   return { times, urls, newest };
 }
 
+/* ══════════════════════════════════════════════════════════════
+   コマが「今日のぶん」かどうかの確認
+
+   ファイル名は時分だけで日付が無いため、その時分がまだ今日は
+   更新されていないと、居座っている前日の画像がそのまま返ってくる。
+   satNewestIndex は「最新（＝いちばん新しい時分）」を探すときにこれを
+   確かめているが、そこで見つけた位置から遡って見る他のコマ
+   （スライドバーで戻したとき・自動送りのとき）は、いままで確かめずに
+   信じていた。気象衛星センター側の配信が1コマだけ遅れたり抜けたりすると、
+   そこだけ前日の画像に化ける ── 「ときどき1枚だけ違う時刻の画像が
+   混じる」という不具合の原因はここ。
+   表示する直前に、更新日時がそのコマの本来の時刻に対して自然な範囲
+   （配信の遅れを見て前後15分〜90分）にあるかを確かめ、外れていたら
+   「前日の居座り」とみなして、そのコマの表示自体をやめる。 */
+const satFreshCache = new Map();
+async function satFrameFresh(band, hhmm, expected) {
+  const px = avwxProxy();
+  if (!px) return true;   /* 確かめる手段が無いときは、これまでどおり信じるしかない */
+  const dateKey = expected.getUTCFullYear() + pad(expected.getUTCMonth() + 1) + pad(expected.getUTCDate());
+  const cacheKey = band + '_' + hhmm + '_' + dateKey;
+  const c = satFreshCache.get(cacheKey);
+  if (c && Date.now() - c.got < 5 * 60000) return c.fresh;
+
+  let fresh = true;
+  try {
+    const r = await fetch(px + '/satcheck/' + band + '/' + hhmm, { cache: 'no-store' });
+    const j = await r.json();
+    if (j && j.ok && j.lastModified) {
+      const diffMin = (Date.parse(j.lastModified) - expected.getTime()) / 60000;
+      /* 前日の居座りなら、この差はおよそ -1440分（1日ぶん）近くになる。
+         正常な配信はそのコマの時刻から少し遅れて来る程度 */
+      fresh = diffMin >= -15 && diffMin <= 90;
+    }
+  } catch (e) { /* 確かめられなければ、これまでどおり信じる */ }
+  satFreshCache.set(cacheKey, { fresh, got: Date.now() });
+  return fresh;
+}
+
 async function loadMsc(key, box, tsEl) {
   const band = MSC_BAND[key];
   const { times, urls, newest } = await satFrames(key);
@@ -2337,14 +2387,15 @@ async function loadMsc(key, box, tsEl) {
   let i = newest + (satBack[key] || 0);
   if (i >= urls.length) i = urls.length - 1;
 
+  const hhmm = pad(times[i].getUTCHours()) + pad(times[i].getUTCMinutes());
   const im = new Image();
   im.referrerPolicy = 'no-referrer';
-  const ok = await new Promise(done => {
-    im.onload = () => done(true);
-    im.onerror = () => done(false);
-    im.src = urls[i];
-  });
+  const [ok, fresh] = await Promise.all([
+    new Promise(done => { im.onload = () => done(true); im.onerror = () => done(false); im.src = urls[i]; }),
+    satFrameFresh(band, hhmm, times[i]),
+  ]);
   if (!ok) throw new Error('そのコマは配信されていません');
+  if (!fresh) throw new Error('そのコマはまだ今日のぶんが配信されていません（前日の画像の可能性があるため表示しません）');
 
   shownUrl[key] = urls[i];
   box.innerHTML = ''; box.appendChild(im);

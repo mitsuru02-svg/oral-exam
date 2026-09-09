@@ -56,20 +56,17 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
   body:not(.wide) .wrap,
   body:not(.wide) .hdr-row { max-width:min(1360px, 94vw); }
 
-  /* カードの中を2列に。見出しは上いっぱいに渡す */
+  /* カードの中を2列に。見出しは上いっぱいに渡す。
+     左は図だけ（時刻・図・時間送り）。ボタンも注記も解説も右へ寄せる。
+     ノートPCのように縦が足りない画面では、左に物を積むほど図が
+     押し下げられて、肝心のボタンが画面の外へ出てしまう */
   body:not(.wide) .step {
-    display:grid; grid-template-columns:minmax(0,520px) minmax(0,1fr);
+    display:grid; grid-template-columns:minmax(0,420px) minmax(0,1fr);
     align-items:start;
   }
   body:not(.wide) .step > .step-hd { grid-column:1 / -1; }
-  /* 図の列は下までぶち抜く。解説が伸びても右の列と取り合わない */
-  body:not(.wide) .step > .shot { grid-column:1; grid-row:2 / span 99; }
-  body:not(.wide) .step > :not(.step-hd):not(.shot) { grid-column:2; }
-  body:not(.wide) .step > .look { padding-top:2px; }
-  /* 解説は右の列の頭に出す。図の下に積むと縦に伸びていくが、
-     右は「何を見るか」を読み終えたあと空いている。そこへ入れる */
-  body:not(.wide) .step > .exp { grid-row:2; margin:0 14px 12px; }
-  body:not(.wide) .step > .exp:not(:empty) ~ .look { padding-top:0; }
+  body:not(.wide) .step > .shot { grid-column:1; }
+  body:not(.wide) .step > .side { grid-column:2; padding-right:14px; }
 
   /* 図は画面の半分までにとどめる。原寸で見たいときはクリック */
   /* 図・スライドバー・ボタンの幅をそろえる。高さで縮めると図だけが
@@ -162,6 +159,9 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
    file:// から取りに行くとCORSで弾かれる端末もあるので、必ず取得を試みて
    だめならリンクに落ちる形にしてある。壊れた画像は絶対に見せない。 */
 .shot { margin:0 14px 12px; }
+/* カードの右半分。ボタン・注記・解説・読みどころをまとめて置く。
+   スマホでは1列に積まれるので、見え方は今までと変わらない */
+.side > .shot-bar, .side > .act, .side > .urlset, .side > .shot-note { margin-left:14px; margin-right:14px; }
 .shot-box {
   position:relative; border-radius:10px; overflow:hidden;
   background:#0d1117; border:1px solid #21262d; min-height:96px;
@@ -328,8 +328,8 @@ iframe.wxframe.tall { height:420px; }
   background:#0d1117; padding:12px 14px; font-size:14px; line-height:1.9; color:#c9d1d9;
 }
 .exp:empty { display:none; }
-/* カード直下に置いた解説は、カードの内側の余白に合わせる */
-.step > .exp { margin:0 14px 12px; }
+/* 解説はカードの内側の余白に合わせる */
+.side > .exp, .step > .exp { margin:0 14px 12px; }
 /* 解説の見出し行。読み上げボタンを本文の「前」に置く。
    後ろに付けていると、長い解説では画面外に流れて見つからない */
 .exp-hd {
@@ -663,30 +663,32 @@ table.xw td.hit { color:#f85149; font-weight:700; }
           <span data-ck="h48" data-on="0">48時間</span>
         </div>
       </div>
-      <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
-      <div class="act">
-        <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
-      </div>
-      <div class="urlset" id="url-chart">
-        <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-        <button onclick="saveUrl('chart')">保存</button>
-        <button onclick="clearUrl('chart')">解除</button>
-      </div>
-      <div class="shot-note"><b>日本付近のカラー図</b>を出しています。<b>実況</b>でいまの気圧配置をつかみ、<b>24時間後・48時間後</b>で前線や低気圧がどう動くかを見ます。飛ぶ日が明日以降なら、そちらのコマが本番です。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して ⚙ URL に貼り付けてください。画像をタップで拡大。<b>図の中の時刻</b>で必ず確かめること。</div>
+    </div>
+    <div class="side">
+    <div class="act">
+      <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
     </div>
     <div class="exp" id="exp-chart"></div>
+    <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
+    <div class="urlset" id="url-chart">
+      <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button onclick="saveUrl('chart')">保存</button>
+      <button onclick="clearUrl('chart')">解除</button>
+    </div>
     <div class="look">
-      <div class="look-t">▸ 何を見るか</div>
-      <ul>
-        <li><b>気圧配置</b>。滝川が<span class="hi">高気圧の圏内</span>なら安定、<span class="hi">気圧の谷・低気圧の前面</span>なら下り坂。</li>
-        <li><b>等圧線の混み具合</b>。北海道付近で線が詰まっているほど風が強い。西高東低が締まると北西風。</li>
-        <li><b>前線の位置と動き</b>。寒冷前線の通過前後は風向が急変し、突風・シアーが出る。</li>
-        <li><b>予想図（12・24時間先）</b>で、<span class="hi">飛ぶ時間帯にどう変わるか</span>を必ず見る。今の図だけで決めない。</li>
-      </ul>
+    <div class="look-t">▸ 何を見るか</div>
+    <ul>
+      <li><b>気圧配置</b>。滝川が<span class="hi">高気圧の圏内</span>なら安定、<span class="hi">気圧の谷・低気圧の前面</span>なら下り坂。</li>
+      <li><b>等圧線の混み具合</b>。北海道付近で線が詰まっているほど風が強い。西高東低が締まると北西風。</li>
+      <li><b>前線の位置と動き</b>。寒冷前線の通過前後は風向が急変し、突風・シアーが出る。</li>
+      <li><b>予想図（12・24時間先）</b>で、<span class="hi">飛ぶ時間帯にどう変わるか</span>を必ず見る。今の図だけで決めない。</li>
+    </ul>
     </div>
     <div class="stop">
-      <div class="stop-t">⚠ ここで警戒</div>
-      <p>低気圧・前線が飛行時間帯に北海道へかかる／等圧線が明らかに混んでいる。この時点で怪しければ、以降は「飛べるか」ではなく「いつ中止を決めるか」を見る目に切り替えます。</p>
+    <div class="stop-t">⚠ ここで警戒</div>
+    <p>低気圧・前線が飛行時間帯に北海道へかかる／等圧線が明らかに混んでいる。この時点で怪しければ、以降は「飛べるか」ではなく「いつ中止を決めるか」を見る目に切り替えます。</p>
+    </div>
+    <div class="shot-note"><b>日本付近のカラー図</b>を出しています。<b>実況</b>でいまの気圧配置をつかみ、<b>24時間後・48時間後</b>で前線や低気圧がどう動くかを見ます。飛ぶ日が明日以降なら、そちらのコマが本番です。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して ⚙ URL に貼り付けてください。画像をタップで拡大。<b>図の中の時刻</b>で必ず確かめること。</div>
     </div>
   </div>
 
@@ -705,29 +707,31 @@ table.xw td.hit { color:#f85149; font-weight:700; }
                aria-label="赤外画像の時刻" oninput="setSat('ir', this.value)">
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
       </div>
-      <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
-      <div class="act">
-        <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
-      </div>
-      <div class="urlset" id="url-ir">
-        <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-        <button onclick="saveUrl('ir')">保存</button>
-        <button onclick="clearUrl('ir')">解除</button>
-      </div>
-      <div class="shot-note">ひまわり赤外（B13）。<b>スライドバーで6時間前まで遡れます</b>。<b>▶ 自動送り</b>を押すと古いほうから順に再生します。1枚で見ずに動かして、雲域が滝川へ近づいているのか離れているのかを見てください。</div>
+    </div>
+    <div class="side">
+    <div class="act">
+      <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
     </div>
     <div class="exp" id="exp-ir"></div>
+    <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
+    <div class="urlset" id="url-ir">
+      <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button onclick="saveUrl('ir')">保存</button>
+      <button onclick="clearUrl('ir')">解除</button>
+    </div>
     <div class="look">
-      <div class="look-t">▸ 何を見るか</div>
-      <ul>
-        <li><b>白いほど雲頂が高い＝背が高い雲</b>。積乱雲や前線の雲域はここで見分ける。</li>
-        <li><b>動かして時系列で見る</b>。雲域が滝川へ近づいているか、離れているか。発達しているか衰えているか。</li>
-        <li>赤外は<span class="hi">低い雲・薄い雲が写りにくい</span>。下層の雲は次の可視画像で確かめる。</li>
-      </ul>
+    <div class="look-t">▸ 何を見るか</div>
+    <ul>
+      <li><b>白いほど雲頂が高い＝背が高い雲</b>。積乱雲や前線の雲域はここで見分ける。</li>
+      <li><b>動かして時系列で見る</b>。雲域が滝川へ近づいているか、離れているか。発達しているか衰えているか。</li>
+      <li>赤外は<span class="hi">低い雲・薄い雲が写りにくい</span>。下層の雲は次の可視画像で確かめる。</li>
+    </ul>
     </div>
     <div class="stop">
-      <div class="stop-t">⚠ ここで警戒</div>
-      <p>石狩平野へ向かって真っ白な雲域が移動している。時間を追って明るさが増している（発達中）。</p>
+    <div class="stop-t">⚠ ここで警戒</div>
+    <p>石狩平野へ向かって真っ白な雲域が移動している。時間を追って明るさが増している（発達中）。</p>
+    </div>
+    <div class="shot-note">ひまわり赤外（B13）。<b>スライドバーで6時間前まで遡れます</b>。<b>▶ 自動送り</b>を押すと古いほうから順に再生します。1枚で見ずに動かして、雲域が滝川へ近づいているのか離れているのかを見てください。</div>
     </div>
   </div>
 
@@ -746,30 +750,32 @@ table.xw td.hit { color:#f85149; font-weight:700; }
                aria-label="可視画像の時刻" oninput="setSat('vis', this.value)">
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
       </div>
-      <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
-      <div class="act">
-        <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
-      </div>
-      <div class="urlset" id="url-vis">
-        <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-        <button onclick="saveUrl('vis')">保存</button>
-        <button onclick="clearUrl('vis')">解除</button>
-      </div>
-      <div class="shot-note">ひまわり可視（B03）。夜間は真っ暗になるので赤外で判断します。</div>
+    </div>
+    <div class="side">
+    <div class="act">
+      <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
     </div>
     <div class="exp" id="exp-vis"></div>
+    <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
+    <div class="urlset" id="url-vis">
+      <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button onclick="saveUrl('vis')">保存</button>
+      <button onclick="clearUrl('vis')">解除</button>
+    </div>
     <div class="look">
-      <div class="look-t">▸ 何を見るか</div>
-      <ul>
-        <li><b>積雲の粒々が見えるか</b>。きれいに散らばっていればサーマルが立っている目安。</li>
-        <li><b>雲量と広がり</b>。一面に覆われていれば日射が入らず、サーマルは弱い。</li>
-        <li><b>ぼこぼこと盛り上がってきていないか</b>。対流が強すぎると突風・シアーの側に振れる。</li>
-        <li><span class="hi">滝川は西に樺戸山地・増毛山地、東に夕張山地</span>。山沿いの雲の出方で、リッジやウェーブの有無、山越えの風の強さを推し量る。</li>
-      </ul>
+    <div class="look-t">▸ 何を見るか</div>
+    <ul>
+      <li><b>積雲の粒々が見えるか</b>。きれいに散らばっていればサーマルが立っている目安。</li>
+      <li><b>雲量と広がり</b>。一面に覆われていれば日射が入らず、サーマルは弱い。</li>
+      <li><b>ぼこぼこと盛り上がってきていないか</b>。対流が強すぎると突風・シアーの側に振れる。</li>
+      <li><span class="hi">滝川は西に樺戸山地・増毛山地、東に夕張山地</span>。山沿いの雲の出方で、リッジやウェーブの有無、山越えの風の強さを推し量る。</li>
+    </ul>
     </div>
     <div class="stop">
-      <div class="stop-t">⚠ ここで警戒</div>
-      <p>石狩平野が一面の雲に覆われている（＝雲底が低い可能性）。積雲が急速に立ち上がっている。夜間・薄明は可視画像が使えないので、赤外で判断する。</p>
+    <div class="stop-t">⚠ ここで警戒</div>
+    <p>石狩平野が一面の雲に覆われている（＝雲底が低い可能性）。積雲が急速に立ち上がっている。夜間・薄明は可視画像が使えないので、赤外で判断する。</p>
+    </div>
+    <div class="shot-note">ひまわり可視（B03）。夜間は真っ暗になるので赤外で判断します。</div>
     </div>
   </div>
 
@@ -792,31 +798,33 @@ table.xw td.hit { color:#f85149; font-weight:700; }
           <span data-ft="9" data-on="0">9時間後</span>
         </div>
       </div>
-      <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
-      <div class="act">
-        <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
-      </div>
-      <div class="urlset" id="url-sigwx">
-        <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-        <button onclick="saveUrl('sigwx')">保存</button>
-        <button onclick="clearUrl('sigwx')">解除</button>
-      </div>
-      <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
+    </div>
+    <div class="side">
+    <div class="act">
+      <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
     </div>
     <div class="exp" id="exp-sigwx"></div>
+    <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
+    <div class="urlset" id="url-sigwx">
+      <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button onclick="saveUrl('sigwx')">保存</button>
+      <button onclick="clearUrl('sigwx')">解除</button>
+    </div>
     <div class="look">
-      <div class="look-t">▸ 何を見るか</div>
-      <ul>
-        <li><b>雲底の高さ</b>。ここが <span class="hi">300m（約1,000ft）</span> を割ると運航の気象条件に触れる。</li>
-        <li><b>視程</b>。<span class="hi">5km</span> を割ると同じく条件外。降水・霧・下層雲の記号に注意。</li>
-        <li><b>乱気流・着氷の領域</b>が滝川（半径9km・4,000ft MSL以下）にかかっていないか。</li>
-        <li><b>風</b>。矢羽根から風向・風速を読み、<span class="hi">滑走路との角度で横風成分</span>を出す（下の早見表）。</li>
-        <li>この図は<b>予想図</b>。3・6・9時間後の3枚があるので、<span class="hi">飛ぶ時間帯にいちばん近いコマ</span>を見る。</li>
-      </ul>
+    <div class="look-t">▸ 何を見るか</div>
+    <ul>
+      <li><b>雲底の高さ</b>。ここが <span class="hi">300m（約1,000ft）</span> を割ると運航の気象条件に触れる。</li>
+      <li><b>視程</b>。<span class="hi">5km</span> を割ると同じく条件外。降水・霧・下層雲の記号に注意。</li>
+      <li><b>乱気流・着氷の領域</b>が滝川（半径9km・4,000ft MSL以下）にかかっていないか。</li>
+      <li><b>風</b>。矢羽根から風向・風速を読み、<span class="hi">滑走路との角度で横風成分</span>を出す（下の早見表）。</li>
+      <li>この図は<b>予想図</b>。3・6・9時間後の3枚があるので、<span class="hi">飛ぶ時間帯にいちばん近いコマ</span>を見る。</li>
+    </ul>
     </div>
     <div class="stop">
-      <div class="stop-t">⚠ 中止側の判断</div>
-      <p>雲底300m未満／視程5km未満／横風成分8kt超のいずれかに当たれば飛べません。乱気流・着氷域がかかっていれば、かからない時間帯・高度に限るか中止します。</p>
+    <div class="stop-t">⚠ 中止側の判断</div>
+    <p>雲底300m未満／視程5km未満／横風成分8kt超のいずれかに当たれば飛べません。乱気流・着氷域がかかっていれば、かからない時間帯・高度に限るか中止します。</p>
+    </div>
+    <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
     </div>
   </div>
 

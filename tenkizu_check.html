@@ -358,6 +358,14 @@ iframe.wxframe.tall { height:420px; }
 }
 .exp-hd-t { flex:1; font-size:11px; font-weight:700; color:#79c0ff; letter-spacing:.1em; }
 .exp-hd .ttsbtn { margin-top:0; }
+/* 詳しい解説／要点だけ を切り替えるリンク。一度取った側は
+   キャッシュから即座に出るので、行き来しても待たされない */
+.exp-swap {
+  flex-shrink:0; border:1px solid #30363d; background:#161b22; color:#8b949e;
+  border-radius:20px; padding:6px 11px; font-size:11.5px; font-weight:600;
+  font-family:inherit; cursor:pointer;
+}
+.exp-swap:active { border-color:#3b82f6; color:#79c0ff; }
 .exp h3 { font-size:14px; color:#79c0ff; margin:10px 0 4px; }
 .exp h3:first-child { margin-top:0; }
 .exp p { margin:0 0 7px; }
@@ -394,10 +402,16 @@ iframe.wxframe.tall { height:420px; }
   cursor:pointer;
 }
 .exp-go:active { background:#0d2044; }
+/* 要点だけ版のボタン。詳しい解説より一段控えめにして、
+   どちらが主かが見た目で分かるようにする */
+.exp-go.concise {
+  border-color:#30363d; background:#161b22; color:#8b949e;
+}
+.exp-go.concise:active { background:#21262d; }
 /* 操作行。どのカードでも「図 → スライドバー → ここ」の位置に置く。
    場所が毎回同じなら、探さなくても手が伸びる */
-.act { display:flex; gap:8px; margin-top:10px; }
-.act .exp-go { flex:1; margin-top:0; }
+.act { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.act .exp-go { flex:1; margin-top:0; min-width:120px; }
 .act .ttsbtn { flex-shrink:0; margin-top:0; padding:10px 14px; font-size:13px; }
 /* 解説ボタンが無いカード（⑤）では読み上げが主役なので、幅いっぱいに */
 .act .ttsbtn.solo { flex:1; }
@@ -701,7 +715,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
+      <button class="exp-go" onclick="explainShot('chart','detail')">🔎 詳しい解説</button>
+      <button class="exp-go concise" onclick="explainShot('chart','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-chart"></div>
     <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
@@ -745,7 +760,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
+      <button class="exp-go" onclick="explainShot('ir','detail')">🔎 詳しい解説</button>
+      <button class="exp-go concise" onclick="explainShot('ir','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-ir"></div>
     <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
@@ -788,7 +804,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
+      <button class="exp-go" onclick="explainShot('vis','detail')">🔎 詳しい解説</button>
+      <button class="exp-go concise" onclick="explainShot('vis','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-vis"></div>
     <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
@@ -836,7 +853,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
+      <button class="exp-go" onclick="explainShot('sigwx','detail')">🔎 詳しい解説</button>
+      <button class="exp-go concise" onclick="explainShot('sigwx','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-sigwx"></div>
     <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
@@ -1798,13 +1816,22 @@ function expRender(md) {
   return out.join('');
 }
 
-function expShow(key, html, speak) {
+const STYLE_LABEL = { detail: '詳しい解説', concise: '要点だけ' };
+
+function expShow(key, html, speak, style) {
   const el = document.getElementById('exp-' + key);
   if (!el) return;
   /* 読み上げは解説の「前」に置く。後ろに付けていると、解説が長いほど
      下へ流れて見つからない。見出しと並べておけば位置が毎回同じになる */
+  const other = style === 'concise' ? 'detail' : 'concise';
+  const swap = style
+    ? '<button class="exp-swap" onclick="explainShot(\'' + key + '\',\'' + other + '\')">'
+      + (style === 'concise' ? '🔎 ' + STYLE_LABEL.detail : '📝 ' + STYLE_LABEL.concise) + 'を見る</button>'
+    : '';
   const hd = speak
-    ? '<div class="exp-hd"><span class="exp-hd-t">解説</span>' + ttsBtn('#exp-' + key) + '</div>'
+    ? '<div class="exp-hd"><span class="exp-hd-t">解説'
+      + (style ? '（' + STYLE_LABEL[style] + '）' : '') + '</span>'
+      + swap + ttsBtn('#exp-' + key) + '</div>'
     : '';
   el.innerHTML = hd + html;
 }
@@ -1956,7 +1983,8 @@ function briefFoot(cached, images, text) {
     + '</div>';
 }
 
-async function explainShot(key) {
+async function explainShot(key, style) {
+  style = style === 'concise' ? 'concise' : 'detail';
   const px = avwxProxy();
   if (!px) {
     expShow(key, '<div class="exp-err">解説には中継サーバーが要ります。'
@@ -1987,16 +2015,16 @@ async function explainShot(key) {
     return;
   }
 
-  const ck = images.map(i => i.url).join('|');
+  const ck = style + '|' + images.map(i => i.url).join('|');
   const cached = expCache()[ck];
-  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images, key), true); return; }
+  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images, key, style), true, style); return; }
 
-  expShow(key, '<p>' + EXP_TITLE[key] + 'を読んでいます…</p>');
+  expShow(key, '<p>' + (style === 'concise' ? '要点をまとめています…' : EXP_TITLE[key] + 'を読んでいます…') + '</p>');
   try {
     const r = await fetch(px + '/explain', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ images, kind: key }),
+      body: JSON.stringify({ images, kind: key, style }),
     });
     const j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.text) {
@@ -2005,14 +2033,21 @@ async function explainShot(key) {
       return;
     }
     expRemember(ck, j.text);
-    expShow(key, expRender(j.text) + expFoot(false, images, key), true);
+    expShow(key, expRender(j.text) + expFoot(false, images, key, style), true, style);
   } catch (e) {
     expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc((e && e.message) || e) + '）</div>');
   }
 }
 
-function expFoot(cached, images, key) {
+function expFoot(cached, images, key, style) {
   const n = (images && images.length) || 0;
+  if (style === 'concise') {
+    return '<div class="exp-foot">要点だけを簡潔にまとめた説明です。'
+      + '<b>飛べるかどうかの判断はしていません</b>。詳しく知りたいときは上の「'
+      + STYLE_LABEL.detail + 'を見る」もあわせてご確認ください。'
+      + (cached ? '<br>（前に取った解説を表示しています。図を再読込すると取り直します）' : '')
+      + '</div>';
+  }
   const src = key === 'sigwx'
     ? (n > 1 ? n + '枚（3・6・9時間後）を見比べて、時間とともにどう変わるかを読ませた説明です。'
         + '表示する時間を切り替えても内容は変わりません。<br>' : '')

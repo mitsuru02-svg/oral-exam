@@ -1914,13 +1914,23 @@ function imgTimeRemember(url, text) {
   } catch (e) {}
 }
 
+/* AI に読んでもらう日時は「2026-09-10 00:00」の形で返ってくる約束。
+   Date にできれば他の図と同じ書式（wxTimeLabel）に揃え、
+   古い形式のまま残っているキャッシュや、約束を守れなかった返答は
+   そのままの文字で表示する（表示が消えるより、崩れた形でも出るほうがよい） */
+function parseImgTime(text) {
+  const m = String(text || '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
+}
+
 async function showImgTime(key, url, tail) {
   const tsEl = document.getElementById('ts-' + key);
   if (!tsEl || !url) return;
   const put = t => {
     /* 途中で図が切り替わっていたら書かない */
     if (shownUrl[key] !== url) return;
-    tsEl.textContent = t + (tail ? '　' + tail : '') + '　※図から読取';
+    const d = parseImgTime(t);
+    tsEl.textContent = (d ? wxTimeLabel(d, tail) : t + (tail ? '　' + tail : '')) + '　※図から読取';
   };
   const c = imgTimeCache()[url];
   if (c) { if (c.text) put(c.text); return; }
@@ -2033,6 +2043,14 @@ let imagesOn = (localStorage.getItem(IMG_KEY) ?? '1') === '1';
 
 const pad = n => String(n).padStart(2, '0');
 
+/* 天気図・衛星画像の時刻表示を、どの図でも同じ形にそろえる。
+   「9/10 00:00 JST 現在」「9/9 21:00 JST 24時間後の予想」のように、
+   日付＋時刻＋JST＋（現在｜◯時間後の予想）の順で固定する */
+function wxTimeLabel(d, tail) {
+  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST`
+    + (tail ? '　' + tail : '');
+}
+
 /* ══════════════════════════════════════════════════════════════
    天気図の取り込み
 
@@ -2046,11 +2064,14 @@ const CHART_HOST = 'https://www.jma.go.jp';
 const CHART_BASE = CHART_HOST + '/bosai/weather_map/data/png/';
 const CHART_LIST = CHART_HOST + '/bosai/weather_map/data/list.json';
 
-/* 12桁の時刻から見出しを作る。UTCとJSTを併記して取り違えを防ぐ */
+/* 12桁の時刻（YYYYMMDDHHmm・UTC）から見出しを作る。
+   Date を経由することで、UTCの日付をまたいでJSTになる場合
+   （例：UTC 15時→JST 翌0時）も日付ごと正しく進む */
 function chartLabel(ts12, tail) {
   if (!ts12) return tail || '最新';
-  const M = +ts12.slice(4, 6), D = +ts12.slice(6, 8), H = +ts12.slice(8, 10);
-  return `${M}/${D} ${pad(H)}UTC（${pad((H + 9) % 24)}JST）` + (tail || '');
+  const Y = +ts12.slice(0, 4), M = +ts12.slice(4, 6), D = +ts12.slice(6, 8),
+        H = +ts12.slice(8, 10), mi = +ts12.slice(10, 12);
+  return wxTimeLabel(new Date(Date.UTC(Y, M - 1, D, H, mi)), tail);
 }
 function chartStamp(name) {
   const m = String(name).match(/(\d{12})/);
@@ -2101,6 +2122,9 @@ function chartKindOf(it) {
 }
 
 const CHART_KIND_LABEL = { now: '実況', h24: '24時間後', h48: '48時間後' };
+/* 時刻の表示だけに使う呼び名。「実況を取得できませんでした」のような
+   案内文にはCHART_KIND_LABELのほうを使い、ここは混同しない */
+const CHART_TIME_TAIL = { now: '現在', h24: '24時間後の予想', h48: '48時間後の予想' };
 
 async function chartFromList(kind) {
   const items = [];
@@ -2124,7 +2148,7 @@ async function chartFromList(kind) {
   if (!use.length) throw new Error('実況の天気図が見つかりません');
 
   /* ボタンが並ぶ細い行に出るので短く。時刻を図で確かめる注意は下の説明文にある */
-  const tail = '　' + CHART_KIND_LABEL[kind];
+  const tail = CHART_TIME_TAIL[kind];
   /* 日本付近を先に、そのうえで新しい順 */
   return use
     .sort((a, b) => (chartAreaScore(a) - chartAreaScore(b))
@@ -2144,7 +2168,7 @@ function chartCandidates() {
     const h = Math.floor(d.getUTCHours() / 6) * 6;
     const ymd = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate());
     const t12 = ymd + pad(h) + '00';
-    const label = chartLabel(t12, ' 発表');
+    const label = chartLabel(t12, CHART_TIME_TAIL.now);
     [t12 + '00.png', t12 + '-00.png', t12 + '.png', t12 + '00-00.png']
       .forEach(f => out.push({ url: CHART_BASE + f, label }));
   }
@@ -2192,7 +2216,7 @@ function satTimes(n) {
   return out;
 }
 function satLabel(d) {
-  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST 現在`;
+  return wxTimeLabel(d, '現在');
 }
 
 /* スライドバーの位置。0 が6時間前、35 が最新。カードごとに持つ */
@@ -2412,11 +2436,10 @@ async function loadHimawari(key, box, tsEl) {
   box.appendChild(grid);
   box.classList.add('zoom');
   box.onclick = () => openLb(grid.cloneNode(true));
-  const vt = hit.v.replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2}).*$/, (_, Y, M, D, h, m) => {
-    const d = new Date(Date.UTC(+Y, +M - 1, +D, +h, +m));
-    return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())} JST`;
-  });
-  tsEl.textContent = vt + ' 現在';
+  const m = hit.v.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/);
+  tsEl.textContent = m
+    ? wxTimeLabel(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])), '現在')
+    : '現在';
 }
 
 function fallback(box, tsEl, why, key) {
@@ -2569,7 +2592,7 @@ async function loadShot(key, manual) {
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
-        showImgTime(key, shownUrl[key], CHART_KIND_LABEL[chartKind]);
+        showImgTime(key, shownUrl[key], CHART_TIME_TAIL[chartKind]);
       },
       () => fallback(box, tsEl,
         chartKind === 'now' ? '天気図を取得できませんでした。'

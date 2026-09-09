@@ -543,6 +543,48 @@ body {
 .st-row.open .st-qtext { white-space: normal; }
 .st-filter-sub { font-size: 11px; color: #6e7681; font-weight: 400; margin-left: 8px; }
 .st-empty { text-align: center; color: #8b949e; font-size: 13px; padding: 24px 0; }
+.st-qtext mark, .qs-qtext mark, .qs-atext mark { background: #3b82f6; color: #fff; border-radius: 3px; padding: 0 2px; }
+
+/* ── キーワード検索（開始画面／ステータス一覧の両方で使う） ── */
+.qs-input-row {
+  display: flex; align-items: center; gap: 6px;
+  background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+  padding: 8px 12px;
+}
+.qs-icon { font-size: 13px; opacity: .75; flex-shrink: 0; }
+.qs-input-row input {
+  flex: 1; min-width: 0; background: none; border: none; outline: none;
+  color: #e6edf3; font-size: 14px; font-family: inherit;
+}
+.qs-input-row input::placeholder { color: #6e7681; }
+.qs-input-row button {
+  flex-shrink: 0; background: none; border: none; color: #6e7681; font-size: 17px;
+  line-height: 1; cursor: pointer; padding: 0 3px; display: none;
+}
+.qs-input-row button.show { display: block; }
+.qs-input-row button:hover { color: #e6edf3; }
+.qs-results { margin-top: 10px; max-height: 60vh; overflow-y: auto; display: none; }
+.qs-results.show { display: block; }
+.qs-count { font-size: 11px; color: #6e7681; padding: 2px 4px 8px; }
+.qs-empty { font-size: 13px; color: #6e7681; padding: 10px 4px; }
+/* 検索結果の1問。ステータス一覧の行（.st-row）と見た目をそろえる */
+.qs-item { background: #161b22; border: 1px solid #21262d; border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+.qs-item.open { border-color: #3b82f6; }
+.qs-q {
+  display: flex; align-items: flex-start; gap: 8px; width: 100%; text-align: left;
+  background: none; border: none; color: #e6edf3; font-family: inherit;
+  padding: 11px 12px; cursor: pointer; font-size: 13px; line-height: 1.6;
+}
+.qs-q:hover { background: rgba(59,130,246,.06); }
+.qs-q .qs-car { flex-shrink: 0; color: #6e7681; font-size: 12px; margin-top: 3px; transition: transform .15s; }
+.qs-item.open .qs-q .qs-car { transform: rotate(90deg); }
+.qs-q .st-qnum { margin-top: 1px; }
+.qs-q .qs-qtext { flex: 1; min-width: 0; }
+.qs-a {
+  display: none; padding: 4px 14px 14px 34px; font-size: 12.5px; color: #8b949e;
+  line-height: 1.8; border-top: 1px solid #21262d;
+}
+.qs-item.open .qs-a { display: block; }
 
 /* 中断ボタン */
 .btn-abort {
@@ -700,6 +742,16 @@ body {
 
       <!-- ── 左：出題範囲を決める ── -->
       <div class="start-main">
+
+        <section class="panel sec-search">
+          <div class="panel-title">🔍 キーワード検索<span class="panel-sub">試験開始前に、問題文・模範解答から探して答えまで確認できます</span></div>
+          <div class="qs-input-row">
+            <span class="qs-icon">🔍</span>
+            <input type="text" id="qSearchInput" placeholder="キーワードで問題を検索" autocomplete="off">
+            <button type="button" id="qSearchClear" aria-label="検索をクリア">×</button>
+          </div>
+          <div class="qs-results" id="qSearchResults"></div>
+        </section>
 
         <section class="panel sec-mode">
           <div class="panel-title">🎲 出題モード</div>
@@ -866,6 +918,14 @@ body {
     <div class="cat-section">
       <div class="cat-section-title">カテゴリで絞り込み</div>
       <div class="cat-cards" id="stCatFilter"></div>
+    </div>
+    <div class="cat-section">
+      <div class="cat-section-title">キーワードで絞り込み<span class="st-filter-sub">上の絞り込みと組み合わせられます</span></div>
+      <div class="qs-input-row">
+        <span class="qs-icon">🔍</span>
+        <input type="text" id="stSearchInput" placeholder="問題文・模範解答から検索" autocomplete="off">
+        <button type="button" id="stSearchClear" aria-label="検索をクリア">×</button>
+      </div>
     </div>
 
     <div id="stList"></div>
@@ -2625,12 +2685,107 @@ let stStatusFilter = 'all';
 let stCatFilter = null;
 let stExFilter = null;
 
+// ══════════════════════════════════════════════════════════════
+// キーワード検索
+//
+// 開始画面：試験に入る前に、問題文・模範解答から探してその場で
+// 答えまで見られる（既存の試験フローには手を触れない）。
+// ステータス一覧：状況・試験官・カテゴリの絞り込みに、さらに
+// キーワードでの絞り込みを重ねられる（renderStatusList 側で使う）。
+// ══════════════════════════════════════════════════════════════
+function qsEsc(t) {
+  return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+}
+function qsMark(text, q) {
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return qsEsc(text);
+  return qsEsc(text.slice(0, idx)) + '<mark>' + qsEsc(text.slice(idx, idx + q.length)) + '</mark>' + qsEsc(text.slice(idx + q.length));
+}
+
+let qSearchOpen = -1;   // 展開中の検索結果（activeQA() のインデックス）。-1 は無し
+function qSearchRun() {
+  const input = document.getElementById('qSearchInput');
+  const clearBt = document.getElementById('qSearchClear');
+  const box = document.getElementById('qSearchResults');
+  if (!input || !box) return;
+  const q = input.value.trim();
+  clearBt.classList.toggle('show', !!q);
+  if (!q) { box.innerHTML = ''; box.classList.remove('show'); qSearchOpen = -1; return; }
+  const qLower = q.toLowerCase();
+  const bank = activeQA();
+  const hits = [];
+  bank.forEach((qa, i) => {
+    if ((qa.q || '').toLowerCase().includes(qLower) || (qa.a || '').toLowerCase().includes(qLower)) hits.push(i);
+  });
+  qSearchRender(hits, q, bank);
+}
+function qSearchRender(hits, q, bank) {
+  const box = document.getElementById('qSearchResults');
+  box.innerHTML = '';
+  if (!hits.length) {
+    box.innerHTML = '<div class="qs-empty">見つかりませんでした</div>';
+    box.classList.add('show');
+    return;
+  }
+  const shown = hits.slice(0, 40);
+  const count = document.createElement('div');
+  count.className = 'qs-count';
+  count.textContent = hits.length + '件見つかりました' + (hits.length > shown.length ? '（上位' + shown.length + '件を表示）' : '');
+  box.appendChild(count);
+  shown.forEach(i => {
+    const qa = bank[i];
+    const status = questionStatus(i);
+    const st = ST_STATUS_LABELS[status];
+    const item = document.createElement('div');
+    item.className = 'qs-item' + (qSearchOpen === i ? ' open' : '');
+    item.innerHTML = '<button type="button" class="qs-q">'
+      + '<span class="qs-car">▸</span>'
+      + '<span class="st-qnum">#' + (i + 1) + '</span>'
+      + '<span class="qs-qtext">' + qsMark(qa.q || '', q) + '</span>'
+      + '<span class="st-badge ' + status + '">' + st.icon + ' ' + st.label + '</span>'
+      + '</button>'
+      + '<div class="qs-a">' + qsMark(qa.a || '', q) + '</div>';
+    item.querySelector('.qs-q').addEventListener('click', () => {
+      qSearchOpen = (qSearchOpen === i) ? -1 : i;
+      qSearchRender(hits, q, bank);
+    });
+    box.appendChild(item);
+  });
+  box.classList.add('show');
+}
+(function qSearchInit() {
+  const input = document.getElementById('qSearchInput');
+  const clearBt = document.getElementById('qSearchClear');
+  if (!input || !clearBt) return;
+  let timer = null;
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(qSearchRun, 150); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { input.value = ''; qSearchRun(); input.blur(); }
+  });
+  clearBt.addEventListener('click', () => { input.value = ''; qSearchRun(); input.focus(); });
+})();
+
+(function stSearchInit() {
+  const input = document.getElementById('stSearchInput');
+  const clearBt = document.getElementById('stSearchClear');
+  if (!input || !clearBt) return;
+  let timer = null;
+  const run = () => { clearBt.classList.toggle('show', !!input.value.trim()); renderStatusList(); };
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 150); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { input.value = ''; run(); input.blur(); }
+  });
+  clearBt.addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+})();
+
 function showStatusScreen() {
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('statusScreen').classList.remove('hidden');
   stStatusFilter = 'all';
   stCatFilter = null;
   stExFilter = null;
+  const stSearch = document.getElementById('stSearchInput');
+  if (stSearch) { stSearch.value = ''; document.getElementById('stSearchClear').classList.remove('show'); }
   renderStatusFilters();
   renderStatusSummary();
   renderStatusList();
@@ -2692,8 +2847,18 @@ function renderStatusFilters() {
 
 function renderStatusList() {
   const wrap = document.getElementById('stList');
-  const rows = stScopeIndices().filter(i =>
+  /* 状況・試験官・カテゴリの絞り込みに、キーワードでの絞り込みを
+     さらに重ねる。問題文・模範解答のどちらかに含まれていれば残す */
+  const q = (document.getElementById('stSearchInput') || {}).value?.trim() || '';
+  const qLower = q.toLowerCase();
+  let rows = stScopeIndices().filter(i =>
     stStatusFilter === 'all' || questionStatus(i) === stStatusFilter);
+  if (q) {
+    rows = rows.filter(i => {
+      const qa = activeQA()[i];
+      return (qa.q || '').toLowerCase().includes(qLower) || (qa.a || '').toLowerCase().includes(qLower);
+    });
+  }
   if (rows.length === 0) {
     wrap.innerHTML = '<div class="st-empty">該当する問題がありません。</div>';
     return;
@@ -2702,14 +2867,17 @@ function renderStatusList() {
     const qa = activeQA()[i];
     const status = questionStatus(i);
     const st = ST_STATUS_LABELS[status];
+    const qText = q ? qsMark(qa.q || '', q) : escapeHtml(qa.q);
+    const ansText = ansShort(qa);
+    const ansHtml = q ? qsMark(ansText, q) : escapeHtml(ansText);
     return `
       <div class="st-row" onclick="this.classList.toggle('open')">
         <div class="st-row-head">
           <span class="st-qnum">#${i+1}</span>
-          <span class="st-qtext">${escapeHtml(qa.q)}</span>
+          <span class="st-qtext">${qText}</span>
           <span class="st-badge ${status}">${st.icon} ${st.label}</span>
         </div>
-        <div class="st-answer">${escapeHtml(ansShort(qa))}${qa.s ? `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>${escapeHtml(qa.a)}</div>` : ``}</div>
+        <div class="st-answer">${ansHtml}${qa.s ? `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>${escapeHtml(qa.a)}</div>` : ``}</div>
       </div>`;
   }).join('');
 }

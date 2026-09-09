@@ -401,7 +401,6 @@ iframe.wxframe.tall { height:420px; }
   padding:8px 10px; margin:7px 0 0; white-space:pre-wrap; word-break:break-word;
 }
 .rawblk { margin:7px 0 0; }
-.rawblk .rawlb { display:block; font-size:11px; font-weight:700; color:#79c0ff; letter-spacing:.1em; margin-bottom:4px; }
 .rawblk .pt-raw { margin:0; }
 .pt-fr { font-size:10.5px; font-weight:700; border-radius:20px; padding:2px 8px; margin-left:6px; border:1px solid; }
 .pt-fr.VFR  { color:#3fb950; border-color:#2ea043; background:#132d1c; }
@@ -1300,6 +1299,28 @@ function avwxToObj(d) {
   return o;
 }
 
+/* 方位の読み。「西〜南西」のように範囲で書かれたときに使う */
+const DIR_YOMI = {
+  '北':'きた', '北北東':'ほくほくとう', '北東':'ほくとう', '東北東':'とうほくとう',
+  '東':'ひがし', '東南東':'とうなんとう', '南東':'なんとう', '南南東':'なんなんとう',
+  '南':'みなみ', '南南西':'なんなんせい', '南西':'なんせい', '西南西':'せいなんせい',
+  '西':'にし', '西北西':'せいほくせい', '北西':'ほくせい', '北北西':'ほくほくせい',
+};
+/* 長い語ほど先に試す。「北」だけを先に当ててしまうと「北北東」を
+   活かせない */
+const DIR_ALT = Object.keys(DIR_YOMI).sort((a, b) => b.length - a.length).join('|');
+const DIR_RANGE_RE = new RegExp('(' + DIR_ALT + ')(?:〜|から)(' + DIR_ALT + ')', 'g');
+
+/* 「枚」の読み。7 を「しち」ではなく「なな」で読む、聞き取りやすいほう */
+const MAI_YOMI = ['', 'いち', 'に', 'さん', 'よん', 'ご', 'ろく', 'なな', 'はち', 'きゅう'];
+function kanjiCount(n) {
+  n = Math.trunc(n);
+  if (n <= 0 || n >= 100) return String(n);   /* 使わない範囲は数字のまま */
+  if (n < 10) return MAI_YOMI[n];
+  const j = Math.floor(n / 10), r = n % 10;
+  return (j === 1 ? '' : MAI_YOMI[j]) + 'じゅう' + (r ? MAI_YOMI[r] : '');
+}
+
 /* 雲量の意味。試験でも問われるので、記号のままにしない */
 const CLOUD_JA = {
   FEW: { n: '1〜2', w: 'わずか' },
@@ -1378,14 +1399,18 @@ async function avwxLoad(box) {
   const whens = ok.map(r => metarTime((r.m && r.m.raw) || ''));
   const sameWhen = whens.length && whens.every(w => w === whens[0]) ? whens[0] : '';
 
+  /* 見出しは「いま」ではなく、METARの観測時刻そのものを出す。
+     「いま」と書いても、それがいつなのかは結局この時刻を見ないと
+     分からないので、最初から時刻を出す。3空港の時刻がずれているときは
+     代表を出さず「METAR」だけにする（各空港の時刻はカードのほうに出る） */
   box.innerHTML = '<div class="wxdata">'
-    + '<div class="wx-sec"><b>いま</b>　METAR（実況）'
+    + '<div class="wx-sec"><b>METAR</b>'
       + (sameWhen ? '<span class="wx-when">' + sameWhen + '</span>' : '') + '</div>'
     + avwxRawBlock(ok, 'METAR', r => (r.m && r.m.raw) || '')
     + '<div class="wxgrid">'
       + res.map(r => avwxMetarCard(r, sameWhen)).join('')
     + '</div>'
-    + '<div class="wx-sec"><b>これから</b>　TAF（予報）</div>'
+    + '<div class="wx-sec"><b>TAF</b></div>'
     + avwxRawBlock(ok.filter(hasTaf), 'TAF', r => (r.t && r.t.raw) || '')
     + '<div class="wxgrid">'
       + res.map(r => avwxTafCard(r)).join('')
@@ -1410,7 +1435,10 @@ function avwxRawBlock(list, label, get) {
   const lines = list.map(r => (get(r) || '').trim()).filter(Boolean);
   if (!lines.length) return '';
   const multi = lines.some(t => t.includes('\n'));
-  return '<div class="rawblk"><span class="rawlb">' + label + ' 原文</span>'
+  /* 「METAR 原文」の見出しは出さない。すぐ上に METAR / TAF の見出しがあり、
+     生電文はそれと分かる字面なので、重ねて書く必要が無い。
+     どちらの電文かは briefText() が使うので data 属性だけに残す */
+  return '<div class="rawblk" data-label="' + esc(label) + '">'
     + '<pre class="pt-raw">' + esc(lines.join(multi ? '\n\n' : '\n')) + '</pre></div>';
 }
 
@@ -1477,11 +1505,26 @@ const TTS_FIX = [
   /* 漢字のままだと読みを外す語。かなにして渡す */
   [/赤外/g, 'せきがい'], [/雲頂/g, 'うんちょう'], [/雲塊/g, 'うんかい'],
   [/雲底/g, 'うんてい'], [/露点/g, 'ろてん'],
+  [/総観場/g, 'そうかんば'], [/東海上/g, 'ひがしかいじょう'],
+  [/道東/g, 'どうとう'], [/道南/g, 'どうなん'],
+  [/積雲/g, 'せきうん'], [/層雲/g, 'そううん'], [/雲帯/g, 'うんたい'],
+  [/下層悪天/g, 'かそうあくてん'],
+  /* 「西〜南西」のように方位を範囲で書いた箇所を読み下す */
+  [DIR_RANGE_RE, (m, a, b) => DIR_YOMI[a] + 'から' + DIR_YOMI[b]],
   /* 雲量のかっこ書き（1〜2/8・わずか）は、画面で見るぶんには要るが
      読み上げると「いちからにはちぶんの…」と長く、肝心の高さが遠のく。
      声では落として「フュー 2,000フィート」とだけ言う。
-     ほかのかっこ（340°）や（差7℃・…）は残すため、8分量の形だけを狙う */
+     ほかのかっこ（340°）や（差7℃・…）は残すため、8分量の形だけを狙う。
+     これは日付（9/9）を読み下す規則より先に行う。1〜2/8 の「2/8」を
+     日付と見間違えて「2月8日」にしてしまわないようにするため */
   [/（\d+(?:〜\d+)?\/8・[^）]*）/g, ''],
+  /* 日付。9/9 のような月/日の書き方を読み下す。時刻の範囲
+     （0906/1006 のような4桁どうし）は前後が数字で挟まれるので触らない */
+  [/(?<!\d)(\d{1,2})\/(\d{1,2})(?!\d)/g, (m, mo, da) => mo + '月' + da + '日'],
+  /* 「図7枚」「10枚」のような枚数。数字だけでは「しち」「じゅう」と
+     素っ気なく読まれるので、聞き取りやすい読みに換える */
+  [/図\s*(\d{1,2})\s*枚/g, (m, n) => 'ず' + kanjiCount(+n) + 'まい'],
+  [/(\d{1,2})\s*枚/g, (m, n) => kanjiCount(+n) + 'まい'],
   [/(\d)kt/g, '$1ノット'], [/\bkt\b/g, 'ノット'],
   [/(\d)ft/g, '$1フィート'], [/\bft\b/g, 'フィート'],
   [/hPa/g, 'ヘクトパスカル'],
@@ -1728,12 +1771,10 @@ async function briefImages() {
 function briefText() {
   const blks = [...document.querySelectorAll('#box-metar .rawblk')];
   if (!blks.length) return '';
-  /* 見出しは別の要素にあるので、そのまま並べれば本文とくっつかない。
-     電文の改行はそのまま渡す。畳んでしまうと読み手が区切りを失う */
+  /* 電文の改行はそのまま渡す。畳んでしまうと読み手が区切りを失う */
   const lines = blks.map(e => {
-    const lb = e.querySelector('.rawlb');
     const pre = e.querySelector('.pt-raw');
-    const label = lb ? lb.textContent.trim() : '';
+    const label = e.dataset.label || '';
     const body = pre ? pre.textContent.trim() : '';
     return (label ? label + '\n' : '') + body;
   });

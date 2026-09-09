@@ -222,6 +222,27 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
   color:#79c0ff; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:600;
   cursor:pointer; font-family:inherit;
 }
+/* 「図面の見方」のようなリンク。押すと下に説明が開く。
+   毎回は要らない長めの解説を、必要なときだけ出すための仕組み */
+.guide-link {
+  display:inline-flex; align-items:center; gap:4px; margin-top:8px;
+  background:none; border:none; color:#79c0ff; font-size:12.5px; font-weight:700;
+  font-family:inherit; cursor:pointer; padding:2px 0;
+}
+.guide-link .car { font-size:10px; transition:transform .15s; }
+.guide-link[data-on="1"] .car { transform:rotate(90deg); }
+.guidebox {
+  display:none; margin-top:8px; padding:11px 13px; border-radius:10px;
+  background:#0d1117; border:1px solid #21262d; font-size:12.5px; line-height:1.85; color:#c9d1d9;
+}
+.guidebox.on { display:block; }
+.guidebox h4 { font-size:12.5px; color:#79c0ff; margin:10px 0 4px; }
+.guidebox h4:first-child { margin-top:0; }
+.guidebox ul { margin:0 0 6px; padding-left:1.2em; }
+.guidebox li { margin-bottom:3px; }
+.guidebox b { color:#e6edf3; }
+.guidebox .src { display:block; margin-top:8px; font-size:10.5px; color:#6e7681; }
+.guidebox .src a { color:#58a6ff; }
 iframe.wxframe {
   width:100%; height:300px; border:0; display:block; background:#fff;
 }
@@ -839,6 +860,35 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <p>雲底300m未満／視程5km未満／横風成分8kt超のいずれかに当たれば飛べません。乱気流・着氷域がかかっていれば、かからない時間帯・高度に限るか中止します。</p>
     </div>
     <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
+    <button class="guide-link" id="guidelink-sigwx" data-on="0" onclick="toggleGuide('sigwx')">
+      <span class="car">▸</span>📖 図面の見方
+    </button>
+    <div class="guidebox" id="guide-sigwx">
+      <h4>この図はどんなものか</h4>
+      <ul>
+        <li>低い高度を飛ぶ小型機向けに、下層の悪天を<b>スーパーコンピューターが予想</b>した図。旅客機でも離着陸などで低高度に降りたときに使える。</li>
+        <li>雲頂・雲底、降水・降雪域、乱気流、視程、着氷域（0℃ライン）を絵で示す。</li>
+        <li>全国を<b>6エリア</b>（北海道・東北・東日本・西日本・奄美・沖縄）に分けている。小型機の行動範囲に近い区切り。</li>
+      </ul>
+      <h4>高さと雲の表し方</h4>
+      <ul>
+        <li>高さは<b>地上〜FL150を500ft刻み</b>で。FL140以下も29.92inHgで作られているため、実際の高度はQNH分だけ違うことがある。</li>
+        <li>雲頂がFL150を超える、雲底が地上より低い、のどちらも「<b>XXX</b>」の記号で表す。</li>
+        <li>雲が何層もあるときは、<b>最も低い雲底</b>と<b>最も高い雲頂</b>だけを示す。</li>
+      </ul>
+      <h4>3つの表示窓</h4>
+      <ul>
+        <li><b>左上</b>：乱気流・積乱雲（TS）・降水域</li>
+        <li><b>右上</b>：視程・雲の情報・着氷域（0℃ライン）</li>
+        <li><b>下</b>：記号の説明、空港付近の地上〜上空の風向風速・雲・気温</li>
+      </ul>
+      <h4>TAFとずれたとき</h4>
+      <ul>
+        <li>TAFと下層悪天予想図で予想がずれていたら、<b>TAFを優先</b>する。</li>
+        <li>TAFにTS（雷雨）の予想が無くても、下層悪天予想図には出ていることがあり、当たることが多い。</li>
+      </ul>
+      <span class="src">参考：<a href="https://www.hikouki-pilot.com/low-bad-weather-forecast/" target="_blank" rel="noopener">hikouki-pilot.com「下層悪天予想図」</a></span>
+    </div>
     </div>
   </div>
 
@@ -2105,6 +2155,15 @@ const URL_KEY = 'tenkizu_customUrls';
 function customUrls() {
   try { return JSON.parse(localStorage.getItem(URL_KEY) || '{}'); } catch (e) { return {}; }
 }
+/* 「図面の見方」など、押したときだけ開く長めの説明の開閉 */
+function toggleGuide(key) {
+  const box = document.getElementById('guide-' + key);
+  const link = document.getElementById('guidelink-' + key);
+  if (!box) return;
+  const on = box.classList.toggle('on');
+  if (link) link.dataset.on = on ? '1' : '0';
+}
+
 function toggleUrlSet(key) {
   const box = document.getElementById('url-' + key);
   if (!box) return;

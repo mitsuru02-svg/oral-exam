@@ -1774,6 +1774,18 @@ async function chartImagesForExplain() {
   return out;
 }
 
+/* 下層悪天予想図は3・6・9時間先の3枚をまとめて渡す。1枚だけでは
+   「その時間はどうか」しか分からず、知りたいのは時間とともに
+   悪化するのか改善するのかなので、3枚を見比べさせる */
+async function sigwxImagesForExplain() {
+  const out = [];
+  for (const ft of SIGWX_FTS) {
+    const url = SIGWX_URLS[ft];
+    if (url && await probeImg(url)) out.push({ label: ft + '時間後の予想', url });
+  }
+  return out;
+}
+
 /* 衛星は1枚では動きが分からない。最新から20分おきに10枚を、
    古い順に並べて渡す。3時間20分ぶんの流れが1回で読める */
 const SAT_EXPLAIN_N = 10;
@@ -1910,6 +1922,13 @@ async function explainShot(key) {
     expShow(key, '<p>直近' + SAT_EXPLAIN_N + '枚の画像をそろえています…</p>');
     images = await satImagesForExplain(key);
     if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
+  } else if (key === 'sigwx') {
+    /* 表示中の1枚（3時間後だけ等）ではなく、3・6・9時間後の3枚を
+       まとめて渡す。時間とともに悪化・改善するかを見るのが目的で、
+       いま画面に出ているコマだけでは分からないため */
+    expShow(key, '<p>3・6・9時間後の3枚をそろえています…</p>');
+    images = await sigwxImagesForExplain();
+    if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
   } else {
     images = shownUrl[key] ? [{ label: '', url: shownUrl[key] }] : [];
   }
@@ -1920,7 +1939,7 @@ async function explainShot(key) {
 
   const ck = images.map(i => i.url).join('|');
   const cached = expCache()[ck];
-  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images), true); return; }
+  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images, key), true); return; }
 
   expShow(key, '<p>' + EXP_TITLE[key] + 'を読んでいます…</p>');
   try {
@@ -1936,15 +1955,18 @@ async function explainShot(key) {
       return;
     }
     expRemember(ck, j.text);
-    expShow(key, expRender(j.text) + expFoot(false, images), true);
+    expShow(key, expRender(j.text) + expFoot(false, images, key), true);
   } catch (e) {
     expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc((e && e.message) || e) + '）</div>');
   }
 }
 
-function expFoot(cached, images) {
+function expFoot(cached, images, key) {
   const n = (images && images.length) || 0;
-  const src = n > 2
+  const src = key === 'sigwx'
+    ? (n > 1 ? n + '枚（3・6・9時間後）を見比べて、時間とともにどう変わるかを読ませた説明です。'
+        + '表示する時間を切り替えても内容は変わりません。<br>' : '')
+    : n > 2
     ? n + '枚を古い順に並べて、動きを読ませた説明です。表示するコマを切り替えても内容は変わりません。<br>'
     : (n === 2 ? '実況と24時間後の2枚をもとにした説明です。表示するコマを切り替えても内容は変わりません。<br>' : '');
   return '<div class="exp-foot">' + src + '図から読み取れることの説明です。'
@@ -1992,7 +2014,16 @@ async function showImgTime(key, url, tail) {
     /* 途中で図が切り替わっていたら書かない */
     if (shownUrl[key] !== url) return;
     const d = parseImgTime(t);
-    tsEl.textContent = (d ? wxTimeLabel(d, tail) : t + (tail ? '　' + tail : '')) + '　※図から読取';
+    if (!d) { tsEl.textContent = t + (tail ? '　' + tail : '') + '　※図から読取'; return; }
+    if (key === 'sigwx') {
+      /* 図に印字されているのは有効時刻。下層悪天予想図そのものの
+         発表（初期）時刻は書かれていないので、そこから予想時間ぶん
+         遡って求める。3・6・9時間後はどれも同じ発表時刻になるはず */
+      const issued = new Date(d.getTime() - sigwxFT * 3600000);
+      tsEl.textContent = '発表：' + wxTimeLabel(issued, '') + '　' + tail + '　※図から読取';
+      return;
+    }
+    tsEl.textContent = wxTimeLabel(d, tail) + '　※図から読取';
   };
   const c = imgTimeCache()[url];
   if (c) { if (c.text) put(c.text); return; }
@@ -2612,13 +2643,10 @@ async function loadShot(key, manual) {
     box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
     tsEl.textContent = '—';
   }
-  /* 別の図の解説が残らないように消す。ただし天気図だけは例外で、
-     天気図は実況と24時間を、衛星は直近10枚をまとめて解説しているので、
-     表示するコマを切り替えても内容は変わらない */
-  if (key === 'sigwx') {
-    const ex = document.getElementById('exp-' + key);
-    if (ex) ex.innerHTML = '';
-  }
+  /* どのカードも、解説はスライドバーの位置に関わらず同じ資料
+     （天気図は実況＋24時間、衛星は直近10枚、下層悪天予想図は
+     3・6・9時間後の3枚）をまとめて見て答えているので、
+     コマを切り替えても解説を消す必要はない */
 
   /* 手で設定されたURLがあれば、それを最優先で使う */
   const custom = customUrls()[key];

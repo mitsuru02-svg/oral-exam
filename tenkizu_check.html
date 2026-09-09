@@ -377,6 +377,14 @@ iframe.wxframe.tall { height:420px; }
   font-size:10px; color:#7d8590; line-height:1.6;
 }
 .exp .exp-err { color:#e3b341; }
+/* 「試験官への説明の組み立て」だけを枠で囲んで目立たせる。
+   ここが実際に口述試験で話す文なので、ほかの項目に埋もれないように */
+.exp .exam-box {
+  margin:14px 0 4px; padding:12px 14px;
+  border:1px solid #9e6a03; background:#2b1d02; border-radius:10px;
+}
+.exp .exam-box h3 { margin-top:0; color:#e3b341; }
+.exp .exam-box p:last-child, .exp .exam-box li:last-child { margin-bottom:0; }
 /* 読み上げ */
 .ttsbtn {
   border:1px solid #1f4b8f; background:#0d2044; color:#79c0ff;
@@ -1597,15 +1605,31 @@ const TTS_FIX = [
   [/衰えてはいません/g, 'おとろえてわいません'],
   [/総観場/g, 'そうかんば'], [/東海上/g, 'ひがしかいじょう'],
   [/道東/g, 'どうとう'], [/道南/g, 'どうなん'],
+  /* 「中層雲」のように、雲の種類の複合語ごと先にかなへ直す。
+     あとに続く「層雲」だけの規則が中の字を食ってしまわないよう、
+     長い語（中層雲・積乱雲・対流雲・帯状雲）を先に処理する */
+  [/中層雲/g, 'ちゅうそううん'], [/積乱雲/g, 'せきらんうん'],
+  [/対流雲/g, 'たいりゅううん'], [/帯状雲/g, 'たいじょううん'],
   [/積雲/g, 'せきうん'], [/層雲/g, 'そううん'], [/雲帯/g, 'うんたい'],
   [/下層悪天/g, 'かそうあくてん'],
+  /* 中層雲を処理したあとに残る、単独の「中層」 */
+  [/中層/g, 'ちゅうそう'],
+  [/前線帯/g, 'ぜんせんたい'],
+  [/滑空場/g, 'かっくうじょう'], [/読み解き/g, 'よみとき'],
+  [/着氷/g, 'ちゃくひょう'], [/近傍/g, 'きんぼう'], [/雲量/g, 'うんりょう'],
+  [/後面/g, 'あとめん'], [/消散/g, 'しょうさん'],
   [/高・低気圧/g, 'こうていきあつ'], [/気圧傾度/g, 'きあつけいど'],
   /* 「風」が単独の1文字で出てくるところだけ「かぜ」にする。
      風向・風速・横風・追い風・台風のように他の漢字とくっついている
      ときはそのままにする（前後どちらかが漢字なら手を出さない） */
   [/(?<![一-鿿])風(?![一-鿿])/g, 'かぜ'],
-  /* 「西〜南西」のように方位を範囲で書いた箇所を読み下す */
+  /* 「西〜南西」のように方位を範囲で書いた箇所を読み下す。
+     単独の方位（範囲でないもの）より先に行う。先に単独側で
+     「南東」を仮名にしてしまうと、「南東〜南西」のような範囲を
+     この後で拾えなくなるため */
   [DIR_RANGE_RE, (m, a, b) => DIR_YOMI[a] + 'から' + DIR_YOMI[b]],
+  /* 範囲でなく単独で出てくる「南東」「南南東」 */
+  [/南南東/g, 'なんなんとう'], [/南東/g, 'なんとう'],
   /* 雲量のかっこ書き（1〜2/8・わずか）は、画面で見るぶんには要るが
      読み上げると「いちからにはちぶんの…」と長く、肝心の高さが遠のく。
      声では落として「フュー 2,000フィート」とだけ言う。
@@ -1743,8 +1767,11 @@ function ttsFrom(btn, sel) {
     /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む。
        exp-foot は毎回同じ注意書き（「◯枚をもとにした説明です」
        「飛べるかどうかの判断はしていません」等）なので、聞くのは
-       1回で十分。読むたびに付いてくると本題が遠のく */
-    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot').forEach(b => b.remove());
+       1回で十分。読むたびに付いてくると本題が遠のく。
+       .tag（条件内／条件外の時間帯あり）と .pt-fr（VFR等）は
+       画面では一目で分かる色バッジだが、声にすると「条件内 ブイエフアール」
+       と続いて数値の前に挟まり、聞き取りの邪魔になるので読まない */
+    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot, .tag, .pt-fr').forEach(b => b.remove());
     ttsBreaks(c);
     return c.textContent;
   });
@@ -1814,6 +1841,16 @@ function expRender(md) {
   });
   if (ul) out.push('</ul>');
   return out.join('');
+}
+
+/* 「①〜⑤まとめて分析」の最後に出る「試験官への説明の組み立て」だけ、
+   枠で囲んで目立たせる。ここが実際に口で話す文なので、
+   読み流されないようほかの項目と見た目を分ける */
+function boxExamSection(html) {
+  const m = html.match(/<h3>([^<]*試験官[^<]*)<\/h3>([\s\S]*?)(?=<h3>|$)/);
+  if (!m) return html;
+  const boxed = '<div class="exam-box"><h3>🗣 ' + m[1] + '</h3>' + m[2] + '</div>';
+  return html.slice(0, m.index) + boxed + html.slice(m.index + m[0].length);
 }
 
 const STYLE_LABEL = { detail: '詳しい解説', concise: '要点だけ' };
@@ -1951,7 +1988,7 @@ async function explainAll() {
 
   const ck = 'brief|' + images.map(i => i.url).join('|') + '|' + text.length;
   const cached = expCache()[ck];
-  if (cached) { expShow(key, expRender(cached.text) + briefFoot(true, images, text), true); return; }
+  if (cached) { expShow(key, boxExamSection(expRender(cached.text)) + briefFoot(true, images, text), true); return; }
 
   expShow(key, '<p>' + images.length + '枚の図と電文を読んでいます…（20〜30秒）</p>');
   try {
@@ -1967,7 +2004,7 @@ async function explainAll() {
       return;
     }
     expRemember(ck, j.text);
-    expShow(key, expRender(j.text) + briefFoot(false, images, text), true);
+    expShow(key, boxExamSection(expRender(j.text)) + briefFoot(false, images, text), true);
   } catch (e) {
     expShow(key, '<div class="exp-err">分析できませんでした（' + esc((e && e.message) || e) + '）</div>');
   }

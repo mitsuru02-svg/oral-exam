@@ -741,11 +741,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
 
     <div class="paste-tool">
-      <div class="pt-row">
-        <label>滑走路方位</label>
-        <input type="number" id="ptRwy" min="0" max="360" placeholder="例 350" onchange="ptRwyChanged()">
-      </div>
-      <div class="shot-note">横風成分を出すのに使います。一度入れると覚えます。空欄だと横風は出ません。</div>
+      <div class="shot-note"><b>横風成分は出していません。</b>風向・風速から、その日の使用滑走路に合わせて<b>下の早見表</b>で換算してください。角度が同じでも、どちらの滑走路を使うかで話が変わるためです。</div>
     </div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
@@ -862,28 +858,14 @@ table.xw td.hit { color:#f85149; font-weight:700; }
 /* ══════════════════════════════════════════════════════════════
    METAR / TAF の判定
 
-   横風成分・視程・雲底をしきい値と突き合わせる。滑走路方位だけは
-   人にしか分からないので、入力してもらって覚えておく。
+   視程と雲底はしきい値と突き合わせる。横風成分はここでは出さない。
+   同じ風でも、どちらの滑走路を使うかで値が変わり、それは当日の
+   状況を見ている人にしか決められないため。風は方位を言葉にして示し、
+   横風への換算は下の早見表で人がする。
    ══════════════════════════════════════════════════════════════ */
 const PT_KEY = 'tenkizu_paste';
+/* xwind は早見表と読み合わせるための目安。判定には使わない */
 const LIM = { xwind: 8, vis: 5000, ceil: 1000 };   /* kt / m / ft */
-
-/* 滑走路方位だけを覚える。横風成分の計算に使う */
-function ptSave() {
-  try {
-    const el = document.getElementById('ptRwy');
-    localStorage.setItem(PT_KEY, JSON.stringify({ rwy: el ? el.value : '' }));
-  } catch (e) {}
-}
-function ptLoad() {
-  try {
-    const r = JSON.parse(localStorage.getItem(PT_KEY) || '{}');
-    const el = document.getElementById('ptRwy');
-    if (el && r.rwy) el.value = r.rwy;   /* 方位は日をまたいでも残す */
-  } catch (e) {}
-}
-/* 方位を変えたら、横風成分を出し直す */
-function ptRwyChanged() { ptSave(); loadShot('metar', true); }
 
 /* 1本の電文から、風・視程・雲底を取り出す */
 function parseMetar(line) {
@@ -910,41 +892,44 @@ function parseMetar(line) {
   return o;
 }
 
-/* 横風成分。風向と滑走路方位の差の正弦。ガストがあればガストで見る */
-function xwind(o, rwy) {
-  if (o.windDir === undefined || rwy === null) return null;
-  const spd = o.gust != null ? o.gust : o.windSpd;
-  if (o.windDir === 'VRB') return { kt: spd, ang: null, vrb: true };
-  let d = Math.abs(o.windDir - rwy) % 360;
-  if (d > 180) d = 360 - d;
-  return { kt: Math.round(spd * Math.abs(Math.sin(d * Math.PI / 180)) * 10) / 10, ang: d, vrb: false };
+/* 風向を16方位の日本語に。度数だけでは体に入らないので言葉も添える */
+const DIR16 = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東',
+               '南', '南南西', '南西', '西南西', '西', '西北西', '北西', '北北西'];
+function dirJa(deg) {
+  const d = (((+deg % 360) + 360) % 360);
+  return DIR16[Math.round(d / 22.5) % 16];
+}
+
+/* 風の読み下し。「340/8kt」ではなく「北北西（340°）から 8kt」 */
+function windText(o) {
+  if (o.windSpd === undefined) return '風 —';
+  if (o.windSpd === 0) return '風 静穏（0kt）';
+  const g = o.gust != null ? '　最大' + o.gust + 'kt' : '';
+  if (o.windDir === 'VRB') return '風向不定　' + o.windSpd + 'kt' + g;
+  const d = String(o.windDir).padStart(3, '0');
+  return dirJa(o.windDir) + '（' + d + '°）から　' + o.windSpd + 'kt' + g;
 }
 
 /* しきい値との突き合わせ。貼り付け・AVWX のどちらからでも同じ結果になるよう
    ここ1か所に寄せてある */
-function judge(o, rwy) {
-  const xw = xwind(o, rwy);
+/* 横風は滑走路の向きが決まらないと出せないので、ここでは見ない。
+   風は数字と言葉で示し、換算は早見表で人がする */
+function judge(o) {
   const bad = [];
-  const xwBad = !!(xw && xw.kt > LIM.xwind);
-  if (xwBad) bad.push('横風');
   const visBad = o.vis != null && o.vis < LIM.vis;
   if (visBad) bad.push('視程');
   const ceilBad = o.ceil != null && o.ceil < LIM.ceil;
   if (ceilBad) bad.push('雲底');
-  return { xw, bad, xwBad, visBad, ceilBad };
+  return { bad, visBad, ceilBad };
 }
 
 /* 電文1本ぶんの行。時刻 → 風 → 視程 → 雲底 → 横風 の順に並べる。
    METAR も TAF の各期間も同じ形にして、目が迷わないようにする */
 /* 値の並び。時刻を付ける場所とそうでない場所の両方から使う */
-function wxVals(o, rwy) {
-  const { xw } = judge(o, rwy);
-  const wind = o.windSpd === undefined ? '—'
-    : (o.windDir === 'VRB' ? 'VRB（風向不定）' : String(o.windDir).padStart(3, '0'))
-      + '/' + o.windSpd + (o.gust != null ? 'G' + o.gust : '') + 'kt';
+function wxVals(o) {
+  const wind = windText(o);
   const vis = '視程' + (o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km'));
   const cei = o.ceil == null ? '雲底なし' : ('雲底' + o.ceil.toLocaleString() + 'ft');
-  const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
 
   /* 雲は層ごとに、気温・露点・気圧も省かずに出す。
      電文を読み下せることが試験でも実務でも要るので */
@@ -957,19 +942,19 @@ function wxVals(o, rwy) {
   }
   if (o.qnh != null) rest.push('気圧' + o.qnh + 'hPa');
 
-  return `<div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(xwt)}</div>`
+  return `<div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}</div>`
     + (rest.length ? '<div class="d sub">' + esc(rest.join('　／　')) + '</div>' : '');
 }
 
 /* 時刻つきの1行。TAF の各期間はこれで並べる */
-function wxRow(headHtml, o, rwy) {
-  const { bad } = judge(o, rwy);
+function wxRow(headHtml, o) {
+  const { bad } = judge(o);
   return `<div class="taf-r${bad.length ? ' bad' : ''}">
     <div class="hd">
       <div class="w">${headHtml}</div>
       <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
     </div>
-    ${wxVals(o, rwy)}
+    ${wxVals(o)}
   </div>`;
 }
 
@@ -995,15 +980,15 @@ function metarTime(raw) {
    数値は wxRow の1行にすべて出るので、内訳の枠は置かない */
 /* 1空港ぶんの読み解き。観測時刻は見出しに1回だけ出すので、ここには持たない。
    時刻が空港ごとに違うときだけ、そのカードに添える */
-function ptCard(o, rwy, when) {
-  const { bad } = judge(o, rwy);
+function ptCard(o, when) {
+  const { bad } = judge(o);
   const frTag = o.fr ? `<span class="pt-fr ${esc(o.fr)}">${esc(o.fr)}</span>` : '';
   return `<div class="pt-card ${bad.length ? 'ng' : 'ok'}">
     <div class="pt-st">${esc(o.station || '—')}
       <span class="tag ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + 'が条件外' : '条件内'}</span>${frTag}</div>
     ${when ? '<div class="pt-when">' + when + '</div>' : ''}
-    ${wxVals(o, rwy)}
-    ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風はガスト値で見ています</div>' : ''}
+    ${wxVals(o)}
+    ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風を換算するときは、平均風ではなく<b>最大' + o.gust + 'kt</b>のほうで見てください</div>' : ''}
   </div>`;
 }
 
@@ -1184,6 +1169,22 @@ function avwxToObj(d) {
     const a = num(d.altimeter);
     if (a != null) o.qnh = a > 500 ? a : null;
   }
+
+  /* AVWX が解いた値を欠いて返すことがある。そのとき電文そのものは届いて
+     いるのに「風 —・視程—・雲底なし」と出てしまい、目の前に 34008KT と
+     書いてあるのに読めていない、という一番まずい形になる。
+     電文から拾い直して埋める。解けている値は上書きしない */
+  if (o.raw) {
+    const p = parseMetar(o.raw);
+    if (o.windSpd === undefined && p.windSpd !== undefined) {
+      o.windDir = p.windDir; o.windSpd = p.windSpd; o.gust = p.gust;
+    }
+    if (o.vis == null && p.vis != null) o.vis = p.vis;
+    if (!o.clouds.length && p.clouds.length) {
+      o.clouds = p.clouds.slice().sort((a, b) => a.ft - b.ft);
+      o.ceil = p.ceil;
+    }
+  }
   return o;
 }
 
@@ -1217,7 +1218,7 @@ function tafWhen(t) {
 }
 
 /* TAF を時間帯ごとに分解して並べる。「11時以降に風が変わる」を目で拾えるように */
-function avwxTafRows(taf, rwy, noRaw) {
+function avwxTafRows(taf, noRaw) {
   if (!taf) return '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
   const rawTxt = (taf.raw || '').trim();
   const raw = (noRaw || !rawTxt) ? ''
@@ -1233,7 +1234,7 @@ function avwxTafRows(taf, rwy, noRaw) {
     const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
     const head = esc(kind) + ' ' + esc(w.z)
       + (w.jst ? '<span class="jst">（' + esc(w.jst) + '）</span>' : '');
-    return wxRow(head, o, rwy);
+    return wxRow(head, o);
   }).join('');
   return raw + '<div class="taf-per">' + rows + '</div>';
 }
@@ -1241,10 +1242,6 @@ function avwxTafRows(taf, rwy, noRaw) {
 async function avwxLoad(box) {
   const token = avwxToken();
   if (!token && !avwxProxy()) throw new Error('トークンも中継サーバーも未設定');
-  const rwyEl = document.getElementById('ptRwy');
-  const rwyRaw = rwyEl ? rwyEl.value : '';
-  const rwy = rwyRaw === '' ? null : (((+rwyRaw % 360) + 360) % 360);
-
   const res = await Promise.all(AVWX_ST.map(async ic => {
     try {
       const m = await avwxGet('metar', ic, token);
@@ -1274,12 +1271,12 @@ async function avwxLoad(box) {
       + (sameWhen ? '<span class="wx-when">' + sameWhen + '</span>' : '') + '</div>'
     + avwxRawBlock(ok, 'METAR', r => (r.m && r.m.raw) || '')
     + '<div class="wxgrid">'
-      + res.map(r => avwxMetarCard(r, rwy, sameWhen)).join('')
+      + res.map(r => avwxMetarCard(r, sameWhen)).join('')
     + '</div>'
     + '<div class="wx-sec"><b>これから</b>　TAF（予報）</div>'
     + avwxRawBlock(ok.filter(hasTaf), 'TAF', r => (r.t && r.t.raw) || '')
     + '<div class="wxgrid">'
-      + res.map(r => avwxTafCard(r, rwy)).join('')
+      + res.map(r => avwxTafCard(r)).join('')
     + '</div>'
     + '</div>';
 }
@@ -1303,16 +1300,16 @@ function avwxErrCard(r) {
     <div class="shot-note" style="margin:0;">取得できませんでした（${esc(r.err)}）</div></div>`;
 }
 
-function avwxMetarCard(r, rwy, sameWhen) {
+function avwxMetarCard(r, sameWhen) {
   if (r.err) return avwxErrCard(r);
   const o = avwxToObj(r.m);
   o.station = r.ic + ' ' + (AVWX_NAME[r.ic] || '');
   /* 3空港とも同じ時刻なら見出しに出ているので、ここでは繰り返さない */
   const w = metarTime(o.raw);
-  return ptCard(o, rwy, (sameWhen && w === sameWhen) ? '' : w);
+  return ptCard(o, (sameWhen && w === sameWhen) ? '' : w);
 }
 
-function avwxTafCard(r, rwy) {
+function avwxTafCard(r) {
   if (r.err) return '';
   /* TAF を出していない空港（丘珠など）は、カードごと出さない。
      「取得できませんでした」と並べても読む人の役に立たない */
@@ -1322,13 +1319,13 @@ function avwxTafCard(r, rwy) {
   const nm = AVWX_NAME[r.ic] || '';
   /* 予報の期間のどれかが条件外なら、カードごと目立たせる */
   const fc = (r.t && Array.isArray(r.t.forecast)) ? r.t.forecast : [];
-  const anyBad = fc.some(f => judge(avwxToObj(f), rwy).bad.length);
+  const anyBad = fc.some(f => judge(avwxToObj(f)).bad.length);
   const tag = fc.length
     ? `<span class="tag ${anyBad ? 'ng' : 'ok'}">${anyBad ? '条件外の時間帯あり' : '通して条件内'}</span>`
     : '';
   return `<div class="pt-card ${fc.length ? (anyBad ? 'ng' : 'ok') : ''}">
     <div class="pt-st">${esc(r.ic + ' ' + nm)}${tag}</div>
-    ${avwxTafRows(r.t, rwy, true)}
+    ${avwxTafRows(r.t, true)}
   </div>`;
 }
 
@@ -1364,6 +1361,7 @@ const TTS_FIX = [
   [/(\d)m\b/g, '$1メートル'],
   [/JST/g, '日本時間'], [/UTC/g, '協定世界時'],
   [/(\d)Z\b/g, '$1 世界時'],
+  [/(\d)°/g, '$1度'],
   [/℃/g, '度'], [/／/g, '、'], [/[✕✓●▸→←]/g, ' '],
 ];
 
@@ -1534,8 +1532,6 @@ async function briefImages() {
 function briefText() {
   const pres = [...document.querySelectorAll('#box-metar .pt-raw')];
   if (!pres.length) return '';
-  const rwyEl = document.getElementById('ptRwy');
-  const rwy = rwyEl && rwyEl.value ? ('\n滑走路方位は ' + rwyEl.value + ' 度です。') : '';
   /* 見出し（METAR / TAF）と本文がくっつかないよう、間を空ける */
   const lines = pres.map(e => {
     const c = e.cloneNode(true);
@@ -1545,7 +1541,7 @@ function briefText() {
     return (label ? label + ' ' : '') + c.textContent.trim();
   });
   return '⑤近傍空港の電文（旭川 RJEC・丘珠 RJCO・新千歳 RJCC）\n'
-    + lines.join('\n') + rwy;
+    + lines.join('\n');
 }
 
 async function explainAll() {
@@ -2504,7 +2500,7 @@ function tick() {
 }
 
 load(); render(); tick(); setInterval(tick, 10000);
-loadWide(); syncSwitch(); syncChartSlider(); syncSigwxSlider(); avwxFillInput(); ptLoad(); loadAllShots();
+loadWide(); syncSwitch(); syncChartSlider(); syncSigwxSlider(); avwxFillInput(); loadAllShots();
 /* 日をまたいだ状態でアプリに戻ってきたときに備える */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
 </script>

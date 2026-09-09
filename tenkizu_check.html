@@ -43,6 +43,56 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
 }
 .clock b { display:block; font-size:16px; color:#e6edf3; font-weight:700; }
 
+/* ══════════════════════════════════════════════════════════════
+   PC の通常表示
+
+   760px の1本柱のままだと、広い画面では左右が空いて図が縦に長く伸び、
+   全体で7画面ぶんも転がすことになる。そこで幅を広げ、カードの中を
+   「左＝図　右＝読みどころ」の2列にする。図には高さの上限を付け、
+   細かく見たいときはクリックで拡大する。
+   一画面表示（body.wide）は別の作りなので、ここでは触らない。
+   ══════════════════════════════════════════════════════════════ */
+@media (min-width:1024px) {
+  body:not(.wide) .wrap,
+  body:not(.wide) .hdr-row { max-width:min(1360px, 94vw); }
+
+  /* カードの中を2列に。見出しは上いっぱいに渡す */
+  body:not(.wide) .step {
+    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    align-items:start;
+  }
+  body:not(.wide) .step > .step-hd { grid-column:1 / -1; }
+  /* 図の列は下までぶち抜く。解説が伸びても右の列と取り合わない */
+  body:not(.wide) .step > .shot { grid-column:1; grid-row:2 / span 99; }
+  body:not(.wide) .step > :not(.step-hd):not(.shot) { grid-column:2; }
+  body:not(.wide) .step > .look { padding-top:2px; }
+  /* 解説は右の列の頭に出す。図の下に積むと縦に伸びていくが、
+     右は「何を見るか」を読み終えたあと空いている。そこへ入れる */
+  body:not(.wide) .step > .exp { grid-row:2; margin:0 14px 12px; }
+  body:not(.wide) .step > .exp:not(:empty) ~ .look { padding-top:0; }
+
+  /* 図は画面の半分までにとどめる。原寸で見たいときはクリック */
+  body:not(.wide) .shot-box img {
+    width:auto; max-width:100%; max-height:34vh; margin:0 auto;
+  }
+  /* 枠を図の大きさに合わせる。高さを抑えると、そのままでは図の左右に
+     黒い帯が残って、額縁だけ大きい間の抜けた見た目になる */
+  body:not(.wide) .step > .shot > .shot-box {
+    width:max-content; max-width:100%; margin:0 auto; min-height:0;
+  }
+  /* ⑤の電文は図ではないので、幅いっぱいのまま */
+  body:not(.wide) #box-metar { display:block; width:auto; }
+
+  /* ⑤だけは2列にしない。ここに入るのは図ではなく3空港ぶんの数字で、
+     半分の幅に押し込むと1行が折り返し、電文も読み解きも追いにくくなる。
+     幅いっぱいに広げて、3空港を横に並べたほうが速く読める */
+  body:not(.wide) #step-metar { display:block; }
+
+  /* 行間が空きすぎて縦に伸びるのを抑える */
+  body:not(.wide) .look li { margin-bottom:5px; line-height:1.75; }
+  body:not(.wide) .step { margin-bottom:14px; }
+}
+
 /* ── 目的 ── */
 .lead {
   margin:16px 0 6px; padding:13px 15px; border-radius:12px;
@@ -142,6 +192,16 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
   border-radius:7px; padding:5px 10px; font-size:10.5px; cursor:pointer; font-family:inherit;
 }
 .shot-box.zoom img, .shot-box.zoom .tiles { cursor:zoom-in; }
+/* 押せば大きくなることは、言われないと気づかない。図の隅に出しておく */
+.shot-box.zoom::after {
+  content:'⤢ タップで拡大'; position:absolute; right:7px; bottom:7px;
+  font-size:10.5px; color:#c9d1d9; background:rgba(13,17,23,.78);
+  border:1px solid #30363d; border-radius:6px; padding:3px 7px;
+  pointer-events:none; letter-spacing:.02em;
+}
+.shot-box.busy::after { display:none; }
+/* マウスの端末では「タップ」ではなく「クリック」と出す */
+@media (pointer:fine) { .shot-box.zoom::after { content:'⤢ クリックで拡大'; } }
 /* 読み込み中。前の図は消さず、薄くして待っていることだけ伝える */
 .shot-box.busy img, .shot-box.busy .tiles { opacity:.4; transition:opacity .12s; }
 .shot-note { font-size:12px; color:#6e7681; margin-top:5px; line-height:1.6; }
@@ -207,6 +267,8 @@ iframe.wxframe.tall { height:420px; }
    狭い画面で無理に並べると、どの行がどの空港か分からなくなる */
 .wxgrid { display:grid; grid-template-columns:1fr; gap:8px; }
 @media (min-width: 900px) { .wxgrid { grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); } }
+/* 広い画面では3空港を必ず横一列に。折り返すと時刻の対応が取りにくい */
+@media (min-width:1024px) { body:not(.wide) .wxgrid { grid-template-columns:repeat(3, minmax(0,1fr)); } }
 .wxgrid .pt-card { margin-bottom:0; }
 .pt-when { font-size:11.5px; color:#8b949e; margin-bottom:3px; font-variant-numeric:tabular-nums; }
 .pt-card {
@@ -257,6 +319,16 @@ iframe.wxframe.tall { height:420px; }
   background:#0d1117; padding:12px 14px; font-size:14px; line-height:1.9; color:#c9d1d9;
 }
 .exp:empty { display:none; }
+/* カード直下に置いた解説は、カードの内側の余白に合わせる */
+.step > .exp { margin:0 14px 12px; }
+/* 解説の見出し行。読み上げボタンを本文の「前」に置く。
+   後ろに付けていると、長い解説では画面外に流れて見つからない */
+.exp-hd {
+  display:flex; align-items:center; gap:10px;
+  margin:-2px 0 9px; padding-bottom:8px; border-bottom:1px solid #21262d;
+}
+.exp-hd-t { flex:1; font-size:11px; font-weight:700; color:#79c0ff; letter-spacing:.1em; }
+.exp-hd .ttsbtn { margin-top:0; }
 .exp h3 { font-size:14px; color:#79c0ff; margin:10px 0 4px; }
 .exp h3:first-child { margin-top:0; }
 .exp p { margin:0 0 7px; }
@@ -286,6 +358,13 @@ iframe.wxframe.tall { height:420px; }
   cursor:pointer;
 }
 .exp-go:active { background:#0d2044; }
+/* 操作行。どのカードでも「図 → スライドバー → ここ」の位置に置く。
+   場所が毎回同じなら、探さなくても手が伸びる */
+.act { display:flex; gap:8px; margin-top:10px; }
+.act .exp-go { flex:1; margin-top:0; }
+.act .ttsbtn { flex-shrink:0; margin-top:0; padding:13px 16px; font-size:14px; }
+/* 解説ボタンが無いカード（⑤）では読み上げが主役なので、幅いっぱいに */
+.act .ttsbtn.solo { flex:1; }
 /* 上部のまとめボタン。ページの主役なので一段強く */
 .brief { margin:0 14px 16px; }
 .brief-go {
@@ -576,8 +655,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         </div>
       </div>
       <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
-      <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
-      <div class="exp" id="exp-chart"></div>
+      <div class="act">
+        <button class="exp-go" onclick="explainShot('chart')">🔎 この図の解説を読む</button>
+      </div>
       <div class="urlset" id="url-chart">
         <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('chart')">保存</button>
@@ -585,6 +665,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       </div>
       <div class="shot-note"><b>日本付近のカラー図</b>を出しています。<b>実況</b>でいまの気圧配置をつかみ、<b>24時間後・48時間後</b>で前線や低気圧がどう動くかを見ます。飛ぶ日が明日以降なら、そちらのコマが本番です。出ないときは「開く」で気象庁のページを表示し、<b>図を長押し →「画像アドレスをコピー」</b>して ⚙ URL に貼り付けてください。画像をタップで拡大。<b>図の中の時刻</b>で必ず確かめること。</div>
     </div>
+    <div class="exp" id="exp-chart"></div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
       <ul>
@@ -616,8 +697,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
       </div>
       <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
-      <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
-      <div class="exp" id="exp-ir"></div>
+      <div class="act">
+        <button class="exp-go" onclick="explainShot('ir')">🔎 この図の解説を読む</button>
+      </div>
       <div class="urlset" id="url-ir">
         <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('ir')">保存</button>
@@ -625,6 +707,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       </div>
       <div class="shot-note">ひまわり赤外（B13）。<b>スライドバーで6時間前まで遡れます</b>。<b>▶ 自動送り</b>を押すと古いほうから順に再生します。1枚で見ずに動かして、雲域が滝川へ近づいているのか離れているのかを見てください。</div>
     </div>
+    <div class="exp" id="exp-ir"></div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
       <ul>
@@ -655,8 +738,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
       </div>
       <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
-      <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
-      <div class="exp" id="exp-vis"></div>
+      <div class="act">
+        <button class="exp-go" onclick="explainShot('vis')">🔎 この図の解説を読む</button>
+      </div>
       <div class="urlset" id="url-vis">
         <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('vis')">保存</button>
@@ -664,6 +748,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       </div>
       <div class="shot-note">ひまわり可視（B03）。夜間は真っ暗になるので赤外で判断します。</div>
     </div>
+    <div class="exp" id="exp-vis"></div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
       <ul>
@@ -699,8 +784,9 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         </div>
       </div>
       <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
-      <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
-      <div class="exp" id="exp-sigwx"></div>
+      <div class="act">
+        <button class="exp-go" onclick="explainShot('sigwx')">🔎 この図の解説を読む</button>
+      </div>
       <div class="urlset" id="url-sigwx">
         <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button onclick="saveUrl('sigwx')">保存</button>
@@ -708,6 +794,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       </div>
       <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。図の中に実際の有効時刻が入っているので、そちらで確かめてください。</div>
     </div>
+    <div class="exp" id="exp-sigwx"></div>
     <div class="look">
       <div class="look-t">▸ 何を見るか</div>
       <ul>
@@ -734,7 +821,10 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="shot">
       <div class="shot-time" id="ts-metar">—</div>
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><button class="ttsbtn" data-on="0" onclick="ttsFrom(this, '#box-metar')">🔊 読み上げ</button><button onclick="loadShot('metar',true)">再読込</button></div>
+      <div class="shot-bar"><button onclick="loadShot('metar',true)">再読込</button></div>
+      <div class="act">
+        <button class="ttsbtn solo" data-on="0" onclick="ttsFrom(this, '#box-metar')">🔊 METAR / TAF を読み上げる</button>
+      </div>
       <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
 
@@ -1411,7 +1501,7 @@ function ttsFrom(btn, sel) {
     if (!el) return '';
     const c = el.cloneNode(true);
     /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む */
-    c.querySelectorAll('.ttsbtn, .rawblk').forEach(b => b.remove());
+    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd').forEach(b => b.remove());
     return c.textContent;
   });
 }
@@ -1465,7 +1555,12 @@ function expRender(md) {
 function expShow(key, html, speak) {
   const el = document.getElementById('exp-' + key);
   if (!el) return;
-  el.innerHTML = html + (speak ? ttsBtn('#exp-' + key) : '');
+  /* 読み上げは解説の「前」に置く。後ろに付けていると、解説が長いほど
+     下へ流れて見つからない。見出しと並べておけば位置が毎回同じになる */
+  const hd = speak
+    ? '<div class="exp-hd"><span class="exp-hd-t">解説</span>' + ttsBtn('#exp-' + key) + '</div>'
+    : '';
+  el.innerHTML = hd + html;
 }
 
 /* 天気図は、実況と24時間後の2枚をまとめて渡す。1枚だけ見ても

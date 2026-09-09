@@ -374,6 +374,11 @@ iframe.wxframe.tall { height:420px; }
 .act .ttsbtn { flex-shrink:0; margin-top:0; padding:10px 14px; font-size:13px; }
 /* 解説ボタンが無いカード（⑤）では読み上げが主役なので、幅いっぱいに */
 .act .ttsbtn.solo { flex:1; }
+/* 見出しの右に置く読み上げ。⑤は電文そのものを読ませるので、
+   本文まで下がらないと押せないのは不便。開くボタンの隣に出す */
+.hd-tts { flex-shrink:0; margin-top:0; padding:6px 11px; font-size:12px; border-radius:20px; }
+@media (max-width:560px) { .hd-tts { padding:6px 9px; font-size:0; }
+  .hd-tts::before { content:'🔊'; font-size:14px; } }
 /* 上部のまとめボタン。ページの主役なので一段強く */
 .brief { margin:0 14px 16px; }
 .brief-go {
@@ -833,15 +838,13 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="step-hd">
       <div class="step-no">5</div>
       <div class="step-hd-t"><b>METAR / TAF</b><span>近傍空港の実況と予報。数字で裏を取る</span></div>
+      <button class="ttsbtn hd-tts" data-on="0" onclick="ttsFrom(this, '#box-metar')">🔊 読み上げ</button>
       <a class="step-open" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener" aria-label="METAR / TAF を開く">開く <span class="ext">↗</span></a>
     </div>
     <div class="shot">
       <div class="shot-time" id="ts-metar">—</div>
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
       <div class="shot-bar"><button onclick="loadShot('metar',true)">再読込</button></div>
-      <div class="act">
-        <button class="ttsbtn solo" data-on="0" onclick="ttsFrom(this, '#box-metar')">🔊 METAR / TAF を読み上げる</button>
-      </div>
       <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
 
@@ -1471,6 +1474,9 @@ const TTS_FIX = [
   [/\bCAVOK\b/g, 'キャブオーケー'],
   [/\bBECMG\b/g, 'ビカミング'], [/\bTEMPO\b/g, 'テンポ'], [/\bFM\b/g, 'フロム'],
   [/\bVRB\b/g, '風向不定'],
+  /* 漢字のままだと読みを外す語。かなにして渡す */
+  [/赤外/g, 'せきがい'], [/雲頂/g, 'うんちょう'], [/雲塊/g, 'うんかい'],
+  [/雲底/g, 'うんてい'], [/露点/g, 'ろてん'],
   [/(\d)kt/g, '$1ノット'], [/\bkt\b/g, 'ノット'],
   [/(\d)ft/g, '$1フィート'], [/\bft\b/g, 'フィート'],
   [/hPa/g, 'ヘクトパスカル'],
@@ -1487,7 +1493,45 @@ function ttsText(t) {
     .replace(/\*\*/g, '').replace(/^#{1,6}\s*/gm, '')
     .replace(/^[-*・]\s*/gm, '').replace(/\s+/g, ' ');
   TTS_FIX.forEach(([re, to]) => { x = x.replace(re, to); });
+  /* 息継ぎを入れた結果、句点が重なることがある。ひとつにまとめる */
+  x = x.replace(/[、。]?\s*。(\s*。)+/g, '。').replace(/、\s*。/g, '。')
+       .replace(/。\s*/g, '。 ').replace(/\s{2,}/g, ' ')
+       .replace(/^[\s。、]+/, '');          /* 頭の間は要らない */
   return x.trim();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   読み上げの声
+
+   声を指定しないと、端末が勝手に選ぶ。Windows は入っている声が
+   まちまちで、Ayumi や Nanami、英語の声で日本語を読まれることもある。
+   Windows なら Haruka を使う。
+
+   Haruka は Windows にしか入っていないので、名前で探せば
+   iPhone（Kyoko）や Android（Google 日本語）はこれまでどおりになる。
+   見つからなければ端末まかせに戻す。
+
+   getVoices() は最初の呼び出しで空を返すことがある。声の一覧が
+   あとから届くので、voiceschanged でもう一度拾い直す。
+   ══════════════════════════════════════════════════════════════ */
+const TTS_WANT = [/haruka/i, /はるか/];
+let ttsVoice = null;
+
+function ttsPickVoice() {
+  let list = [];
+  try { list = window.speechSynthesis.getVoices() || []; } catch (e) { return null; }
+  if (!list.length) return null;
+  const ja = list.filter(v => /^ja\b|^ja[-_]/i.test(String(v.lang || '')));
+  for (const re of TTS_WANT) {
+    const hit = ja.find(v => re.test(String(v.name || '')));
+    if (hit) return hit;
+  }
+  return null;                       /* 端末の既定にまかせる */
+}
+function ttsVoiceInit() {
+  if (!('speechSynthesis' in window)) return;
+  const v = ttsPickVoice();
+  if (v) ttsVoice = v;
 }
 
 let ttsOn = null;
@@ -1503,6 +1547,10 @@ function ttsSpeak(btn, getText) {
   if (!t) return;
   const u = new SpeechSynthesisUtterance(t);
   u.lang = 'ja-JP';
+  /* 押された時点でもう一度探す。ページを開いた直後は
+     声の一覧がまだ届いていないことがあるため */
+  if (!ttsVoice) ttsVoiceInit();
+  if (ttsVoice) { u.voice = ttsVoice; u.lang = ttsVoice.lang || 'ja-JP'; }
   u.rate = 1.0;
   u.onend = ttsStop;
   u.onerror = ttsStop;
@@ -1519,7 +1567,28 @@ function ttsFrom(btn, sel) {
     const c = el.cloneNode(true);
     /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む */
     c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd').forEach(b => b.remove());
+    ttsBreaks(c);
     return c.textContent;
+  });
+}
+
+/* textContent は要素の切れ目で何も入れずにつなぐので、そのままでは
+   「1. 雲域の動き雲域が西から東へ…」と地続きになって聞き取れない。
+   段落と箇条書きのあとに句点を入れ、見出しは前後に間を開ける */
+function ttsBreaks(root) {
+  const put = (el, where, t) => {
+    const n = document.createTextNode(t);
+    if (where === 'before') el.insertBefore(n, el.firstChild); else el.appendChild(n);
+  };
+  root.querySelectorAll('p, li').forEach(el => put(el, 'after', '。'));
+  /* ⑤の読み解き。行の切れ目に何も無いと
+     「雲底7,000フィート雲 フュー…」と続いて聞こえる */
+  root.querySelectorAll('.d, .pt-warn, .pt-st, .wx-sec').forEach(el => put(el, 'after', '。'));
+  root.querySelectorAll('.pt-card, .taf-r').forEach(el => put(el, 'after', '。'));
+  root.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(el => {
+    /* 「1. 雲域の動き」の番号は、点のままだと読みが崩れる */
+    el.textContent = el.textContent.replace(/^\s*(\d+)\.\s*/, '$1、');
+    put(el, 'before', '。'); put(el, 'after', '。');
   });
 }
 function ttsBtn(sel) {
@@ -2626,6 +2695,8 @@ function tick() {
 
 load(); render(); tick(); setInterval(tick, 10000);
 loadWide(); syncSwitch(); syncChartSlider(); syncSigwxSlider(); avwxFillInput(); loadAllShots();
+ttsVoiceInit();
+try { window.speechSynthesis.addEventListener('voiceschanged', ttsVoiceInit); } catch (e) {}
 /* 日をまたいだ状態でアプリに戻ってきたときに備える */
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { load(); render(); tick(); } });
 </script>

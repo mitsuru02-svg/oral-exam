@@ -278,6 +278,53 @@ body {
 .imp-badge.imp2 { background: #2d1d00; color: #d29922; border: 1px solid #5c3d00; }
 .imp-badge.imp1 { background: #161b22; color: #8b949e; border: 1px solid #30363d; }
 
+/* ── ページ内キーワード検索 ── 問題は1問ずつしか表示されないので、
+   ブラウザの Ctrl+F では他の問題の中身まで探せない。ここで選んでいる
+   問題集（標準／Fuka先生）の全問から検索し、その場で答えまで見られる */
+.qs-box { margin: 0 0 20px; text-align: left; }
+.qs-input-row {
+  display: flex; align-items: center; gap: 6px;
+  background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+  padding: 8px 12px;
+}
+.qs-icon { font-size: 13px; opacity: .75; flex-shrink: 0; }
+.qs-input-row input {
+  flex: 1; min-width: 0; background: none; border: none; outline: none;
+  color: #e6edf3; font-size: 14px; font-family: inherit;
+}
+.qs-input-row input::placeholder { color: #6e7681; }
+.qs-input-row button {
+  flex-shrink: 0; background: none; border: none; color: #6e7681; font-size: 17px;
+  line-height: 1; cursor: pointer; padding: 0 3px; display: none;
+}
+.qs-input-row button.show { display: block; }
+.qs-input-row button:hover { color: #e6edf3; }
+.qs-results { margin-top: 8px; max-height: 60vh; overflow-y: auto; display: none; }
+.qs-results.show { display: block; }
+.qs-count { font-size: 11px; color: #6e7681; padding: 2px 4px 8px; }
+.qs-empty { font-size: 13px; color: #6e7681; padding: 10px 4px; }
+.qs-item {
+  background: #161b22; border: 1px solid #21262d; border-radius: 10px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.qs-item.open { border-color: #3b82f6; }
+.qs-q {
+  display: flex; align-items: flex-start; gap: 8px; width: 100%; text-align: left;
+  background: none; border: none; color: #e6edf3; font-family: inherit;
+  padding: 11px 12px; cursor: pointer; font-size: 13.5px; line-height: 1.65;
+}
+.qs-q:hover { background: rgba(59,130,246,.06); }
+.qs-q .qs-car { flex-shrink: 0; color: #6e7681; font-size: 12px; margin-top: 2px; transition: transform .15s; }
+.qs-item.open .qs-q .qs-car { transform: rotate(90deg); }
+.qs-q .qs-qtext { flex: 1; min-width: 0; }
+.qs-qtext mark, .qs-atext mark { background: #3b82f6; color: #fff; border-radius: 3px; padding: 0 2px; }
+.qs-a {
+  display: none; padding: 4px 14px 14px 34px; font-size: 13px; color: #c9d1d9;
+  line-height: 1.8; border-top: 1px solid #21262d;
+}
+.qs-item.open .qs-a { display: block; }
+.qs-a .qs-alabel { font-size: 10.5px; color: #6e7681; letter-spacing: .06em; margin: 10px 0 4px; }
+
 /* 聞き流しモード：再生ボタン */
 .pb-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; }
 .pb-play-btn {
@@ -323,6 +370,18 @@ body {
       <button class="bank-tab selected" id="bankStandard" onclick="selectBank('standard')">📚 標準問題集</button>
       <button class="bank-tab" id="bankFuka" onclick="selectBank('fuka')">👨‍🏫 Fuka先生問題集</button>
     </div>
+
+    <!-- キーワード検索。試験開始前に、選んでいる問題集の中を
+         キーワードで探して答えまでその場で確認できる -->
+    <div class="qs-box">
+      <div class="qs-input-row">
+        <span class="qs-icon">🔍</span>
+        <input type="text" id="qSearchInput" placeholder="キーワードで問題を検索" autocomplete="off">
+        <button type="button" id="qSearchClear" aria-label="検索をクリア">×</button>
+      </div>
+      <div class="qs-results" id="qSearchResults"></div>
+    </div>
+
     <p id="modeDesc">問題を読み上げ、マイクで答えてAI採点。<br>実際の口述試験と同じ流れで練習できます。</p>
     <div id="examInfoBox" style="background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#c9d1d9;text-align:left;line-height:1.8;">
       🤚 <strong style="color:#3fb950">ON</strong> にすることで、完全ハンズフリー。<br>
@@ -586,7 +645,85 @@ function selectBank(b) {
   sel.options[3].text  = `全問 (${activeQA().length}問)`;
   if (parseInt(sel.value) > activeQA().length) sel.value = 10;
   updateCheckedCount();
+  if (typeof qSearchRun === 'function') qSearchRun();  // 問題集を切り替えたら検索結果も入れ替える
 }
+
+// ══════════════════════════════════════════════════════════════
+// キーワード検索（試験開始前に問題文・模範解答から探す）
+//
+// 試験は1問ずつしか出さないので、他の問題の中身を見るには実際に
+// 出題されるまで待つしかない。ここで選んでいる問題集を全問検索し、
+// タップすればその場で模範解答まで見られるようにする。
+// ══════════════════════════════════════════════════════════════
+let qSearchOpen = -1;   // 展開中の検索結果（activeQA() のインデックス）。-1 は無し
+function qsEsc(t) {
+  return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+}
+function qsMark(text, q) {
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return qsEsc(text);
+  return qsEsc(text.slice(0, idx)) + '<mark>' + qsEsc(text.slice(idx, idx + q.length)) + '</mark>' + qsEsc(text.slice(idx + q.length));
+}
+function qSearchRun() {
+  const input = document.getElementById('qSearchInput');
+  const clearBt = document.getElementById('qSearchClear');
+  const box = document.getElementById('qSearchResults');
+  if (!input || !box) return;
+  const q = input.value.trim();
+  clearBt.classList.toggle('show', !!q);
+  if (!q) { box.innerHTML = ''; box.classList.remove('show'); qSearchOpen = -1; return; }
+  const qLower = q.toLowerCase();
+  const bank = activeQA();
+  const hits = [];
+  bank.forEach((qa, i) => {
+    if ((qa.q || '').toLowerCase().includes(qLower) || (qa.a || '').toLowerCase().includes(qLower)) hits.push(i);
+  });
+  qSearchRender(hits, q, bank);
+}
+function qSearchRender(hits, q, bank) {
+  const box = document.getElementById('qSearchResults');
+  box.innerHTML = '';
+  if (!hits.length) {
+    box.innerHTML = '<div class="qs-empty">見つかりませんでした</div>';
+    box.classList.add('show');
+    return;
+  }
+  const shown = hits.slice(0, 40);
+  const count = document.createElement('div');
+  count.className = 'qs-count';
+  count.textContent = hits.length + '件見つかりました' + (hits.length > shown.length ? '（上位' + shown.length + '件を表示）' : '');
+  box.appendChild(count);
+  shown.forEach(i => {
+    const qa = bank[i];
+    const item = document.createElement('div');
+    item.className = 'qs-item' + (qSearchOpen === i ? ' open' : '');
+    const impBadge = qa.imp ? '<span class="imp-badge imp' + qa.imp + '" style="flex-shrink:0;margin-top:1px;">'
+      + (qa.imp === 3 ? '★★★' : qa.imp === 2 ? '★★' : '★') + '</span>' : '';
+    item.innerHTML = '<button type="button" class="qs-q">'
+      + '<span class="qs-car">▸</span>'
+      + '<span class="qs-qtext">' + qsMark(qa.q || '', q) + '</span>' + impBadge
+      + '</button>'
+      + '<div class="qs-a">' + qsMark(qa.a || '', q)
+      + (qa.ch ? '<div class="qs-alabel">出典：' + qsEsc(qa.ch) + '</div>' : '') + '</div>';
+    item.querySelector('.qs-q').addEventListener('click', () => {
+      qSearchOpen = (qSearchOpen === i) ? -1 : i;
+      qSearchRender(hits, q, bank);
+    });
+    box.appendChild(item);
+  });
+  box.classList.add('show');
+}
+(function qSearchInit() {
+  const input = document.getElementById('qSearchInput');
+  const clearBt = document.getElementById('qSearchClear');
+  if (!input || !clearBt) return;
+  let timer = null;
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(qSearchRun, 150); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { input.value = ''; qSearchRun(); input.blur(); }
+  });
+  clearBt.addEventListener('click', () => { input.value = ''; qSearchRun(); input.focus(); });
+})();
 
 // ── ハンズフリーモード ────────────────────────────────────────
 let handsFreeMode = false;

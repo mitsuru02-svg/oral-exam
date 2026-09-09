@@ -198,6 +198,51 @@ img,svg{max-width:100%;}
   font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.6;
 }
 .sidebar a.active{background:rgba(255,255,255,.1);border-left-color:var(--amber);color:#fff;font-weight:700;}
+
+/* ===== ページ内キーワード検索（サイドバー） ===== */
+.ps-box{margin-top:12px;}
+.ps-input-row{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface-3);border:1px solid var(--line-strong);border-radius:8px;
+  padding:6px 8px;
+}
+.ps-icon{font-size:12px;opacity:.7;flex-shrink:0;}
+.ps-input-row input{
+  flex:1;min-width:0;background:none;border:none;outline:none;
+  color:#fff;font-size:13px;font-family:var(--font);
+}
+.ps-input-row input::placeholder{color:#7c93ab;}
+.ps-input-row button{
+  flex-shrink:0;background:none;border:none;color:#7c93ab;font-size:15px;
+  line-height:1;cursor:pointer;padding:0 2px;display:none;
+}
+.ps-input-row button.show{display:block;}
+.ps-input-row button:hover{color:#fff;}
+.ps-results{
+  margin-top:6px;max-height:52vh;overflow-y:auto;
+  border-radius:8px;display:none;
+}
+.ps-results.show{display:block;}
+.ps-count{font-size:10.5px;color:#7c93ab;padding:4px 4px 6px;}
+.ps-empty{font-size:12.5px;color:#7c93ab;padding:8px 4px;}
+.ps-row{
+  display:block;width:100%;text-align:left;background:var(--surface-2);
+  border:1px solid var(--line-base);border-radius:7px;
+  padding:7px 9px;margin-bottom:5px;cursor:pointer;font-family:var(--font);
+}
+.ps-row:hover{border-color:var(--accent);background:rgba(59,130,246,.08);}
+.ps-ch{
+  display:block;font-size:10px;font-weight:700;color:var(--accent2);
+  letter-spacing:.02em;margin-bottom:2px;
+}
+.ps-snip{display:block;font-size:12px;color:#cfd9e3;line-height:1.6;word-break:break-word;}
+.ps-snip mark{background:var(--accent);color:#fff;border-radius:3px;padding:0 2px;}
+/* クリックで飛んだ先。読み上げ中（.tts-reading／琥珀色）とは区別して青で示す */
+.search-hit{
+  outline:3px solid var(--accent) !important;outline-offset:3px;
+  background:rgba(59,130,246,.14) !important;border-radius:8px;
+  scroll-margin-top:90px;transition:outline .15s, background .15s;
+}
 .sidebar .chnum{
   display:inline-block;width:20px;color:var(--accent2);font-weight:700;margin-right:2px;
 }
@@ -425,6 +470,17 @@ table.datatbl td.num{font-weight:700;color:var(--accent-text);text-align:right;f
     <div class="tag">Y.fuka 先生 講義ノート</div>
     <h1>グライダー工学・実務</h1>
     <div class="sub">自家用操縦士（滑空機）／全13章</div>
+    <!-- ページ内キーワード検索。章が display:none で隠れているため、
+         ブラウザの Ctrl+F では隠れた章の中まで探せない。ここで
+         全13章の本文をまとめて検索し、見つかった章へジャンプする -->
+    <div class="ps-box">
+      <div class="ps-input-row">
+        <span class="ps-icon">🔍</span>
+        <input type="text" id="pageSearchInput" placeholder="キーワードで検索（全章）" autocomplete="off">
+        <button type="button" id="pageSearchClear" aria-label="検索をクリア">×</button>
+      </div>
+      <div class="ps-results" id="pageSearchResults"></div>
+    </div>
   </div>
   <div class="grp-label">巻頭</div>
   <a href="#ch1" data-ch="ch1"><span class="chnum">1</span>口述試験の心構えと資料</a>
@@ -5795,6 +5851,108 @@ function showCh(id){
   closeSidebar();
   try{history.replaceState(null,'','#'+id);}catch(e){}
 }
+
+// ===== ページ内キーワード検索 =====
+// 章は display:none で隠れているため、ブラウザの Ctrl+F は
+// いま開いている章の中しか探せない。ここで全13章の本文を
+// まとめて検索し、見つかった段落へ直接ジャンプする。
+(function(){
+  var input   = document.getElementById('pageSearchInput');
+  var clearBt = document.getElementById('pageSearchClear');
+  var box     = document.getElementById('pageSearchResults');
+  if (!input || !box) return;
+
+  var HIT_TAGS = 'p, li, h2.sec, h3.sub, td, dd, blockquote, figcaption, .card, .box';
+  var timer = null;
+
+  function escHtml(t){
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+
+  function chapterTitle(chId){
+    var a = document.querySelector('.sidebar a[data-ch="' + chId + '"]');
+    return a ? a.textContent.replace(/\s+/g, ' ').trim() : chId;
+  }
+
+  function runSearch(){
+    var q = input.value.trim();
+    clearBt.classList.toggle('show', !!q);
+    if (!q) { box.innerHTML = ''; box.classList.remove('show'); return; }
+    var qLower = q.toLowerCase();
+    var hits = [];
+    document.querySelectorAll('.chapter').forEach(function(ch){
+      var seen = [];   // 親子関係にある要素を二重に拾わない（li の中の p など）
+      ch.querySelectorAll(HIT_TAGS).forEach(function(el){
+        if (seen.some(function(s){ return s.contains(el) || el.contains(s); })) return;
+        var text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        var idx = text.toLowerCase().indexOf(qLower);
+        if (idx === -1) return;
+        seen.push(el);
+        hits.push({ chId: ch.id, el: el, text: text, idx: idx });
+      });
+    });
+    renderResults(hits, q);
+  }
+
+  function renderResults(hits, q){
+    box.innerHTML = '';
+    if (!hits.length) {
+      box.innerHTML = '<div class="ps-empty">見つかりませんでした</div>';
+      box.classList.add('show');
+      return;
+    }
+    var shown = hits.slice(0, 40);
+    var count = document.createElement('div');
+    count.className = 'ps-count';
+    count.textContent = hits.length + '件見つかりました'
+      + (hits.length > shown.length ? '（上位' + shown.length + '件を表示）' : '');
+    box.appendChild(count);
+    shown.forEach(function(h){
+      var pre  = Math.max(0, h.idx - 16);
+      var before = escHtml(h.text.slice(pre, h.idx));
+      var match  = escHtml(h.text.slice(h.idx, h.idx + q.length));
+      var after  = escHtml(h.text.slice(h.idx + q.length, h.idx + q.length + 42));
+      var row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'ps-row';
+      row.innerHTML = '<span class="ps-ch">' + escHtml(chapterTitle(h.chId)) + '</span>'
+        + '<span class="ps-snip">' + (pre > 0 ? '…' : '') + before
+        + '<mark>' + match + '</mark>' + after + '…</span>';
+      row.addEventListener('click', function(){ jumpTo(h); });
+      box.appendChild(row);
+    });
+    box.classList.add('show');
+  }
+
+  function jumpTo(h){
+    showCh(h.chId);
+    setTimeout(function(){
+      h.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      h.el.classList.add('search-hit');
+      setTimeout(function(){ h.el.classList.remove('search-hit'); }, 2200);
+    }, 60);
+  }
+
+  input.addEventListener('input', function(){
+    clearTimeout(timer);
+    timer = setTimeout(runSearch, 150);
+  });
+  input.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') {
+      clearTimeout(timer);
+      runSearch();
+      var first = box.querySelector('.ps-row');
+      if (first) first.click();
+    } else if (e.key === 'Escape') {
+      input.value = ''; runSearch(); input.blur();
+    }
+  });
+  clearBt.addEventListener('click', function(){
+    input.value = ''; runSearch(); input.focus();
+  });
+})();
 
 document.querySelectorAll('.sidebar a').forEach(function(a){
   a.addEventListener('click', function(e){

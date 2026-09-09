@@ -357,6 +357,13 @@ iframe.wxframe.tall { height:420px; }
 }
 .ttsbtn[data-on="1"] { border-color:#9e6a03; background:#2b1d02; color:#e3b341; }
 .shot-bar .ttsbtn { margin-top:0; padding:6px 10px; font-size:11.5px; }
+/* 一時停止。読み上げている間だけ、読み上げボタンの右に出す */
+.ttspause {
+  border:1px solid #9e6a03; background:#2b1d02; color:#e3b341;
+  border-radius:8px; padding:7px 10px; font-size:12.5px; font-weight:700;
+  font-family:inherit; cursor:pointer; margin-top:9px; margin-left:6px;
+}
+.ttspause[data-on="1"] { border-color:#1f4b8f; background:#0d2044; color:#79c0ff; }
 /* 解説ボタン。狭いボタン行に混ぜると押しにくく目立たないので、
    独立した1本の帯にして大きくしてある */
 .exp-go {
@@ -377,8 +384,12 @@ iframe.wxframe.tall { height:420px; }
 /* 見出しの右に置く読み上げ。⑤は電文そのものを読ませるので、
    本文まで下がらないと押せないのは不便。開くボタンの隣に出す */
 .hd-tts { flex-shrink:0; margin-top:0; padding:6px 11px; font-size:12px; border-radius:20px; }
+.step-hd .ttspause { flex-shrink:0; margin-top:0; padding:6px 9px; font-size:12px; border-radius:20px; margin-left:0; }
 @media (max-width:560px) { .hd-tts { padding:6px 9px; font-size:0; }
-  .hd-tts::before { content:'🔊'; font-size:14px; } }
+  .hd-tts::before { content:'🔊'; font-size:14px; }
+  .step-hd .ttspause { padding:6px 9px; font-size:0; }
+  .step-hd .ttspause::before { content:'⏸'; font-size:14px; }
+  .step-hd .ttspause[data-on="1"]::before { content:'▶'; } }
 /* 上部のまとめボタン。ページの主役なので一段強く */
 .brief { margin:0 14px 16px; }
 .brief-go {
@@ -1600,9 +1611,40 @@ function ttsVoiceInit() {
 }
 
 let ttsOn = null;
+let ttsPauseEl = null;   /* 読み上げ中だけ隣に出す一時停止ボタン */
+
+function ttsRemovePauseBtn() {
+  if (ttsPauseEl) { ttsPauseEl.remove(); ttsPauseEl = null; }
+}
+function ttsAddPauseBtn(afterEl) {
+  ttsRemovePauseBtn();
+  const b = document.createElement('button');
+  b.className = 'ttspause';
+  b.type = 'button';
+  b.dataset.on = '0';
+  b.textContent = '⏸ 一時停止';
+  b.onclick = ttsPauseToggle;
+  afterEl.insertAdjacentElement('afterend', b);
+  ttsPauseEl = b;
+}
+/* 一時停止／再開。speechSynthesis.pause() は途中の一文まで読み終えてから
+   止まる端末があるので、押した瞬間にぱたっと止まるとは限らない */
+function ttsPauseToggle() {
+  const sp = window.speechSynthesis;
+  if (!sp || !ttsOn) return;
+  try {
+    if (sp.paused) { sp.resume(); } else { sp.pause(); }
+  } catch (e) { return; }
+  const paused = !!sp.paused;
+  if (ttsPauseEl) {
+    ttsPauseEl.dataset.on = paused ? '1' : '0';
+    ttsPauseEl.textContent = paused ? '▶ 再開' : '⏸ 一時停止';
+  }
+}
 function ttsStop() {
   try { window.speechSynthesis.cancel(); } catch (e) {}
   if (ttsOn) { ttsOn.dataset.on = '0'; ttsOn.textContent = '🔊 読み上げ'; ttsOn = null; }
+  ttsRemovePauseBtn();
 }
 function ttsSpeak(btn, getText) {
   if (!('speechSynthesis' in window)) { alert('この端末では読み上げが使えません'); return; }
@@ -1622,6 +1664,7 @@ function ttsSpeak(btn, getText) {
   ttsOn = btn;
   btn.dataset.on = '1';
   btn.textContent = '⏹ 停止';
+  ttsAddPauseBtn(btn);
   try { window.speechSynthesis.speak(u); } catch (e) { ttsStop(); }
 }
 /* 画面の一部分を読ませる。読み上げボタン自身の文字は拾わない */
@@ -2199,6 +2242,13 @@ function chartCandidates() {
 /* いま表示している画像のURL。解説を頼むときに使う */
 const shownUrl = {};
 
+/* カードごとの「いちばん新しい呼び出し」の番号。
+   スライドバーを続けて動かすと loadShot が重なって走ることがあり、
+   通信は非同期なので、後から呼んだほうが先に終わるとは限らない。
+   番号が古い呼び出しの結果は、届いても画面に反映しない
+   （これも「時々違う時刻の画像に見える」不具合の一因だった） */
+const loadGen = {};
+
 function tryImages(cands, onOk, onFail, key) {
   let i = 0;
   const next = () => {
@@ -2378,7 +2428,7 @@ async function satFrameFresh(band, hhmm, expected) {
   return fresh;
 }
 
-async function loadMsc(key, box, tsEl) {
+async function loadMsc(key, box, tsEl, myGen) {
   const band = MSC_BAND[key];
   const { times, urls, newest } = await satFrames(key);
   if (newest < 0) throw new Error('画像が見つかりません');
@@ -2394,6 +2444,11 @@ async function loadMsc(key, box, tsEl) {
     new Promise(done => { im.onload = () => done(true); im.onerror = () => done(false); im.src = urls[i]; }),
     satFrameFresh(band, hhmm, times[i]),
   ]);
+  /* ここまで待っている間に、続けてスライドバーを動かされて別の呼び出しに
+     追い越されていることがある。追い越されていたら、いま自分が読み込んだ
+     コマは画面に出さない（古い呼び出しが後から書き込んで新しい表示を
+     上書きしてしまうのを防ぐ） */
+  if (myGen != null && loadGen[key] !== myGen) throw new Error('追い越されました');
   if (!ok) throw new Error('そのコマは配信されていません');
   if (!fresh) throw new Error('そのコマはまだ今日のぶんが配信されていません（前日の画像の可能性があるため表示しません）');
 
@@ -2454,7 +2509,7 @@ function himaTimes(n) {
   });
 }
 
-async function loadHimawari(key, box, tsEl) {
+async function loadHimawari(key, box, tsEl, myGen) {
   const cfg = HIMA[key];
 
   /* ① targetTimes.json が読めれば確実。file:// では読めないので ② に落ちる */
@@ -2490,6 +2545,8 @@ async function loadHimawari(key, box, tsEl) {
   }
   const okCount = (await Promise.all(jobs)).filter(Boolean).length;
   if (!okCount) throw new Error('タイルを取得できません');
+  /* loadMsc と同じ理由。ここまで待つ間に追い越されていたら書き込まない */
+  if (myGen != null && loadGen[key] !== myGen) throw new Error('追い越されました');
 
   box.innerHTML = '';
   box.appendChild(grid);
@@ -2536,6 +2593,10 @@ async function loadShot(key, manual) {
   const box  = document.getElementById('box-' + key);
   const tsEl = document.getElementById('ts-' + key);
   if (!box) return;
+  /* このカードで、いまが「いちばん新しい呼び出し」であることを覚えておく。
+     途中で別の呼び出しに追い越されたら、自分の結果は画面に出さない */
+  const myGen = (loadGen[key] = (loadGen[key] || 0) + 1);
+  const stale = () => loadGen[key] !== myGen;
 
   if (!imagesOn && !manual) {
     box.classList.remove('zoom'); box.onclick = null;
@@ -2565,13 +2626,14 @@ async function loadShot(key, manual) {
   if (custom) {
     tryImages([{ url: custom, label: '設定したURL' }],
       (im, label) => {
+        if (stale()) return;   /* 追い越されていたら、この結果は捨てる */
         box.innerHTML = ''; box.appendChild(im);
         box.classList.remove('busy');
         box.classList.add('zoom');
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
       },
-      () => fallback(box, tsEl, '設定したURLから取得できませんでした。', key), key);
+      () => { if (!stale()) fallback(box, tsEl, '設定したURLから取得できませんでした。', key); }, key);
     return;
   }
 
@@ -2586,10 +2648,12 @@ async function loadShot(key, manual) {
     if (avwxToken() || avwxProxy()) {
       try {
         await avwxLoad(box);
+        if (stale()) return;
         stamp();
         avwxSay('AVWX から取得しました', true);
         return;
       } catch (e) {
+        if (stale()) return;
         avwxSay('AVWX から取れませんでした（' + ((e && e.message) || e) + '）。AWC の取り込みに切り替えます', false);
       }
     } else {
@@ -2603,10 +2667,12 @@ async function loadShot(key, manual) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const txt = (await r.text()).trim();
       if (!txt) throw new Error('空です');
+      if (stale()) return;
       box.innerHTML = '<pre class="wx">' + txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
       stamp();
       return;
     } catch (e) { /* iframe へ */ }
+    if (stale()) return;
 
     /* iframe は中身を読まずに表示するだけなので、fetch と違って
        相手サイトの許可（CORS）が要らない。file:// から開いていても出る。 */
@@ -2627,6 +2693,7 @@ async function loadShot(key, manual) {
     syncSigwxSlider();
     tryImages([{ url: SIGWX_URLS[sigwxFT], label: sigwxFT + '時間後の予想' }],
       (im, label) => {
+        if (stale()) return;
         box.innerHTML = ''; box.appendChild(im);
         box.classList.remove('busy');
         box.classList.add('zoom');
@@ -2634,7 +2701,7 @@ async function loadShot(key, manual) {
         tsEl.textContent = label;
         showImgTime(key, shownUrl[key], sigwxFT + '時間後の予想');
       },
-      () => fallback(box, tsEl, '悪天予想図を取得できませんでした。', key), key);
+      () => { if (!stale()) fallback(box, tsEl, '悪天予想図を取得できませんでした。', key); }, key);
     return;
   }
   if (key === 'chart') {
@@ -2643,9 +2710,11 @@ async function loadShot(key, manual) {
        ファイル名の付け方が分かっている実況にだけ効かせる */
     let cands = [];
     try { cands = await chartFromList(chartKind); } catch (e) { /* 総当たりへ */ }
+    if (stale()) return;
     if (chartKind === 'now') cands = cands.concat(chartCandidates());
     tryImages(cands,
       (im, label) => {
+        if (stale()) return;
         box.innerHTML = ''; box.appendChild(im);
         box.classList.remove('busy');
         box.classList.add('zoom');
@@ -2653,23 +2722,31 @@ async function loadShot(key, manual) {
         tsEl.textContent = label;
         showImgTime(key, shownUrl[key], CHART_TIME_TAIL[chartKind]);
       },
-      () => fallback(box, tsEl,
+      () => { if (!stale()) fallback(box, tsEl,
         chartKind === 'now' ? '天気図を取得できませんでした。'
-          : CHART_KIND_LABEL[chartKind] + 'を取得できませんでした。', key), key);
+          : CHART_KIND_LABEL[chartKind] + 'を取得できませんでした。', key); }, key);
     return;
   }
   /* ①気象衛星センターの1枚画像（fetch が要らないので file:// でも出る）
-     ②気象庁のタイル ③案内 */
+     ②気象庁のタイル ③案内
+     loadMsc／loadHimawari には myGen を渡し、DOM を書き込む直前でも
+     追い越されていないかを確かめてもらう（この await の間に box/tsEl の
+     持ち主が別の呼び出しに替わっていることがあるため、ここで
+     チェックするだけでは遅い） */
   try {
-    await loadMsc(key, box, tsEl);
+    await loadMsc(key, box, tsEl, myGen);
+    if (stale()) return;
     box.classList.remove('busy');
     return;
   } catch (e) { /* ② へ */ }
+  if (stale()) return;
   try {
-    await loadHimawari(key, box, tsEl);
+    await loadHimawari(key, box, tsEl, myGen);
+    if (stale()) return;
     box.classList.remove('busy');
     return;
   } catch (e) { /* ③ へ */ }
+  if (stale()) return;
   box.classList.remove('busy');
   if (hadImg) {
     /* 前の図は残したまま、そのコマが無いことだけ伝える */

@@ -307,7 +307,9 @@ iframe.wxframe.tall { height:420px; }
   color:#c9d1d9; background:#010409; border:1px solid #21262d; border-radius:8px;
   padding:8px 10px; margin:7px 0 0; white-space:pre-wrap; word-break:break-word;
 }
-.pt-raw .rawlb { display:block; font-family:inherit; font-size:11px; font-weight:700; color:#79c0ff; letter-spacing:.1em; margin-bottom:4px; }
+.rawblk { margin:7px 0 0; }
+.rawblk .rawlb { display:block; font-size:11px; font-weight:700; color:#79c0ff; letter-spacing:.1em; margin-bottom:4px; }
+.rawblk .pt-raw { margin:0; }
 .pt-fr { font-size:10.5px; font-weight:700; border-radius:20px; padding:2px 8px; margin-left:6px; border:1px solid; }
 .pt-fr.VFR  { color:#3fb950; border-color:#2ea043; background:#132d1c; }
 .pt-fr.MVFR { color:#58a6ff; border-color:#1f6feb; background:#0d2044; }
@@ -402,7 +404,7 @@ body.wide .exp-go { font-size:13px; padding:9px 10px; }
 body.wide .brief-go { font-size:15px; padding:13px 12px; }
 /* 生電文は伏せる。読み解いた行に同じ数字が出ているので、
    一画面で見渡すときは無くても困らない */
-body.wide .pt-raw { display:none; }
+body.wide .rawblk { display:none; }
 body.wide .pt-card { padding:8px 10px; margin-bottom:6px; }
 body.wide .wx-sec { margin:10px 0 5px; }
 
@@ -1287,11 +1289,19 @@ function hasTaf(r) {
 }
 
 /* 原文をまとめて1つの枠に。空港ごとに枠を分けると縦に伸びるだけ */
+/* 生電文は、発信された姿のまま出す。折り返し・行頭の空白も触らない。
+   見出しは <pre> の外に置く。中に入れていると、電文を選んで写したときに
+   「METAR 原文RJEC 090100Z…」と頭がくっついてきて、そのままでは使えない。
+
+   TAF は1本が複数行にわたることがある。空港どうしを1行あけで区切って、
+   どこからどこまでが1本なのかが分かるようにする */
 function avwxRawBlock(list, label, get) {
+  /* trim は前後だけ。電文の途中の改行も、続き行の字下げもそのまま残る */
   const lines = list.map(r => (get(r) || '').trim()).filter(Boolean);
   if (!lines.length) return '';
-  return '<pre class="pt-raw"><span class="rawlb">' + label + ' 原文</span>'
-    + esc(lines.join('\n')) + '</pre>';
+  const multi = lines.some(t => t.includes('\n'));
+  return '<div class="rawblk"><span class="rawlb">' + label + ' 原文</span>'
+    + '<pre class="pt-raw">' + esc(lines.join(multi ? '\n\n' : '\n')) + '</pre></div>';
 }
 
 function avwxErrCard(r) {
@@ -1401,7 +1411,7 @@ function ttsFrom(btn, sel) {
     if (!el) return '';
     const c = el.cloneNode(true);
     /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む */
-    c.querySelectorAll('.ttsbtn, .pt-raw').forEach(b => b.remove());
+    c.querySelectorAll('.ttsbtn, .rawblk').forEach(b => b.remove());
     return c.textContent;
   });
 }
@@ -1530,15 +1540,16 @@ async function briefImages() {
 
 /* ⑤に出ている生電文を、そのまま文字で渡す */
 function briefText() {
-  const pres = [...document.querySelectorAll('#box-metar .pt-raw')];
-  if (!pres.length) return '';
-  /* 見出し（METAR / TAF）と本文がくっつかないよう、間を空ける */
-  const lines = pres.map(e => {
-    const c = e.cloneNode(true);
-    const lb = c.querySelector('.rawlb');
+  const blks = [...document.querySelectorAll('#box-metar .rawblk')];
+  if (!blks.length) return '';
+  /* 見出しは別の要素にあるので、そのまま並べれば本文とくっつかない。
+     電文の改行はそのまま渡す。畳んでしまうと読み手が区切りを失う */
+  const lines = blks.map(e => {
+    const lb = e.querySelector('.rawlb');
+    const pre = e.querySelector('.pt-raw');
     const label = lb ? lb.textContent.trim() : '';
-    if (lb) lb.remove();
-    return (label ? label + ' ' : '') + c.textContent.trim();
+    const body = pre ? pre.textContent.trim() : '';
+    return (label ? label + '\n' : '') + body;
   });
   return '⑤近傍空港の電文（旭川 RJEC・丘珠 RJCO・新千歳 RJCC）\n'
     + lines.join('\n');

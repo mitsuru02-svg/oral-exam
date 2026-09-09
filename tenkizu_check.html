@@ -1170,8 +1170,7 @@ function cloudsText(cl) {
   if (!cl || !cl.length) return '雲なし';
   return cl.map(c => {
     const j = CLOUD_JA[c.amt];
-    return c.amt + (j ? '（' + j.n + '/8・' + j.w + '）' : '') + ' ' + c.ft.toLocaleString() + 'ft'
-      + '（約' + Math.round(c.ft * 0.3048).toLocaleString() + 'm）';
+    return c.amt + (j ? '（' + j.n + '/8・' + j.w + '）' : '') + ' ' + c.ft.toLocaleString() + 'ft';
   }).join('　');
 }
 

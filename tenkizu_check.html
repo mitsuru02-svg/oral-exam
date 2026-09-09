@@ -27,6 +27,8 @@ body {
   padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
 }
 .hdr-row { max-width:760px; margin:0 auto; display:flex; align-items:center; gap:10px; }
+body.wide .hdr-row { max-width:1700px; }
+@media (max-width: 520px) { .hdr-t span { display:none; } }
 .back {
   flex-shrink:0; width:34px; height:34px; border-radius:9px; border:1px solid #30363d;
   background:#161b22; color:#c9d1d9; font-size:17px; line-height:32px; text-align:center;
@@ -256,6 +258,14 @@ iframe.wxframe.tall { height:420px; }
   font-size:10px; color:#7d8590; line-height:1.6;
 }
 .exp .exp-err { color:#e3b341; }
+/* 読み上げ */
+.ttsbtn {
+  border:1px solid #1f4b8f; background:#0d2044; color:#79c0ff;
+  border-radius:8px; padding:7px 12px; font-size:12.5px; font-weight:700;
+  font-family:inherit; cursor:pointer; margin-top:9px;
+}
+.ttsbtn[data-on="1"] { border-color:#9e6a03; background:#2b1d02; color:#e3b341; }
+.shot-bar .ttsbtn { margin-top:0; padding:6px 10px; font-size:11.5px; }
 /* 解説ボタン。狭いボタン行に混ぜると押しにくく目立たないので、
    独立した1本の帯にして大きくしてある */
 .exp-go {
@@ -311,6 +321,8 @@ iframe.wxframe.tall { height:420px; }
   font-size:12.5px; line-height:1.8; margin-top:2px;
 }
 .taf-r.bad .d { color:#f85149; }
+.taf-r .d.sub { color:#8b949e; font-size:11.5px; margin-top:3px; }
+.taf-r.bad .d.sub { color:#a08084; }
 .taf-r .j { flex:1 1 auto; text-align:right; font-size:11.5px; font-weight:700; line-height:1.5; }
 .taf-r .j.ok { color:#3fb950; }
 .taf-r .j.ng { color:#f85149; }
@@ -328,13 +340,18 @@ pre.wx {
    別ページを作らず、同じページに class を足すだけにしてある。
    取得の仕組みを二重に持たずに済み、直したことが両方に効く。
    ══════════════════════════════════════════════════════════════ */
+/* 表示の切り替え。押すとどちらになるかではなく、
+   いまどちらを見ているかを示す（2択を並べて片方を光らせる） */
 .wide-sw {
-  flex-shrink:0; border:1px solid #30363d; background:#161b22; color:#8b949e;
-  border-radius:8px; padding:7px 11px; font-size:12px; font-family:inherit;
-  cursor:pointer; white-space:nowrap; margin-right:10px;
+  flex-shrink:0; display:flex; gap:0; margin-right:12px;
+  border:1px solid #30363d; border-radius:9px; overflow:hidden; background:#0d1117;
 }
-.wide-sw[data-on="1"] { border-color:#1f4b8f; background:#0d2044; color:#79c0ff; font-weight:700; }
-@media (max-width: 700px) { .wide-sw { display:none; } }
+.wide-sw span {
+  padding:8px 13px; font-size:12.5px; font-weight:600; color:#7d8590;
+  white-space:nowrap; cursor:pointer; line-height:1.3;
+}
+.wide-sw span[data-on="1"] { background:#1f6feb; color:#fff; font-weight:700; }
+@media (max-width: 760px) { .wide-sw { display:none; } }
 
 body.wide .wrap {
   max-width:1700px;
@@ -492,7 +509,10 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   <div class="hdr-row">
     <a class="back" href="./index.html">‹</a>
     <div class="hdr-t"><b>🌤 天気図確認</b><span>滝川エリア・飛べる状況かを判断する</span></div>
-    <button class="wide-sw" id="wideSw" onclick="toggleWide()" title="一画面に並べて表示">🖥 一画面</button>
+    <div class="wide-sw" id="wideSw" role="group" aria-label="表示の切り替え">
+      <span data-w="0" data-on="1" onclick="setWide(false)" title="スマホ向け。上から順に読む">📱 通常</span>
+      <span data-w="1" data-on="0" onclick="setWide(true)" title="PC向け。図を並べて一度に見る">🖥 一画面</span>
+    </div>
     <div class="clock"><b id="clkT">--:--</b><span id="clkD">----/--/--</span></div>
   </div>
 </div>
@@ -696,7 +716,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <div class="shot">
       <div class="shot-time" id="ts-metar">—</div>
       <div class="shot-box" id="box-metar"><div class="shot-msg">…</div></div>
-      <div class="shot-bar"><button onclick="loadShot('metar',true)">再読込</button></div>
+      <div class="shot-bar"><button class="ttsbtn" data-on="0" onclick="ttsFrom(this, '#box-metar')">🔊 読み上げ</button><button onclick="loadShot('metar',true)">再読込</button></div>
       <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
 
@@ -908,12 +928,25 @@ function wxRow(headHtml, o, rwy) {
   const vis = '視程' + (o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km'));
   const cei = o.ceil == null ? '雲底なし' : ('雲底' + o.ceil.toLocaleString() + 'ft');
   const xwt = xw ? '　横風' + xw.kt + 'kt' : '';
+
+  /* 雲は層ごとに、気温・露点・気圧も省かずに出す。
+     電文を読み下せることが試験でも実務でも要るので */
+  const rest = [];
+  if (o.clouds && o.clouds.length) rest.push('雲 ' + cloudsText(o.clouds));
+  if (o.temp != null && o.dew != null) {
+    const spread = o.temp - o.dew;
+    rest.push('気温' + o.temp + '℃／露点' + o.dew + '℃'
+      + '（差' + spread + '℃' + (spread <= 2 ? '・湿っていて霧や下層雲が出やすい' : '') + '）');
+  }
+  if (o.qnh != null) rest.push('気圧' + o.qnh + 'hPa');
+
   return `<div class="taf-r${bad.length ? ' bad' : ''}">
     <div class="hd">
       <div class="w">${headHtml}</div>
       <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
     </div>
     <div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(xwt)}</div>
+    ${rest.length ? '<div class="d sub">' + esc(rest.join('　／　')) + '</div>' : ''}
   </div>`;
 }
 
@@ -932,16 +965,17 @@ function metarWhen(raw) {
 
 /* 1本ぶんの判定カード。extra には生電文やTAFの内訳を差し込む。
    数値は wxRow の1行にすべて出るので、内訳の枠は置かない */
-function ptCard(o, rwy, extra) {
+function ptCard(o, rwy, before) {
   const { bad } = judge(o, rwy);
   const frTag = o.fr ? `<span class="pt-fr ${esc(o.fr)}">${esc(o.fr)}</span>` : '';
 
+  /* TAF と同じ並びにする。まず原文、そのあと読み解き */
   return `<div class="pt-card ${bad.length ? 'ng' : 'ok'}">
     <div class="pt-st">${esc(o.station || '—')}
       <span class="tag ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + 'が条件外' : '条件内'}</span>${frTag}</div>
+    ${before || ''}
     ${wxRow(metarWhen(o.raw), o, rwy)}
     ${o.gust != null ? '<div class="pt-warn">⚠ ガストあり。横風はガスト値で見ています</div>' : ''}
-    ${extra || ''}
   </div>`;
 }
 
@@ -1099,11 +1133,46 @@ function avwxToObj(d) {
   o.clouds = (d.clouds || []).map(c => ({
     amt: cloudAmt(c),
     ft: (c.altitude != null ? c.altitude * 100 : null),
-  })).filter(c => c.ft != null);
-  const ce = o.clouds.filter(c => c.amt === 'BKN' || c.amt === 'OVC').sort((a, b) => a.ft - b.ft)[0];
+  })).filter(c => c.ft != null).sort((a, b) => a.ft - b.ft);
+  const ce = o.clouds.filter(c => c.amt === 'BKN' || c.amt === 'OVC')[0];
   o.ceil = ce ? ce.ft : null;
   o.fr = d.flight_rules || null;
+
+  /* 気温・露点・気圧。AVWX が返さないときは電文から拾う */
+  o.temp = num(d.temperature);
+  o.dew  = num(d.dewpoint);
+  if (o.temp == null || o.dew == null) {
+    const m = o.raw.match(/\s(M?\d{2})\/(M?\d{2})\s/);
+    if (m) {
+      const v = t => (t.charAt(0) === 'M' ? -(+t.slice(1)) : +t);
+      if (o.temp == null) o.temp = v(m[1]);
+      if (o.dew == null) o.dew = v(m[2]);
+    }
+  }
+  o.qnh = null;
+  const q = o.raw.match(/\bQ(\d{4})\b/);
+  if (q) o.qnh = +q[1];
+  else {
+    const a = num(d.altimeter);
+    if (a != null) o.qnh = a > 500 ? a : null;
+  }
   return o;
+}
+
+/* 雲量の意味。試験でも問われるので、記号のままにしない */
+const CLOUD_JA = {
+  FEW: { n: '1〜2', w: 'わずか' },
+  SCT: { n: '3〜4', w: '散在' },
+  BKN: { n: '5〜7', w: '雲が多い' },
+  OVC: { n: '8',   w: '全天' },
+};
+function cloudsText(cl) {
+  if (!cl || !cl.length) return '雲なし';
+  return cl.map(c => {
+    const j = CLOUD_JA[c.amt];
+    return c.amt + (j ? '（' + j.n + '/8・' + j.w + '）' : '') + ' ' + c.ft.toLocaleString() + 'ft'
+      + '（約' + Math.round(c.ft * 0.3048).toLocaleString() + 'm）';
+  }).join('　');
 }
 
 /* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある。
@@ -1210,6 +1279,82 @@ function avwxTafCard(r, rwy) {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   読み上げ
+
+   飛ぶ前は手も目もふさがっていることが多い。耳で確かめられるように
+   しておく。そのままだと略号を1文字ずつ読んでしまうので、
+   航空の言い回しに直してから渡す。
+   ══════════════════════════════════════════════════════════════ */
+const CLOUD_YOMI = { FEW: 'フュー', SCT: 'スキャッタード', BKN: 'ブロークン', OVC: 'オーバーキャスト' };
+const TTS_FIX = [
+  /* 空港は「RJEC 旭川」と並んでいるので、まとめて1回だけ読む */
+  [/RJEC\s*旭川/g, '旭川'], [/RJCO\s*丘珠/g, '丘珠'], [/RJCC\s*新千歳/g, '新千歳'],
+  [/RJEC/g, '旭川'], [/RJCO/g, '丘珠'], [/RJCC/g, '新千歳'],
+  [/METAR/g, 'メター'], [/\bTAF\b/g, 'ター'],
+  /* BKN020 のように高さがくっついた形も読み下す */
+  [/\b(FEW|SCT|BKN|OVC)(\d{3})\b/g, (m, a, n) => CLOUD_YOMI[a] + '、高さ' + (+n * 100) + 'フィート'],
+  [/\bVFR\b/g, 'ブイエフアール'], [/\bMVFR\b/g, 'エムブイエフアール'],
+  [/\bIFR\b/g, 'アイエフアール'], [/\bLIFR\b/g, 'エルアイエフアール'],
+  [/\bFEW\b/g, 'フュー'], [/\bSCT\b/g, 'スキャッタード'],
+  [/\bBKN\b/g, 'ブロークン'], [/\bOVC\b/g, 'オーバーキャスト'],
+  [/\bCAVOK\b/g, 'キャブオーケー'],
+  [/\bBECMG\b/g, 'ビカミング'], [/\bTEMPO\b/g, 'テンポ'], [/\bFM\b/g, 'フロム'],
+  [/\bVRB\b/g, '風向不定'],
+  [/(\d)kt/g, '$1ノット'], [/\bkt\b/g, 'ノット'],
+  [/(\d)ft/g, '$1フィート'], [/\bft\b/g, 'フィート'],
+  [/hPa/g, 'ヘクトパスカル'],
+  [/(\d)km\+/g, '$1キロメートル以上'], [/(\d)km/g, '$1キロメートル'],
+  [/(\d)m\b/g, '$1メートル'],
+  [/JST/g, '日本時間'], [/UTC/g, '協定世界時'],
+  [/(\d)Z\b/g, '$1 世界時'],
+  [/℃/g, '度'], [/／/g, '、'], [/[✕✓●▸→←]/g, ' '],
+];
+
+function ttsText(t) {
+  let x = String(t || '')
+    .replace(/\*\*/g, '').replace(/^#{1,6}\s*/gm, '')
+    .replace(/^[-*・]\s*/gm, '').replace(/\s+/g, ' ');
+  TTS_FIX.forEach(([re, to]) => { x = x.replace(re, to); });
+  return x.trim();
+}
+
+let ttsOn = null;
+function ttsStop() {
+  try { window.speechSynthesis.cancel(); } catch (e) {}
+  if (ttsOn) { ttsOn.dataset.on = '0'; ttsOn.textContent = '🔊 読み上げ'; ttsOn = null; }
+}
+function ttsSpeak(btn, getText) {
+  if (!('speechSynthesis' in window)) { alert('この端末では読み上げが使えません'); return; }
+  if (ttsOn === btn) { ttsStop(); return; }
+  ttsStop();
+  const t = ttsText(getText());
+  if (!t) return;
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = 'ja-JP';
+  u.rate = 1.0;
+  u.onend = ttsStop;
+  u.onerror = ttsStop;
+  ttsOn = btn;
+  btn.dataset.on = '1';
+  btn.textContent = '⏹ 停止';
+  try { window.speechSynthesis.speak(u); } catch (e) { ttsStop(); }
+}
+/* 画面の一部分を読ませる。読み上げボタン自身の文字は拾わない */
+function ttsFrom(btn, sel) {
+  ttsSpeak(btn, () => {
+    const el = document.querySelector(sel);
+    if (!el) return '';
+    const c = el.cloneNode(true);
+    /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む */
+    c.querySelectorAll('.ttsbtn, .pt-raw').forEach(b => b.remove());
+    return c.textContent;
+  });
+}
+function ttsBtn(sel) {
+  return '<button class="ttsbtn" data-on="0" onclick="ttsFrom(this, \'' + sel + '\')">🔊 読み上げ</button>';
+}
+
+/* ══════════════════════════════════════════════════════════════
    図の解説
 
    画像そのものは送らず、URLだけを中継サーバーに渡す。取りにいくのも
@@ -1252,9 +1397,10 @@ function expRender(md) {
   return out.join('');
 }
 
-function expShow(key, html) {
+function expShow(key, html, speak) {
   const el = document.getElementById('exp-' + key);
-  if (el) el.innerHTML = html;
+  if (!el) return;
+  el.innerHTML = html + (speak ? ttsBtn('#exp-' + key) : '');
 }
 
 /* 天気図は、実況と24時間後の2枚をまとめて渡す。1枚だけ見ても
@@ -1363,7 +1509,7 @@ async function explainAll() {
 
   const ck = 'brief|' + images.map(i => i.url).join('|') + '|' + text.length;
   const cached = expCache()[ck];
-  if (cached) { expShow(key, expRender(cached.text) + briefFoot(true, images, text)); return; }
+  if (cached) { expShow(key, expRender(cached.text) + briefFoot(true, images, text), true); return; }
 
   expShow(key, '<p>' + images.length + '枚の図と電文を読んでいます…（20〜30秒）</p>');
   try {
@@ -1379,7 +1525,7 @@ async function explainAll() {
       return;
     }
     expRemember(ck, j.text);
-    expShow(key, expRender(j.text) + briefFoot(false, images, text));
+    expShow(key, expRender(j.text) + briefFoot(false, images, text), true);
   } catch (e) {
     expShow(key, '<div class="exp-err">分析できませんでした（' + esc((e && e.message) || e) + '）</div>');
   }
@@ -1421,7 +1567,7 @@ async function explainShot(key) {
 
   const ck = images.map(i => i.url).join('|');
   const cached = expCache()[ck];
-  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images)); return; }
+  if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images), true); return; }
 
   expShow(key, '<p>' + EXP_TITLE[key] + 'を読んでいます…</p>');
   try {
@@ -1437,7 +1583,7 @@ async function explainShot(key) {
       return;
     }
     expRemember(ck, j.text);
-    expShow(key, expRender(j.text) + expFoot(false, images));
+    expShow(key, expRender(j.text) + expFoot(false, images), true);
   } catch (e) {
     expShow(key, '<div class="exp-err">解説を取得できませんでした（' + esc((e && e.message) || e) + '）</div>');
   }
@@ -1795,6 +1941,7 @@ async function toggleSatPlay(key) {
 }
 
 function setSat(key, v) {
+  ttsStop();
   stopSatPlay(key);                            /* 手で動かしたら自動送りは止める */
   satBack[key] = (SAT_STEPS - 1) - (+v);       /* 右へ動かすほど新しい */
   /* 指を動かしている間に何度も読みにいかない。止まってから取りにいく */
@@ -2193,16 +2340,17 @@ function toggleImages() {
 }
 /* 一画面表示。端末ごとに覚える */
 const WIDE_KEY = 'tenkizu_wide';
-function toggleWide() {
-  const on = !document.body.classList.contains('wide');
-  document.body.classList.toggle('wide', on);
+function setWide(on) {
+  document.body.classList.toggle('wide', !!on);
   try { localStorage.setItem(WIDE_KEY, on ? '1' : '0'); } catch (e) {}
   syncWide();
 }
+function toggleWide() { setWide(!document.body.classList.contains('wide')); }
 function syncWide() {
   const on = document.body.classList.contains('wide');
-  const b = document.getElementById('wideSw');
-  if (b) { b.dataset.on = on ? '1' : '0'; b.textContent = on ? '↩ 通常表示' : '🖥 一画面'; }
+  document.querySelectorAll('#wideSw span').forEach(sp => {
+    sp.dataset.on = ((sp.dataset.w === '1') === on) ? '1' : '0';
+  });
 }
 function loadWide() {
   let on = false;

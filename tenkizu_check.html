@@ -58,7 +58,7 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
 
   /* カードの中を2列に。見出しは上いっぱいに渡す */
   body:not(.wide) .step {
-    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    display:grid; grid-template-columns:minmax(0,520px) minmax(0,1fr);
     align-items:start;
   }
   body:not(.wide) .step > .step-hd { grid-column:1 / -1; }
@@ -72,21 +72,19 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
   body:not(.wide) .step > .exp:not(:empty) ~ .look { padding-top:0; }
 
   /* 図は画面の半分までにとどめる。原寸で見たいときはクリック */
-  body:not(.wide) .shot-box img {
-    width:auto; max-width:100%; max-height:34vh; margin:0 auto;
-  }
-  /* 枠を図の大きさに合わせる。高さを抑えると、そのままでは図の左右に
-     黒い帯が残って、額縁だけ大きい間の抜けた見た目になる */
-  body:not(.wide) .step > .shot > .shot-box {
-    width:max-content; max-width:100%; margin:0 auto; min-height:0;
-  }
-  /* ⑤の電文は図ではないので、幅いっぱいのまま */
-  body:not(.wide) #box-metar { display:block; width:auto; }
+  /* 図・スライドバー・ボタンの幅をそろえる。高さで縮めると図だけが
+     細くなり、下のスライドバーと端が合わなくて落ち着かない。
+     列の幅そのものを絞れば、上から下まで同じ幅で揃う */
+  body:not(.wide) .step > .shot > .shot-box { min-height:0; }
+  body:not(.wide) .shot-box img { width:100%; height:auto; }
 
   /* ⑤だけは2列にしない。ここに入るのは図ではなく3空港ぶんの数字で、
      半分の幅に押し込むと1行が折り返し、電文も読み解きも追いにくくなる。
      幅いっぱいに広げて、3空港を横に並べたほうが速く読める */
   body:not(.wide) #step-metar { display:block; }
+  /* ⑤の読み上げは幅いっぱいに伸ばさない。1360px の帯になると重い。
+     指で押すスマホでは幅いっぱいのままにしておく */
+  body:not(.wide) #step-metar .act .ttsbtn.solo { flex:0 0 auto; }
 
   /* 行間が空きすぎて縦に伸びるのを抑える */
   body:not(.wide) .look li { margin-bottom:5px; line-height:1.75; }
@@ -271,6 +269,17 @@ iframe.wxframe.tall { height:420px; }
 @media (min-width:1024px) { body:not(.wide) .wxgrid { grid-template-columns:repeat(3, minmax(0,1fr)); } }
 .wxgrid .pt-card { margin-bottom:0; }
 .pt-when { font-size:11.5px; color:#8b949e; margin-bottom:3px; font-variant-numeric:tabular-nums; }
+/* 読み解きの行。指定が無いまま body の 16px を継いでいて、
+   TAF の同じ行（12.5px）や「何を見るか」（14px）より大きく、
+   ⑤だけ字が浮いていた。TAF の行にそろえる */
+.pt-card .d {
+  font-size:13px; line-height:1.85;
+  font-family:'SF Mono',Menlo,Consolas,monospace; color:#c9d1d9;
+}
+.pt-card.ng .d { color:#f85149; }
+.pt-card .d.sub { font-size:11.5px; color:#8b949e; margin-top:3px; }
+.pt-card.ng .d.sub { color:#a08084; }
+.pt-st { font-size:13.5px; }
 .pt-card {
   border:1px solid #21262d; border-radius:10px; padding:10px 12px; margin-bottom:8px;
   background:#0d1117;
@@ -351,10 +360,10 @@ iframe.wxframe.tall { height:420px; }
 /* 解説ボタン。狭いボタン行に混ぜると押しにくく目立たないので、
    独立した1本の帯にして大きくしてある */
 .exp-go {
-  display:block; width:100%; margin-top:8px; padding:13px 12px;
-  border:1px solid #1f6feb; border-radius:10px;
+  display:block; width:100%; margin-top:8px; padding:10px 12px;
+  border:1px solid #1f6feb; border-radius:9px;
   background:#122b4d; color:#79c0ff;
-  font-size:15px; font-weight:700; font-family:inherit; letter-spacing:.02em;
+  font-size:13.5px; font-weight:700; font-family:inherit; letter-spacing:.02em;
   cursor:pointer;
 }
 .exp-go:active { background:#0d2044; }
@@ -362,13 +371,13 @@ iframe.wxframe.tall { height:420px; }
    場所が毎回同じなら、探さなくても手が伸びる */
 .act { display:flex; gap:8px; margin-top:10px; }
 .act .exp-go { flex:1; margin-top:0; }
-.act .ttsbtn { flex-shrink:0; margin-top:0; padding:13px 16px; font-size:14px; }
+.act .ttsbtn { flex-shrink:0; margin-top:0; padding:10px 14px; font-size:13px; }
 /* 解説ボタンが無いカード（⑤）では読み上げが主役なので、幅いっぱいに */
 .act .ttsbtn.solo { flex:1; }
 /* 上部のまとめボタン。ページの主役なので一段強く */
 .brief { margin:0 14px 16px; }
 .brief-go {
-  margin-top:0; padding:16px 12px; font-size:16px;
+  margin-top:0; padding:13px 12px; font-size:14.5px;
   background:#1f6feb; border-color:#79c0ff; color:#fff;
 }
 .brief-go:active { background:#1a5fd0; }
@@ -437,16 +446,16 @@ pre.wx {
   flex-shrink:0; display:flex; gap:0; margin-right:12px;
   border:1px solid #30363d; border-radius:9px; overflow:hidden; background:#0d1117;
 }
-.wide-sw span {
+.wide-sw > span {
   padding:8px 13px; font-size:12.5px; font-weight:600; color:#7d8590;
   white-space:nowrap; cursor:pointer; line-height:1.3;
 }
-.wide-sw span[data-on="1"] { background:#1f6feb; color:#fff; font-weight:700; }
+.wide-sw > span[data-on="1"] { background:#1f6feb; color:#fff; font-weight:700; }
 /* スマホでも切り替えられるようにする。狭いところでは字を詰める */
 @media (max-width: 560px) {
   .wide-sw { margin-right:8px; }
-  .wide-sw span { padding:7px 9px; font-size:11.5px; }
-  .wide-sw span .lbl { display:none; }
+  .wide-sw > span { padding:7px 9px; font-size:11.5px; }
+  .wide-sw > span .lbl { display:none; }
 }
 
 body.wide .wrap {
@@ -2507,7 +2516,9 @@ function setWide(on) {
 function toggleWide() { setWide(!document.body.classList.contains('wide')); }
 function syncWide() {
   const on = document.body.classList.contains('wide');
-  document.querySelectorAll('#wideSw span').forEach(sp => {
+  /* data-w を持つ2つだけ。中の <span class="lbl"> まで拾うと、
+     そちらにも data-on="1" が付いて両方とも青くなる */
+  document.querySelectorAll('#wideSw span[data-w]').forEach(sp => {
     sp.dataset.on = ((sp.dataset.w === '1') === on) ? '1' : '0';
   });
 }

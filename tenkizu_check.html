@@ -1509,6 +1509,11 @@ const TTS_FIX = [
   [/道東/g, 'どうとう'], [/道南/g, 'どうなん'],
   [/積雲/g, 'せきうん'], [/層雲/g, 'そううん'], [/雲帯/g, 'うんたい'],
   [/下層悪天/g, 'かそうあくてん'],
+  [/高・低気圧/g, 'こうていきあつ'], [/気圧傾度/g, 'きあつけいど'],
+  /* 「風」が単独の1文字で出てくるところだけ「かぜ」にする。
+     風向・風速・横風・追い風・台風のように他の漢字とくっついている
+     ときはそのままにする（前後どちらかが漢字なら手を出さない） */
+  [/(?<![一-鿿])風(?![一-鿿])/g, 'かぜ'],
   /* 「西〜南西」のように方位を範囲で書いた箇所を読み下す */
   [DIR_RANGE_RE, (m, a, b) => DIR_YOMI[a] + 'から' + DIR_YOMI[b]],
   /* 雲量のかっこ書き（1〜2/8・わずか）は、画面で見るぶんには要るが
@@ -1613,8 +1618,11 @@ function ttsFrom(btn, sel) {
     const el = document.querySelector(sel);
     if (!el) return '';
     const c = el.cloneNode(true);
-    /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む */
-    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd').forEach(b => b.remove());
+    /* 生電文は記号の羅列なので読み上げない。読み下した行のほうを読む。
+       exp-foot は毎回同じ注意書き（「◯枚をもとにした説明です」
+       「飛べるかどうかの判断はしていません」等）なので、聞くのは
+       1回で十分。読むたびに付いてくると本題が遠のく */
+    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot').forEach(b => b.remove());
     ttsBreaks(c);
     return c.textContent;
   });

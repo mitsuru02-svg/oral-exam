@@ -948,7 +948,25 @@ table.xw td.hit { color:#f85149; font-weight:700; }
         <li><b>視程</b>。<span class="hi">9999</span> は10km以上。<span class="hi">5000</span> を割ると運航の気象条件に触れる。</li>
         <li><b>雲</b>。<span class="hi">BKN010</span> は雲量5〜7で1,000ft＝約300m。<span class="hi">OVC</span>／<span class="hi">BKN</span> の高さが雲底の目安。</li>
         <li><b>天気</b>。<span class="hi">RA</span>雨 <span class="hi">SN</span>雪 <span class="hi">BR</span>もや <span class="hi">FG</span>霧 <span class="hi">TS</span>雷。頭の <span class="hi">-</span>は弱い、<span class="hi">+</span>は強い。</li>
-        <li><b>TAF</b> で飛ぶ時間帯を見る。<span class="hi">TEMPO</span>は一時的、<span class="hi">BECMG</span>は移り変わり、<span class="hi">PROB30</span>は確率30%。</li>
+        <li><b>TAF</b> で飛ぶ時間帯を見る。<span class="hi">FM</span>はその時刻から状態が一変、<span class="hi">TEMPO</span>は一時的、<span class="hi">BECMG</span>は移り変わり、<span class="hi">PROB30</span>は確率30%。</li>
+      </ul>
+    </div>
+    <button class="guide-link" id="guidelink-taf" data-on="0" onclick="toggleGuide('taf')">
+      <span class="car">▸</span>📖 TAFの電文の読み方
+    </button>
+    <div class="guidebox" id="guide-taf">
+      <h4>冒頭の2つの時刻</h4>
+      <ul>
+        <li><b>090500Z</b> のような最初の1つ＝<b>このTAFが発表された時刻</b>（世界時）。カードの「発表：」に日本時間で出している。</li>
+        <li>続く <b>1000/1106</b> のような「日+時／日+時」＝<b>このTAF全体の有効期間</b>（世界時、開始〜終了）。カードの「有効期間：」に日本時間で出している。ここから先の FM・BECMG・TEMPO は、すべてこの期間の中の話。</li>
+      </ul>
+      <h4>変化のことば</h4>
+      <ul>
+        <li><b>FM</b>（FROM）：その時刻から<b>状態がまるごと入れ替わる</b>。次の FM・BECMG・TEMPO が出るまでその状態が続く、という区切りの合図。</li>
+        <li><b>BECMG</b>（BECOMING）：示された時間の幅（目安30分〜2時間）で<b>ゆっくり移り変わる</b>。</li>
+        <li><b>TEMPO</b>（TEMPORARY）：<b>一時的な変化</b>。目安1時間未満、断続的に元の状態と入れ替わる（ずっとは続かない）。</li>
+        <li><b>PROB30／PROB40</b>：そうなる<b>確率</b>が30%／40%という予想。</li>
+        <li><b>INTER</b>：TEMPOに近いが、より短い間隔で断続的に変化する。日本の空港ではあまり使われない。</li>
       </ul>
     </div>
     <div class="stop">
@@ -1452,6 +1470,23 @@ function tafWhen(t) {
   };
 }
 
+/* TAF電文冒頭の「090500Z 1000/1106」のうち、発表時刻の直後にある
+   「1000/1106」＝このTAF全体の有効期間（開始日時〜終了日時、世界時）。
+   これまで読み解きのどこにも出ておらず、生電文を見ても
+   「1000/1106」が何を指すか説明できていなかったので、日本時間に
+   直して添える */
+function tafValidity(raw) {
+  const m = String(raw || '').match(/Z\s+(\d{2})(\d{2})\/(\d{2})(\d{2})\b/);
+  if (!m) return '';
+  const d1 = +m[1], h1 = +m[2], d2 = +m[3], h2 = +m[4];
+  const mk = (day, h) => {
+    const jh = (h + 9) % 24;
+    const jDay = (h + 9 >= 24) ? day + 1 : day;
+    return pad(jDay) + '日' + pad(jh) + '時JST（' + pad(h) + 'Z）';
+  };
+  return mk(d1, h1) + '〜' + mk(d2, h2);
+}
+
 /* TAF を時間帯ごとに分解して並べる。「11時以降に風が変わる」を目で拾えるように */
 function avwxTafRows(taf, noRaw) {
   if (!taf) return '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
@@ -1581,9 +1616,13 @@ function avwxTafCard(r) {
   /* TAFそのものの発表時刻（電文冒頭の090500Zなど）。各期間の開始時刻とは別物で、
      「このTAFはいつ出されたものか」が今まで読み解きのどこにも出ていなかった */
   const issued = metarTime((r.t && r.t.raw) || '');
+  /* 発表時刻の直後にある「1000/1106」＝TAF全体の有効期間。これも
+     生電文にしか出ておらず、説明が無かった */
+  const valid = tafValidity((r.t && r.t.raw) || '');
   return `<div class="pt-card ${fc.length ? (anyBad ? 'ng' : 'ok') : ''}">
     <div class="pt-st">${esc(r.ic + ' ' + nm)}${tag}</div>
     ${issued ? '<div class="pt-when">発表：' + issued + '</div>' : ''}
+    ${valid ? '<div class="pt-when">有効期間：' + valid + '</div>' : ''}
     ${avwxTafRows(r.t, true)}
   </div>`;
 }
@@ -1602,6 +1641,10 @@ const TTS_FIX = [
      読みもその形に合わせて拾う */
   [/(\d{1,2}日\d{1,2}:\d{2})JST\s*（\d{1,2}:\d{2}Z）/g, '$1 日本時間'],
   [/(\d{1,2}日\d{1,2}時)JST\s*（\d{1,2}Z）/g, '$1 日本時間'],
+  /* TAFの有効期間「10日09時JST（00Z）〜11日15時JST（06Z）」のような
+     範囲の「〜」。上のJST変換のあとに出てくる「日本時間〜」だけを
+     狙うので、ほかの「〜」（雲量のかっこ内など）には手を出さない */
+  [/日本時間〜/g, '日本時間から'],
   /* 空港は「RJEC 旭川」と並んでいるので、まとめて1回だけ読む */
   [/RJEC\s*旭川/g, '旭川空港'], [/RJCO\s*丘珠/g, '丘珠空港'], [/RJCC\s*新千歳/g, '新千歳空港'],
   [/RJEC/g, '旭川空港'], [/RJCO/g, '丘珠空港'], [/RJCC/g, '新千歳空港'],

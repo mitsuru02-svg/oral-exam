@@ -410,12 +410,13 @@ iframe.wxframe.tall { height:420px; }
   cursor:pointer;
 }
 .exp-go:active { background:#0d2044; }
-/* 要点だけ版のボタン。詳しい解説より一段控えめにして、
-   どちらが主かが見た目で分かるようにする */
-.exp-go.concise {
+/* 詳しい解説のボタン。まずは「要点だけ」を見てもらいたいので、
+   こちらを一段控えめにして、どちらを先に押してほしいかが
+   見た目で分かるようにする */
+.exp-go.muted {
   border-color:#30363d; background:#161b22; color:#8b949e;
 }
-.exp-go.concise:active { background:#21262d; }
+.exp-go.muted:active { background:#21262d; }
 /* 操作行。どのカードでも「図 → スライドバー → ここ」の位置に置く。
    場所が毎回同じなら、探さなくても手が伸びる */
 .act { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
@@ -472,7 +473,7 @@ iframe.wxframe.tall { height:420px; }
   flex:0 0 auto; color:#8b949e; font-weight:700; font-size:12.5px;
   letter-spacing:.02em; white-space:nowrap;
 }
-.taf-r .w .jst { color:#7d8590; font-weight:400; }
+.taf-r .w .z { color:#7d8590; font-weight:400; }
 .taf-r .d {
   color:#c9d1d9; font-family:'SF Mono',Menlo,Consolas,monospace;
   font-size:12.5px; line-height:1.8; margin-top:2px;
@@ -723,8 +724,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('chart','detail')">🔎 詳しい解説</button>
-      <button class="exp-go concise" onclick="explainShot('chart','concise')">📝 要点だけ</button>
+      <button class="exp-go muted" onclick="explainShot('chart','detail')">🔎 詳しい解説</button>
+      <button class="exp-go" onclick="explainShot('chart','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-chart"></div>
     <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
@@ -768,8 +769,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('ir','detail')">🔎 詳しい解説</button>
-      <button class="exp-go concise" onclick="explainShot('ir','concise')">📝 要点だけ</button>
+      <button class="exp-go muted" onclick="explainShot('ir','detail')">🔎 詳しい解説</button>
+      <button class="exp-go" onclick="explainShot('ir','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-ir"></div>
     <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
@@ -812,8 +813,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('vis','detail')">🔎 詳しい解説</button>
-      <button class="exp-go concise" onclick="explainShot('vis','concise')">📝 要点だけ</button>
+      <button class="exp-go muted" onclick="explainShot('vis','detail')">🔎 詳しい解説</button>
+      <button class="exp-go" onclick="explainShot('vis','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-vis"></div>
     <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
@@ -861,8 +862,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
     <div class="side">
     <div class="act">
-      <button class="exp-go" onclick="explainShot('sigwx','detail')">🔎 詳しい解説</button>
-      <button class="exp-go concise" onclick="explainShot('sigwx','concise')">📝 要点だけ</button>
+      <button class="exp-go muted" onclick="explainShot('sigwx','detail')">🔎 詳しい解説</button>
+      <button class="exp-go" onclick="explainShot('sigwx','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-sigwx"></div>
     <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
@@ -1076,6 +1077,10 @@ function parseMetar(line) {
     o.windSpd = +w[2];
     o.gust    = w[3] ? +w[3] : null;
   }
+  /* 風向が60〜180度の間で変動するとき、風の組の直後に
+     「100V170」のように現れる。主風向だけでは変動の幅が分からないため */
+  const v2 = line.match(/\b(\d{3})V(\d{3})\b/);
+  if (v2) { o.varLo = +v2[1]; o.varHi = +v2[2]; }
   if (/\bCAVOK\b/.test(line)) { o.vis = 9999; o.cavok = true; }
   else {
     const v = line.match(/\b(\d{4})\b(?!\/)/);
@@ -1097,14 +1102,20 @@ function dirJa(deg) {
   return DIR16[Math.round(d / 22.5) % 16];
 }
 
-/* 風の読み下し。「340/8kt」ではなく「北北西（340°）から 8kt」 */
+/* 風の読み下し。「340/8kt」ではなく「340°（北北西）から 8kt」。
+   数字を先に出すのは、電文の 340 という数字とすぐ照らせるようにするため。
+   方位の言葉はあくまで補足なのでかっこ書きに回す */
 function windText(o) {
   if (o.windSpd === undefined) return '風 —';
   if (o.windSpd === 0) return '風 静穏（0kt）';
   const g = o.gust != null ? '　最大' + o.gust + 'kt' : '';
-  if (o.windDir === 'VRB') return '風向不定　' + o.windSpd + 'kt' + g;
+  /* 100V170 のように風向が変動する幅が分かっているとき、それも添える */
+  const v = (o.varLo != null && o.varHi != null)
+    ? '　（風向は' + String(o.varLo).padStart(3, '0') + '°〜'
+      + String(o.varHi).padStart(3, '0') + '°の間で変動）' : '';
+  if (o.windDir === 'VRB') return '風向不定　' + o.windSpd + 'kt' + g + v;
   const d = String(o.windDir).padStart(3, '0');
-  return dirJa(o.windDir) + '（' + d + '°）から　' + o.windSpd + 'kt' + g;
+  return d + '°（' + dirJa(o.windDir) + '）から　' + o.windSpd + 'kt' + g + v;
 }
 
 /* しきい値との突き合わせ。貼り付け・AVWX のどちらからでも同じ結果になるよう
@@ -1160,17 +1171,18 @@ function metarWhen(raw) {
   const t = metarTime(raw);
   return t ? ('METAR ' + t) : 'METAR';
 }
-/* 時刻だけ。見出しに1回だけ出すときに使う */
+/* 時刻だけ。見出しに1回だけ出すときに使う。
+   日本時間を主に、世界時は確認用にかっこ書きで添える
+   （日本時間だけ見れば飛ぶ時刻と結びつく。世界時は原文と照らすためのもの） */
 function metarTime(raw) {
   const m = String(raw || '').match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
   if (!m) return '';
   const day = +m[1], h = +m[2], mi = m[3];
   const jh = (h + 9) % 24;
   const rolled = h + 9 >= 24;
-  const jst = rolled ? (pad(day + 1) + '日' + pad(jh) + ':' + mi + 'JST')
-                     : (pad(jh) + ':' + mi + 'JST');
-  return pad(day) + '日' + pad(h) + ':' + mi + 'Z'
-    + '<span class="jst">（' + jst + '）</span>';
+  const jDay = rolled ? day + 1 : day;
+  return pad(jDay) + '日' + pad(jh) + ':' + mi + 'JST'
+    + '<span class="z">（' + pad(h) + ':' + mi + 'Z）</span>';
 }
 
 /* 1本ぶんの判定カード。extra には生電文やTAFの内訳を差し込む。
@@ -1381,6 +1393,9 @@ function avwxToObj(d) {
       o.clouds = p.clouds.slice().sort((a, b) => a.ft - b.ft);
       o.ceil = p.ceil;
     }
+    /* 風向の変動幅（100V170）は AVWX の解析結果には無いので、
+       電文から常に拾う */
+    if (p.varLo != null) { o.varLo = p.varLo; o.varHi = p.varHi; }
   }
   return o;
 }
@@ -1423,16 +1438,17 @@ function cloudsText(cl) {
 }
 
 /* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある。
-   世界時のままでは飛ぶ時刻と結びつかないので、日本時間を添える */
+   世界時のままでは飛ぶ時刻と結びつかないので、日本時間を主に表示する */
 function tafWhen(t) {
   const d = String((t && t.repr) || '').replace(/[^0-9]/g, '');
-  if (d.length < 4) return { z: '—', jst: '' };
+  if (d.length < 4) return { jst: '—', z: '' };
   const day = +d.slice(0, 2), h = +d.slice(2, 4);
   const jh = (h + 9) % 24;
   const rolled = h + 9 >= 24;
+  const jDay = rolled ? day + 1 : day;
   return {
-    z: pad(day) + '日' + pad(h) + 'Z',
-    jst: rolled ? (pad(day + 1) + '日' + pad(jh) + '時JST') : (pad(jh) + '時JST'),
+    jst: pad(jDay) + '日' + pad(jh) + '時JST',
+    z: pad(h) + 'Z',
   };
 }
 
@@ -1451,8 +1467,8 @@ function avwxTafRows(taf, noRaw) {
     const o = avwxToObj(f);
     const w = tafWhen(f.start_time);
     const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
-    const head = esc(kind) + ' ' + esc(w.z)
-      + (w.jst ? '<span class="jst">（' + esc(w.jst) + '）</span>' : '');
+    const head = esc(kind) + ' ' + esc(w.jst)
+      + (w.z ? '<span class="z">（' + esc(w.z) + '）</span>' : '');
     return wxRow(head, o);
   }).join('');
   return raw + '<div class="taf-per">' + rows + '</div>';
@@ -1581,13 +1597,15 @@ function avwxTafCard(r) {
    ══════════════════════════════════════════════════════════════ */
 const CLOUD_YOMI = { FEW: 'フュー', SCT: 'スキャッタード', BKN: 'ブロークン', OVC: 'オーバーキャスト' };
 const TTS_FIX = [
-  /* 時刻は日本時間だけ読む。世界時と二重に読むと聞き取りにくい */
-  [/\d{1,2}日\d{1,2}:\d{2}\s*Z\s*（(\d{1,2}:\d{2})JST）/g, '$1 日本時間'],
-  [/\d{1,2}日\d{1,2}\s*Z\s*（((?:\d{1,2}日)?\d{1,2}時)JST）/g, '$1 日本時間'],
+  /* 時刻は日本時間だけ読む。世界時と二重に読むと聞き取りにくい。
+     表示は「10日10:00JST（01:00Z）」のように日本時間を先に出すので、
+     読みもその形に合わせて拾う */
+  [/(\d{1,2}日\d{1,2}:\d{2})JST\s*（\d{1,2}:\d{2}Z）/g, '$1 日本時間'],
+  [/(\d{1,2}日\d{1,2}時)JST\s*（\d{1,2}Z）/g, '$1 日本時間'],
   /* 空港は「RJEC 旭川」と並んでいるので、まとめて1回だけ読む */
   [/RJEC\s*旭川/g, '旭川空港'], [/RJCO\s*丘珠/g, '丘珠空港'], [/RJCC\s*新千歳/g, '新千歳空港'],
   [/RJEC/g, '旭川空港'], [/RJCO/g, '丘珠空港'], [/RJCC/g, '新千歳空港'],
-  [/METAR/g, 'メター'], [/\bTAF\b/g, 'ター'],
+  [/METAR/g, 'メター'], [/\bTAF\b/g, 'たふ'],
   /* BKN020 のように高さがくっついた形も読み下す */
   [/\b(FEW|SCT|BKN|OVC)(\d{3})\b/g, (m, a, n) => CLOUD_YOMI[a] + (+n * 100) + 'フィート'],
   [/\bVFR\b/g, 'ブイエフアール'], [/\bMVFR\b/g, 'エムブイエフアール'],
@@ -1608,17 +1626,26 @@ const TTS_FIX = [
   /* 「中層雲」のように、雲の種類の複合語ごと先にかなへ直す。
      あとに続く「層雲」だけの規則が中の字を食ってしまわないよう、
      長い語（中層雲・積乱雲・対流雲・帯状雲）を先に処理する */
+  /* 「積乱雲的」のように「的」が続く形は、あとの単独「積乱雲」規則より
+     先に処理する（先に「積乱雲」だけ変えると「的」が漢字のまま残る） */
+  [/積乱雲的/g, 'せきらんうんてき'],
   [/中層雲/g, 'ちゅうそううん'], [/積乱雲/g, 'せきらんうん'],
   [/対流雲/g, 'たいりゅううん'], [/帯状雲/g, 'たいじょううん'],
   [/積雲/g, 'せきうん'], [/層雲/g, 'そううん'], [/雲帯/g, 'うんたい'],
-  [/下層悪天/g, 'かそうあくてん'],
+  [/下層悪天/g, 'かそうあくてん'], [/悪天要素/g, 'あくてんようそ'],
   /* 中層雲を処理したあとに残る、単独の「中層」 */
   [/中層/g, 'ちゅうそう'],
-  [/前線帯/g, 'ぜんせんたい'],
+  [/前線帯/g, 'ぜんせんたい'], [/中程度/g, 'ちゅうていど'],
   [/滑空場/g, 'かっくうじょう'], [/読み解き/g, 'よみとき'],
   [/着氷/g, 'ちゃくひょう'], [/近傍/g, 'きんぼう'], [/雲量/g, 'うんりょう'],
-  [/後面/g, 'あとめん'], [/消散/g, 'しょうさん'],
+  [/後面/g, 'あとめん'], [/消散/g, 'しょうさん'], [/縁/g, 'ふち'],
   [/高・低気圧/g, 'こうていきあつ'], [/気圧傾度/g, 'きあつけいど'],
+  /* 見出しに残ることがある「🗣」は読まない */
+  [/🗣️?/g, ''],
+  /* 「①総観」のように丸数字が語にくっついていると聞き取りにくいので、
+     直後に軽い間を入れる。かっこの直前に来ても（「）」自体は読まれないので
+     不自然にはならない */
+  [/([①②③④⑤])/g, '$1、'],
   /* 「風」が単独の1文字で出てくるところだけ「かぜ」にする。
      風向・風速・横風・追い風・台風のように他の漢字とくっついている
      ときはそのままにする（前後どちらかが漢字なら手を出さない） */
@@ -1630,10 +1657,18 @@ const TTS_FIX = [
   [DIR_RANGE_RE, (m, a, b) => DIR_YOMI[a] + 'から' + DIR_YOMI[b]],
   /* 範囲でなく単独で出てくる「南東」「南南東」 */
   [/南南東/g, 'なんなんとう'], [/南東/g, 'なんとう'],
+  /* 風向の表示は「340°（北北西）から」のように度数を先に出す。
+     度数はすでに聞こえているので、かっこの中の方位の言葉は
+     読み上げでは重ねずに落とす */
+  [/(\d)°（[^）]*）から/g, '$1度から'],
+  /* 「100°〜170°の間で変動」のような度数どうしの範囲は「〜」を
+     「から」に開く。上の「かっこの中は読まない」規則より先に方位の
+     単語側を処理しているので、こちらは度数どうしの範囲だけを見ればよい */
+  [/(\d+)°〜(\d+)°/g, '$1度から$2度'],
   /* 雲量のかっこ書き（1〜2/8・わずか）は、画面で見るぶんには要るが
      読み上げると「いちからにはちぶんの…」と長く、肝心の高さが遠のく。
      声では落として「フュー 2,000フィート」とだけ言う。
-     ほかのかっこ（340°）や（差7℃・…）は残すため、8分量の形だけを狙う。
+     ほかのかっこ（差7℃・…）は残すため、8分量の形だけを狙う。
      これは日付（9/9）を読み下す規則より先に行う。1〜2/8 の「2/8」を
      日付と見間違えて「2月8日」にしてしまわないようにするため */
   [/（\d+(?:〜\d+)?\/8・[^）]*）/g, ''],
@@ -1768,10 +1803,11 @@ function ttsFrom(btn, sel) {
        exp-foot は毎回同じ注意書き（「◯枚をもとにした説明です」
        「飛べるかどうかの判断はしていません」等）なので、聞くのは
        1回で十分。読むたびに付いてくると本題が遠のく。
-       .tag（条件内／条件外の時間帯あり）と .pt-fr（VFR等）は
-       画面では一目で分かる色バッジだが、声にすると「条件内 ブイエフアール」
-       と続いて数値の前に挟まり、聞き取りの邪魔になるので読まない */
-    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot, .tag, .pt-fr').forEach(b => b.remove());
+       .tag（条件内／条件外の時間帯あり）と .pt-fr（VFR等）、
+       .j（TAFの期間ごとに出る OK／視程✕ 等）は画面では一目で分かる
+       色バッジだが、声にすると数値の前後に挟まり、聞き取りの邪魔になるので
+       読まない */
+    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot, .tag, .pt-fr, .j').forEach(b => b.remove());
     ttsBreaks(c);
     return c.textContent;
   });
@@ -1824,13 +1860,28 @@ function expRemember(url, text) {
   } catch (e) {}
 }
 
+/* AIが指示に反して付けてくることがある、中身のない前置きを削る。
+   「④下層悪天予想図の解説」のような自己紹介の見出しや、
+   「（約115字）」のような字数の断り書き、「滝川周辺の状況
+   （RJCC地点の資料から）」のような出典の見出しは、読んでも
+   表示されても本題の前に無駄がある。表示にも読み上げにも
+   使う前（Markdownの段階）で落とす */
+function stripMetaLines(text) {
+  return String(text)
+    .replace(/^#{0,6}\s*.*予想図の解説\s*$/gm, '')
+    .replace(/^#{0,6}\s*滝川周辺の状況(?:（[^）\n]*）)?\s*$/gm, '')
+    .replace(/（約\d+字[程度前後]*）/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /* 見出し・箇条書き・太字だけの、ごく簡単な整形 */
 function expRender(md) {
   const esc1 = t => esc(t);
   const inline = t => esc1(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
   const out = [];
   let ul = false;
-  String(md).split(/\n/).forEach(raw => {
+  String(stripMetaLines(md)).split(/\n/).forEach(raw => {
     const l = raw.trim();
     const li = l.match(/^(?:[-*・]|\d+\.)\s+(.*)$/);
     if (li) { if (!ul) { out.push('<ul>'); ul = true; } out.push('<li>' + inline(li[1]) + '</li>'); return; }
@@ -1849,8 +1900,12 @@ function expRender(md) {
 function boxExamSection(html) {
   const m = html.match(/<h3>([^<]*試験官[^<]*)<\/h3>([\s\S]*?)(?=<h3>|$)/);
   if (!m) return html;
-  const boxed = '<div class="exam-box"><h3>🗣 ' + m[1] + '</h3>' + m[2] + '</div>';
-  return html.slice(0, m.index) + boxed + html.slice(m.index + m[0].length);
+  /* 「7. 」のような番号は、一番上に動かすと順番と合わなくなるので外す */
+  let heading = m[1].replace(/^\d+[.、]\s*/, '');
+  if (!/口頭例/.test(heading)) heading += '（口頭例）';
+  const boxed = '<div class="exam-box"><h3>🗣 ' + heading + '</h3>' + m[2] + '</div>';
+  /* 話す例なので、埋もれないよう一番上に持ってくる */
+  return boxed + html.slice(0, m.index) + html.slice(m.index + m[0].length);
 }
 
 const STYLE_LABEL = { detail: '詳しい解説', concise: '要点だけ' };

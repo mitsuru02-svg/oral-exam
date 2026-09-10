@@ -162,6 +162,9 @@ body.wide .hdr-row { max-width:min(2400px, 97vw); }
 /* カードの右半分。ボタン・注記・解説・読みどころをまとめて置く。
    スマホでは1列に積まれるので、見え方は今までと変わらない */
 .side > .shot-bar, .side > .act, .side > .urlset, .side > .shot-note { margin-left:14px; margin-right:14px; }
+/* ⑤（METAR/TAF）のように .side を使わないステップにも、
+   同じ左右の余白で解説ボタンを置けるようにする */
+.step > .act { margin-left:14px; margin-right:14px; }
 .shot-box {
   position:relative; border-radius:10px; overflow:hidden;
   background:#0d1117; border:1px solid #21262d; min-height:96px;
@@ -933,6 +936,11 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <div class="shot-bar"><button onclick="loadShot('metar',true)">再読込</button></div>
       <div class="shot-note">旭川 RJEC・丘珠 RJCO・新千歳 RJCC。滝川にいちばん近いのは旭川ですが、いずれも滝川そのものではないので傾向として読みます。</div>
     </div>
+    <div class="act">
+      <button class="exp-go muted" onclick="explainShot('metar','detail')">🔎 詳しい解説</button>
+      <button class="exp-go" onclick="explainShot('metar','concise')">📝 要点だけ</button>
+    </div>
+    <div class="exp" id="exp-metar"></div>
 
     <div class="paste-tool" style="margin-bottom:12px;">
       <div class="avwx-msg" id="avwxMsg"></div>
@@ -1894,7 +1902,7 @@ function ttsBtn(sel) {
    その画像URLごと覚えておき、二度目からは取っておいたものを出す。
    ══════════════════════════════════════════════════════════════ */
 const EXP_KEY = 'tenkizu_explain';
-const EXP_TITLE = { chart:'天気図', ir:'赤外画像', vis:'可視画像', sigwx:'下層悪天予想図' };
+const EXP_TITLE = { chart:'天気図', ir:'赤外画像', vis:'可視画像', sigwx:'下層悪天予想図', metar:'近傍空港の電文' };
 
 function expCache() { try { return JSON.parse(localStorage.getItem(EXP_KEY) || '{}'); } catch (e) { return {}; } }
 function expRemember(url, text) {
@@ -2132,7 +2140,8 @@ async function explainShot(key, style) {
     return;
   }
 
-  let images;
+  let images = [];
+  let text = '';
   if (key === 'chart') {
     expShow(key, '<p>天気図をそろえています…</p>');
     images = await chartImagesForExplain();
@@ -2147,15 +2156,20 @@ async function explainShot(key, style) {
     expShow(key, '<p>3・6・9時間後の3枚をそろえています…</p>');
     images = await sigwxImagesForExplain();
     if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
+  } else if (key === 'metar') {
+    /* ⑤は画像ではなく、いま画面に出ている電文（原文）をそのまま渡す */
+    text = briefText();
   } else {
     images = shownUrl[key] ? [{ label: '', url: shownUrl[key] }] : [];
   }
-  if (!images.length) {
-    expShow(key, '<div class="exp-err">図が表示されていないので解説できません。先に図を出してください。</div>');
+  if (!images.length && !text) {
+    expShow(key, '<div class="exp-err">' + (key === 'metar'
+      ? '電文が読み込まれていないので解説できません。先に電文を読み込んでください。'
+      : '図が表示されていないので解説できません。先に図を出してください。') + '</div>');
     return;
   }
 
-  const ck = style + '|' + images.map(i => i.url).join('|');
+  const ck = style + '|' + (images.length ? images.map(i => i.url).join('|') : 'text:' + text);
   const cached = expCache()[ck];
   if (cached) { expShow(key, expRender(cached.text) + expFoot(true, images, key, style), true, style); return; }
 
@@ -2164,7 +2178,7 @@ async function explainShot(key, style) {
     const r = await fetch(px + '/explain', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ images, kind: key, style }),
+      body: JSON.stringify({ images, text, kind: key, style }),
     });
     const j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.text) {
@@ -2181,24 +2195,28 @@ async function explainShot(key, style) {
 
 function expFoot(cached, images, key, style) {
   const n = (images && images.length) || 0;
+  /* ⑤（METAR/TAF）は図ではなく電文なので、断り書きの言葉を変える */
+  const src2 = key === 'metar' ? '電文' : '図';
   if (style === 'concise') {
     return '<div class="exp-foot">要点だけを簡潔にまとめた説明です。'
       + '<b>飛べるかどうかの判断はしていません</b>。詳しく知りたいときは上の「'
       + STYLE_LABEL.detail + 'を見る」もあわせてご確認ください。'
-      + (cached ? '<br>（前に取った解説を表示しています。図を再読込すると取り直します）' : '')
+      + (cached ? '<br>（前に取った解説を表示しています。' + src2 + 'を再読込すると取り直します）' : '')
       + '</div>';
   }
   const src = key === 'sigwx'
     ? (n > 1 ? n + '枚（3・6・9時間後）を見比べて、時間とともにどう変わるかを読ませた説明です。'
         + '表示する時間を切り替えても内容は変わりません。<br>' : '')
+    : key === 'metar'
+    ? '近傍空港（旭川・丘珠・新千歳）のMETAR/TAFの電文をもとにした説明です。<br>'
     : n > 2
     ? n + '枚を古い順に並べて、動きを読ませた説明です。表示するコマを切り替えても内容は変わりません。<br>'
     : (n === 2 ? '実況と24時間後の2枚をもとにした説明です。表示するコマを切り替えても内容は変わりません。<br>' : '');
-  return '<div class="exp-foot">' + src + '図から読み取れることの説明です。'
+  return '<div class="exp-foot">' + src + src2 + 'から読み取れることの説明です。'
     + '<b>飛べるかどうかの判断はしていません</b>。最終的な可否はご自身で、'
     + '現地の観天望気と合わせて判断してください。読み違いの可能性もあるので、'
-    + '数値は必ず図そのもので確かめること。'
-    + (cached ? '<br>（前に取った解説を表示しています。図を再読込すると取り直します）' : '')
+    + '数値は必ず' + src2 + 'そのもので確かめること。'
+    + (cached ? '<br>（前に取った解説を表示しています。' + src2 + 'を再読込すると取り直します）' : '')
     + '</div>';
 }
 

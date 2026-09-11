@@ -291,6 +291,19 @@ iframe.wxframe.tall { height:420px; }
    1枚ずつ落ち着いて読める */
 .wxgrid { display:grid; grid-template-columns:1fr; gap:8px; }
 .wxgrid .pt-card { margin-bottom:0; }
+/* 読み解いたカードは、まず原文を自分で読む練習をしてから確かめられる
+   よう、ボタンを押すまで隠す */
+.wxgrid.hideable { display:none; }
+.wxgrid.hideable.shown { display:grid; }
+.cards-link {
+  display:block; width:100%; margin:6px 0 8px; padding:8px 12px;
+  border:1px dashed #30363d; border-radius:9px; background:transparent;
+  color:#8b949e; font-size:12.5px; font-weight:600; font-family:inherit;
+  cursor:pointer; text-align:center;
+}
+.cards-link:active { background:#161b22; }
+.cards-link .car { display:inline-block; margin-right:4px; transition:transform .15s; }
+.cards-link[data-on="1"] .car { transform:rotate(90deg); }
 .pt-when { font-size:11.5px; color:#8b949e; margin-bottom:3px; font-variant-numeric:tabular-nums; }
 /* 読み解きの行。指定が無いまま body の 16px を継いでいて、
    TAF の同じ行（12.5px）や「何を見るか」（14px）より大きく、
@@ -1551,15 +1564,31 @@ async function avwxLoad(box) {
     + '<div class="wx-sec"><b>METAR</b>'
       + (sameWhen ? '<span class="wx-when">' + sameWhen + '</span>' : '') + '</div>'
     + avwxRawBlock(ok, 'METAR', r => (r.m && r.m.raw) || '')
-    + '<div class="wxgrid">'
+    + cardsToggle('metarcards')
+    + '<div class="wxgrid hideable" id="metarcards">'
       + res.map(r => avwxMetarCard(r, sameWhen)).join('')
     + '</div>'
     + '<div class="wx-sec"><b>TAF</b></div>'
     + avwxRawBlock(ok.filter(hasTaf), 'TAF', r => (r.t && r.t.raw) || '')
-    + '<div class="wxgrid">'
+    + cardsToggle('tafcards')
+    + '<div class="wxgrid hideable" id="tafcards">'
       + res.map(r => avwxTafCard(r)).join('')
     + '</div>'
     + '</div>';
+}
+
+/* 原文をまず自分で読み解く練習になるよう、読み解いたカードは
+   ボタンを押すまで隠す */
+function cardsToggle(id) {
+  return '<button class="cards-link" id="' + id + '-link" data-on="0" onclick="toggleCards(\'' + id + '\')">'
+    + '<span class="car">▸</span>読み解きを見る</button>';
+}
+function toggleCards(id) {
+  const box = document.getElementById(id);
+  const link = document.getElementById(id + '-link');
+  if (!box) return;
+  const on = box.classList.toggle('shown');
+  if (link) link.dataset.on = on ? '1' : '0';
 }
 
 function hasTaf(r) {
@@ -1676,7 +1705,10 @@ const TTS_FIX = [
   /* 「衰えてはいません」の「は」は助詞（発音は「わ」）なのに、
      読み上げでは字のまま「は」と読まれてしまう */
   [/衰えてはいません/g, 'おとろえてわいません'],
-  [/総観場/g, 'そうかんば'], [/東海上/g, 'ひがしかいじょう'],
+  [/総観場/g, 'そうかんば'],
+  /* 「南東海上」は「東海上」を含むので、先に長いほうを処理する */
+  [/南東海上/g, 'なんとうかいじょう'],
+  [/東海上/g, 'ひがしかいじょう'], [/南海上/g, 'みなみかいじょう'],
   [/道東/g, 'どうとう'], [/道南/g, 'どうなん'],
   /* 「中層雲」のように、雲の種類の複合語ごと先にかなへ直す。
      あとに続く「層雲」だけの規則が中の字を食ってしまわないよう、
@@ -1710,7 +1742,8 @@ const TTS_FIX = [
      「南東」を仮名にしてしまうと、「南東〜南西」のような範囲を
      この後で拾えなくなるため */
   [DIR_RANGE_RE, (m, a, b) => DIR_YOMI[a] + 'から' + DIR_YOMI[b]],
-  /* 範囲でなく単独で出てくる「南東」「南南東」 */
+  /* 範囲でなく単独で出てくる「南東」「南南東」（「南東海上」は
+     もっと前で先に処理済み） */
   [/南南東/g, 'なんなんとう'], [/南東/g, 'なんとう'],
   /* 風向の表示は「340°（北北西）から」のように度数を先に出す。
      度数はすでに聞こえているので、かっこの中の方位の言葉は
@@ -1862,7 +1895,7 @@ function ttsFrom(btn, sel) {
        .j（TAFの期間ごとに出る OK／視程✕ 等）は画面では一目で分かる
        色バッジだが、声にすると数値の前後に挟まり、聞き取りの邪魔になるので
        読まない */
-    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot, .tag, .pt-fr, .j').forEach(b => b.remove());
+    c.querySelectorAll('.ttsbtn, .rawblk, .exp-hd, .exp-foot, .tag, .pt-fr, .j, .cards-link').forEach(b => b.remove());
     ttsBreaks(c);
     return c.textContent;
   });
@@ -1926,6 +1959,10 @@ function stripMetaLines(text) {
     .replace(/^#{0,6}\s*.*予想図の解説\s*$/gm, '')
     .replace(/^#{0,6}\s*滝川周辺の状況(?:（[^）\n]*）)?\s*$/gm, '')
     .replace(/（約\d+字[程度前後]*）/g, '')
+    /* 「総観場（①）」のような、丸数字だけのかっこ書きは表示に要らない。
+       まとめて分析のプロンプトが①〜⑤を参照するために書かせているだけで、
+       読み手には見出しの言葉自体で十分伝わる */
+    .replace(/（[①-⑤][①-⑤・\s]*）/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -1953,12 +1990,11 @@ function expRender(md) {
    枠で囲んで目立たせる。ここが実際に口で話す文なので、
    読み流されないようほかの項目と見た目を分ける */
 function boxExamSection(html) {
+  /* AIの見出し文言（「7. 試験官への説明の組み立て」等、番号や言い回しが
+     揺れる）はそのまま出さず、固定の見出しに置き換える */
   const m = html.match(/<h3>([^<]*試験官[^<]*)<\/h3>([\s\S]*?)(?=<h3>|$)/);
   if (!m) return html;
-  /* 「7. 」のような番号は、一番上に動かすと順番と合わなくなるので外す */
-  let heading = m[1].replace(/^\d+[.、]\s*/, '');
-  if (!/口頭例/.test(heading)) heading += '（口頭例）';
-  const boxed = '<div class="exam-box"><h3>🗣 ' + heading + '</h3>' + m[2] + '</div>';
+  const boxed = '<div class="exam-box"><h3>🗣 気象分析まとめ</h3>' + m[2] + '</div>';
   /* 話す例なので、埋もれないよう一番上に持ってくる */
   return boxed + html.slice(0, m.index) + html.slice(m.index + m[0].length);
 }

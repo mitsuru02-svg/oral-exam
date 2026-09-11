@@ -569,16 +569,21 @@ body.wide .brief-go { font-size:15px; padding:13px 12px; }
 body.wide .pt-card { padding:8px 10px; margin-bottom:6px; }
 body.wide .wx-sec { margin:10px 0 5px; }
 
-/* ⑤は文字が主役なので2列ぶん取り、中の空港カードも横に並べる */
+/* ⑤は文字が主役なので2列ぶん取る。原文と読み解きは左右ではなく
+   上下に積む（原文→ボタン→カード、の順で自分で確かめられるように） */
 body.wide #step-metar { grid-column:span 2; }
 body.wide #box-metar .wxdata {
-  display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; padding:10px 10px 2px;
+  display:grid; grid-template-columns:1fr; gap:8px; padding:10px 10px 2px;
 }
 body.wide #box-metar .wx-sec { grid-column:1 / -1; }
 @media (max-width: 1280px) {
   body.wide #step-metar { grid-column:1 / -1; }
 }
-@media (max-width: 620px) { body.wide .shot-box img { max-height:26vh; } }
+/* スマホの幅で一画面を見るときは、複数列に並べる余地が無いので
+   高さで抑えず、スマホの画面幅いっぱいに図を出す（通常表示と同じ） */
+@media (max-width: 620px) {
+  body.wide .shot-box img { max-height:none; width:100%; height:auto; margin:0; }
+}
 /* 画像の読み込み切り替えは、並べて見ている間は使わない */
 body.wide .imgsw { display:none; }
 
@@ -689,8 +694,8 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     <a class="back" href="./index.html">‹</a>
     <div class="hdr-t"><b>🌤 天気図確認</b><span>滝川エリア・飛べる状況かを判断する</span></div>
     <div class="wide-sw" id="wideSw" role="group" aria-label="表示の切り替え">
-      <span data-w="0" data-on="1" onclick="setWide(false)" title="上から順に読む">📱<span class="lbl"> 通常</span></span>
-      <span data-w="1" data-on="0" onclick="setWide(true)" title="図を並べて一度に見る">🖥<span class="lbl"> 一画面</span></span>
+      <span data-w="0" data-on="0" onclick="setWide(false)" title="上から順に読む">📱<span class="lbl"> 詳細</span></span>
+      <span data-w="1" data-on="1" onclick="setWide(true)" title="図を並べて一度に見る">🖥<span class="lbl"> 一画面</span></span>
     </div>
     <div class="clock"><b id="clkT">--:--</b><span id="clkD">----/--/--</span></div>
   </div>
@@ -3119,8 +3124,12 @@ function syncWide() {
   });
 }
 function loadWide() {
-  let on = false;
-  try { on = localStorage.getItem(WIDE_KEY) === '1'; } catch (e) {}
+  /* 基本表示は一画面。「詳細」を選んだことがある端末では、その選択を覚える */
+  let on = true;
+  try {
+    const v = localStorage.getItem(WIDE_KEY);
+    if (v !== null) on = v === '1';
+  } catch (e) {}
   document.body.classList.toggle('wide', on);
   syncWide();
 }

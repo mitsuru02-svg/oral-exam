@@ -750,7 +750,7 @@ const JITCHI_QA_DATA = [
 
 {cat:"law", imp:1, examiner:["nonaka"],
  q:"捜索救難活動を取り仕切る機関はどこですか。",
- a:"救難調整本部（RCC）が取り仕切ります。国内では東京空港事務所内などに設置されています。",
+ a:"救難調整本部（RCC）が取り仕切ります。国内では東京空港事務所内に設置されています。",
  hint:"RCC（救難調整本部）が取り仕切るという点が言えているか。"},
 
 {cat:"aircraft", imp:1, examiner:["nonaka"],

@@ -1460,10 +1460,10 @@ const JITCHI_QA_DATA = [
 // D. 航空情報
 {cat:"departure", imp:3, examiner:["shorui"],
  q:"航空情報はどこから、どのように入手していますか。",
- a:"SWIMから入手しています。確認するのは4種類です。航空路誌つまりAIPは、AIS Japanで2026年8月6日から有効のものを使っています。航空路誌改訂版のAIP Amendmentsは該当なし。航空路誌補足版のAIP Supplementsは該当空域なし。そしてNOTAMを飛行当日と翌日の分まで確認します。加えて航空情報サーキュラーのAICと、訓練空域内の飛行情報をSWIMで確認します。AIPは28日ごとのAIRACサイクルで更新されるので、有効日が今日を含んでいるかを必ず見ます。",
- s:"SWIMから入手しています。AIP、AIP Amendments、AIP Supplements、NOTAMの4種類を確認し、加えてAICと訓練空域の飛行情報を見ます。AIPは28日ごとの更新なので、有効日が今日を含むかを必ず確認します。",
+ a:"SWIMから入手しています。確認するのは4種類です。航空路誌つまりAIPは、AIS Japanで2026年8月6日から有効のものを使っています。航空路誌改訂版のAIP Amendmentsは該当なし。航空路誌補足版のAIP Supplementsは該当空域なし。そしてNOTAMを飛行当日と翌日の分まで確認します。NOTAMは、SWIMのメニューからデジタルノータムリクエストサービスで見ます。加えて航空情報サーキュラーのAICと、訓練空域内の飛行情報をSWIMで確認します。AIPは28日ごとのAIRACサイクルで更新されるので、有効日が今日を含んでいるかを必ず見ます。",
+ s:"SWIMから入手しています。",
  rel:["航空情報にはどのような種類があり、どのように更新されますか。", "ノータム（NOTAM）はどこで確認しますか。", "今日のNOTAMには何が出ていましたか。"],
- hint:"AIP・AIP Amendments・AIP Supplements・NOTAMの4種類を挙げられているか。SWIMという入手先と、AIPの有効日確認に触れられるか。"},
+ hint:"AIP・AIP Amendments・AIP Supplements・NOTAMの4種類を挙げられているか。SWIMという入手先と、AIPの有効日確認に触れられるか。NOTAMの確認方法（SWIMメニューのデジタルノータムリクエストサービス）まで説明できると加点。"},
 
 {cat:"departure", imp:3, examiner:["shorui"],
  q:"今日のNOTAMには何が出ていましたか。どう対応しましたか。",

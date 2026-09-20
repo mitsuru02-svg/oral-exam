@@ -332,7 +332,7 @@ const JITCHI_QA_DATA = [
 
 {cat:"aircraft", imp:2, examiner:["konno","higuchi","yuda"],
  q:"ASK21の速度限界にはどのようなものがありますか。",
- a:"超過禁止速度VNEは151kt（280km/h）、悪気流速度VRAは108kt（200km/h）、運動速度VAは97kt（180km/h）、最大航空機曳航速度VTは97kt（180km/h）、最大ウインチ曳航速度VWは81kt（150km/h）です。",
+ a:"超過禁止速度VNEは151kt、悪気流速度VRAは108kt、運動速度VAは97kt、最大航空機曳航速度VTは97kt、最大ウインチ曳航速度VWは81ktです。",
  hint:"VNE151・VRA108・VA97・VT97・VW81（kt）という数値がおおむね正確に言えているか。"},
 
 {cat:"aircraft", imp:1, examiner:["konno","yuda"],

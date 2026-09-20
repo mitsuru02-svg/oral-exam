@@ -181,7 +181,7 @@ const JITCHI_QA_DATA = [
 
 {cat:"airspace", imp:1, examiner:["nonaka"],
  q:"緊急事態が発生した場合、トランスポンダーはどのコードにセットしますか。",
- a:"7700にセットします。7700は緊急状態を示すコードです。",
+ a:"7700にセットします。",
  hint:"7700＝緊急状態という対応関係が言えているか。"},
 
 {cat:"airspace", imp:2, examiner:["nonaka","konno","yuda"],

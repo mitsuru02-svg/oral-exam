@@ -602,6 +602,14 @@ body.wide .imgsw { display:none; }
   width:38px; height:38px; border-radius:10px; border:1px solid #30363d;
   background:rgba(22,27,34,.9); color:#c9d1d9; font-size:19px; cursor:pointer;
 }
+/* 拡大表示の中の発表日時。カード側の見出し（ts-chart 等）と同じ文字列を出す */
+.lb-time {
+  position:absolute; top:calc(10px + env(safe-area-inset-top)); left:12px;
+  right:60px; color:#c9d1d9; font-size:12px; line-height:1.4;
+  background:rgba(22,27,34,.9); border:1px solid #30363d; border-radius:10px;
+  padding:8px 10px; pointer-events:none;
+}
+.lb-time:empty { display:none; }
 /* 拡大表示のまま前後のコマへ送るボタン。スワイプ・矢印キーでも同じ動作 */
 .lb-nav {
   position:absolute; top:50%; transform:translateY(-50%); z-index:1;
@@ -1106,6 +1114,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
 
 <div class="lb" id="lb" onclick="closeLb(event)" ontouchstart="lbTouchStart(event)" ontouchend="lbTouchEnd(event)">
   <button class="lb-x" onclick="closeLb(event)">✕</button>
+  <div class="lb-time" id="lbTime"></div>
   <button class="lb-nav lb-prev" id="lbPrev" onclick="event.stopPropagation(); lbStep(-1)">‹</button>
   <button class="lb-nav lb-next" id="lbNext" onclick="event.stopPropagation(); lbStep(1)">›</button>
   <div id="lbIn" onclick="event.stopPropagation()"></div>
@@ -2377,6 +2386,12 @@ function expFoot(cached, images, key, style) {
    読めなければ、ファイル名から作った表示のまま静かに終わる。
    ══════════════════════════════════════════════════════════════ */
 const IMGT_KEY = 'tenkizu_imgtime';
+/* 下層悪天予想図（fbsp03/06/09.png）はURLが固定で、気象庁が中身だけを
+   数時間おきに入れ替える。URLをキーにしたキャッシュを無期限に信じると、
+   最初に読んだときの古い発表時刻が消えずに残り続けてしまう
+   （「発表日時がおかしい」の原因）。更新間隔（6時間おき）より十分短い
+   間隔で読み直すよう、キャッシュに有効期限を持たせる */
+const IMGT_TTL = 2 * 3600000;
 
 function imgTimeCache() { try { return JSON.parse(localStorage.getItem(IMGT_KEY) || '{}'); } catch (e) { return {}; } }
 function imgTimeRemember(url, text) {
@@ -2417,7 +2432,7 @@ async function showImgTime(key, url, tail) {
     tsEl.textContent = wxTimeLabel(d, tail) + '　※図から読取';
   };
   const c = imgTimeCache()[url];
-  if (c) { if (c.text) put(c.text); return; }
+  if (c && (Date.now() - c.t) < IMGT_TTL) { if (c.text) put(c.text); return; }
 
   const px = avwxProxy();
   if (!px) return;
@@ -3306,7 +3321,15 @@ function lbSyncNav() {
   const prevBtn = document.getElementById('lbPrev');
   const nextBtn = document.getElementById('lbNext');
   const cap = document.getElementById('lbCap');
+  const timeEl = document.getElementById('lbTime');
   lbCloneControls(lbKey);
+  /* 発表日時はカード側の見出し（ts-chart 等）にすでに出ている文字列を
+     そのまま複製する。カードのほうがloadShot/showImgTimeで常に
+     最新に保たれているので、ここで作り直す必要はない */
+  if (timeEl) {
+    const tsEl = lbKey && document.getElementById('ts-' + lbKey);
+    timeEl.textContent = (tsEl && tsEl.textContent !== '—') ? tsEl.textContent : '';
+  }
   if (!info) {
     if (prevBtn) prevBtn.style.display = 'none';
     if (nextBtn) nextBtn.style.display = 'none';

@@ -602,6 +602,20 @@ body.wide .imgsw { display:none; }
   width:38px; height:38px; border-radius:10px; border:1px solid #30363d;
   background:rgba(22,27,34,.9); color:#c9d1d9; font-size:19px; cursor:pointer;
 }
+/* 拡大表示のまま前後のコマへ送るボタン。スワイプ・矢印キーでも同じ動作 */
+.lb-nav {
+  position:absolute; top:50%; transform:translateY(-50%); z-index:1;
+  width:48px; height:48px; border-radius:50%; border:1px solid #30363d;
+  background:rgba(22,27,34,.9); color:#c9d1d9; font-size:26px; line-height:1;
+  cursor:pointer; display:none;
+}
+.lb-nav:disabled { opacity:.3; cursor:default; }
+.lb-prev { left:10px; }
+.lb-next { right:10px; }
+.lb-cap {
+  position:absolute; left:0; right:0; bottom:calc(10px + env(safe-area-inset-bottom));
+  text-align:center; color:#8b949e; font-size:12px; pointer-events:none;
+}
 /* 画像読み込みの一括スイッチ */
 .imgsw {
   display:flex; align-items:center; gap:10px; margin:14px 0 0;
@@ -1082,7 +1096,13 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   </div>
 </div>
 
-<div class="lb" id="lb" onclick="closeLb(event)"><button class="lb-x" onclick="closeLb(event)">✕</button><div id="lbIn"></div></div>
+<div class="lb" id="lb" onclick="closeLb(event)" ontouchstart="lbTouchStart(event)" ontouchend="lbTouchEnd(event)">
+  <button class="lb-x" onclick="closeLb(event)">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev" onclick="event.stopPropagation(); lbStep(-1)">‹</button>
+  <button class="lb-nav lb-next" id="lbNext" onclick="event.stopPropagation(); lbStep(1)">›</button>
+  <div id="lbIn" onclick="event.stopPropagation()"></div>
+  <div class="lb-cap" id="lbCap"></div>
+</div>
 
 <div class="verdict">
   <div class="verdict-in">
@@ -2856,7 +2876,7 @@ async function loadMsc(key, box, tsEl, myGen) {
   shownUrl[key] = urls[i];
   box.innerHTML = ''; box.appendChild(im);
   box.classList.add('zoom');
-  box.onclick = () => openLb(im.cloneNode(true));
+  box.onclick = () => openLb(im.cloneNode(true), key);
   tsEl.textContent = satLabel(times[i]);
   syncSatSlider(key, i - newest, times[i]);
 }
@@ -2952,7 +2972,7 @@ async function loadHimawari(key, box, tsEl, myGen) {
   box.innerHTML = '';
   box.appendChild(grid);
   box.classList.add('zoom');
-  box.onclick = () => openLb(grid.cloneNode(true));
+  box.onclick = () => openLb(grid.cloneNode(true), key);
   const m = hit.v.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})/);
   tsEl.textContent = m
     ? wxTimeLabel(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])), '現在')
@@ -3028,6 +3048,7 @@ async function loadShot(key, manual) {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.remove('busy');
         box.classList.add('zoom');
+        /* 手で設定したURLは1枚だけで送る先が無いので、拡大表示にも送りボタンは出さない */
         box.onclick = () => openLb(im.cloneNode(true));
         tsEl.textContent = label;
       },
@@ -3095,7 +3116,7 @@ async function loadShot(key, manual) {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.remove('busy');
         box.classList.add('zoom');
-        box.onclick = () => openLb(im.cloneNode(true));
+        box.onclick = () => openLb(im.cloneNode(true), key);
         tsEl.textContent = label;
         showImgTime(key, shownUrl[key], sigwxFT + '時間後の予想');
       },
@@ -3116,7 +3137,7 @@ async function loadShot(key, manual) {
         box.innerHTML = ''; box.appendChild(im);
         box.classList.remove('busy');
         box.classList.add('zoom');
-        box.onclick = () => openLb(im.cloneNode(true));
+        box.onclick = () => openLb(im.cloneNode(true), key);
         tsEl.textContent = label;
         showImgTime(key, shownUrl[key], CHART_TIME_TAIL[chartKind]);
       },
@@ -3223,12 +3244,108 @@ function syncSwitch() {
 }
 
 /* 拡大表示 */
-function openLb(node) {
+/* 拡大表示のまま前後のコマへ送る。ir/vis は衛星の時系列コマ（satBack）、
+   sigwx は3/6/9時間後（SIGWX_FTS）、chart は実況/24時間後/48時間後
+   （CHART_KINDS）を、それぞれのスライダーと同じ添字で送る */
+let lbKey = null;
+let lbBusy = false;
+
+function lbNavInfo(key) {
+  if (key === 'ir' || key === 'vis') {
+    return { idx: (SAT_STEPS - 1) - (satBack[key] || 0), max: SAT_STEPS - 1 };
+  }
+  if (key === 'sigwx') return { idx: Math.max(0, SIGWX_FTS.indexOf(sigwxFT)), max: SIGWX_FTS.length - 1 };
+  if (key === 'chart') return { idx: Math.max(0, CHART_KINDS.indexOf(chartKind)), max: CHART_KINDS.length - 1 };
+  return null;
+}
+
+function lbSyncNav() {
+  const info = lbKey ? lbNavInfo(lbKey) : null;
+  const prevBtn = document.getElementById('lbPrev');
+  const nextBtn = document.getElementById('lbNext');
+  const cap = document.getElementById('lbCap');
+  if (!info) {
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    if (cap) cap.textContent = '';
+    return;
+  }
+  if (prevBtn) { prevBtn.style.display = 'block'; prevBtn.disabled = lbBusy || info.idx <= 0; }
+  if (nextBtn) { nextBtn.style.display = 'block'; nextBtn.disabled = lbBusy || info.idx >= info.max; }
+  if (cap) cap.textContent = (info.idx + 1) + ' / ' + (info.max + 1) + '　‹ › か指でスワイプで送れます';
+}
+
+function openLb(node, key) {
+  lbKey = key || null;
   const inn = document.getElementById('lbIn');
   inn.innerHTML = ''; inn.appendChild(node);
   document.getElementById('lb').classList.add('on');
+  lbSyncNav();
 }
-function closeLb(e) { if (e) e.stopPropagation(); document.getElementById('lb').classList.remove('on'); }
+function closeLb(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('lb').classList.remove('on');
+  lbKey = null;
+}
+
+/* 前後のコマを読み込んで拡大表示の中身だけ差し替える。
+   元のカード（box-ir 等）のスライダー・時刻表示も一緒に更新される */
+async function lbStep(dir) {
+  if (!lbKey || lbBusy) return;
+  const info = lbNavInfo(lbKey);
+  if (!info) return;
+  const next = info.idx + dir;
+  if (next < 0 || next > info.max) return;
+  lbBusy = true; lbSyncNav();
+  try {
+    if (lbKey === 'ir' || lbKey === 'vis') {
+      stopSatPlay(lbKey);
+      satBack[lbKey] = (SAT_STEPS - 1) - next;
+      satPreview(lbKey);
+      await loadShot(lbKey, true);
+    } else if (lbKey === 'sigwx') {
+      sigwxFT = SIGWX_FTS[next];
+      await loadShot('sigwx', true);
+    } else if (lbKey === 'chart') {
+      chartKind = CHART_KINDS[next];
+      await loadShot('chart', true);
+    }
+    const box = document.getElementById('box-' + lbKey);
+    const fresh = box && (box.querySelector('img') || box.querySelector('.tiles'));
+    if (fresh) {
+      const inn = document.getElementById('lbIn');
+      inn.innerHTML = ''; inn.appendChild(fresh.cloneNode(true));
+    }
+  } finally {
+    lbBusy = false; lbSyncNav();
+  }
+}
+
+/* スワイプでの送り。横方向にはっきり動いたときだけ送り、縦スクロールの
+   身振りと混同しないよう斜めに近い動きは無視する */
+let lbTouchX = null, lbTouchY = null;
+function lbTouchStart(e) {
+  if (!e.touches || e.touches.length !== 1) return;
+  lbTouchX = e.touches[0].clientX; lbTouchY = e.touches[0].clientY;
+}
+function lbTouchEnd(e) {
+  if (lbTouchX == null) return;
+  const t = e.changedTouches && e.changedTouches[0];
+  const x0 = lbTouchX, y0 = lbTouchY;
+  lbTouchX = null; lbTouchY = null;
+  if (!t) return;
+  const dx = t.clientX - x0, dy = t.clientY - y0;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    lbStep(dx < 0 ? 1 : -1);   /* 左へスワイプ＝次（未来／深い時間）へ */
+  }
+}
+document.addEventListener('keydown', (e) => {
+  const lb = document.getElementById('lb');
+  if (!lb || !lb.classList.contains('on')) return;
+  if (e.key === 'Escape') closeLb();
+  else if (e.key === 'ArrowRight') lbStep(1);
+  else if (e.key === 'ArrowLeft') lbStep(-1);
+});
 
 const KEY = 'tenkizu_checks';
 let state = {};

@@ -3167,7 +3167,7 @@ function showQuestion() {
 
   const progress = (currentIdx / examQuestions.length) * 100;
   document.getElementById('progressBar').style.width = progress + '%';
-  document.getElementById('scoreDisplay').textContent   = correctCount + partialCount;
+  document.getElementById('scoreDisplay').textContent   = correctCount;
   document.getElementById('answeredDisplay').textContent = answered;
 
   // Auto-read question if voice is on → 読み上げ完了後に自動マイクON
@@ -3373,7 +3373,7 @@ function setSelfVerdict(v) {
   if (title) { title.textContent = v === '正解' ? '正解！' : v; title.className = `result-title ${cls}`; }
   box.querySelectorAll('.sj-btn').forEach(btn => btn.classList.toggle('on', btn.dataset.v === v));
 
-  document.getElementById('scoreDisplay').textContent = correctCount + partialCount;
+  document.getElementById('scoreDisplay').textContent = correctCount;
 }
 
 /* 判定を集計へ反映する。sign=+1 で加算、-1 で取り消し。
@@ -3423,7 +3423,7 @@ function handleResult(result, qa, qIdx, userAns) {
     </div>
   `;
   box.classList.remove('hidden');
-  document.getElementById('scoreDisplay').textContent    = correctCount + partialCount;
+  document.getElementById('scoreDisplay').textContent    = correctCount;
   document.getElementById('answeredDisplay').textContent = answered;
 
   const nextRow = document.getElementById('nextRow');

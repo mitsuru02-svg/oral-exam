@@ -1523,12 +1523,8 @@ function cloudsText(cl) {
   }).join('　');
 }
 
-/* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある。
-   世界時のままでは飛ぶ時刻と結びつかないので、日本時間を主に表示する */
-function tafWhen(t) {
-  const d = String((t && t.repr) || '').replace(/[^0-9]/g, '');
-  if (d.length < 4) return { jst: '—', z: '' };
-  const day = +d.slice(0, 2), h = +d.slice(2, 4);
+/* 日＋時（世界時）を日本時間表記に変換する共通処理 */
+function tafWhenDH(day, h) {
   const jh = (h + 9) % 24;
   const rolled = h + 9 >= 24;
   const jDay = rolled ? day + 1 : day;
@@ -1536,6 +1532,14 @@ function tafWhen(t) {
     jst: pad(jDay) + '日' + pad(jh) + '時JST',
     z: pad(h) + 'Z',
   };
+}
+
+/* TAF の期間開始時刻。AVWX は 0701（日+時）で返すことも 070100Z で返すこともある。
+   世界時のままでは飛ぶ時刻と結びつかないので、日本時間を主に表示する */
+function tafWhen(t) {
+  const d = String((t && t.repr) || '').replace(/[^0-9]/g, '');
+  if (d.length < 4) return { jst: '—', z: '' };
+  return tafWhenDH(+d.slice(0, 2), +d.slice(2, 4));
 }
 
 /* TAF電文冒頭の「090500Z 1000/1106」のうち、発表時刻の直後にある
@@ -1555,6 +1559,19 @@ function tafValidity(raw) {
   return mk(d1, h1) + '〜' + mk(d2, h2);
 }
 
+/* BECMG・TEMPO・INTER の直後に書かれている「ddhh/ddhh」（変化の時間帯そのもの）を
+   電文全体から出現順にすべて拾う。AVWX の f.end_time は BECMG では
+   「新しい状態が確立してから次の変化点までの期間」という別の意味を持ち、
+   電文に書かれた変化の時間帯（例：BECMG 2121/2123 の 21時〜23時）とは
+   食い違うため、start_time/end_time には頼らず生電文から直接読み取る */
+function tafGroupTimes(rawTxt) {
+  const out = [];
+  for (const m of String(rawTxt || '').matchAll(/\b(?:BECMG|TEMPO|INTER)\s+(\d{2})(\d{2})\/(\d{2})(\d{2})\b/g)) {
+    out.push({ d1: +m[1], h1: +m[2], d2: +m[3], h2: +m[4] });
+  }
+  return out;
+}
+
 /* TAF を時間帯ごとに分解して並べる。「11時以降に風が変わる」を目で拾えるように */
 function avwxTafRows(taf, noRaw) {
   if (!taf) return '<div class="shot-note" style="margin-top:7px;">TAF は取得できませんでした</div>';
@@ -1566,22 +1583,30 @@ function avwxTafRows(taf, noRaw) {
     return raw || '<div class="shot-note" style="margin-top:7px;">原文のみ。時間帯ごとの内訳はありません</div>';
   }
 
+  const groupTimes = tafGroupTimes(rawTxt);
+  let gi = 0;
+
   const rows = fc.map(f => {
     const o = avwxToObj(f);
-    const w = tafWhen(f.start_time);
     const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
-    let head = esc(kind) + ' ' + esc(w.jst)
-      + (w.z ? '<span class="z">（' + esc(w.z) + '）</span>' : '');
-    /* BECMG・TEMPO・INTER には開始だけでなく終了時刻もあり、その期間だけの
-       変化を示す。FM は次の FM/BECMG/TEMPO まで状態が入れ替わりっぱなしなので
-       開始時刻のみで足りるが、BECMG/TEMPO/INTER は終了時刻も出さないと
-       「何時から何時まで」という期間が読み解きに反映されない */
+    let ws, we = null;
     if (kind === 'BECMG' || kind === 'TEMPO' || kind === 'INTER') {
-      const we = tafWhen(f.end_time);
-      if (we.jst !== '—') {
-        head += '〜' + esc(we.jst)
-          + (we.z ? '<span class="z">（' + esc(we.z) + '）</span>' : '');
-      }
+      /* BECMG・TEMPO・INTER には開始だけでなく終了時刻もあり、その期間だけの
+         変化を示す。「何時から何時まで」という期間は電文の ddhh/ddhh から
+         そのまま読み取る（start_time/end_time は使わない） */
+      const g = groupTimes[gi++];
+      if (g) { ws = tafWhenDH(g.d1, g.h1); we = tafWhenDH(g.d2, g.h2); }
+      else    { ws = tafWhen(f.start_time); we = tafWhen(f.end_time); }
+    } else {
+      /* FM は次の FM/BECMG/TEMPO まで状態が入れ替わりっぱなしなので、
+         開始時刻のみで足りる */
+      ws = tafWhen(f.start_time);
+    }
+    let head = esc(kind) + ' ' + esc(ws.jst)
+      + (ws.z ? '<span class="z">（' + esc(ws.z) + '）</span>' : '');
+    if (we && we.jst !== '—') {
+      head += '〜' + esc(we.jst)
+        + (we.z ? '<span class="z">（' + esc(we.z) + '）</span>' : '');
     }
     return wxRow(head, o);
   }).join('');

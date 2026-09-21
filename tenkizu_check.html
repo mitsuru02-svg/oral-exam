@@ -1108,9 +1108,46 @@ const PT_KEY = 'tenkizu_paste';
 /* xwind は早見表と読み合わせるための目安。判定には使わない */
 const LIM = { xwind: 8, vis: 5000, ceil: 1000 };   /* kt / m / ft */
 
-/* 1本の電文から、風・視程・雲底を取り出す */
+/* 天気（現象）コード。強度・降水種別の記述子・現象そのものの3段で構成される。
+   「1500 BR」のように視程の直後に置かれる BR（もや）や RA（雨）などが、
+   これまでどこにも訳されず読み解きから漏れていたため追加する */
+const WX_DESC = { MI:'地表の', PR:'部分的な', BC:'まばらな', DR:'地表を吹く', BL:'高く吹く', SH:'にわか', TS:'雷を伴う', FZ:'着氷性の' };
+const WX_PHEN = { DZ:'霧雨', RA:'雨', SN:'雪', SG:'細氷雪', IC:'細氷', PL:'氷あられ', GR:'あられ（大粒）', GS:'あられ（小粒）', UP:'不明な降水', BR:'もや', FG:'霧', FU:'煙', VA:'火山灰', DU:'じん', SA:'砂', HZ:'煙霧', PY:'水しぶき', PO:'じん旋風', SQ:'スコール', FC:'ファネル雲', SS:'砂じんあらし', DS:'じんあらし' };
+
+/* 天気コード1トークンを日本語に。分解できなければ null を返し、
+   誤って無関係な英字トークン（滑走路名や局名など）を訳さないようにする */
+function wxPhenomJa(token) {
+  let t = token, prefix = '';
+  if (t.startsWith('VC')) { prefix = '付近で'; t = t.slice(2); }
+  else if (t[0] === '-' || t[0] === '+') { prefix = t[0] === '-' ? '弱い' : '強い'; t = t.slice(1); }
+  const parts = [];
+  while (t.length >= 2) {
+    const c2 = t.slice(0, 2);
+    if (WX_DESC[c2]) { parts.push(WX_DESC[c2]); t = t.slice(2); continue; }
+    if (WX_PHEN[c2]) { parts.push(WX_PHEN[c2]); t = t.slice(2); continue; }
+    return null;
+  }
+  if (t.length || !parts.length) return null;
+  return prefix + parts.join('');
+}
+
+/* 電文（1期間分の断片でよい）から天気コードをすべて拾って日本語の配列にする。
+   トークンを空白で区切って判定する。「-RA」「+TSRA」のように先頭が
+   +／-のときは、その文字と直前の空白の間に \b が立たず正規表現の
+   \b 境界指定では取り落とすため、単語境界に頼らず分割する */
+function wxPhenomFromRaw(raw) {
+  const out = [];
+  for (const tok of String(raw || '').split(/\s+/)) {
+    const ja = wxPhenomJa(tok);
+    if (ja) out.push(ja);
+  }
+  return out;
+}
+
+/* 1本の電文から、風・視程・雲底・天気を取り出す */
 function parseMetar(line) {
   const o = { raw: line };
+  o.wx = wxPhenomFromRaw(line);
   const st = line.match(/\b([A-Z]{4})\b/);
   o.station = st ? st[1] : '';
 
@@ -1181,6 +1218,9 @@ function wxVals(o) {
   const wind = windText(o);
   const vis = '視程' + (o.vis == null ? '—' : (o.vis >= 9999 ? '10km+' : (o.vis / 1000).toFixed(1) + 'km'));
   const cei = o.ceil == null ? '雲底なし' : ('雲底' + o.ceil.toLocaleString() + 'ft');
+  /* 天気（BR・SHRA 等）は視程・雲底の悪化理由に直結するので、
+     風・視程・雲底と並べてメイン行に出す */
+  const wx = (o.wx && o.wx.length) ? '　天気' + o.wx.join('・') : '';
 
   /* 雲は層ごとに、気温・露点・気圧も省かずに出す。
      電文を読み下せることが試験でも実務でも要るので */
@@ -1193,7 +1233,7 @@ function wxVals(o) {
   }
   if (o.qnh != null) rest.push('気圧' + o.qnh + 'hPa');
 
-  return `<div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}</div>`
+  return `<div class="d">${esc(wind)}　${esc(vis)}　${esc(cei)}${esc(wx)}</div>`
     + (rest.length ? '<div class="d sub">' + esc(rest.join('　／　')) + '</div>' : '');
 }
 
@@ -1439,6 +1479,9 @@ function avwxToObj(d) {
     /* 風向の変動幅（100V170）は AVWX の解析結果には無いので、
        電文から常に拾う */
     if (p.varLo != null) { o.varLo = p.varLo; o.varHi = p.varHi; }
+    /* 天気（BR・RA・SHRA 等）も AVWX の構造化フィールドを使わず、
+       電文から常に拾う */
+    o.wx = p.wx;
   }
   return o;
 }

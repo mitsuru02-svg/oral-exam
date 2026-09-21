@@ -1527,8 +1527,19 @@ function avwxTafRows(taf, noRaw) {
     const o = avwxToObj(f);
     const w = tafWhen(f.start_time);
     const kind = ({ FROM: 'FM', BECMG: 'BECMG', TEMPO: 'TEMPO', INTER: 'INTER' })[f.type] || (f.type || '');
-    const head = esc(kind) + ' ' + esc(w.jst)
+    let head = esc(kind) + ' ' + esc(w.jst)
       + (w.z ? '<span class="z">（' + esc(w.z) + '）</span>' : '');
+    /* BECMG・TEMPO・INTER には開始だけでなく終了時刻もあり、その期間だけの
+       変化を示す。FM は次の FM/BECMG/TEMPO まで状態が入れ替わりっぱなしなので
+       開始時刻のみで足りるが、BECMG/TEMPO/INTER は終了時刻も出さないと
+       「何時から何時まで」という期間が読み解きに反映されない */
+    if (kind === 'BECMG' || kind === 'TEMPO' || kind === 'INTER') {
+      const we = tafWhen(f.end_time);
+      if (we.jst !== '—') {
+        head += '〜' + esc(we.jst)
+          + (we.z ? '<span class="z">（' + esc(we.z) + '）</span>' : '');
+      }
+    }
     return wxRow(head, o);
   }).join('');
   return raw + '<div class="taf-per">' + rows + '</div>';

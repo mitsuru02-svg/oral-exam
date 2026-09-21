@@ -616,6 +616,14 @@ body.wide .imgsw { display:none; }
   position:absolute; left:0; right:0; bottom:calc(10px + env(safe-area-inset-bottom));
   text-align:center; color:#8b949e; font-size:12px; pointer-events:none;
 }
+/* 一画面表示のカードと同じスライダー・自動送りボタンを、拡大表示の
+   下部にも複製して置く場所。何も複製されていないときは表示しない */
+.lb-slide-wrap {
+  position:absolute; left:16px; right:16px; bottom:calc(36px + env(safe-area-inset-bottom));
+  max-width:520px; margin:0 auto;
+}
+.lb-slide-wrap:empty { display:none; }
+.lb-slide-wrap .playbtn { display:block; margin:0 auto 8px; }
 /* 画像読み込みの一括スイッチ */
 .imgsw {
   display:flex; align-items:center; gap:10px; margin:14px 0 0;
@@ -1102,6 +1110,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   <button class="lb-nav lb-next" id="lbNext" onclick="event.stopPropagation(); lbStep(1)">›</button>
   <div id="lbIn" onclick="event.stopPropagation()"></div>
   <div class="lb-cap" id="lbCap"></div>
+  <div class="lb-slide-wrap" id="lbSlideWrap" onclick="event.stopPropagation()"></div>
 </div>
 
 <div class="verdict">
@@ -2724,6 +2733,7 @@ function setSatPlayBtn(key, on) {
   if (!b) return;
   b.dataset.on = on ? '1' : '0';
   b.textContent = on ? '⏸ 停止' : '▶ 自動送り';
+  lbRefreshIfOpen(key);   /* 拡大表示中なら、複製した自動送りボタンの表示も揃える */
 }
 function stopSatPlay(key) {
   if (!satPlay[key]) return;
@@ -2739,6 +2749,7 @@ async function toggleSatPlay(key) {
   while (satPlay[key]) {
     satPreview(key);
     await loadShot(key, true);
+    lbRefreshIfOpen(key);   /* 拡大表示中なら、1コマ送るたびに反映する */
     if (!satPlay[key]) break;
     if ((satBack[key] || 0) <= 0) { stopSatPlay(key); break; }   /* 最新まで来たら止まる */
     satBack[key] = satBack[key] - 1;
@@ -2752,8 +2763,9 @@ function setSat(key, v) {
   satBack[key] = (SAT_STEPS - 1) - (+v);       /* 右へ動かすほど新しい */
   /* 指を動かしている間に何度も読みにいかない。止まってから取りにいく */
   clearTimeout(satTimer[key]);
-  satTimer[key] = setTimeout(() => loadShot(key, true), 220);
+  satTimer[key] = setTimeout(() => { loadShot(key, true).then(() => lbRefreshIfOpen(key)); }, 220);
   satPreview(key);
+  lbRefreshIfOpen(key);   /* スライダーの位置（キャプション等）だけは動かした瞬間に反映する */
 }
 
 /* 指を動かしている最中は、まだ読んでいなくても目盛りだけ先に動かす */
@@ -3176,7 +3188,7 @@ async function loadShot(key, manual) {
 }
 
 const SIGWX_FTS = [3, 6, 9];
-function setFT(h) { sigwxFT = h; loadShot('sigwx', true); }
+function setFT(h) { sigwxFT = h; loadShot('sigwx', true).then(() => lbRefreshIfOpen('sigwx')); }
 function setSigwxIdx(i) { setFT(SIGWX_FTS[+i] || 3); }
 function syncSigwxSlider() {
   const r = document.getElementById('sigwxRange');
@@ -3197,7 +3209,7 @@ function syncChartSlider() {
   });
 }
 function setChartIdx(i) { setChart(CHART_KINDS[+i] || 'now'); }
-function setChart(k) { chartKind = k; loadShot('chart', true); }
+function setChart(k) { chartKind = k; loadShot('chart', true).then(() => lbRefreshIfOpen('chart')); }
 
 function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'metar'].forEach(k => loadShot(k)); }
 
@@ -3259,11 +3271,42 @@ function lbNavInfo(key) {
   return null;
 }
 
+/* 元のカードのスライダー（.tslide）・自動送りボタン（ir/visのみ）を
+   そのまま複製して拡大表示に差し込む。id はそのまま複製すると
+   ページ内に重複してしまうので剥がす（inline の oninput/onclick は
+   属性としてそのまま効くので、複製後も同じ関数を呼べる） */
+function stripIds(node) {
+  if (node.id) node.removeAttribute('id');
+  node.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  return node;
+}
+function lbCloneControls(key) {
+  const wrap = document.getElementById('lbSlideWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!key) return;
+  if (key === 'ir' || key === 'vis') {
+    const playBtn = document.getElementById('satPlay-' + key);
+    if (playBtn) wrap.appendChild(stripIds(playBtn.cloneNode(true)));
+  }
+  const rangeId = (key === 'ir' || key === 'vis') ? ('satRange-' + key)
+    : key === 'sigwx' ? 'sigwxRange' : key === 'chart' ? 'chartRange' : null;
+  const range = rangeId && document.getElementById(rangeId);
+  const slide = range && range.closest('.tslide');
+  if (slide) {
+    const clone = stripIds(slide.cloneNode(true));
+    const cloneRange = clone.querySelector('input[type=range]');
+    if (cloneRange) cloneRange.value = range.value;   /* 生きた value を複製にも反映する */
+    wrap.appendChild(clone);
+  }
+}
+
 function lbSyncNav() {
   const info = lbKey ? lbNavInfo(lbKey) : null;
   const prevBtn = document.getElementById('lbPrev');
   const nextBtn = document.getElementById('lbNext');
   const cap = document.getElementById('lbCap');
+  lbCloneControls(lbKey);
   if (!info) {
     if (prevBtn) prevBtn.style.display = 'none';
     if (nextBtn) nextBtn.style.display = 'none';
@@ -3288,6 +3331,26 @@ function closeLb(e) {
   lbKey = null;
 }
 
+/* 元のカード（box-ir 等）にすでに出ている画像を拡大表示へそのまま
+   反映する。スライダー・自動送りでの更新後に呼ぶ */
+function lbRefreshImage(key) {
+  const box = document.getElementById('box-' + key);
+  const fresh = box && (box.querySelector('img') || box.querySelector('.tiles'));
+  if (fresh) {
+    const inn = document.getElementById('lbIn');
+    inn.innerHTML = ''; inn.appendChild(fresh.cloneNode(true));
+  }
+}
+/* 拡大表示がそのkeyで開いているときだけ、画像とスライダー・ボタンの
+   見た目を更新する。スライダーのoninput・自動送りのトグルなど、
+   カード側の操作で状態が変わったときに呼ぶ */
+function lbRefreshIfOpen(key) {
+  const lb = document.getElementById('lb');
+  if (!lb || !lb.classList.contains('on') || lbKey !== key) return;
+  lbRefreshImage(key);
+  lbSyncNav();
+}
+
 /* 前後のコマを読み込んで拡大表示の中身だけ差し替える。
    元のカード（box-ir 等）のスライダー・時刻表示も一緒に更新される */
 async function lbStep(dir) {
@@ -3310,12 +3373,7 @@ async function lbStep(dir) {
       chartKind = CHART_KINDS[next];
       await loadShot('chart', true);
     }
-    const box = document.getElementById('box-' + lbKey);
-    const fresh = box && (box.querySelector('img') || box.querySelector('.tiles'));
-    if (fresh) {
-      const inn = document.getElementById('lbIn');
-      inn.innerHTML = ''; inn.appendChild(fresh.cloneNode(true));
-    }
+    lbRefreshImage(lbKey);
   } finally {
     lbBusy = false; lbSyncNav();
   }

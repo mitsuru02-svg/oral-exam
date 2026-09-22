@@ -1824,6 +1824,9 @@ const TTS_FIX = [
   /* 漢字のままだと読みを外す語。かなにして渡す */
   [/赤外/g, 'せきがい'], [/雲頂/g, 'うんちょう'], [/雲塊/g, 'うんかい'],
   [/雲底/g, 'うんてい'], [/露点/g, 'ろてん'],
+  /* 「本州上空」の「上空」まで拾って「本州じょう空」にしないよう、
+     直後が「空」でないときだけ変換する */
+  [/本州上(?!空)/g, 'ほんしゅうじょう'],
   /* 「衰えてはいません」の「は」は助詞（発音は「わ」）なのに、
      読み上げでは字のまま「は」と読まれてしまう */
   [/衰えてはいません/g, 'おとろえてわいません'],
@@ -1980,10 +1983,30 @@ function ttsPauseToggle() {
     ttsPauseEl.textContent = paused ? '▶ 再開' : '⏸ 一時停止';
   }
 }
+/* 読み上げ中に画面がロックされるとJSが一時停止し、読み上げが途中で
+   止まってしまうため、読み上げ中は画面スリープを止める。
+   非対応環境（wakeLock APIが無い端末）では何もしない */
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    }
+  } catch (e) { /* 非対応・拒否時は無視 */ }
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && ttsOn) requestWakeLock();
+});
+
 function ttsStop() {
   try { window.speechSynthesis.cancel(); } catch (e) {}
   if (ttsOn) { ttsOn.dataset.on = '0'; ttsOn.textContent = '🔊 読み上げ'; ttsOn = null; }
   ttsRemovePauseBtn();
+  releaseWakeLock();
 }
 function ttsSpeak(btn, getText) {
   if (!('speechSynthesis' in window)) { alert('この端末では読み上げが使えません'); return; }
@@ -2004,6 +2027,7 @@ function ttsSpeak(btn, getText) {
   btn.dataset.on = '1';
   btn.textContent = '⏹ 停止';
   ttsAddPauseBtn(btn);
+  requestWakeLock();
   try { window.speechSynthesis.speak(u); } catch (e) { ttsStop(); }
 }
 /* 画面の一部分を読ませる。読み上げボタン自身の文字は拾わない */

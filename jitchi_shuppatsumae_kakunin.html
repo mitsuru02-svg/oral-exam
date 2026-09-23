@@ -674,8 +674,10 @@
             <div class="doc-photo-cap">実物：耐空証明書・運用限界等指定書（JA20HC）── クリックで拡大</div>
           </div>
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_hikou_kitei_moku.jpg" alt="飛行規程 目次の実物（ASK21）" onclick="openDocPhoto(this)">
-            <div class="doc-photo-cap">実物：飛行規程 目次（ASK21）── クリックで拡大</div>
+            <img class="doc-photo" src="assets/docs_hikou_kitei_p1.png" alt="飛行規程 表紙の実物（アレキサンダー・シュライハー式ASK21型／JA20HC）"
+                 data-more='[{"src":"assets/docs_hikou_kitei_p45.png","alt":"別添1　三面図（Center line adjustment 1000：52 horizontal）の実物"}]'
+                 onclick="openDocPhoto(this)">
+            <div class="doc-photo-cap">実物：飛行規程 表紙（ASK21・JA20HC）── クリックで拡大（›で別添1 三面図も見られます）</div>
           </div>
           <div class="doc-photo-item">
             <img class="doc-photo" src="assets/docs_koku_nisshi.jpg" alt="航空日誌の実物（表紙）" onclick="openDocPhoto(this)">
@@ -1753,9 +1755,16 @@ let docGallery = [];
 let docGalleryIdx = 0;
 
 function openDocPhoto(imgEl) {
-  const wrap = imgEl.closest('.doc-photo-wrap');
-  docGallery = wrap ? Array.from(wrap.querySelectorAll('img.doc-photo')) : [imgEl];
-  docGalleryIdx = Math.max(0, docGallery.indexOf(imgEl));
+  const more = imgEl.dataset.more ? JSON.parse(imgEl.dataset.more) : null;
+  if (more) {
+    docGallery = [{ src: imgEl.src, alt: imgEl.alt || '' }, ...more];
+    docGalleryIdx = 0;
+  } else {
+    const wrap = imgEl.closest('.doc-photo-wrap');
+    const imgs = wrap ? Array.from(wrap.querySelectorAll('img.doc-photo')) : [imgEl];
+    docGallery = imgs.map(i => ({ src: i.src, alt: i.alt || '' }));
+    docGalleryIdx = Math.max(0, imgs.indexOf(imgEl));
+  }
   showDocPhoto();
   document.getElementById('docLb').classList.add('show');
 }

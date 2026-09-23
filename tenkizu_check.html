@@ -1777,7 +1777,7 @@ function avwxTafCard(r) {
   /* 発表時刻の直後にある「1000/1106」＝TAF全体の有効期間。これも
      生電文にしか出ておらず、説明が無かった */
   const valid = tafValidity((r.t && r.t.raw) || '');
-  return `<div class="pt-card ${fc.length ? (anyBad ? 'ng' : 'ok') : ''}">
+  return `<div class="pt-card ${fc.length ? 'ok' : ''}">
     <div class="pt-st">${esc(r.ic + ' ' + nm)}${tag}</div>
     ${issued ? '<div class="pt-when">発表：' + issued + '</div>' : ''}
     ${valid ? '<div class="pt-when">有効期間：' + valid + '</div>' : ''}

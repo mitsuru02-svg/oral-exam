@@ -371,7 +371,22 @@
     align-items:center; justify-content:center; padding:24px; cursor:zoom-out;
   }
   #docLb.show{display:flex;}
-  #docLb img{max-width:100%; max-height:100%; border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,.6);}
+  #docLb img{max-width:100%; max-height:100%; border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,.6); cursor:default;}
+  .doc-lb-btn{
+    position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px;
+    border-radius:50%; border:1px solid rgba(255,255,255,.25); background:rgba(22,27,34,.7);
+    color:#e6edf3; font-size:24px; line-height:1; cursor:pointer; display:flex;
+    align-items:center; justify-content:center; z-index:2001;
+  }
+  .doc-lb-btn:hover{background:rgba(22,27,34,.95);}
+  .doc-lb-prev{left:14px;}
+  .doc-lb-next{right:14px;}
+  .doc-lb-close{position:absolute; top:14px; right:14px; width:38px; height:38px; font-size:19px;}
+  .doc-lb-count{
+    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+    color:#e6edf3; font-size:12.5px; background:rgba(22,27,34,.7); padding:3px 12px;
+    border-radius:20px; z-index:2001;
+  }
 
   /* TTS controls */
   /* かつて position:sticky; top:0 だったが、ヘッダー（sticky, z-index:999）の
@@ -651,27 +666,27 @@
         </ul>
         <div class="doc-photo-wrap">
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_touroku.jpg" alt="航空機登録証明書の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_touroku.jpg" alt="航空機登録証明書の実物（JA20HC）" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：航空機登録証明書（JA20HC）── クリックで拡大</div>
           </div>
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_taiku_p1.jpg" alt="耐空証明書・運用限界等指定書の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_taiku_p1.jpg" alt="耐空証明書・運用限界等指定書の実物（JA20HC）" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：耐空証明書・運用限界等指定書（JA20HC）── クリックで拡大</div>
           </div>
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_hikou_kitei_moku.jpg" alt="飛行規程 目次の実物（ASK21）" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_hikou_kitei_moku.jpg" alt="飛行規程 目次の実物（ASK21）" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：飛行規程 目次（ASK21）── クリックで拡大</div>
           </div>
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_koku_nisshi.jpg" alt="航空日誌の実物（表紙）" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_koku_nisshi.jpg" alt="航空日誌の実物（表紙）" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：航空日誌（表紙）── クリックで拡大</div>
           </div>
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_koku_zu.jpg" alt="区分航空図（JAPA-501）の実物" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_koku_zu.jpg" alt="区分航空図（JAPA-501）の実物" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：区分航空図（JAPA-501）── クリックで拡大</div>
           </div>
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_musen_p1.jpg" alt="無線局免許状の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_musen_p1.jpg" alt="無線局免許状の実物（JA20HC）" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：無線局免許状（JA20HC）── クリックで拡大</div>
           </div>
         </div>
@@ -887,7 +902,7 @@
         </p>
         <div class="doc-photo-wrap">
           <div class="doc-photo-item">
-            <img class="doc-photo" src="assets/docs_taiku_p13.jpg" alt="重量・重心チャート（単座・複座）の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+            <img class="doc-photo" src="assets/docs_taiku_p13.jpg" alt="重量・重心チャート（単座・複座）の実物（JA20HC）" onclick="openDocPhoto(this)">
             <div class="doc-photo-cap">実物：重量・重心チャート 単座・複座（JA20HC）── クリックで拡大</div>
           </div>
         </div>
@@ -1541,59 +1556,59 @@
           </p>
           <div class="doc-photo-wrap" style="margin-top:10px;">
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p2.jpg" alt="耐空検査準備作業報告書 表紙・目次の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p2.jpg" alt="耐空検査準備作業報告書 表紙・目次の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：表紙・目次（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p3.jpg" alt="航空機現況表の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p3.jpg" alt="航空機現況表の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：1．航空機現況表（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p4.jpg" alt="航空機経歴表の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p4.jpg" alt="航空機経歴表の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：2．航空機経歴表（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p5.jpg" alt="耐空性改善通報（TCD）実施状況の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p5.jpg" alt="耐空性改善通報（TCD）実施状況の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：3．耐空性改善通報（TCD）実施状況（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p6.jpg" alt="飛行規程の状況の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p6.jpg" alt="飛行規程の状況の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：4．飛行規程の状況（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p7.jpg" alt="運用様式限界及び無線航法機器等装備状況表の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p7.jpg" alt="運用様式限界及び無線航法機器等装備状況表の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：5．運用様式限界及び無線航法機器等装備状況表（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p8.jpg" alt="作業の概要の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p8.jpg" alt="作業の概要の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：6．作業の概要（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p9.jpg" alt="不具合処理記録の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p9.jpg" alt="不具合処理記録の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：7．不具合処理記録（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p10.jpg" alt="前回検査後の不具合・主要備品交換記録の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p10.jpg" alt="前回検査後の不具合・主要備品交換記録の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：8．前回検査後の不具合／9．主要備品交換記録（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p11.jpg" alt="計測記録　重量及び重心・各部重量の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p11.jpg" alt="計測記録　重量及び重心・各部重量の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：10．計測記録　I重量及び重心／II各部重量（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p12.jpg" alt="舵角測定の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p12.jpg" alt="舵角測定の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：III．舵角測定（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p13.jpg" alt="重量・重心チャート（単座・複座）の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p13.jpg" alt="重量・重心チャート（単座・複座）の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：IV．重量・重心チャート（単座・複座）（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p14.jpg" alt="主翼固有振動数の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p14.jpg" alt="主翼固有振動数の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：V．主翼固有振動数（JA20HC）── クリックで拡大</div>
             </div>
             <div class="doc-photo-item">
-              <img class="doc-photo" src="assets/docs_taiku_p15.jpg" alt="装備品の名称・形式の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <img class="doc-photo" src="assets/docs_taiku_p15.jpg" alt="装備品の名称・形式の実物（JA20HC）" onclick="openDocPhoto(this)">
               <div class="doc-photo-cap">実物：装備品の名称・形式（JA20HC）── クリックで拡大</div>
             </div>
           </div>
@@ -1709,20 +1724,53 @@
   </main>
 </div>
 
-<div id="docLb" onclick="closeDocPhoto()"><img id="docLbImg" alt=""></div>
+<div id="docLb" onclick="closeDocPhoto()">
+  <button class="doc-lb-btn doc-lb-prev" onclick="event.stopPropagation(); docPhotoNav(-1)">‹</button>
+  <img id="docLbImg" alt="" onclick="event.stopPropagation()">
+  <button class="doc-lb-btn doc-lb-next" onclick="event.stopPropagation(); docPhotoNav(1)">›</button>
+  <button class="doc-lb-btn doc-lb-close" onclick="event.stopPropagation(); closeDocPhoto()">✕</button>
+  <div class="doc-lb-count" id="docLbCount"></div>
+</div>
 
 <script>
-/* 実物書類の写真サムネイル。クリックで拡大表示、もう一度クリックで閉じる */
-function openDocPhoto(src, alt) {
-  const lb = document.getElementById('docLb');
-  const img = document.getElementById('docLbImg');
-  img.src = src;
-  img.alt = alt || '';
-  lb.classList.add('show');
+/* 実物書類の写真サムネイル。クリックで拡大表示。
+   同じ .doc-photo-wrap 内に複数枚あるときは、‹ › ボタンでページを前後に送れる。
+   背景（写真の外）をクリックすると閉じる。 */
+let docGallery = [];
+let docGalleryIdx = 0;
+
+function openDocPhoto(imgEl) {
+  const wrap = imgEl.closest('.doc-photo-wrap');
+  docGallery = wrap ? Array.from(wrap.querySelectorAll('img.doc-photo')) : [imgEl];
+  docGalleryIdx = Math.max(0, docGallery.indexOf(imgEl));
+  showDocPhoto();
+  document.getElementById('docLb').classList.add('show');
+}
+function showDocPhoto() {
+  const img = docGallery[docGalleryIdx];
+  const lbImg = document.getElementById('docLbImg');
+  lbImg.src = img.src;
+  lbImg.alt = img.alt || '';
+  const multi = docGallery.length > 1;
+  document.querySelector('.doc-lb-prev').style.display = multi ? '' : 'none';
+  document.querySelector('.doc-lb-next').style.display = multi ? '' : 'none';
+  document.getElementById('docLbCount').style.display = multi ? '' : 'none';
+  document.getElementById('docLbCount').textContent = multi ? (docGalleryIdx + 1) + ' / ' + docGallery.length : '';
+}
+function docPhotoNav(dir) {
+  if (docGallery.length < 2) return;
+  docGalleryIdx = (docGalleryIdx + dir + docGallery.length) % docGallery.length;
+  showDocPhoto();
 }
 function closeDocPhoto() {
   document.getElementById('docLb').classList.remove('show');
 }
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('docLb').classList.contains('show')) return;
+  if (e.key === 'ArrowLeft') docPhotoNav(-1);
+  else if (e.key === 'ArrowRight') docPhotoNav(1);
+  else if (e.key === 'Escape') closeDocPhoto();
+});
 
 /* ══════════ 共通：読み上げ設定の保存と共有 ══════════
    速度と音声の選択は全ページで同じキーに保存する。

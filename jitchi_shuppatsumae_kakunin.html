@@ -305,6 +305,15 @@
   ul.plist{list-style:none; margin:14px 0;}
   ul.plist li{padding:5px 0 5px 22px; position:relative; color:var(--text); font-size:15px;}
   ul.plist li::before{content:"▸"; position:absolute; left:0; color:var(--amber);}
+  .jump-link{color:inherit; text-decoration:none; border-bottom:1px dashed var(--line);}
+  .jump-link:hover{color:var(--cyan); border-bottom-color:var(--cyan);}
+  .page-link-btn{
+    display:inline-flex; align-items:center; gap:6px; margin:2px 0 12px;
+    padding:8px 14px; border-radius:8px; border:1px solid var(--cyan);
+    color:var(--cyan); text-decoration:none; font-size:13.5px; font-weight:600;
+  }
+  .page-link-btn:hover{background:var(--cyan); color:#0d1117;}
+  .page-link-btn .ext{font-size:11px; opacity:.8;}
 
   /* Q&A */
   .qa{border:1px solid var(--line); border-radius:6px; margin:10px 0; overflow:hidden;}
@@ -541,12 +550,12 @@
           機長の出発前確認事項は、<strong>航空法第73条の2</strong>に定められています。この6項目を確認しなければ、航空機を出発させてはなりません。
         </p>
         <ul class="plist">
-          <li data-tts data-text="1つ目、当該航空機及びこれに装備すべきものの整備状況。">1．当該航空機及びこれに装備すべきものの整備状況</li>
-          <li data-tts data-text="2つ目、離陸重量、着陸重量、重心位置及び重量分布。">2．離陸重量、着陸重量、重心位置及び重量分布</li>
-          <li data-tts data-text="3つ目、航空法第99条第1項の規定により国土交通大臣が提供する航空情報。">3．国土交通大臣が提供する航空情報（航空法第99条第1項）</li>
-          <li data-tts data-text="4つ目、当該航行に必要な気象情報。">4．当該航行に必要な気象情報</li>
-          <li data-tts data-text="5つ目、燃料及び滑油の搭載量及びその品質。上級滑空機には該当しません。">5．燃料及び滑油の搭載量及びその品質（上級滑空機には該当しません）</li>
-          <li data-tts data-text="6つ目、積載物の安全性。">6．積載物の安全性</li>
+          <li data-tts data-text="1つ目、当該航空機及びこれに装備すべきものの整備状況。"><a href="#ch2" class="jump-link">1．当該航空機及びこれに装備すべきものの整備状況</a></li>
+          <li data-tts data-text="2つ目、離陸重量、着陸重量、重心位置及び重量分布。"><a href="#ch3" class="jump-link">2．離陸重量、着陸重量、重心位置及び重量分布</a></li>
+          <li data-tts data-text="3つ目、航空法第99条第1項の規定により国土交通大臣が提供する航空情報。"><a href="#ch4" class="jump-link">3．国土交通大臣が提供する航空情報（航空法第99条第1項）</a></li>
+          <li data-tts data-text="4つ目、当該航行に必要な気象情報。"><a href="#ch4" class="jump-link">4．当該航行に必要な気象情報</a></li>
+          <li data-tts data-text="5つ目、燃料及び滑油の搭載量及びその品質。上級滑空機には該当しません。"><a href="#ch5" class="jump-link">5．燃料及び滑油の搭載量及びその品質（上級滑空機には該当しません）</a></li>
+          <li data-tts data-text="6つ目、積載物の安全性。"><a href="#ch5" class="jump-link">6．積載物の安全性</a></li>
         </ul>
         <div class="callout">
           <span class="cal-label">確認が完了するタイミング</span>
@@ -976,6 +985,7 @@
         <p data-tts data-text="4項目め、当該航行に必要な気象情報の確認です。地上天気図、高層天気図（850、700、500、300ヘクトパスカル）と悪天天気図、そしてメターとタフを確認します。">
           4項目め、当該航行に必要な気象情報の確認です。
         </p>
+        <a href="tenkizu_check.html" class="page-link-btn">🌤 天気図確認ページを開く<span class="ext">↗</span></a>
         <ul class="plist">
           <li data-tts data-text="地上天気図。">地上天気図</li>
           <li data-tts data-text="高層天気図。850、700、500、300ヘクトパスカル。悪天天気図。">高層天気図（850／700／500／300hPa）、悪天天気図</li>

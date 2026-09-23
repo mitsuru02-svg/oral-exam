@@ -353,9 +353,10 @@
   .fig-img-b{flex:1 1 220px; max-width:240px; width:100%; height:auto;}
 
   /* 実物書類の写真サムネイル。小さく表示し、クリックで拡大 */
-  .doc-photo-wrap{margin:10px 0 4px;}
+  .doc-photo-wrap{margin:10px 0 4px; display:flex; gap:14px; flex-wrap:wrap;}
+  .doc-photo-item{flex:0 0 auto;}
   .doc-photo{max-width:130px; width:100%; height:auto; border-radius:8px; border:1px solid var(--line); cursor:zoom-in; display:block; background:#fff;}
-  .doc-photo-cap{font-size:11.5px; color:var(--text-dim); margin-top:5px;}
+  .doc-photo-cap{font-size:11.5px; color:var(--text-dim); margin-top:5px; max-width:130px;}
   #docLb{
     display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2000;
     align-items:center; justify-content:center; padding:24px; cursor:zoom-out;
@@ -638,8 +639,14 @@
           <li data-tts data-text="無線局免許状。あるかどうかのチェックでよいです。">無線局免許状 ── あるかどうかのチェックでよい</li>
         </ul>
         <div class="doc-photo-wrap">
-          <img class="doc-photo" src="assets/docs_taiku_p1.jpg" alt="耐空証明書・運用限界等指定書の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
-          <div class="doc-photo-cap">実物：耐空証明書・運用限界等指定書（JA20HC）── クリックで拡大</div>
+          <div class="doc-photo-item">
+            <img class="doc-photo" src="assets/docs_taiku_p1.jpg" alt="耐空証明書・運用限界等指定書の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+            <div class="doc-photo-cap">実物：耐空証明書・運用限界等指定書（JA20HC）── クリックで拡大</div>
+          </div>
+          <div class="doc-photo-item">
+            <img class="doc-photo" src="assets/docs_musen_p1.jpg" alt="無線局免許状の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+            <div class="doc-photo-cap">実物：無線局免許状（JA20HC）── クリックで拡大</div>
+          </div>
         </div>
         <div class="callout amber">
           <span class="cal-label">記入例（ASK-21／JA20HC）</span>
@@ -1465,8 +1472,10 @@
         <div class="callout">
           <span class="cal-label">装備品リスト（JA20HC・耐空検査準備作業報告書 2026.4.4 より）</span>
           <div class="doc-photo-wrap">
-            <img class="doc-photo" src="assets/docs_taiku_p2.jpg" alt="耐空検査準備作業報告書 表紙・目次の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
-            <div class="doc-photo-cap">実物：耐空検査準備作業報告書 表紙・目次（JA20HC）── クリックで拡大</div>
+            <div class="doc-photo-item">
+              <img class="doc-photo" src="assets/docs_taiku_p2.jpg" alt="耐空検査準備作業報告書 表紙・目次の実物（JA20HC）" onclick="openDocPhoto(this.src, this.alt)">
+              <div class="doc-photo-cap">実物：耐空検査準備作業報告書 表紙・目次（JA20HC）── クリックで拡大</div>
+            </div>
           </div>
           <table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:4px;">
             <tr style="border-bottom:1px solid var(--line);">

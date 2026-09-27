@@ -998,7 +998,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <button class="exp-go" onclick="explainShot('sfcwind','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-sfcwind"></div>
-    <div class="shot-bar"><button onclick="toggleUrlSet('sfcwind')">⚙ URL</button><button onclick="loadShot('sfcwind',true)">再読込</button></div>
+    <div class="shot-bar"><button class="playbtn" id="sfcwindPlay" onclick="toggleSfcwindPlay()">▶ 自動送り</button><button onclick="toggleUrlSet('sfcwind')">⚙ URL</button><button onclick="loadShot('sfcwind',true)">再読込</button></div>
     <div class="urlset" id="url-sfcwind">
       <input type="url" id="urlin-sfcwind" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
       <button onclick="saveUrl('sfcwind')">保存</button>
@@ -3192,7 +3192,8 @@ async function loadShot(key, manual) {
      画像が消えて文字が出るのは目に障るので、次の図が来るまで前の図を残す */
   const hadImg = !!box.querySelector('img');
   if (hadImg) {
-    if (!satPlay[key]) box.classList.add('busy');   /* 自動送り中はちらつくので薄くしない */
+    const autoPlaying = satPlay[key] || (key === 'sfcwind' && sfcwindPlay);
+    if (!autoPlaying) box.classList.add('busy');   /* 自動送り中はちらつくので薄くしない */
   } else {
     box.innerHTML = '<div class="shot-msg">読み込み中…</div>';
     tsEl.textContent = '—';
@@ -3365,6 +3366,7 @@ function syncSigwxSlider() {
 }
 
 function setSfcwindIdx(i) {
+  stopSfcwindPlay();   /* 手で動かしたら自動送りは止める */
   sfcwindIdx = Math.max(0, Math.min(SFCWIND_TIMES.length - 1, +i));
   loadShot('sfcwind', true).then(() => lbRefreshIfOpen('sfcwind'));
 }
@@ -3374,6 +3376,38 @@ function syncSfcwindSlider() {
   document.querySelectorAll('#sfcwindLab span').forEach((sp, i) => {
     sp.dataset.on = (i === sfcwindIdx) ? '1' : '0';
   });
+}
+
+/* 自動送り。11時から16時へ1コマずつ進める。衛星（ir/vis）は36コマの
+   連続タイムラインを行き来する専用の仕組みなので、6コマの離散的な
+   時刻を進むだけの地上風には、もっと単純な専用の送りを別に作る */
+let sfcwindPlay = false;
+function setSfcwindPlayBtn(on) {
+  const b = document.getElementById('sfcwindPlay');
+  if (!b) return;
+  b.dataset.on = on ? '1' : '0';
+  b.textContent = on ? '⏸ 停止' : '▶ 自動送り';
+  lbRefreshIfOpen('sfcwind');   /* 拡大表示中なら、複製した自動送りボタンの表示も揃える */
+}
+function stopSfcwindPlay() {
+  if (!sfcwindPlay) return;
+  sfcwindPlay = false;
+  setSfcwindPlayBtn(false);
+}
+async function toggleSfcwindPlay() {
+  if (sfcwindPlay) { stopSfcwindPlay(); return; }
+  /* 最後まで来ていたら、いちばん古い11時へ戻してから始める */
+  if (sfcwindIdx >= SFCWIND_TIMES.length - 1) sfcwindIdx = 0;
+  sfcwindPlay = true;
+  setSfcwindPlayBtn(true);
+  while (sfcwindPlay) {
+    await loadShot('sfcwind', true);
+    lbRefreshIfOpen('sfcwind');   /* 拡大表示中なら、1コマ送るたびに反映する */
+    if (!sfcwindPlay) break;
+    if (sfcwindIdx >= SFCWIND_TIMES.length - 1) { stopSfcwindPlay(); break; }   /* 16時まで来たら止まる */
+    sfcwindIdx = sfcwindIdx + 1;
+    await new Promise(r => setTimeout(r, 900));
+  }
 }
 
 const CHART_KINDS = ['now', 'h24', 'h48'];
@@ -3467,6 +3501,9 @@ function lbCloneControls(key) {
   if (key === 'ir' || key === 'vis') {
     const playBtn = document.getElementById('satPlay-' + key);
     if (playBtn) wrap.appendChild(stripIds(playBtn.cloneNode(true)));
+  } else if (key === 'sfcwind') {
+    const playBtn = document.getElementById('sfcwindPlay');
+    if (playBtn) wrap.appendChild(stripIds(playBtn.cloneNode(true)));
   }
   const rangeId = (key === 'ir' || key === 'vis') ? ('satRange-' + key)
     : key === 'sigwx' ? 'sigwxRange' : key === 'sfcwind' ? 'sfcwindRange' : key === 'chart' ? 'chartRange' : null;
@@ -3557,6 +3594,7 @@ async function lbStep(dir) {
       sigwxFT = SIGWX_FTS[next];
       await loadShot('sigwx', true);
     } else if (lbKey === 'sfcwind') {
+      stopSfcwindPlay();
       sfcwindIdx = next;
       await loadShot('sfcwind', true);
     } else if (lbKey === 'chart') {

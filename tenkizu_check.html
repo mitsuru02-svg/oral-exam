@@ -734,7 +734,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
 <div class="wrap">
 
   <div class="lead">
-    大きい場から小さい場へ、<b>①総観 → ②雲の全体像 → ③下層の実況 → ④効いてくる予想 → ⑤近傍空港の数字</b> の順に見ます。
+    大きい場から小さい場へ、<b>①総観 → ②雲の全体像 → ③下層の実況 → ④効いてくる予想 → ⑤地上風 → ⑥近傍空港の数字</b> の順に見ます。
     順番が大事で、いきなり下層悪天予想図だけを見ても「なぜそうなるのか」が分からず、
     <b>その先どう変わるか</b>を読めません。最後に現地の観天望気で答え合わせをします。
   </div>
@@ -745,7 +745,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   </button>
 
   <div class="brief">
-    <button class="exp-go brief-go" onclick="explainAll()">🔎 ①〜⑤をまとめて分析する</button>
+    <button class="exp-go brief-go" onclick="explainAll()">🔎 ①〜⑥をまとめて分析する</button>
     <div class="exp" id="exp-all"></div>
     <div class="shot-note">天気図・衛星・下層悪天・近傍空港の電文をまとめて読み、1つの筋にして返します。最後に「試験官への説明の組み立て」も付きます。<b>読み込みに20〜30秒</b>かかります。</div>
   </div>
@@ -970,9 +970,74 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   </div>
 
   <!-- STEP 5 -->
-  <div class="step" id="step-metar">
+  <div class="step" id="step-sfcwind">
     <div class="step-hd">
       <div class="step-no">5</div>
+      <div class="step-hd-t"><b>地上風（RASP・滝川周辺）</b><span>離着陸判断に直結する地表の風</span></div>
+      <a class="step-open" href="kishou_matome.html" target="_blank" rel="noopener" aria-label="地上風の詳細ページを開く">開く <span class="ext">↗</span></a>
+    </div>
+    <div class="shot">
+      <div class="shot-time" id="ts-sfcwind">—</div>
+      <div class="shot-box" id="box-sfcwind"><div class="shot-msg">…</div></div>
+      <div class="tslide">
+        <input type="range" min="0" max="5" step="1" value="2" id="sfcwindRange"
+               aria-label="地上風の時刻" oninput="setSfcwindIdx(this.value)">
+        <div class="tslide-lab" id="sfcwindLab">
+          <span data-t="1100" data-on="0">11:00</span>
+          <span data-t="1200" data-on="0">12:00</span>
+          <span data-t="1300" data-on="1">13:00</span>
+          <span data-t="1400" data-on="0">14:00</span>
+          <span data-t="1500" data-on="0">15:00</span>
+          <span data-t="1600" data-on="0">16:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="side">
+    <div class="act">
+      <button class="exp-go muted" onclick="explainShot('sfcwind','detail')">🔎 詳しい解説</button>
+      <button class="exp-go" onclick="explainShot('sfcwind','concise')">📝 要点だけ</button>
+    </div>
+    <div class="exp" id="exp-sfcwind"></div>
+    <div class="shot-bar"><button onclick="toggleUrlSet('sfcwind')">⚙ URL</button><button onclick="loadShot('sfcwind',true)">再読込</button></div>
+    <div class="urlset" id="url-sfcwind">
+      <input type="url" id="urlin-sfcwind" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button onclick="saveUrl('sfcwind')">保存</button>
+      <button onclick="clearUrl('sfcwind')">解除</button>
+    </div>
+    <div class="look">
+    <div class="look-t">▸ 何を見るか</div>
+    <ul>
+      <li>矢羽根から<b>風向・風速</b>を読み、<span class="hi">滑走路との角度で横風成分</span>を出す（下の早見表）。</li>
+      <li><b>飛ぶ時間帯</b>に近いコマを見る。11時〜16時の1時間おき、滝川周辺に絞った予想。</li>
+      <li>これは<b>予想図</b>。実際の風はMETAR・現地の吹き流しで必ず裏を取る。</li>
+    </ul>
+    </div>
+    <div class="stop">
+    <div class="stop-t">⚠ 中止側の判断</div>
+    <p>横風成分（ガスト込み）が8ktを超える見込みなら、その時間帯は見送ります。</p>
+    </div>
+    <div class="shot-note">飛ぶ時間帯にいちばん近いコマを選びます。画像をタップで拡大。</div>
+    <button class="guide-link" id="guidelink-sfcwind" data-on="0" onclick="toggleGuide('sfcwind')">
+      <span class="car">▸</span>📖 図面の見方
+    </button>
+    <div class="guidebox" id="guide-sfcwind">
+      <h4>この図はどんなものか</h4>
+      <ul>
+        <li>RASP（BLIPMAP）という、滑空向けの気象予想モデルが出す<b>地上の風</b>の予想図。滝川周辺に絞った細かいマス目（Fine Grid）で計算したもの。</li>
+        <li>当日の11:00〜16:00を1時間おきに6コマ。矢羽根の向きが風向、長さ・羽根の数が風速の目安。</li>
+      </ul>
+      <h4>もっと詳しく見るには</h4>
+      <ul>
+        <li>「開く」から<b>気象情報まとめ（RASP BLIPMAP）</b>のページへ。地上風のほか、混合層の風・サーマルの強さなど、滑空に関わる項目をまとめて見られます。</li>
+      </ul>
+    </div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step" id="step-metar">
+    <div class="step-hd">
+      <div class="step-no">6</div>
       <div class="step-hd-t"><b>METAR / TAF</b><span>近傍空港の実況と予報。数字で裏を取る</span></div>
       <button class="ttsbtn hd-tts" data-on="0" onclick="ttsFrom(this, '#box-metar')">🔊 読み上げ</button>
       <a class="step-open" href="https://aviationweather.gov/data/metar/?ids=RJEC%2CRJCO%2CRJCC&amp;taf=1" target="_blank" rel="noopener" aria-label="METAR / TAF を開く">開く <span class="ext">↗</span></a>
@@ -1030,10 +1095,10 @@ table.xw td.hit { color:#f85149; font-weight:700; }
     </div>
   </div>
 
-  <!-- STEP 6 -->
+  <!-- STEP 7 -->
   <div class="step">
     <div class="step-hd">
-      <div class="step-no">6</div>
+      <div class="step-no">7</div>
       <div class="step-hd-t"><b>現地で答え合わせ</b><span>観天望気・吹き流し・実測</span></div>
       <div class="step-scale">滝川</div>
     </div>
@@ -2091,7 +2156,7 @@ function ttsBtn(sel) {
    その画像URLごと覚えておき、二度目からは取っておいたものを出す。
    ══════════════════════════════════════════════════════════════ */
 const EXP_KEY = 'tenkizu_explain';
-const EXP_TITLE = { chart:'天気図', ir:'赤外画像', vis:'可視画像', sigwx:'下層悪天予想図', metar:'近傍空港の電文' };
+const EXP_TITLE = { chart:'天気図', ir:'赤外画像', vis:'可視画像', sigwx:'下層悪天予想図', sfcwind:'地上風', metar:'近傍空港の電文' };
 
 function expCache() { try { return JSON.parse(localStorage.getItem(EXP_KEY) || '{}'); } catch (e) { return {}; } }
 function expRemember(url, text) {
@@ -2117,9 +2182,9 @@ function stripMetaLines(text) {
     .replace(/^#{0,6}\s*滝川周辺の状況(?:（[^）\n]*）)?\s*$/gm, '')
     .replace(/（約\d+字[程度前後]*）/g, '')
     /* 「総観場（①）」のような、丸数字だけのかっこ書きは表示に要らない。
-       まとめて分析のプロンプトが①〜⑤を参照するために書かせているだけで、
+       まとめて分析のプロンプトが①〜⑥を参照するために書かせているだけで、
        読み手には見出しの言葉自体で十分伝わる */
-    .replace(/（[①-⑤][①-⑤・\s]*）/g, '')
+    .replace(/（[①-⑥][①-⑥・\s]*）/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -2143,7 +2208,7 @@ function expRender(md) {
   return out.join('');
 }
 
-/* 「①〜⑤まとめて分析」の最後に出る「試験官への説明の組み立て」だけ、
+/* 「①〜⑥まとめて分析」の最後に出る「試験官への説明の組み立て」だけ、
    枠で囲んで目立たせる。ここが実際に口で話す文なので、
    読み流されないようほかの項目と見た目を分ける */
 function boxExamSection(html) {
@@ -2203,6 +2268,18 @@ async function sigwxImagesForExplain() {
   return out;
 }
 
+/* 地上風は11〜16時の6コマをまとめて渡す。1枚だけでは「そのときどうか」
+   しか分からず、知りたいのは飛ぶ時間帯にかけて風がどう変わるかなので、
+   6枚を見比べさせる */
+async function sfcwindImagesForExplain() {
+  const out = [];
+  for (const t of SFCWIND_TIMES) {
+    const url = sfcwindUrl(t);
+    if (await probeImg(url)) out.push({ label: hhmmLabel(t) + 'の地上風', url });
+  }
+  return out;
+}
+
 /* 衛星は1枚では動きが分からない。最新から20分おきに10枚を、
    古い順に並べて渡す。3時間20分ぶんの流れが1回で読める */
 const SAT_EXPLAIN_N = 10;
@@ -2233,10 +2310,10 @@ async function satImagesForExplain(key) {
   });
 }
 
-/* ①〜⑤をまとめて読む。
+/* ①〜⑥をまとめて読む。
    図は全部は送らない。総観場（天気図2枚）、雲の動き（赤外3枚）、
-   いまの雲（可視1枚）、下層の予想（悪天図1枚）の7枚に絞る。
-   ⑤の電文は画像ではなく文字で渡す（そのほうが正確で安い）。 */
+   いまの雲（可視1枚）、下層の予想（悪天図1枚）、地上風（1枚）の8枚に絞る。
+   ⑥の電文は画像ではなく文字で渡す（そのほうが正確で安い）。 */
 async function briefImages() {
   const out = [];
   try {
@@ -2255,10 +2332,13 @@ async function briefImages() {
   if (shownUrl.sigwx) {
     out.push({ label: '④下層悪天予想図　' + sigwxFT + '時間後', url: shownUrl.sigwx });
   }
+  if (shownUrl.sfcwind) {
+    out.push({ label: '⑤地上風　' + hhmmLabel(SFCWIND_TIMES[sfcwindIdx]), url: shownUrl.sfcwind });
+  }
   return out;
 }
 
-/* ⑤に出ている生電文を、そのまま文字で渡す */
+/* ⑥に出ている生電文を、そのまま文字で渡す */
 function briefText() {
   const blks = [...document.querySelectorAll('#box-metar .rawblk')];
   if (!blks.length) return '';
@@ -2269,7 +2349,7 @@ function briefText() {
     const body = pre ? pre.textContent.trim() : '';
     return (label ? label + '\n' : '') + body;
   });
-  return '⑤近傍空港の電文（旭川 RJEC・丘珠 RJCO・新千歳 RJCC）\n'
+  return '⑥近傍空港の電文（旭川 RJEC・丘珠 RJCO・新千歳 RJCC）\n'
     + lines.join('\n');
 }
 
@@ -2280,7 +2360,7 @@ async function explainAll() {
     expShow(key, '<div class="exp-err">分析には中継サーバーが要ります。</div>');
     return;
   }
-  expShow(key, '<p>①〜⑤の資料をそろえています…</p>');
+  expShow(key, '<p>①〜⑥の資料をそろえています…</p>');
   const images = await briefImages();
   const text = briefText();
   if (!images.length && !text) {
@@ -2348,8 +2428,14 @@ async function explainShot(key, style) {
     expShow(key, '<p>3・6・9時間後の3枚をそろえています…</p>');
     images = await sigwxImagesForExplain();
     if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
+  } else if (key === 'sfcwind') {
+    /* 表示中の1コマだけでなく、11〜16時の6コマをまとめて渡す。
+       飛ぶ時間帯にかけて風がどう変わるかを見るのが目的のため */
+    expShow(key, '<p>11時〜16時の6コマをそろえています…</p>');
+    images = await sfcwindImagesForExplain();
+    if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
   } else if (key === 'metar') {
-    /* ⑤は画像ではなく、いま画面に出ている電文（原文）をそのまま渡す */
+    /* ⑥は画像ではなく、いま画面に出ている電文（原文）をそのまま渡す */
     text = briefText();
   } else {
     images = shownUrl[key] ? [{ label: '', url: shownUrl[key] }] : [];
@@ -2387,7 +2473,7 @@ async function explainShot(key, style) {
 
 function expFoot(cached, images, key, style) {
   const n = (images && images.length) || 0;
-  /* ⑤（METAR/TAF）は図ではなく電文なので、断り書きの言葉を変える */
+  /* ⑥（METAR/TAF）は図ではなく電文なので、断り書きの言葉を変える */
   const src2 = key === 'metar' ? '電文' : '図';
   if (style === 'concise') {
     return '<div class="exp-foot">要点だけを簡潔にまとめた説明です。'
@@ -2399,6 +2485,9 @@ function expFoot(cached, images, key, style) {
   const src = key === 'sigwx'
     ? (n > 1 ? n + '枚（3・6・9時間後）を見比べて、時間とともにどう変わるかを読ませた説明です。'
         + '表示する時間を切り替えても内容は変わりません。<br>' : '')
+    : key === 'sfcwind'
+    ? (n > 1 ? n + '枚（11時〜16時）を見比べて、飛ぶ時間帯にかけて風がどう変わるかを読ませた説明です。'
+        + '表示する時刻を切り替えても内容は変わりません。<br>' : '')
     : key === 'metar'
     ? '近傍空港（旭川・丘珠・新千歳）のMETAR/TAFの電文をもとにした説明です。<br>'
     : n > 2
@@ -2525,6 +2614,17 @@ const SIGWX_URLS = {
   9: 'https://www.data.jma.go.jp/airinfo/data/pict/low-level_sigwx/fbsp09.png',
 };
 let sigwxFT = 3;
+
+/* 地上風（RASP BLIPMAP・北海道）。kishou_matome.html と同じ中継サーバー経由で、
+   滝川周辺に絞った細かいマス目（Fine Grid=w2）の当日ぶんを11〜16時の1時間おきで取る。
+   時刻がファイル名に入っているだけの固定パターンなので、JSONを引く必要がない */
+const RASP_BASE = 'https://oral-exam-proxy.mitsuru02.workers.dev/rasp/';
+const SFCWIND_TIMES = ['1100', '1200', '1300', '1400', '1500', '1600'];
+let sfcwindIdx = 2;
+function sfcwindUrl(t) {
+  return RASP_BASE + 'HOKKAIDO_JAPAN/FCST/sfcwind.curr.' + t + 'lst.w2.png';
+}
+function hhmmLabel(t) { return t.slice(0, 2) + ':' + t.slice(2); }
 
 /* 手で設定した画像URL。気象庁のページで図を長押し →「画像アドレスをコピー」して
    貼り付けると、以後そのURLを最優先で使う。URLが変わっても貼り直せば動き続ける。 */
@@ -3068,7 +3168,8 @@ function fallback(box, tsEl, why, key) {
   const btn = key
     ? `<br><button class="setbtn" onclick="toggleUrlSet('${key}')">画像URLを貼り付けて表示する</button>`
     : '';
-  box.innerHTML = `<div class="shot-msg"><b>この端末では画像を出せません</b>${why}<br>上の「開く」から気象庁のページでご覧ください${btn}</div>`;
+  const pageWord = key === 'sfcwind' ? '気象情報まとめ' : '気象庁';
+  box.innerHTML = `<div class="shot-msg"><b>この端末では画像を出せません</b>${why}<br>上の「開く」から${pageWord}のページでご覧ください${btn}</div>`;
   tsEl.textContent = '—';
 }
 
@@ -3185,6 +3286,21 @@ async function loadShot(key, manual) {
       () => { if (!stale()) fallback(box, tsEl, '悪天予想図を取得できませんでした。', key); }, key);
     return;
   }
+  if (key === 'sfcwind') {
+    syncSfcwindSlider();
+    const t = SFCWIND_TIMES[sfcwindIdx];
+    tryImages([{ url: sfcwindUrl(t), label: hhmmLabel(t) + '（RASP・当日予想）' }],
+      (im, label) => {
+        if (stale()) return;
+        box.innerHTML = ''; box.appendChild(im);
+        box.classList.remove('busy');
+        box.classList.add('zoom');
+        box.onclick = () => openLb(im.cloneNode(true), key);
+        tsEl.textContent = label;
+      },
+      () => { if (!stale()) fallback(box, tsEl, '地上風の図を取得できませんでした。', key); }, key);
+    return;
+  }
   if (key === 'chart') {
     syncChartSlider();
     /* list.json が読めればそれが最優先。読めないときの総当たりは、
@@ -3248,6 +3364,18 @@ function syncSigwxSlider() {
   });
 }
 
+function setSfcwindIdx(i) {
+  sfcwindIdx = Math.max(0, Math.min(SFCWIND_TIMES.length - 1, +i));
+  loadShot('sfcwind', true).then(() => lbRefreshIfOpen('sfcwind'));
+}
+function syncSfcwindSlider() {
+  const r = document.getElementById('sfcwindRange');
+  if (r) r.value = String(sfcwindIdx);
+  document.querySelectorAll('#sfcwindLab span').forEach((sp, i) => {
+    sp.dataset.on = (i === sfcwindIdx) ? '1' : '0';
+  });
+}
+
 const CHART_KINDS = ['now', 'h24', 'h48'];
 let chartKind = 'now';
 
@@ -3261,7 +3389,7 @@ function syncChartSlider() {
 function setChartIdx(i) { setChart(CHART_KINDS[+i] || 'now'); }
 function setChart(k) { chartKind = k; loadShot('chart', true).then(() => lbRefreshIfOpen('chart')); }
 
-function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'metar'].forEach(k => loadShot(k)); }
+function loadAllShots() { ['chart', 'ir', 'vis', 'sigwx', 'sfcwind', 'metar'].forEach(k => loadShot(k)); }
 
 function toggleImages() {
   imagesOn = !imagesOn;
@@ -3317,6 +3445,7 @@ function lbNavInfo(key) {
     return { idx: (SAT_STEPS - 1) - (satBack[key] || 0), max: SAT_STEPS - 1 };
   }
   if (key === 'sigwx') return { idx: Math.max(0, SIGWX_FTS.indexOf(sigwxFT)), max: SIGWX_FTS.length - 1 };
+  if (key === 'sfcwind') return { idx: sfcwindIdx, max: SFCWIND_TIMES.length - 1 };
   if (key === 'chart') return { idx: Math.max(0, CHART_KINDS.indexOf(chartKind)), max: CHART_KINDS.length - 1 };
   return null;
 }
@@ -3340,7 +3469,7 @@ function lbCloneControls(key) {
     if (playBtn) wrap.appendChild(stripIds(playBtn.cloneNode(true)));
   }
   const rangeId = (key === 'ir' || key === 'vis') ? ('satRange-' + key)
-    : key === 'sigwx' ? 'sigwxRange' : key === 'chart' ? 'chartRange' : null;
+    : key === 'sigwx' ? 'sigwxRange' : key === 'sfcwind' ? 'sfcwindRange' : key === 'chart' ? 'chartRange' : null;
   const range = rangeId && document.getElementById(rangeId);
   const slide = range && range.closest('.tslide');
   if (slide) {
@@ -3427,6 +3556,9 @@ async function lbStep(dir) {
     } else if (lbKey === 'sigwx') {
       sigwxFT = SIGWX_FTS[next];
       await loadShot('sigwx', true);
+    } else if (lbKey === 'sfcwind') {
+      sfcwindIdx = next;
+      await loadShot('sfcwind', true);
     } else if (lbKey === 'chart') {
       chartKind = CHART_KINDS[next];
       await loadShot('chart', true);

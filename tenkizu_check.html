@@ -592,11 +592,16 @@ body.wide .imgsw { display:none; }
 .lb {
   position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.94);
   display:none; align-items:center; justify-content:center; padding:12px;
+  touch-action:none;   /* 独自のピンチ拡大・ドラッグをJSで扱うので、ブラウザの既定動作を止める */
 }
 .lb.on { display:flex; }
 .lb img, .lb .tiles { max-width:100%; max-height:88vh; object-fit:contain; }
 .lb .tiles { display:grid; }
 .lb .tiles img { max-height:none; }
+/* 指2本でつまんで拡大・1本でずらす。transform-originを中心にしておくと
+   拡大の基準が画像の真ん中になり、指の位置とのずれが少ない */
+#lbIn { transform-origin:center center; }
+#lbIn.zoomed { cursor:grab; }
 .lb-x {
   position:absolute; top:calc(10px + env(safe-area-inset-top)); right:12px;
   width:38px; height:38px; border-radius:10px; border:1px solid #30363d;
@@ -1177,7 +1182,7 @@ table.xw td.hit { color:#f85149; font-weight:700; }
   </div>
 </div>
 
-<div class="lb" id="lb" onclick="closeLb(event)" ontouchstart="lbTouchStart(event)" ontouchend="lbTouchEnd(event)">
+<div class="lb" id="lb" onclick="closeLb(event)" ontouchstart="lbTouchStart(event)" ontouchmove="lbTouchMove(event)" ontouchend="lbTouchEnd(event)">
   <button class="lb-x" onclick="closeLb(event)">✕</button>
   <div class="lb-time" id="lbTime"></div>
   <button class="lb-nav lb-prev" id="lbPrev" onclick="event.stopPropagation(); lbStep(-1)">‹</button>
@@ -3559,11 +3564,13 @@ function openLb(node, key) {
   lbKey = key || null;
   const inn = document.getElementById('lbIn');
   inn.innerHTML = ''; inn.appendChild(node);
+  lbResetZoom();
   document.getElementById('lb').classList.add('on');
   lbSyncNav();
 }
 function closeLb(e) {
   if (e) e.stopPropagation();
+  lbResetZoom();
   document.getElementById('lb').classList.remove('on');
   lbKey = null;
 }
@@ -3576,6 +3583,7 @@ function lbRefreshImage(key) {
   if (fresh) {
     const inn = document.getElementById('lbIn');
     inn.innerHTML = ''; inn.appendChild(fresh.cloneNode(true));
+    lbResetZoom();   /* 表示するコマが変わるたびに、拡大は引き継がずリセットする */
   }
 }
 /* 拡大表示がそのkeyで開いているときだけ、画像とスライダー・ボタンの
@@ -3620,14 +3628,73 @@ async function lbStep(dir) {
   }
 }
 
-/* スワイプでの送り。横方向にはっきり動いたときだけ送り、縦スクロールの
-   身振りと混同しないよう斜めに近い動きは無視する */
+/* 拡大表示の中で、指2本でつまんで拡大・拡大中は1本でずらせるようにする。
+   ページ全体のピンチズームはuser-scalable=noで止めているので、
+   ここだけ自前のJSで再現する。ズームしていないときは、これまでどおり
+   1本の横スワイプで前後のコマへ送る（縦スクロールの身振りと混同しない
+   よう斜めに近い動きは無視する） */
 let lbTouchX = null, lbTouchY = null;
+let lbScale = 1, lbPanX = 0, lbPanY = 0;
+let lbPinchDist0 = 0, lbPinchScale0 = 1;
+let lbPanX0 = 0, lbPanY0 = 0, lbPanTouchX0 = 0, lbPanTouchY0 = 0;
+const LB_MAX_SCALE = 4;
+
+function lbApplyZoom() {
+  const inn = document.getElementById('lbIn');
+  if (!inn) return;
+  inn.style.transform = (lbScale === 1 && !lbPanX && !lbPanY)
+    ? '' : `translate(${lbPanX}px, ${lbPanY}px) scale(${lbScale})`;
+  inn.classList.toggle('zoomed', lbScale > 1.02);
+}
+/* 画像を切り替える（前後送り・開く・閉じる）たびに、ズームは
+   引き継がずリセットする。ズームしたまま次のコマに移ると、
+   画面のどこを見ているか分からなくなるため */
+function lbResetZoom() {
+  lbScale = 1; lbPanX = 0; lbPanY = 0;
+  lbApplyZoom();
+}
+function lbTouchDist(t0, t1) { return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY); }
+
 function lbTouchStart(e) {
-  if (!e.touches || e.touches.length !== 1) return;
-  lbTouchX = e.touches[0].clientX; lbTouchY = e.touches[0].clientY;
+  if (!e.touches) return;
+  if (e.touches.length === 2) {
+    lbTouchX = null; lbTouchY = null;   /* 2本になったらスワイプ判定は無効化 */
+    lbPinchDist0 = lbTouchDist(e.touches[0], e.touches[1]);
+    lbPinchScale0 = lbScale;
+    return;
+  }
+  if (e.touches.length === 1) {
+    if (lbScale > 1) {
+      /* ズーム中は1本指でドラッグして見る場所をずらす */
+      lbTouchX = null; lbTouchY = null;
+      lbPanTouchX0 = e.touches[0].clientX; lbPanTouchY0 = e.touches[0].clientY;
+      lbPanX0 = lbPanX; lbPanY0 = lbPanY;
+    } else {
+      lbTouchX = e.touches[0].clientX; lbTouchY = e.touches[0].clientY;
+    }
+  }
+}
+function lbTouchMove(e) {
+  if (!e.touches) return;
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    if (lbPinchDist0 > 0) {
+      const dist = lbTouchDist(e.touches[0], e.touches[1]);
+      lbScale = Math.max(1, Math.min(LB_MAX_SCALE, lbPinchScale0 * (dist / lbPinchDist0)));
+      lbApplyZoom();
+    }
+    return;
+  }
+  if (e.touches.length === 1 && lbScale > 1) {
+    e.preventDefault();
+    lbPanX = lbPanX0 + (e.touches[0].clientX - lbPanTouchX0);
+    lbPanY = lbPanY0 + (e.touches[0].clientY - lbPanTouchY0);
+    lbApplyZoom();
+  }
 }
 function lbTouchEnd(e) {
+  lbPinchDist0 = 0;
+  if (lbScale < 1.02) lbResetZoom();   /* ほぼ1倍まで戻ったら完全にリセットする */
   if (lbTouchX == null) return;
   const t = e.changedTouches && e.changedTouches[0];
   const x0 = lbTouchX, y0 = lbTouchY;

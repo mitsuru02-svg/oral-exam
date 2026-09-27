@@ -2166,7 +2166,7 @@ const EXP_KEY = 'tenkizu_explain';
    プロンプトで作った解説（間違った規則で書かれたものなど）が
    端末に残っていても、新しい版とは別物として扱われ、黙って
    古い解説を出し続けることがなくなる */
-const EXP_PROMPT_VER = 'v2-sfcwind-arrow-fix';
+const EXP_PROMPT_VER = 'v3-sfcwind-runway-xwind';
 const EXP_TITLE = { chart:'天気図', ir:'赤外画像', vis:'可視画像', sigwx:'下層悪天予想図', sfcwind:'地上風', metar:'近傍空港の電文' };
 
 function expCache() { try { return JSON.parse(localStorage.getItem(EXP_KEY) || '{}'); } catch (e) { return {}; } }

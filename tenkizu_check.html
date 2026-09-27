@@ -2274,8 +2274,9 @@ async function sigwxImagesForExplain() {
 async function sfcwindImagesForExplain() {
   const out = [];
   for (const t of SFCWIND_TIMES) {
-    const url = sfcwindUrl(t);
-    if (await probeImg(url)) out.push({ label: hhmmLabel(t) + 'の地上風', url });
+    /* 存在確認はブラウザから読める中継サーバー経由のURLで行い、
+       解説に渡すURLは発信元（サーバー側が直接取れる）に差し替える */
+    if (await probeImg(sfcwindUrl(t))) out.push({ label: hhmmLabel(t) + 'の地上風', url: sfcwindOriginUrl(t) });
   }
   return out;
 }
@@ -2333,7 +2334,9 @@ async function briefImages() {
     out.push({ label: '④下層悪天予想図　' + sigwxFT + '時間後', url: shownUrl.sigwx });
   }
   if (shownUrl.sfcwind) {
-    out.push({ label: '⑤地上風　' + hhmmLabel(SFCWIND_TIMES[sfcwindIdx]), url: shownUrl.sfcwind });
+    /* 表示（shownUrl）は中継サーバー経由のURLだが、解説に渡すのは
+       サーバー側が直接取れる発信元のURL（sfcwindImagesForExplainと同じ理由） */
+    out.push({ label: '⑤地上風　' + hhmmLabel(SFCWIND_TIMES[sfcwindIdx]), url: sfcwindOriginUrl(SFCWIND_TIMES[sfcwindIdx]) });
   }
   return out;
 }
@@ -2433,7 +2436,8 @@ async function explainShot(key, style) {
        飛ぶ時間帯にかけて風がどう変わるかを見るのが目的のため */
     expShow(key, '<p>11時〜16時の6コマをそろえています…</p>');
     images = await sfcwindImagesForExplain();
-    if (!images.length && shownUrl[key]) images = [{ label: '', url: shownUrl[key] }];
+    /* フォールバックも中継サーバー経由（shownUrl）ではなく発信元のURLで渡す */
+    if (!images.length && shownUrl[key]) images = [{ label: '', url: sfcwindOriginUrl(SFCWIND_TIMES[sfcwindIdx]) }];
   } else if (key === 'metar') {
     /* ⑥は画像ではなく、いま画面に出ている電文（原文）をそのまま渡す */
     text = briefText();
@@ -2619,10 +2623,19 @@ let sigwxFT = 3;
    滝川周辺に絞った細かいマス目（Fine Grid=w2）の当日ぶんを11〜16時の1時間おきで取る。
    時刻がファイル名に入っているだけの固定パターンなので、JSONを引く必要がない */
 const RASP_BASE = 'https://oral-exam-proxy.mitsuru02.workers.dev/rasp/';
+/* AIの解説（サーバー側）は中継サーバーを経由せず、RASPの発信元へ直接取りにいく。
+   ページ（https）はhttp資料を直接読むとブラウザに遮断されるので中継サーバーが要るが、
+   サーバー側の取得はブラウザではなくCloudflare Workerが行うため、混在コンテンツの
+   制限を受けない。中継サーバー経由のURLをそのまま解説に渡すと、
+   サーバー間の取得だけ404になることが分かったため、発信元を直接使うようにした */
+const RASP_ORIGIN = 'http://tk2-233-26218.vs.sakura.ne.jp/BLIPMAP/';
 const SFCWIND_TIMES = ['1100', '1200', '1300', '1400', '1500', '1600'];
 let sfcwindIdx = 2;
 function sfcwindUrl(t) {
   return RASP_BASE + 'HOKKAIDO_JAPAN/FCST/sfcwind.curr.' + t + 'lst.w2.png';
+}
+function sfcwindOriginUrl(t) {
+  return RASP_ORIGIN + 'HOKKAIDO_JAPAN/FCST/sfcwind.curr.' + t + 'lst.w2.png';
 }
 function hhmmLabel(t) { return t.slice(0, 2) + ':' + t.slice(2); }
 

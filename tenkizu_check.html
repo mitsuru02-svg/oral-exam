@@ -500,6 +500,9 @@ iframe.wxframe.tall { height:420px; }
 .taf-r .j { flex:1 1 auto; text-align:right; font-size:11.5px; font-weight:700; line-height:1.5; }
 .taf-r .j.ok { color:#3fb950; }
 .taf-r .j.ng { color:#f85149; }
+.taf-r .j.na { color:#7d8590; }
+.taf-r.na .d { color:#7d8590; }
+.taf-r.na .d.sub { color:#6e7681; }
 pre.wx {
   width:100%; margin:0; padding:12px 13px; text-align:left;
   font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; line-height:1.85;
@@ -1345,13 +1348,23 @@ function wxVals(o) {
     + (rest.length ? '<div class="d sub">' + esc(rest.join('　／　')) + '</div>' : '');
 }
 
+/* グライダーは夜間（17時〜翌6時JST）は飛ばないので、この時間帯だけの
+   予報は視程・雲底の良否を判定しても意味がない。「関係なし」としてグレー表示にする */
+function isNightHour(h) { return h == null ? false : (h >= 17 || h < 6); }
+function tafPeriodIsNight(wsHour, weHour) {
+  return weHour == null ? isNightHour(wsHour) : (isNightHour(wsHour) && isNightHour(weHour));
+}
+
 /* 時刻つきの1行。TAF の各期間はこれで並べる */
-function wxRow(headHtml, o) {
+function wxRow(headHtml, o, isNight) {
   const { bad } = judge(o);
-  return `<div class="taf-r${bad.length ? ' bad' : ''}">
+  const cls = isNight ? 'na' : (bad.length ? 'bad' : '');
+  const jCls = isNight ? 'na' : (bad.length ? 'ng' : 'ok');
+  const jText = isNight ? '関係なし' : (bad.length ? bad.join('・') + '✕' : 'OK');
+  return `<div class="taf-r${cls ? ' ' + cls : ''}">
     <div class="hd">
       <div class="w">${headHtml}</div>
-      <div class="j ${bad.length ? 'ng' : 'ok'}">${bad.length ? bad.join('・') + '✕' : 'OK'}</div>
+      <div class="j ${jCls}">${jText}</div>
     </div>
     ${wxVals(o)}
   </div>`;
@@ -1639,6 +1652,7 @@ function tafWhenDH(day, h) {
   return {
     jst: pad(jDay) + '日' + pad(jh) + '時JST',
     z: pad(h) + 'Z',
+    h: jh,
   };
 }
 
@@ -1646,7 +1660,7 @@ function tafWhenDH(day, h) {
    世界時のままでは飛ぶ時刻と結びつかないので、日本時間を主に表示する */
 function tafWhen(t) {
   const d = String((t && t.repr) || '').replace(/[^0-9]/g, '');
-  if (d.length < 4) return { jst: '—', z: '' };
+  if (d.length < 4) return { jst: '—', z: '', h: null };
   return tafWhenDH(+d.slice(0, 2), +d.slice(2, 4));
 }
 
@@ -1716,7 +1730,8 @@ function avwxTafRows(taf, noRaw) {
       head += '〜' + esc(we.jst)
         + (we.z ? '<span class="z">（' + esc(we.z) + '）</span>' : '');
     }
-    return wxRow(head, o);
+    const isNight = tafPeriodIsNight(ws.h, we ? we.h : null);
+    return wxRow(head, o, isNight);
   }).join('');
   return raw + '<div class="taf-per">' + rows + '</div>';
 }

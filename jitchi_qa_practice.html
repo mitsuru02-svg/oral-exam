@@ -3731,7 +3731,7 @@ function updatePlaybackUI() {
     pbAns.innerHTML = `<div>${qa.s}</div>`
       + `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>${qa.a}</div>`;
   } else {
-    pbAns.textContent = qa.a;
+    pbAns.innerHTML = qa.a;
   }
   const pbNote = document.getElementById('pbNote');
   pbNote.innerHTML = noteHtml(qa);

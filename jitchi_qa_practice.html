@@ -1376,6 +1376,10 @@ if ('speechSynthesis' in window) initVoices();
 
 // ══ TTS前処理：日本語の読み上げを改善 ══════════════════════════════
 function ttsClean(text) {
+  // 0. <br> は改行タグそのままでは読めず「BRBR」のように読まれてしまうため除去。
+  //    前後は既に「。」で文が終わっているので、除去だけで読み上げに支障はない。
+  text = text.replace(/<br\s*\/?>/gi, '');
+
   // 1. 全角 → 半角
   text = text.replace(/[\uFF01-\uFF5E]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
   text = text.replace(/\u3000/g, ' ');

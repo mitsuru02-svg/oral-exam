@@ -1393,6 +1393,7 @@ function ttsClean(text) {
   // 1.45 英語略語に続く読み仮名・訳語の括弧は読み上げない。「NOTAM（ノータム）」→「NOTAM」。
   text = text.replace(/NOTAM[（(]ノータム[）)]/g, 'NOTAM');
   text = text.replace(/AIP[（(]航空路誌[）)]/g, 'AIP');
+  text = text.replace(/AIC[（(]航空情報サーキュラー[）)]/g, 'AIC');
 
   // 1.451 問102（管制圏には無許可で進入できますか）の回答のみ、括弧内を読み上げない。
   // 「（クリアランス）」は他の設問にも出てくる汎用語のため、この設問固有の

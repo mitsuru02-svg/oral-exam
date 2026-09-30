@@ -1370,6 +1370,21 @@ function wxRow(headHtml, o, isNight) {
   </div>`;
 }
 
+/* METAR・TAFの電文には2桁の「日」しかなく、年月の情報がない。現在時刻の月を
+   基準に候補日を組み立て、それが現在から大きくずれていたら前後の月をまたいだ
+   とみなして補正する。これにより「9月30日の翌日」のように月末＋日をまたぐ
+   変換でも、9月31日という実在しない日付にならず、10月1日へ正しく繰り上がる。
+   METAR・TAFは常に直近（前後1〜2日）の日付を指すため、しきい値15日で
+   月またぎを安全に判定できる。 */
+function resolveUtcDayDate(day, hour, minute) {
+  const now = new Date();
+  let d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day, hour, minute || 0));
+  const diffDays = (d.getTime() - now.getTime()) / 86400000;
+  if (diffDays > 15) d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, day, hour, minute || 0));
+  else if (diffDays < -15) d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, day, hour, minute || 0));
+  return d;
+}
+
 /* METAR の観測時刻。電文の 070100Z を拾って日本時間を添える */
 function metarWhen(raw) {
   const t = metarTime(raw);
@@ -1382,10 +1397,8 @@ function metarTime(raw) {
   const m = String(raw || '').match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
   if (!m) return '';
   const day = +m[1], h = +m[2], mi = m[3];
-  const jh = (h + 9) % 24;
-  const rolled = h + 9 >= 24;
-  const jDay = rolled ? day + 1 : day;
-  return pad(jDay) + '日' + pad(jh) + ':' + mi + 'JST'
+  const jst = new Date(resolveUtcDayDate(day, h, +mi).getTime() + 9 * 3600000);
+  return pad(jst.getUTCDate()) + '日' + pad(jst.getUTCHours()) + ':' + mi + 'JST'
     + '<span class="z">（' + pad(h) + ':' + mi + 'Z）</span>';
 }
 
@@ -1646,13 +1659,11 @@ function cloudsText(cl) {
 
 /* 日＋時（世界時）を日本時間表記に変換する共通処理 */
 function tafWhenDH(day, h) {
-  const jh = (h + 9) % 24;
-  const rolled = h + 9 >= 24;
-  const jDay = rolled ? day + 1 : day;
+  const jst = new Date(resolveUtcDayDate(day, h, 0).getTime() + 9 * 3600000);
   return {
-    jst: pad(jDay) + '日' + pad(jh) + '時JST',
+    jst: pad(jst.getUTCDate()) + '日' + pad(jst.getUTCHours()) + '時JST',
     z: pad(h) + 'Z',
-    h: jh,
+    h: jst.getUTCHours(),
   };
 }
 
@@ -1674,9 +1685,8 @@ function tafValidity(raw) {
   if (!m) return '';
   const d1 = +m[1], h1 = +m[2], d2 = +m[3], h2 = +m[4];
   const mk = (day, h) => {
-    const jh = (h + 9) % 24;
-    const jDay = (h + 9 >= 24) ? day + 1 : day;
-    return pad(jDay) + '日' + pad(jh) + '時JST（' + pad(h) + 'Z）';
+    const jst = new Date(resolveUtcDayDate(day, h, 0).getTime() + 9 * 3600000);
+    return pad(jst.getUTCDate()) + '日' + pad(jst.getUTCHours()) + '時JST（' + pad(h) + 'Z）';
   };
   return mk(d1, h1) + '〜' + mk(d2, h2);
 }

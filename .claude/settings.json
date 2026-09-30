@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "npx --yes html-validate \"$CLAUDE_FILE_PATHS\" || true" }
+        ]
+      }
+    ]
+  }
+}

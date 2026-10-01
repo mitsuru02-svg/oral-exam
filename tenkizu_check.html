@@ -2414,10 +2414,18 @@ async function explainAll() {
 
   expShow(key, '<p>' + images.length + '枚の図と電文を読んでいます…（20〜30秒）</p>');
   try {
+    /* ④下層悪天予想図・⑤地上風はURLが固定（気象庁・RASPが中身だけ
+       差し替える）で、サーバー側（lib/explain.js）が同じURLを5分
+       キャッシュするため、取りに行く直前だけキャッシュバスティングを
+       付ける。ckやimagesはバスティング前のURLのままなので、解説
+       キャッシュ（同じ図なら取り直さない）には影響しない */
+    const postImages = images.map(im => (im.label.startsWith('④') || im.label.startsWith('⑤'))
+      ? { ...im, url: im.url + (im.url.includes('?') ? '&' : '?') + 'cb=' + Date.now() }
+      : im);
     const r = await fetch(px + '/explain', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ images, text, kind: 'brief' }),
+      body: JSON.stringify({ images: postImages, text, kind: 'brief' }),
     });
     const j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.text) {
@@ -2493,10 +2501,19 @@ async function explainShot(key, style) {
 
   expShow(key, '<p>' + (style === 'concise' ? '要点をまとめています…' : EXP_TITLE[key] + 'を読んでいます…') + '</p>');
   try {
+    /* sigwx・sfcwindはURLが固定（気象庁・RASPが中身だけ差し替える）で、
+       サーバー側（lib/explain.js）が同じURLを5分キャッシュするため、
+       実際に取りに行く直前だけキャッシュバスティングを付けて、古い
+       キャッシュに当たらないようにする。ckやimagesはバスティング前の
+       URLで計算したままなので、画面の解説キャッシュ（同じ図なら
+       取り直さない）には影響しない */
+    const postImages = (key === 'sigwx' || key === 'sfcwind')
+      ? images.map(im => ({ ...im, url: im.url + (im.url.includes('?') ? '&' : '?') + 'cb=' + Date.now() }))
+      : images;
     const r = await fetch(px + '/explain', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ images, text, kind: key, style }),
+      body: JSON.stringify({ images: postImages, text, kind: key, style }),
     });
     const j = await r.json().catch(() => null);
     if (!r.ok || !j || !j.text) {

@@ -3375,7 +3375,12 @@ JSON形式のみで回答（前後のテキスト不要）：
       throw new Error('応答が JSON でありません（status ' + res.status + '）');
     }
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-    const result = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+    const resultText = (data.content && data.content[0] && data.content[0].text) || '';
+    /* 長文・複数項目の設問ではAIの返答に前置きの文章が混ざることがあるため、
+       全文をJSONとみなすのではなく、最初の{...}ブロックだけを取り出す。 */
+    const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AIの応答にJSONが見つかりません: ' + resultText.slice(0, 120));
+    const result = JSON.parse(jsonMatch[0]);
     document.getElementById('loadingBox').classList.add('hidden');
     handleResult(result, qa, qIdx, userAns);
   } catch(e) {
@@ -3383,10 +3388,11 @@ JSON形式のみで回答（前後のテキスト不要）：
     const r = scoreOffline(userAns, ansShort(qa));
     const msg = (e && e.message) ? e.message : String(e);
     /* Anthropic側のクレジット不足は、原因が端末側にないことが明確なので
-       利用者に分かる表現で知らせる。それ以外は汎用のエラー表示のままにする */
+       利用者に分かる表現で知らせる。それ以外は、原因調査中につき実際の
+       エラー内容を出す（原因が判明したら汎用表示に戻してよい）。 */
     r.comment = (/credit balance is too low/i.test(msg)
       ? '（AIの利用クレジットが不足しています・自動採点）'
-      : '（AI接続エラー・自動採点）') + r.comment;
+      : '（AI接続エラー・自動採点／原因：' + msg + '）') + r.comment;
     handleResult(r, qa, qIdx, userAns);
   }
 }

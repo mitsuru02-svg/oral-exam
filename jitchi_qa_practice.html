@@ -3368,15 +3368,24 @@ JSON形式のみで回答（前後のテキスト不要）：
       body: JSON.stringify({ model:'claude-sonnet-5', max_tokens:800,
         messages:[{role:'user', content:prompt}] })
     });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    /* 原因調査中：失敗時の実際のエラー内容を画面に出すため、
+       res.json() で落ちる前に生テキストを読み、HTTPステータスも保持する。
+       原因が判明したら、この診断表示（catch内のreason組み立て）は削除してよい。 */
+    const rawText = await res.text();
+    let data;
+    try { data = JSON.parse(rawText); }
+    catch (parseErr) {
+      throw new Error('status ' + res.status + ' / 応答が JSON でない: ' + rawText.slice(0, 200));
+    }
+    if (data.error) throw new Error('status ' + res.status + ' / ' + (data.error.message || JSON.stringify(data.error)));
     const result = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
     document.getElementById('loadingBox').classList.add('hidden');
     handleResult(result, qa, qIdx, userAns);
   } catch(e) {
     document.getElementById('loadingBox').classList.add('hidden');
     const r = scoreOffline(userAns, ansShort(qa));
-    r.comment = '（AI接続エラー・自動採点）' + r.comment;
+    const reason = (e && e.message) ? e.message : String(e);
+    r.comment = '（AI接続エラー・自動採点／原因：' + reason + '）' + r.comment;
     handleResult(r, qa, qIdx, userAns);
   }
 }

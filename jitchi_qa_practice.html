@@ -3363,9 +3363,14 @@ JSON形式のみで回答（前後のテキスト不要）：
 {"verdict":"正解"|"部分正解"|"不正解","comment":"採点コメント","score":100|50|0}`;
 
     // プロキシ経由でAnthropic APIへ（CONFIG.API_ENDPOINTで切り替え）
+    // thinkingを省略するとclaude-sonnet-5は自動で拡張思考（adaptive）を使う
+    // ため、max_tokensの一部が思考に消費され、設問によっては採点のJSON本文が
+    // 出る前にトークン上限に達して空になることがあった。採点に思考は不要なので
+    // 明示的に無効化し、max_tokensも余裕を持たせる。
     const res  = await fetch(CONFIG.API_ENDPOINT, {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'claude-sonnet-5', max_tokens:800,
+      body: JSON.stringify({ model:'claude-sonnet-5', max_tokens:1024,
+        thinking: {type:'disabled'},
         messages:[{role:'user', content:prompt}] })
     });
     const rawText = await res.text();

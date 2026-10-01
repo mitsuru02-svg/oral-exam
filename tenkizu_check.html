@@ -779,6 +779,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
           <span data-ck="h48" data-on="0">48時間</span>
         </div>
       </div>
+      <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
+      <div class="urlset" id="url-chart">
+        <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('chart')">保存</button>
+        <button onclick="clearUrl('chart')">解除</button>
+      </div>
     </div>
     <div class="side">
     <div class="act">
@@ -786,12 +792,6 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <button class="exp-go" onclick="explainShot('chart','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-chart"></div>
-    <div class="shot-bar"><button onclick="toggleUrlSet('chart')">⚙ URL</button><button onclick="loadShot('chart',true)">再読込</button></div>
-    <div class="urlset" id="url-chart">
-      <input type="url" id="urlin-chart" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button onclick="saveUrl('chart')">保存</button>
-      <button onclick="clearUrl('chart')">解除</button>
-    </div>
     <div class="look">
     <div class="look-t">▸ 何を見るか</div>
     <ul>
@@ -824,6 +824,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
                aria-label="赤外画像の時刻" oninput="setSat('ir', this.value)">
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-ir" data-on="1">最新</span><span>最新</span></div>
       </div>
+      <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
+      <div class="urlset" id="url-ir">
+        <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('ir')">保存</button>
+        <button onclick="clearUrl('ir')">解除</button>
+      </div>
     </div>
     <div class="side">
     <div class="act">
@@ -831,12 +837,6 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <button class="exp-go" onclick="explainShot('ir','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-ir"></div>
-    <div class="shot-bar"><button class="playbtn" id="satPlay-ir" onclick="toggleSatPlay('ir')">▶ 自動送り</button><button onclick="toggleUrlSet('ir')">⚙ URL</button><button onclick="loadShot('ir',true)">再読込</button></div>
-    <div class="urlset" id="url-ir">
-      <input type="url" id="urlin-ir" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button onclick="saveUrl('ir')">保存</button>
-      <button onclick="clearUrl('ir')">解除</button>
-    </div>
     <div class="look">
     <div class="look-t">▸ 何を見るか</div>
     <ul>
@@ -868,6 +868,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
                aria-label="可視画像の時刻" oninput="setSat('vis', this.value)">
         <div class="tslide-lab"><span>6時間前</span><span id="satNow-vis" data-on="1">最新</span><span>最新</span></div>
       </div>
+      <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
+      <div class="urlset" id="url-vis">
+        <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('vis')">保存</button>
+        <button onclick="clearUrl('vis')">解除</button>
+      </div>
     </div>
     <div class="side">
     <div class="act">
@@ -875,12 +881,6 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <button class="exp-go" onclick="explainShot('vis','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-vis"></div>
-    <div class="shot-bar"><button class="playbtn" id="satPlay-vis" onclick="toggleSatPlay('vis')">▶ 自動送り</button><button onclick="toggleUrlSet('vis')">⚙ URL</button><button onclick="loadShot('vis',true)">再読込</button></div>
-    <div class="urlset" id="url-vis">
-      <input type="url" id="urlin-vis" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button onclick="saveUrl('vis')">保存</button>
-      <button onclick="clearUrl('vis')">解除</button>
-    </div>
     <div class="look">
     <div class="look-t">▸ 何を見るか</div>
     <ul>
@@ -917,6 +917,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
           <span data-ft="9" data-on="0">9時間後</span>
         </div>
       </div>
+      <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
+      <div class="urlset" id="url-sigwx">
+        <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('sigwx')">保存</button>
+        <button onclick="clearUrl('sigwx')">解除</button>
+      </div>
     </div>
     <div class="side">
     <div class="act">
@@ -924,12 +930,6 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <button class="exp-go" onclick="explainShot('sigwx','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-sigwx"></div>
-    <div class="shot-bar"><button onclick="toggleUrlSet('sigwx')">⚙ URL</button><button onclick="loadShot('sigwx',true)">再読込</button></div>
-    <div class="urlset" id="url-sigwx">
-      <input type="url" id="urlin-sigwx" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button onclick="saveUrl('sigwx')">保存</button>
-      <button onclick="clearUrl('sigwx')">解除</button>
-    </div>
     <div class="look">
     <div class="look-t">▸ 何を見るか</div>
     <ul>
@@ -999,6 +999,12 @@ table.xw td.hit { color:#f85149; font-weight:700; }
           <span data-t="1600" data-on="0">16:00</span>
         </div>
       </div>
+      <div class="shot-bar"><button class="playbtn" id="sfcwindPlay" onclick="toggleSfcwindPlay()">▶ 自動送り</button><button onclick="toggleUrlSet('sfcwind')">⚙ URL</button><button onclick="loadShot('sfcwind',true)">再読込</button></div>
+      <div class="urlset" id="url-sfcwind">
+        <input type="url" id="urlin-sfcwind" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button onclick="saveUrl('sfcwind')">保存</button>
+        <button onclick="clearUrl('sfcwind')">解除</button>
+      </div>
     </div>
     <div class="side">
     <div class="act">
@@ -1006,12 +1012,6 @@ table.xw td.hit { color:#f85149; font-weight:700; }
       <button class="exp-go" onclick="explainShot('sfcwind','concise')">📝 要点だけ</button>
     </div>
     <div class="exp" id="exp-sfcwind"></div>
-    <div class="shot-bar"><button class="playbtn" id="sfcwindPlay" onclick="toggleSfcwindPlay()">▶ 自動送り</button><button onclick="toggleUrlSet('sfcwind')">⚙ URL</button><button onclick="loadShot('sfcwind',true)">再読込</button></div>
-    <div class="urlset" id="url-sfcwind">
-      <input type="url" id="urlin-sfcwind" placeholder="画像URLを貼り付け" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <button onclick="saveUrl('sfcwind')">保存</button>
-      <button onclick="clearUrl('sfcwind')">解除</button>
-    </div>
     <div class="look">
     <div class="look-t">▸ 何を見るか</div>
     <ul>

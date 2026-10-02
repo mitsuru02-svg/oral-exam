@@ -234,16 +234,20 @@
   .content{max-width:820px; margin:0 auto; padding:56px 48px 140px;}
 
   /* Cover */
-  .cover{padding:36px 0 24px; border-bottom:1px solid var(--line); margin-bottom:20px; text-align:left;}
+  .cover{padding:28px 0 14px; border-bottom:1px solid var(--line); margin-bottom:16px; text-align:left;}
   .cover .eyebrow{font-family:var(--disp); letter-spacing:.3em; color:var(--amber); font-size:13px; font-weight:600;}
   .cover h1{font-size:38px; line-height:1.4; margin:18px 0 10px; font-weight:900;}
-  .cover h2{font-size:17px; color:var(--cyan); font-weight:500; margin-bottom:26px;}
+  .cover h2{font-size:17px; color:var(--cyan); font-weight:500; margin-bottom:14px;}
   .cover p{color:var(--text-dim); font-size:14.5px; max-width:600px;}
   .horizon-line{
-    height:2px; margin:30px 0; border-radius:2px;
+    height:2px; margin:14px 0; border-radius:2px;
     background:linear-gradient(90deg, var(--cyan) 0%, transparent 100%);
     opacity:.6; width:120px;
   }
+  /* カバー直後の最初のPART区切りだけ、カバーのpadding-bottom等と
+     積み重なって余白が過大になるため、margin-top/padding-topを詰める。
+     他のPART区切り（章の中身の後）には影響させない。 */
+  #cover + .part-section .part-divider{margin-top:24px; padding-top:16px;}
 
   /* Chapter blocks */
   .part-divider{

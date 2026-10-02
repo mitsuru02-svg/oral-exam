@@ -350,6 +350,12 @@
     margin:26px 0; background:var(--panel); border:1px solid var(--line);
     border-radius:var(--radius); padding:16px 18px 12px;
   }
+  /* 1-01：リード文と表の間だけ、空間を元の1/3程度に詰める。
+     隣接要素のmargin同士は大きいほうが採用される（collapse）ので、
+     リード文側をmargin-bottom:0にして、表側のmargin-topだけで
+     間隔を決めるようにする。 */
+  #ch2 h3 + p{margin-bottom:0;}
+  #ch2 h3 + p + .svg-fig{margin-top:9px;}
   .svg-fig svg{display:block; width:100%; height:auto; margin:0 auto;}
   .svg-fig figcaption{
     font-size:12px; color:var(--text-dim); margin-top:10px; line-height:1.65; text-align:left;

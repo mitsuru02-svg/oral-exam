@@ -403,6 +403,39 @@
     border-radius:20px; z-index:2001;
   }
 
+  /* ノータム原文・解説のポップアップ */
+  ul.plist li.plist-click{cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px;}
+  ul.plist li.plist-click:hover{color:var(--cyan);}
+  #notamModal{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:2100;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  #notamModal.show{display:flex;}
+  .notam-box{
+    position:relative; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+    max-width:880px; width:100%; max-height:88vh; overflow-y:auto;
+    padding:22px 24px 26px; box-shadow:0 10px 40px rgba(0,0,0,.6); color:var(--text);
+  }
+  .notam-box h4{font-size:15px; color:var(--cyan); margin:22px 0 10px; padding-top:14px; border-top:1px solid var(--line-soft);}
+  .notam-box h4:first-of-type{margin-top:0; padding-top:0; border-top:none;}
+  .notam-box h5{font-size:13.5px; color:var(--amber); margin:14px 0 6px;}
+  .notam-box p,.notam-box li{font-size:13.5px; line-height:1.6;}
+  .notam-box ul{margin:4px 0 12px; padding-left:20px;}
+  .notam-raw{
+    background:#0a0e14; border:1px solid var(--line); border-radius:6px;
+    padding:10px 12px; font-family:var(--mono); font-size:10.5px; line-height:1.55;
+    color:var(--text-dim); white-space:pre-wrap; word-break:break-all; overflow-x:auto; margin:0 0 16px;
+  }
+  .notam-close{
+    position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.25); background:rgba(22,27,34,.7); color:#e6edf3;
+    font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:1;
+  }
+  .notam-close:hover{background:rgba(22,27,34,.95);}
+  .notam-box table{width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px;}
+  .notam-box table th{text-align:left; padding:6px; color:var(--cyan); border-bottom:1px solid var(--line);}
+  .notam-box table td{padding:6px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+
   /* TTS controls */
   /* かつて position:sticky; top:0 だったが、ヘッダー（sticky, z-index:999）の
      真下に潜り込んで見えなくなっていた。再生中の操作は画面下の固定ドックが
@@ -823,7 +856,7 @@
           <li data-tts data-text="航空路誌、エーアイピー。">航空路誌（AIP）</li>
           <li data-tts data-text="航空路誌改訂版。">航空路誌改訂版（AIP Amendments）</li>
           <li data-tts data-text="航空路誌補足版。">航空路誌補足版（AIP Supplements）</li>
-          <li data-tts data-text="ノータム。">ノータム（NOTAM）</li>
+          <li data-tts data-text="ノータム。" class="plist-click" onclick="openNotamModal()">ノータム（NOTAM）</li>
           <li data-tts data-text="航空情報サーキュラー、エーアイシー。">航空情報サーキュラー（AIC）</li>
         </ul>
         <div class="model-answer">
@@ -1654,6 +1687,200 @@
   <div class="doc-lb-count" id="docLbCount"></div>
 </div>
 
+<div id="notamModal" onclick="closeNotamModal()">
+  <div class="notam-box" onclick="event.stopPropagation()">
+    <button class="notam-close" onclick="closeNotamModal()">✕</button>
+    <h4 style="margin-top:0; padding-top:0; border-top:none;">① 滝川滑空場直上：曲技（アクロバット）飛行</h4>
+<pre class="notam-raw">280754 RJAAYNYX
+(P4799/26 NOTAMN
+Q)RJJJ/QWBLW/IV/M/W/011/041/4333N14154E001
+A)RJJJ B)2610010000 C)2611070700
+D)0000/0700
+E)AEROBATICS:
+1.FLT AREA  : WI A RADIUS OF 500M OF 433259N1415330E
+              (TAKIKAWA SKYPARK)
+              (TAKIKAWA-SHI,KABATO-GUN IN HOKKAIDO)
+2.USING ACFT: GLIDER
+3.FLT TIME  : 0000/0700
+4.WX COND   : VMC ONLY AND FLT VIS AT OR ABV 5000M
+F)1100FT AMSL G)4100FT AMSL)
+RJJJ 7076/26</pre>
+    <ul>
+      <li><b>NOTAM番号：</b>P4799/26（NOTAMN：新規）</li>
+      <li><b>対象空域：</b>北緯43度32分59秒 東経141度53分30秒（滝川スカイパーク敷地中央）を中心とする半径500mの円内</li>
+      <li><b>有効期間（日本時間）：</b>2026年10月1日 09:00 〜 2026年11月7日 16:00</li>
+      <li><b>日々の実施時間：</b>毎日 09:00 〜 16:00 JST（00:00〜07:00 UTC）</li>
+      <li><b>対象高度：</b>海抜 1,100 ft 〜 海抜 4,100 ft（AMSL）</li>
+      <li><b>運用機体：</b>グライダー（滑空機）</li>
+      <li><b>運航条件：</b>有視界気象状態（VMC）のみ、かつ飛行視程 5,000m 以上</li>
+      <li><b>運航上の留意点：</b>場周経路（ダウンウインドレグ・ベースレグ）の直上および内側がアクロバット空域です。場周進入時およびサーマル旋回時、曲技機との空中接触を避けるため、ピスト無線（たきかわフライト等）での動向把握と徹底した見張りが必要です。</li>
+    </ul>
+
+    <h4>② 滝川・新十津川・砂川：ドローン（無人航空機）目視外飛行</h4>
+<pre class="notam-raw">290629 RJAAYNYX
+(U3470/26 NOTAMN
+Q)RJJJ/QWULW/IV/BO/W/000/015/4333N14150E007
+A)RJJJ B)2609302200 C)2610311459
+D)2200/1459
+E)BEYOND VISUAL LINE OF SIGHT UNMANNED ACFT:
+AREA: BOUNDED BY FLW POINTS
+433601N1415310E - 433740N1415127E - 433741N1414601E - 432955N1414607E
+- 432823N1415338E - 433131N1415429E - 433440N1415244E -
+433601N1415310E
+(KABATO-GUN,SUNAGAWA-SHI,TAKIKAWA-SHI IN HOKKAIDO)
+WT: 2.5KG
+CONTACT INFORMATION: 03-4485-1606
+RMK: THIS AREA IS INCLUDED IN HK11-3
+F)SFC G)1411FT AMSL)
+RJDR 3448/26</pre>
+    <ul>
+      <li><b>NOTAM番号：</b>U3470/26（NOTAMN：新規）</li>
+      <li><b>対象空域：</b>以下の7点を結ぶ多角形内（指定空域：HK11-3に含まれるエリア）
+        <ol style="margin:4px 0 0 4px; padding-left:20px;">
+          <li>北緯43度36分01秒 東経141度53分10秒（新十津川町日の出付近：滑空場の北西約5.6km）</li>
+          <li>北緯43度37分40秒 東経141度51分27秒（新十津川町総進付近：滑空場の北北西約9.2km）</li>
+          <li>北緯43度37分41秒 東経141度46分01秒（徳富川上流山林部）</li>
+          <li>北緯43度29分55秒 東経141度46分07秒（浦臼町・樺戸連山山麓）</li>
+          <li>北緯43度28分23秒 東経141度53分38秒（砂川市空知太・石狩川沿い：滑空場の南南西約8.5km）</li>
+          <li>北緯43度31分31秒 東経141度54分29秒（砂川市北光付近：滑空場の南約3.0km）</li>
+          <li>北緯43度34分40秒 東経141度52分44秒（新十津川町中央付近：滑空場の西約3.3km）</li>
+        </ol>
+      </li>
+      <li><b>有効期間（日本時間）：</b>2026年10月1日 07:00 〜 2026年10月31日 23:59</li>
+      <li><b>日々の実施時間：</b>毎日 07:00 〜 23:59 JST（22:00〜14:59 UTC）</li>
+      <li><b>対象高度：</b>地表（SFC） 〜 海抜 1,411 ft（AMSL）（約430m）</li>
+      <li><b>機体特性：</b>重量 2.5 kg（目視外自律飛行）</li>
+      <li><b>連絡先：</b>03-4485-1606</li>
+      <li><b>運航上の留意点：</b>滝川滑空場のすぐ西〜南側（石狩川対岸の新十津川町および砂川市街地上空）が深く入り込んでいます。場周経路の西側への張り出しや、高度1,400ft以下での低高度アプローチにおいて、操縦者が目視していない自律飛行ドローンと交差するリスクがあります。</li>
+    </ul>
+
+    <h4>③ 空知・石狩・上川地方：最大6機の熱気球フライト</h4>
+<pre class="notam-raw">300203 RJAAYNYX
+(R1691/26 NOTAMN
+Q)RJJJ/QWLLW/IV/M/W/000/020/4322N14145E022
+A)RJJJ B)2609302110 C)2610310725
+D)2110/0725
+E)MAX 6 HOT AIR BALLOONS:
+1.FLT AREA AND ALT :
+(1) AREA: BOUNDED BY FLW POINTS
+432000N1413000E - 431200N1413000E - 430400N1420000E - 432000N1413000E
+ALT : AT OR BLW 1500FT AMSL
+(2) AREA: BOUNDED BY FLW POINTS
+431200N1413000E - 430400N1413000E - 430400N1420000E - 431200N1413000E
+ALT : AT OR BLW 1000FT AMSL
+(3) AREA: BOUNDED BY FLW POINTS
+432000N1413000E - 430400N1420000E - 434000N1420000E - 434000N1414500E
+- 432000N1413000E
+ALT : AT OR BLW 2000FT AMSL
+(ISHIKARI-SHI,TAKIKAWA-SHI,FUKAGAWA-SHI,AKABIRA-SHI,SUNAGAWA-SHI,
+UTASHINAI-SHI,BIBAI-SHI,MIKASA-SHI,IWAMIZAWA-SHI,YUBARI-SHI,
+EBETSU-SHI,SORACHI-GUN,YUBARI-GUN,URYU-GUN,KABATO-GUN,ISHIKARI-GUN IN
+HOKKAIDO)
+2.CHARACTERISTICS: DIAMETER/16M HGT/20M WT/500KG
+                   SHAPE/TEAR-DROP TYPE COLOR/VARIOUS
+3.WX COND        : VMC ONLY
+F)SFC G)2000FT AMSL)
+RJTD 1694/26</pre>
+    <ul>
+      <li><b>NOTAM番号：</b>R1691/26（NOTAMN：新規）</li>
+      <li><b>対象空域：</b>3つのエリアのうち、滝川滑空場はエリア(3)に完全に包含されます。
+        <ul style="margin:4px 0 0 4px;">
+          <li>エリア(3)境界点：北西端　北緯43度40分00秒 東経141度45分00秒（雨竜町・妹背牛町境界付近）／北東端　北緯43度40分00秒 東経142度00分00秒（深川市東部丘陵地）／南東端　北緯43度04分00秒 東経142度00分00秒（夕張市南部）／南西端　北緯43度20分00秒 東経141度30分00秒（石狩市北部・当別町周辺）</li>
+          <li>エリア(3)対象高度：地表（SFC） 〜 海抜 2,000 ft 以下（AMSL）</li>
+        </ul>
+      </li>
+      <li><b>有効期間（日本時間）：</b>2026年10月1日 06:10 〜 2026年10月31日 16:25</li>
+      <li><b>日々の実施時間：</b>毎日 06:10 〜 16:25 JST（21:10〜07:25 UTC）</li>
+      <li><b>機体特性：</b>最大6機、直径16m、全高20m、重量500kg、涙滴型、多様な色彩</li>
+      <li><b>運航条件：</b>有視界気象状態（VMC）のみ</li>
+      <li><b>運航上の留意点：</b>滝川滑空場周辺の場周経路高度（通常1,000ft〜1,200ft前後）から周辺2,000ft以下での滑空において、最大6機の大型気球が滞空しています。熱気球側には機動的な回避能力がないため、グライダー側の「見張り（シー・アンド・アボイド）」と早期の回避操作が必要です。</li>
+    </ul>
+
+    <h4>④・⑤ 北海道広域：大型自由気球（高高度観測気球）の放流</h4>
+<pre class="notam-raw">291330 RJAAYNYX
+(R1685/26 NOTAMN
+Q)RJJJ/QWLLW/IV/M/W/000/999/3310N14118E999
+A)RJJJ B)2610010000 C)2611010244
+E)ASCENT OF FREE BALLOON
+1.RELEASING POINT :
+ A.425333N1432211E (NAKAGAWA-GUN IN HOKKAIDO)
+ B.431417N1431629E (KATO-GUN IN HOKKAIDO)
+ C.430924N1431430E (KATO-GUN IN HOKKAIDO)
+ D.430438N1425236E (KAMIKAWA-GUN IN HOKKAIDO)
+ E.425851N1422414E (YUFUTSU-GUN IN HOKKAIDO)
+ F.430932N1422949E (SORACHI-GUN IN HOKKAIDO)
+ G.430355N1415907E (YUBARI-SHI IN HOKKAIDO)
+ H.432938N1421030E (ASHIBETSU-SHI IN HOKKAIDO)
+ I.433718N1415703E (TAKIKAWA-SHI IN HOKKAIDO)
+ J.422003N1422244E (HIDAKA-GUN IN HOKKAIDO)
+ K.432023N1415407E (BIBAI-SHI IN HOKKAIDO)
+ L.431343N1415413E (MIKASA-SHI IN HOKKAIDO)
+ M.430724N1433519E (NAKAGAWA-GUN IN HOKKAIDO)
+ N.430747N1433741E (NAKAGAWA-GUN IN HOKKAIDO)
+ O.421911N1431945E (HIROO-GUN IN HOKKAIDO)
+ P.422839N1432207E (HIROO-GUN IN HOKKAIDO)
+2.RELEASING TIME : FM 0000 TO 2359/EACH DAY
+3.FLOATING TIME  : 2HR45MIN/EACH
+F)SFC G)130000FT AMSL)
+RJTD 1688/26</pre>
+<pre class="notam-raw">291315 RJAAYNYX
+(R1682/26 NOTAMN
+Q)RJJJ/QWLLW/IV/M/W/000/850/4304N14338E088
+A)RJJJ B)2609301500 C)2610302145
+D)1500/2145
+E)BALLOON:
+1.RELEASING POINT:
+(1) 425333N1432211E (2) 431417N1431629E (3) 430924N1431430E
+(4) 430438N1425236E (5) 425851N1422414E (6) 430932N1422949E
+(7) 430355N1415907E (8) 432938N1421030E (9) 433718N1415703E
+(10)422003N1422244E (11)432023N1415407E (12)431343N1415413E
+(13)430724N1433519E (14)430747N1433741E (15)421911N1431945E
+(16)425658N1440247E (17)425428N1435834E
+2.RELEASING TIME: 1500/1745
+3.FLOATING TIME: 4HR/EACH
+4.EXP FLT AREA:
+BOUNDED BY FLW POINTS
+415500N1431500E - 421000N1424500E - 422300N1421500E -
+425400N1421500E - 425400N1415500E - 430700N1415500E -
+430700N1413800E - 434000N1415500E - 434000N1421900E -
+433500N1421900E - 433500N1423000E - 430800N1440400E -
+425500N1440400E - 425526N1453720E - 415525N1442237E -
+415500N1431500E
+(AKABIRA-SHI,ASAHIKAWA-SHI,ASHIBETSU-SHI,ASHORO-GUN,BIBAI-SHI,
+EBETSU-SHI,FUKAGAWA-SHI,FURANO-SHI,HIDAKA-GUN,HIROO-GUN,
+HOROIZUMI-GUN,IWAMIZAWA-SHI,KABATO-GUN,KAMIKAWA-GUN,KASAI-GUN,
+KATO-GUN,KUSHIRO-SHI,MIKASA-SHI,NAKAGAWA-GUN,NIIKAPPU-GUN,
+OBIHIRO-SHI,SAMANI-GUN,SARU-GUN,SHIRANUKA-GUN,SORACHI-GUN,
+SUNAGAWA-SHI,TAKIKAWA-SHI,TOKACHI-GUN,URAKAWA-GUN,URYU-GUN,
+UTASHINAI-SHI,YUBARI-GUN,YUBARI-SHI,YUFUTSU-GUN IN HOKKAIDO,
+THE-HIGH-SEAS)
+5.EXP TIME OF 59058FT/ALT IN ASC : AFT RELEASING 75MIN
+6.EXP TIME OF 59058FT/ALT IN DES : AFT RELEASING 141MIN
+7.NUMBER: 1/EACH DAY
+8.CHARACTERISTIC: DIAMETER/25M TOTAL LEN/44M (TEAR DROP TYPE)
+                  WT/500KG COLOR/COLORLESS TRANSPARENT
+F)SFC G)85000FT AMSL)</pre>
+    <ul>
+      <li><b>NOTAM番号：</b>R1685/26 ＆ R1682/26（NOTAMN：新規）</li>
+      <li><b>有効期間（日本時間）：</b>2026年10月1日 〜 11月1日</li>
+      <li><b>対象高度：</b>地表（SFC） 〜 海抜 85,000 ft ／ 130,000 ft（AMSL）（成層圏まで到達）</li>
+      <li><b>滝川滑空場至近の放流ポイント：</b>地点I　北緯43度37分18秒 東経141度57分03秒（滝川市江部乙町東部丘陵地）。滑空場から東北東へ約9.3km（直線距離）</li>
+      <li><b>気球の特性：</b>直径25m、全長44m、重量500kg、無色透明</li>
+      <li><b>上昇・降下挙動：</b>放流後75分で高度約59,000ftまで急上昇、141分で降下通過</li>
+      <li><b>運航上の留意点：</b>地点Iから放流される気球は巨大かつ無色透明で、放流直後は低高度を垂直に近い角度で突き抜けます。東側の赤平・芦別方面へ山岳波（ウェーブ）やサーマルを求めに行く際、江部乙上空付近の低高度上昇帯を横切らないよう進路選定に注意が必要です。</li>
+    </ul>
+
+    <h4>滝川滑空場から「半径9km以内」の空間干渉まとめ</h4>
+    <table>
+      <tr><th>方位・距離</th><th>対象エリア</th><th>対象高度</th><th>運航上の警戒事項</th></tr>
+      <tr><td>直上（0〜500m）</td><td>グライダー曲技（P4799/26）</td><td>1,100〜4,100 ft</td><td>場周進入・直上旋回での最優先警戒。無線での位置確認必須。</td></tr>
+      <tr><td>西〜南（3.0〜8.5km）</td><td>ドローン目視外（U3470/26）</td><td>地表〜1,411 ft</td><td>石狩川対岸・砂川市街側での低高度巡航・場周張り出し時の警戒。</td></tr>
+      <tr><td>全方位（全域）</td><td>熱気球最大6機（R1691/26 エリア3）</td><td>地表〜2,000 ft</td><td>2,000ft以下での全周スキャン。色彩・巨大目標の早期視認。</td></tr>
+      <tr><td>東北東（約9.3km・至近外縁）</td><td>自由気球放流点I（R1685/26等）</td><td>地表〜高高度</td><td>東側丘陵・山岳方面への離脱時の直進回避。放流情報への留意。</td></tr>
+    </table>
+  </div>
+</div>
+
 <script>
 /* 実物書類の写真サムネイル。クリックで拡大表示。
    同じ .doc-photo-wrap 内に複数枚あるときは、‹ › ボタンでページを前後に送れる。
@@ -1699,6 +1926,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') docPhotoNav(-1);
   else if (e.key === 'ArrowRight') docPhotoNav(1);
   else if (e.key === 'Escape') closeDocPhoto();
+});
+
+/* ノータム原文・解説のポップアップ */
+function openNotamModal() {
+  document.getElementById('notamModal').classList.add('show');
+}
+function closeNotamModal() {
+  document.getElementById('notamModal').classList.remove('show');
+}
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('notamModal').classList.contains('show')) return;
+  if (e.key === 'Escape') closeNotamModal();
 });
 
 /* ══════════ 共通：読み上げ設定の保存と共有 ══════════

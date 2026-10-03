@@ -111,6 +111,7 @@
 .sb-link:hover{background:rgba(255,255,255,.05);color:var(--text);}
 .sb-link.current{background:var(--accent-soft);color:var(--accent-text);}
 .sb-link.reading{background:var(--key-soft);color:var(--key);}
+mark.sb-hit{background:var(--accent-soft);color:var(--accent-text);padding:0 2px;border-radius:3px;}
 .sb-num{font-family:var(--mono);font-size:10.5px;color:var(--key);
   flex-shrink:0;min-width:30px;}
 .sb-empty{color:var(--text-faint);font-size:12px;padding:12px 8px;}
@@ -1702,15 +1703,59 @@ var TTSPrefs = (function () {
     if (e.target.closest('.sb-link') && window.innerWidth < 900) shut();
   });
 
-  /* 目次の絞り込み */
+  /* 目次の絞り込み（見出し名＋本文も対象。本文ヒット時は該当語をハイライト） */
+  function clearHighlights(){
+    document.querySelectorAll('mark.sb-hit').forEach(function(mark){
+      var parent = mark.parentNode;
+      if (!parent) return;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize();
+    });
+  }
+  function highlightIn(root, term){
+    if (!root || !term) return;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(node){
+        if (!node.nodeValue || node.nodeValue.indexOf(term) < 0) return NodeFilter.FILTER_REJECT;
+        if (node.parentNode && node.parentNode.closest && node.parentNode.closest('mark.sb-hit')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var nodes = [], n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(function(node){
+      var text = node.nodeValue, pos = 0, idx = text.indexOf(term);
+      if (idx < 0) return;
+      var frag = document.createDocumentFragment();
+      while (idx >= 0) {
+        frag.appendChild(document.createTextNode(text.slice(pos, idx)));
+        var mark = document.createElement('mark');
+        mark.className = 'sb-hit';
+        mark.textContent = text.slice(idx, idx + term.length);
+        frag.appendChild(mark);
+        pos = idx + term.length;
+        idx = text.indexOf(term, pos);
+      }
+      frag.appendChild(document.createTextNode(text.slice(pos)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  }
   var q = document.getElementById('sb-q');
   if (q) q.addEventListener('input', function(){
     var t = q.value.trim();
     var hit = 0;
+    clearHighlights();
     document.querySelectorAll('#sb-scroll .sb-link').forEach(function(a){
-      var on = !t || a.textContent.indexOf(t) >= 0;
+      var titleMatch = !t || a.textContent.indexOf(t) >= 0;
+      var sec = null, bodyMatch = false;
+      if (t) {
+        try { sec = document.querySelector(a.getAttribute('href')); } catch(e){}
+        if (sec && !titleMatch) bodyMatch = (sec.textContent || '').indexOf(t) >= 0;
+      }
+      var on = titleMatch || bodyMatch;
       a.style.display = on ? '' : 'none';
       if (on) hit++;
+      if (t && on && sec) highlightIn(sec, t);
     });
     /* 見出しは、その下にひとつでも残っていれば出す */
     document.querySelectorAll('#sb-scroll .sb-grp').forEach(function(g){

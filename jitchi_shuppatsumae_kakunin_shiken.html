@@ -406,11 +406,11 @@
   /* ノータム原文・解説のポップアップ */
   ul.plist li.plist-click{cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px;}
   ul.plist li.plist-click:hover{color:var(--cyan);}
-  #notamModal{
+  #notamModal,#aicModal{
     display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:2100;
     align-items:center; justify-content:center; padding:20px;
   }
-  #notamModal.show{display:flex;}
+  #notamModal.show,#aicModal.show{display:flex;}
   .notam-box{
     position:relative; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
     max-width:880px; width:100%; max-height:88vh; overflow-y:auto;
@@ -857,7 +857,7 @@
           <li data-tts data-text="航空路誌改訂版。">航空路誌改訂版（AIP Amendments）</li>
           <li data-tts data-text="航空路誌補足版。">航空路誌補足版（AIP Supplements）</li>
           <li data-tts data-text="ノータム。" class="plist-click" onclick="openNotamModal()">ノータム（NOTAM）</li>
-          <li data-tts data-text="航空情報サーキュラー、エーアイシー。">航空情報サーキュラー（AIC）</li>
+          <li data-tts data-text="航空情報サーキュラー、エーアイシー。" class="plist-click" onclick="openAicModal()">航空情報サーキュラー（AIC）</li>
         </ul>
         <div class="model-answer">
           <p data-tts data-text="航空情報は、航空路誌、AIP、航空路誌改訂版、航空路誌補足版、ノータム、航空情報サーキュラー、AIC、の5種類で、いずれもSWIMから確認します。ノータムは、SWIMのデジタルノータムリクエストサービスまたはデジタルノータム検索で、飛行当日と翌日の分まで確認します。今日は、無人航空機の目視外飛行のノータムが1件、地表から1,411フィート・機体重量2.5キログラム・7時から21時、出ていたので、その時間・空域を避け、周辺の見張りを強化します。災害特例時に石狩川東河川敷、滝新橋から石狩橋の南北2キロメートル程度、で低空飛行が行われる場合があることも把握しており、徳富川上空の定期便は本日運航予定なしと確認しました。趣味用の小型ドローンは事前に把握できるとは限らないため、目視での警戒もあわせて重要です。航空路誌、AIPは28日ごとのAIRACサイクルで更新されるので、有効日が当日を含んでいるかを確認します。航空路誌改訂版・航空路誌補足版は、該当がなければ該当なしを確認した旨を述べます。航空情報サーキュラー、AICは、いま控えているのが4件で、無人航空機の目視外飛行に関する情報提供、バードストライク発生時の報告、航空安全情報自発申告制度、ボイセズ、VFR機の異常接近対策です。直ちに飛行を制約するものではありませんが、報告手順など実際の行動につながる内容があるので把握しておきます。あわせて、訓練空域内の飛行情報や、使用滑空場周辺の障害物も確認します。滝川滑空場では南側に滝新橋、南東側にごみ焼却場の煙突があり、正確な位置・高さはその日のノータムや周辺図で確認します。">
@@ -1881,6 +1881,48 @@ F)SFC G)85000FT AMSL)</pre>
   </div>
 </div>
 
+<div id="aicModal" onclick="closeAicModal()">
+  <div class="notam-box" onclick="event.stopPropagation()">
+    <button class="notam-close" onclick="closeAicModal()">✕</button>
+    <p style="margin-top:0;">AIC（航空情報サーキュラー）の中から、グライダー（滑空機）の運航・操縦士・実技（口述）試験に直接関係する重要なものを5つ抜き出しました。試験官に「AICにはグライダーに関係するどのようなものが出ていますか」と問われた際の実務知識として整理しています。</p>
+
+    <h4 style="margin-top:14px; padding-top:14px;">1. 有視界飛行方式（VFR）機の異常接近防止対策</h4>
+    <ul>
+      <li><b>AIC番号：</b>Nr 033/09（Page 1）</li>
+      <li>VFRで飛行する航空機に対し、IFR（計器飛行方式）機や他のVFR機との衝突を防ぐための「徹底した外部監視（見張り）」を強く求めています。</li>
+      <li>トランスポンダー装備機は、高度10,000ft未満では「1200」、10,000ft以上では「1400」のVFRコードとモードCを常時発信すること、またレーダー業務や管制官と通信していても、衝突防止の見張り義務は一貫してVFRパイロット側にあることを認識するよう促しています。</li>
+    </ul>
+
+    <h4>2. 「特定操縦技能審査制度」の導入・審査内容</h4>
+    <ul>
+      <li><b>AIC番号：</b>Nr 033/22（Page 32–34）</li>
+      <li>グライダーの操縦士免許（技能証明）を保持して飛行を続けるために、原則2年ごとに合格しなければならない「特操審査」の制度解説です。</li>
+      <li>口述・実技審査の対象として、まさに今行っている「重量重心、航空情報（NOTAM等）、気象情報、機体整備状況の確認（飛行前作業）」や「場周経路における運航」などが細かく規定されています。</li>
+    </ul>
+
+    <h4>3. 航空機への鳥衝突（バードストライク）等の報告要請</h4>
+    <ul>
+      <li><b>AIC番号：</b>Nr 010/22（Page 19–21）</li>
+      <li>福岡FIR（日本国内）を飛行するすべての運航者・機長（グライダー含む）が対象です。</li>
+      <li>鳥と衝突した場合、またはニアミスがあった場合の、インターネット（鳥衝突情報共有サイト）を通じた国への報告手順や、詳細な報告様式の書き方が定められています。</li>
+    </ul>
+
+    <h4>4. ドローン（無人航空機）の目視外飛行にともなう情報確認</h4>
+    <ul>
+      <li><b>AIC番号：</b>Nr 024/21（Page 13–14）</li>
+      <li>一定の条件で目視外飛行を行うドローンの情報が、NOTAMで提供される仕組みの解説です。</li>
+      <li>グライダーの操縦士に対し、「飛行前にドローンの目視外飛行情報をNOTAMで確認し、自身のフライトに影響がある（空域が重なる）場合は、事前にドローン運航者へ連絡を取って安全措置を講じること」を求めています。</li>
+    </ul>
+
+    <h4>5. 航空安全情報自発報告制度（VOICES）</h4>
+    <ul>
+      <li><b>AIC番号：</b>Nr 034/14（Page 4–6）</li>
+      <li>義務報告（事故など）には至らないものの、「一歩間違えれば危なかった」という安全上のヒヤリハット事象を自発的に報告・共有する制度です。</li>
+      <li>対象者にはすべての航空従事者（操縦士、練習生、クラブ組織）が含まれており、報告された個人や会社名などの情報は完全に秘匿され、行政処分等の不利益処分には一切使われない基本原則が示されています。</li>
+    </ul>
+  </div>
+</div>
+
 <script>
 /* 実物書類の写真サムネイル。クリックで拡大表示。
    同じ .doc-photo-wrap 内に複数枚あるときは、‹ › ボタンでページを前後に送れる。
@@ -1938,6 +1980,18 @@ function closeNotamModal() {
 document.addEventListener('keydown', (e) => {
   if (!document.getElementById('notamModal').classList.contains('show')) return;
   if (e.key === 'Escape') closeNotamModal();
+});
+
+/* 航空情報サーキュラー（AIC）解説のポップアップ */
+function openAicModal() {
+  document.getElementById('aicModal').classList.add('show');
+}
+function closeAicModal() {
+  document.getElementById('aicModal').classList.remove('show');
+}
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('aicModal').classList.contains('show')) return;
+  if (e.key === 'Escape') closeAicModal();
 });
 
 /* ══════════ 共通：読み上げ設定の保存と共有 ══════════

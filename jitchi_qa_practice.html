@@ -247,6 +247,13 @@ body {
 .ans-more > summary:hover { border-color: #3b82f6; color: #93c5fd; }
 .ans-more-text { font-size: 13.5px; line-height: 1.85; color: #9aa4af; margin-top: 10px; }
 .ans-more .btn-speak-ans { margin-top: 10px; }
+
+/* 機長の出発前確認から引用した参考図（qa.fig）。元ページと同じ配色で縮小表示する。 */
+.qa-fig-wrap { margin-top: 14px; background: rgba(255,255,255,.04); border-radius: 8px; padding: 14px 16px; }
+.qa-fig-wrap figure { margin: 0; }
+.qa-fig-wrap svg { width: 100%; height: auto; display: block; max-width: 100% !important; }
+.qa-fig-wrap figcaption { font-size: 12px; color: #8b949e; line-height: 1.6; margin-top: 10px; }
+.qa-fig-wrap figcaption .fig-num { color: #58a6ff; font-weight: 700; margin-right: 6px; }
 /* 自動再生では簡潔版だけを読み上げ、詳しい版は読まずに画面に出す */
 .pb-ans-full { margin-top: 12px; padding-top: 10px; border-top: 1px solid #30363d; color: #9aa4af; font-size: .88em; }
 .pb-ans-full-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
@@ -3753,13 +3760,14 @@ function hasAnsMore(qa){ return !!(qa && qa.s); }
 
 function answerBodyHtml(qa){
   const short = `<div class="model-answer-text" id="modelAnswerText">${ansShort(qa)}</div>`;
-  if (!hasAnsMore(qa)) return short;
+  const figHtml = qa.fig ? `<div class="qa-fig-wrap">${qa.fig}</div>` : '';
+  if (!hasAnsMore(qa)) return short + figHtml;
   return short + `
     <details class="ans-more">
       <summary>詳しく</summary>
       <div class="ans-more-text" id="modelAnswerFull">${qa.a}</div>
       <button class="btn-speak-ans" id="btnSpeakFull" onclick="speakFullAnswer()">🔊 詳しく読み上げ</button>
-    </details>`;
+    </details>` + figHtml;
 }
 
 function speakFullAnswer() {
@@ -3886,6 +3894,7 @@ function updatePlaybackUI() {
   document.getElementById('pbQuestionText').textContent = qa.q;
   document.getElementById('pbAnswerBox').classList.add('hidden');
   const pbAns = document.getElementById('pbAnswerText');
+  const pbFigHtml = qa.fig ? `<div class="qa-fig-wrap">${qa.fig}</div>` : '';
   if (hasAnsMore(qa)) {
     // 簡潔版を読み上げ、詳しい版は自動では読まずに下へ添える。
     // ボタンを押せば手動で読み上げられる（speakFullAnswerPb）。
@@ -3894,9 +3903,10 @@ function updatePlaybackUI() {
       + `<div class="pb-ans-full-head"><span class="pb-ans-full-label">詳しく</span>`
       + `<button class="btn-speak-ans" id="btnSpeakFullPb" onclick="speakFullAnswerPb()">🔊 読み上げ</button></div>`
       + `<div id="pbAnswerFullText">${qa.a}</div>`
-      + `</div>`;
+      + `</div>`
+      + pbFigHtml;
   } else {
-    pbAns.innerHTML = qa.a;
+    pbAns.innerHTML = qa.a + pbFigHtml;
   }
   const pbNote = document.getElementById('pbNote');
   pbNote.innerHTML = noteHtml(qa);

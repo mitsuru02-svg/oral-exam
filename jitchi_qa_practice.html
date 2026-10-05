@@ -249,7 +249,8 @@ body {
 .ans-more .btn-speak-ans { margin-top: 10px; }
 /* 自動再生では簡潔版だけを読み上げ、詳しい版は読まずに画面に出す */
 .pb-ans-full { margin-top: 12px; padding-top: 10px; border-top: 1px solid #30363d; color: #9aa4af; font-size: .88em; }
-.pb-ans-full-label { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: #6e7681; margin-bottom: 5px; }
+.pb-ans-full-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.pb-ans-full-label { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; color: #6e7681; }
 /* 原典を確認できていない箇所の注記。模範解答の外に置き、読み上げ対象にしない */
 .qa-note {
   margin-top: 12px; padding: 10px 12px; border-radius: 8px;
@@ -3821,9 +3822,10 @@ function updatePlaybackUI() {
     // 簡潔版を読み上げ、詳しい版は自動では読まずに下へ添える。
     // ボタンを押せば手動で読み上げられる（speakFullAnswerPb）。
     pbAns.innerHTML = `<div>${qa.s}</div>`
-      + `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>`
+      + `<div class="pb-ans-full">`
+      + `<div class="pb-ans-full-head"><span class="pb-ans-full-label">詳しく</span>`
+      + `<button class="btn-speak-ans" id="btnSpeakFullPb" onclick="speakFullAnswerPb()">🔊 読み上げ</button></div>`
       + `<div id="pbAnswerFullText">${qa.a}</div>`
-      + `<button class="btn-speak-ans" id="btnSpeakFullPb" onclick="speakFullAnswerPb()">🔊 詳しく読み上げ</button>`
       + `</div>`;
   } else {
     pbAns.innerHTML = qa.a;

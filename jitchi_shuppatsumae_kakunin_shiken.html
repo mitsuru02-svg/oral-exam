@@ -442,6 +442,11 @@
     padding:10px 12px; font-family:var(--mono); font-size:10.5px; line-height:1.55;
     color:var(--text-dim); white-space:pre-wrap; word-break:break-all; overflow-x:auto; margin:0 0 16px;
   }
+  .notam-raw-map-wrap{display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; margin:0 0 16px;}
+  .notam-raw-map-wrap .notam-raw{flex:1 1 320px; margin:0;}
+  .notam-raw-map-link{flex:0 0 220px; display:block; text-decoration:none;}
+  .notam-raw-map-img{width:100%; height:auto; border-radius:8px; border:1px solid var(--line); display:block;}
+  .notam-raw-map-cap{font-size:10.5px; color:var(--cyan); margin-top:5px; text-align:center;}
   .notam-close{
     position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%;
     border:1px solid rgba(255,255,255,.25); background:rgba(22,27,34,.7); color:#e6edf3;
@@ -1756,6 +1761,7 @@ RJJJ 7076/26</pre>
     </ul>
 
     <h4>② 滝川・新十津川・砂川：ドローン（無人航空機）目視外飛行</h4>
+    <div class="notam-raw-map-wrap">
 <pre class="notam-raw">290629 RJAAYNYX
 (U3470/26 NOTAMN
 Q)RJJJ/QWULW/IV/BO/W/000/015/4333N14150E007
@@ -1772,6 +1778,11 @@ CONTACT INFORMATION: 03-4485-1606
 RMK: THIS AREA IS INCLUDED IN HK11-3
 F)SFC G)1411FT AMSL)
 RJDR 3448/26</pre>
+      <a class="notam-raw-map-link" href="https://www.google.com/maps/d/u/0/edit?mid=1kbdd4Ujuz3w2cfOLQGL-XkFMj1LMXyk&hl=ja&ll=43.558176101154515%2C141.79149475097654&z=12" target="_blank" rel="noopener">
+        <img class="notam-raw-map-img" src="assets/notam_drone_area_map.webp" alt="②ドローン目視外飛行エリア（U3470/26）の範囲を実際の地図上に表示したもの">
+        <div class="notam-raw-map-cap">実際の地図で見る（Google My Maps）↗</div>
+      </a>
+    </div>
     <ul>
       <li><b>NOTAM番号：</b>U3470/26（NOTAMN：新規）</li>
       <li><b>対象空域：</b>以下の7点を結ぶ多角形内（指定空域：HK11-3に含まれるエリア）

@@ -447,6 +447,8 @@
   .notam-raw-map-link{flex:0 0 220px; display:block; text-decoration:none;}
   .notam-raw-map-img{width:100%; height:auto; border-radius:8px; border:1px solid var(--line); display:block;}
   .notam-raw-map-cap{font-size:10.5px; color:var(--cyan); margin-top:5px; text-align:center;}
+  .notam-summary-box{margin:26px 0 0; padding:14px 16px 16px; background:var(--amber-dim); border:2px solid var(--amber); border-radius:8px;}
+  .notam-summary-box h4{margin:0 0 4px; padding-top:0; border-top:none; color:var(--amber);}
   .notam-detail-toggle{margin:0 0 16px;}
   .notam-detail-toggle summary{
     cursor:pointer; font-size:13px; font-weight:700; color:var(--cyan); list-style:none;
@@ -2194,14 +2196,16 @@ F)SFC G)85000FT AMSL)</pre>
       <li><b>運航上の留意点：</b>実施時間帯は夜間〜早朝（日本時間午前0時〜6時45分）のため、日中に飛ぶグライダーとの直接衝突の可能性は低いですが、早朝フライトや機体移動時の浮遊・落下物には注意が必要です。</li>
     </ul>
 
-    <h4>滝川滑空場から「半径9km以内」の空間干渉まとめ</h4>
-    <table>
-      <tr><th>方位・距離</th><th>対象エリア</th><th>対象高度</th><th>運航上の警戒事項</th></tr>
-      <tr><td>直上（0〜500m）</td><td>グライダー曲技（P4799/26）</td><td>1,100〜4,100 ft</td><td>場周進入・直上旋回での最優先警戒。無線での位置確認必須。</td></tr>
-      <tr><td>西〜南（3.0〜8.5km）</td><td>ドローン目視外（U3470/26）</td><td>地表〜1,411 ft</td><td>石狩川対岸・砂川市街側での低高度巡航・場周張り出し時の警戒。</td></tr>
-      <tr><td>全方位（全域）</td><td>熱気球最大6機（R1691/26 エリア3）</td><td>地表〜2,000 ft</td><td>2,000ft以下での全周スキャン。色彩・巨大目標の早期視認。</td></tr>
-      <tr><td>東北東（約9.3km・至近外縁）</td><td>自由気球放流点I（R1685/26等）</td><td>地表〜高高度</td><td>東側丘陵・山岳方面への離脱時の直進回避。放流情報への留意。</td></tr>
-    </table>
+    <div class="notam-summary-box">
+      <h4>滝川滑空場から「半径9km以内」の空間干渉まとめ</h4>
+      <table>
+        <tr><th>方位・距離</th><th>対象エリア</th><th>対象高度</th><th>運航上の警戒事項</th></tr>
+        <tr><td>直上（0〜500m）</td><td>グライダー曲技（P4799/26）</td><td>1,100〜4,100 ft</td><td>場周進入・直上旋回での最優先警戒。無線での位置確認必須。</td></tr>
+        <tr><td>西〜南（3.0〜8.5km）</td><td>ドローン目視外（U3470/26）</td><td>地表〜1,411 ft</td><td>石狩川対岸・砂川市街側での低高度巡航・場周張り出し時の警戒。</td></tr>
+        <tr><td>全方位（全域）</td><td>熱気球最大6機（R1691/26 エリア3）</td><td>地表〜2,000 ft</td><td>2,000ft以下での全周スキャン。色彩・巨大目標の早期視認。</td></tr>
+        <tr><td>東北東（約9.3km・至近外縁）</td><td>自由気球放流点I（R1685/26等）</td><td>地表〜高高度</td><td>東側丘陵・山岳方面への離脱時の直進回避。放流情報への留意。</td></tr>
+      </table>
+    </div>
   </div>
 </div>
 

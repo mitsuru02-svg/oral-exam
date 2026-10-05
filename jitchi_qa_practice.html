@@ -2522,7 +2522,7 @@ async function loadSyncList() {
       return `
         <div class="sl-row${isMe ? ' sl-row-me' : ''}">
           <div class="sl-id">${isMe ? '👤 ' : ''}${escapeHtml(row.id)}</div>
-          <div class="sl-stats">正解 ${row.totalCorrect}/${row.totalAnswered}（${pct}%）・部分正解 ${row.partialCount || 0}・未正解 ${row.wrongCount}・⭐ ${row.checkedCount}</div>
+          <div class="sl-stats">正解 ${row.totalCorrect}/${row.totalAnswered}（${pct}%）・未正解 ${row.wrongCount}・⭐ ${row.checkedCount}</div>
           <div class="sl-time">${when}</div>
           ${isMe ? `<button class="sl-del" title="このIDを削除" data-id="${escapeHtml(row.id)}"
                   onclick="deleteSyncId(this.dataset.id)">🗑 削除</button>` : ''}

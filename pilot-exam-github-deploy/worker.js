@@ -170,8 +170,7 @@ async function handleSyncList(request, env) {
         id: key.name.slice('sync:'.length),
         totalCorrect:  data.totalCorrect  || 0,
         totalAnswered: data.totalAnswered || 0,
-        partialCount:  values.filter(m => m.verdict === '部分正解').length,
-        wrongCount:    values.filter(m => m.verdict === '不正解').length,
+        wrongCount:    values.filter(m => m.verdict && m.verdict !== '正解').length,
         checkedCount:  values.filter(m => m.checked).length,
         updatedAt:     data.updatedAt || 0,
       });

@@ -3702,6 +3702,16 @@ function speakFullAnswer() {
   speak(el.textContent, () => btn.classList.remove('speaking'));
 }
 
+/* 聞き流しモードの「詳しく」用。自動再生では読まれないので、ボタンで手動再生する。 */
+function speakFullAnswerPb() {
+  const btn = document.getElementById('btnSpeakFullPb');
+  const el  = document.getElementById('pbAnswerFullText');
+  if (!btn || !el) return;
+  if (btn.classList.contains('speaking')) { stopSpeaking(); btn.classList.remove('speaking'); return; }
+  btn.classList.add('speaking');
+  speak(el.textContent, () => btn.classList.remove('speaking'));
+}
+
 function speakModelAnswer() {
   const btn  = document.getElementById('btnSpeakAns');
   const text = document.getElementById('modelAnswerText').textContent;
@@ -3808,9 +3818,13 @@ function updatePlaybackUI() {
   document.getElementById('pbAnswerBox').classList.add('hidden');
   const pbAns = document.getElementById('pbAnswerText');
   if (hasAnsMore(qa)) {
-    // 簡潔版を読み上げ、詳しい版は読まずに下へ添える
+    // 簡潔版を読み上げ、詳しい版は自動では読まずに下へ添える。
+    // ボタンを押せば手動で読み上げられる（speakFullAnswerPb）。
     pbAns.innerHTML = `<div>${qa.s}</div>`
-      + `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>${qa.a}</div>`;
+      + `<div class="pb-ans-full"><span class="pb-ans-full-label">詳しく</span>`
+      + `<div id="pbAnswerFullText">${qa.a}</div>`
+      + `<button class="btn-speak-ans" id="btnSpeakFullPb" onclick="speakFullAnswerPb()">🔊 詳しく読み上げ</button>`
+      + `</div>`;
   } else {
     pbAns.innerHTML = qa.a;
   }

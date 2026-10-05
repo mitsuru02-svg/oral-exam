@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <style>
 /* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
 :root{
@@ -462,6 +461,19 @@
   .notam-map-legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin:2px 0 14px; font-size:11px; color:var(--text-dim);}
   .notam-map-legend .sw{display:inline-flex; align-items:center; gap:5px;}
   .notam-map-legend .sw i{width:11px; height:11px; border-radius:3px; display:inline-block; flex-shrink:0;}
+  .notam-map-zoomable{cursor:zoom-in;}
+  .notam-map-zoomable:hover{border-color:var(--line-strong);}
+  .notam-map-zoom-hint{font-size:10px; font-weight:400; color:var(--text-faint); margin-left:8px;}
+  .map-zoom-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2200;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .map-zoom-overlay.show{display:flex;}
+  .map-zoom-inner{
+    position:relative; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+    max-width:95vw; max-height:95vh; overflow:auto; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,.6);
+  }
+  .map-zoom-inner svg{width:min(90vw,900px); height:auto; display:block;}
 
   /* TTS controls */
   /* かつて position:sticky; top:0 だったが、ヘッダー（sticky, z-index:999）の
@@ -2028,9 +2040,8 @@ F)SFC G)85000FT AMSL)</pre>
       <tr><td>東北東（約9.3km・至近外縁）</td><td>自由気球放流点I（R1685/26等）</td><td>地表〜高高度</td><td>東側丘陵・山岳方面への離脱時の直進回避。放流情報への留意。</td></tr>
     </table>
 
-    <h4>①〜⑤の空域を色分けした模式図</h4>
+    <h4>②〜⑤の空域を色分けした模式図</h4>
     <div class="notam-map-legend">
-      <span class="sw"><i style="background:#3fb950;"></i>① 曲技飛行（敷地上空500m）</span>
       <span class="sw"><i style="background:#a371f7;"></i>② ドローン目視外飛行エリア</span>
       <span class="sw"><i style="background:#f85149;"></i>③ 熱気球エリア1〜3</span>
       <span class="sw"><i style="background:#d29922;"></i>④ 自由気球 放球点I（滝川）</span>
@@ -2046,19 +2057,17 @@ F)SFC G)85000FT AMSL)</pre>
           <text x="170" y="86" fill="#8b949e" font-size="9" text-anchor="middle">9km</text>
           <polygon points="166,119 145,92 79,92 81,221 172,247 182,194 161,142" fill="#a371f7" fill-opacity="0.22" stroke="#a371f7" stroke-width="1.5"/>
           <text x="118" y="100" fill="#a371f7" font-size="10" font-weight="700" text-anchor="middle">②</text>
-          <circle cx="170" cy="170" r="9" fill="none" stroke="#3fb950" stroke-width="2"/>
-          <text x="170" y="186" fill="#3fb950" font-size="10" font-weight="700" text-anchor="middle">①</text>
           <circle cx="213" cy="98" r="4.5" fill="#d29922"/>
           <text x="213" y="90" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">④</text>
           <text x="221" y="112" fill="#d29922" font-size="9" text-anchor="start">放球点I</text>
           <circle cx="170" cy="170" r="3.5" fill="#e6edf3" stroke="#0a0e14" stroke-width="1"/>
           <text x="170" y="158" fill="#e6edf3" font-size="9.5" font-weight="700" text-anchor="middle">滝川滑空場</text>
         </svg>
-        <div class="notam-map-caption">緯度経度から滝川滑空場中心の簡易投影で作成した模式図（概略）。①は敷地直上のため滑空場マーカーとほぼ重なります。</div>
+        <div class="notam-map-caption">緯度経度から滝川滑空場中心の簡易投影で作成した模式図（概略）。①の曲技飛行は自機（滝川滑空場）自身の活動なので、ここでは表示していません。</div>
       </div>
-      <div class="notam-map-panel">
-        <div class="notam-map-title">広域図（空知地方 中心・道内広域）</div>
-        <svg viewBox="0 0 620 420" xmlns="http://www.w3.org/2000/svg">
+      <div class="notam-map-panel notam-map-zoomable" onclick="openMapZoom('mapRegional')">
+        <div class="notam-map-title">広域図（空知地方 中心・道内広域）<span class="notam-map-zoom-hint">🔍 クリックで拡大</span></div>
+        <svg id="mapRegional" viewBox="0 0 620 420" xmlns="http://www.w3.org/2000/svg">
           <polygon points="286,339 236,304 185,274 185,202 152,202 152,172 123,172 152,96 192,96 192,107 210,107 368,170 368,200 525,199 400,338 286,339" fill="#3b82f6" fill-opacity="0.08" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 3"/>
           <text x="420" y="230" fill="#3b82f6" font-size="11" font-weight="700" text-anchor="middle">⑤ 飛行想定エリア</text>
           <polygon points="109,142 160,179 160,96 135,96" fill="#f85149" fill-opacity="0.12" stroke="#f85149" stroke-width="1"/>
@@ -2076,14 +2085,33 @@ F)SFC G)85000FT AMSL)</pre>
           <circle cx="400" cy="191" r="2.5" fill="#8b949e"/>
           <text x="400" y="204" fill="#8b949e" font-size="9" text-anchor="middle">釧路</text>
         </svg>
-        <div class="notam-map-caption">海岸線は省略し、主要都市は位置の目安として表示。③④滝川滑空場は近接のため点線の円にまとめ、詳細は左の近接図を参照。④の残り15放球地点（JやOなど）は道内各地に分散し図外。③のエリア1〜3は上限高度が低いほど色を濃く表示。</div>
+        <div class="notam-map-caption">海岸線は省略し、主要都市は位置の目安として表示。③④滝川滑空場は近接のため点線の円にまとめ、詳細は左の近接図を参照。④の残り15放球地点（JやOなど）は道内各地に分散し図外。③のエリア1〜3は上限高度が低いほど色を濃く表示。クリックで拡大表示できます。</div>
       </div>
-      <div class="notam-map-panel" style="flex-basis:100%;">
-        <div class="notam-map-title">実地図（Leaflet + OpenStreetMap・詳細表示）</div>
-        <div id="notamLeafletMap" style="width:100%; height:420px; border-radius:6px; overflow:hidden;"></div>
-        <div class="notam-map-caption">実際の地形図の上に①〜⑤を同じ色分けで重ねた詳細表示です。マーカーや領域をクリックすると名称が出ます。④の放球地点はA〜Pの16地点すべてを表示（Iが滝川市）。地図タイルの読み込みにはインターネット接続が必要です。オフライン時は上の2枚の模式図をご覧ください。</div>
+      <div class="notam-map-panel">
+        <div class="notam-map-title">③熱気球エリア 拡大図（エリア1〜3のみ）</div>
+        <svg viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="53,228 247,370 247,50 150,50" fill="#f85149" fill-opacity="0.12" stroke="#f85149" stroke-width="1.5"/>
+          <polygon points="53,228 53,299 247,370" fill="#f85149" fill-opacity="0.20" stroke="#f85149" stroke-width="1.5"/>
+          <polygon points="53,299 53,370 247,370" fill="#f85149" fill-opacity="0.32" stroke="#f85149" stroke-width="1.5"/>
+          <text x="174" y="150" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle">エリア3</text>
+          <text x="174" y="166" fill="#f85149" font-size="10" text-anchor="middle">上限2,000ft</text>
+          <text x="105" y="280" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle">エリア1</text>
+          <text x="105" y="296" fill="#f85149" font-size="10" text-anchor="middle">上限1,500ft</text>
+          <text x="118" y="340" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle">エリア2</text>
+          <text x="118" y="356" fill="#f85149" font-size="10" text-anchor="middle">上限1,000ft</text>
+          <circle cx="205" cy="112" r="4.5" fill="#e6edf3" stroke="#0a0e14" stroke-width="1"/>
+          <text x="205" y="100" fill="#e6edf3" font-size="10" font-weight="700" text-anchor="middle">滝川滑空場</text>
+        </svg>
+        <div class="notam-map-caption">③熱気球NOTAM（R1691/26）のエリア1〜3だけを拡大表示。滝川滑空場はエリア3の内側に位置します。上限高度が低いほど色を濃く表示（エリア2が最も低く最も濃い赤）。</div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="mapZoomOverlay" class="map-zoom-overlay" onclick="closeMapZoom()">
+  <div class="map-zoom-inner" onclick="event.stopPropagation()">
+    <button class="notam-close" onclick="closeMapZoom()">✕</button>
+    <div id="mapZoomContent"></div>
   </div>
 </div>
 
@@ -2129,7 +2157,6 @@ F)SFC G)85000FT AMSL)</pre>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* 実物書類の写真サムネイル。クリックで拡大表示。
    同じ .doc-photo-wrap 内に複数枚あるときは、‹ › ボタンでページを前後に送れる。
@@ -2180,81 +2207,31 @@ document.addEventListener('keydown', (e) => {
 /* ノータム原文・解説のポップアップ */
 function openNotamModal() {
   document.getElementById('notamModal').classList.add('show');
-  setTimeout(initNotamLeafletMap, 50);
 }
 function closeNotamModal() {
   document.getElementById('notamModal').classList.remove('show');
 }
-
-/* NOTAM①〜⑤を重ねた実地図（Leaflet）。タイル読み込みにネット接続が必要なため、
-   CDN・タイルサーバーに到達できない環境では地図が白いままになる（模式図は常に表示される）。 */
-let notamLeafletMap = null;
-function initNotamLeafletMap() {
-  if (notamLeafletMap || typeof L === 'undefined') return;
-  const el = document.getElementById('notamLeafletMap');
-  if (!el) return;
-  const center = [43.549722, 141.891667]; // 滝川滑空場
-
-  notamLeafletMap = L.map(el, { scrollWheelZoom: false }).setView(center, 10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 18,
-  }).addTo(notamLeafletMap);
-
-  L.circleMarker(center, { radius: 6, color: '#0a0e14', weight: 1, fillColor: '#e6edf3', fillOpacity: 1 })
-    .addTo(notamLeafletMap).bindPopup('滝川滑空場');
-
-  L.circle(center, { radius: 9000, color: '#8b949e', weight: 1.5, dashArray: '5 4', fill: false })
-    .addTo(notamLeafletMap).bindPopup('半径9km（航空法第92条の操縦練習飛行等許可空域）');
-
-  L.circle(center, { radius: 500, color: '#3fb950', weight: 2, fillColor: '#3fb950', fillOpacity: 0.25 })
-    .addTo(notamLeafletMap).bindPopup('① 曲技（アクロバット）飛行エリア');
-
-  const dronePoly = [
-    [43.600278,141.886111],[43.627778,141.8575],[43.628056,141.766944],
-    [43.498611,141.768611],[43.473056,141.893889],[43.525278,141.908056],[43.577778,141.878889],
-  ];
-  L.polygon(dronePoly, { color: '#a371f7', weight: 1.5, fillColor: '#a371f7', fillOpacity: 0.22 })
-    .addTo(notamLeafletMap).bindPopup('② ドローン目視外飛行エリア');
-
-  const area1 = [[43.333333,141.5],[43.2,141.5],[43.066667,142]];
-  const area2 = [[43.2,141.5],[43.066667,141.5],[43.066667,142]];
-  const area3 = [[43.333333,141.5],[43.066667,142],[43.666667,142],[43.666667,141.75]];
-  L.polygon(area3, { color: '#f85149', weight: 1, fillColor: '#f85149', fillOpacity: 0.12 })
-    .addTo(notamLeafletMap).bindPopup('③ 熱気球エリア3（上限2,000ft）');
-  L.polygon(area1, { color: '#f85149', weight: 1, fillColor: '#f85149', fillOpacity: 0.20 })
-    .addTo(notamLeafletMap).bindPopup('③ 熱気球エリア1（上限1,500ft）');
-  L.polygon(area2, { color: '#f85149', weight: 1, fillColor: '#f85149', fillOpacity: 0.32 })
-    .addTo(notamLeafletMap).bindPopup('③ 熱気球エリア2（上限1,000ft）');
-
-  const rel4 = {
-    A:[42.8925,143.369722], B:[43.238056,143.274722], C:[43.156667,143.241667],
-    D:[43.077222,142.876667], E:[42.980833,142.403889], F:[43.158889,142.496944],
-    G:[43.065278,141.985278], H:[43.493889,142.175], I:[43.621667,141.950833],
-    J:[42.334167,142.378889], K:[43.339722,141.901944], L2:[43.228611,141.903611],
-    M:[43.123333,143.588611], N:[43.129722,143.628056], O:[42.319722,143.329167],
-    P:[42.4775,143.368611],
-  };
-  for (const [key, pos] of Object.entries(rel4)) {
-    const label = key === 'L2' ? 'L' : key;
-    L.circleMarker(pos, { radius: label === 'I' ? 6 : 4, color: '#0a0e14', weight: 1, fillColor: '#d29922', fillOpacity: 1 })
-      .addTo(notamLeafletMap).bindPopup('④ 自由気球 放球地点 ' + label + (label === 'I' ? '（滝川市）' : ''));
-  }
-
-  const flt5 = [
-    [41.916667,143.25],[42.166667,142.75],[42.383333,142.25],[42.9,142.25],
-    [42.9,141.916667],[43.116667,141.916667],[43.116667,141.633333],[43.666667,141.916667],
-    [43.666667,142.316667],[43.583333,142.316667],[43.583333,142.5],[43.133333,144.066667],
-    [42.916667,144.066667],[42.923889,145.622222],[41.923611,144.376944],[41.916667,143.25],
-  ];
-  L.polygon(flt5, { color: '#3b82f6', weight: 1.5, fillColor: '#3b82f6', fillOpacity: 0.06, dashArray: '5 3' })
-    .addTo(notamLeafletMap).bindPopup('⑤ 自由気球 飛行想定エリア');
-
-  setTimeout(() => notamLeafletMap.invalidateSize(), 100);
-}
 document.addEventListener('keydown', (e) => {
   if (!document.getElementById('notamModal').classList.contains('show')) return;
   if (e.key === 'Escape') closeNotamModal();
+});
+
+/* NOTAM模式図（近接図・広域図）のクリック拡大表示。元のsvgを複製して
+   大きい表示用オーバーレイに差し込む。 */
+function openMapZoom(svgId) {
+  const src = document.getElementById(svgId);
+  if (!src) return;
+  const content = document.getElementById('mapZoomContent');
+  content.innerHTML = '';
+  content.appendChild(src.cloneNode(true));
+  document.getElementById('mapZoomOverlay').classList.add('show');
+}
+function closeMapZoom() {
+  document.getElementById('mapZoomOverlay').classList.remove('show');
+}
+document.addEventListener('keydown', (e) => {
+  if (!document.getElementById('mapZoomOverlay').classList.contains('show')) return;
+  if (e.key === 'Escape') closeMapZoom();
 });
 
 /* 航空情報サーキュラー（AIC）解説のポップアップ */

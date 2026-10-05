@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
 /* ══════════ 共通デザイントークン（全ページ共通・編集時は全ファイル同時に） ══════════ */
 :root{
@@ -2077,6 +2078,11 @@ F)SFC G)85000FT AMSL)</pre>
         </svg>
         <div class="notam-map-caption">海岸線は省略し、主要都市は位置の目安として表示。③④滝川滑空場は近接のため点線の円にまとめ、詳細は左の近接図を参照。④の残り15放球地点（JやOなど）は道内各地に分散し図外。③のエリア1〜3は上限高度が低いほど色を濃く表示。</div>
       </div>
+      <div class="notam-map-panel" style="flex-basis:100%;">
+        <div class="notam-map-title">実地図（Leaflet + OpenStreetMap・詳細表示）</div>
+        <div id="notamLeafletMap" style="width:100%; height:420px; border-radius:6px; overflow:hidden;"></div>
+        <div class="notam-map-caption">実際の地形図の上に①〜⑤を同じ色分けで重ねた詳細表示です。マーカーや領域をクリックすると名称が出ます。④の放球地点はA〜Pの16地点すべてを表示（Iが滝川市）。地図タイルの読み込みにはインターネット接続が必要です。オフライン時は上の2枚の模式図をご覧ください。</div>
+      </div>
     </div>
   </div>
 </div>
@@ -2123,6 +2129,7 @@ F)SFC G)85000FT AMSL)</pre>
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 /* 実物書類の写真サムネイル。クリックで拡大表示。
    同じ .doc-photo-wrap 内に複数枚あるときは、‹ › ボタンでページを前後に送れる。
@@ -2173,9 +2180,77 @@ document.addEventListener('keydown', (e) => {
 /* ノータム原文・解説のポップアップ */
 function openNotamModal() {
   document.getElementById('notamModal').classList.add('show');
+  setTimeout(initNotamLeafletMap, 50);
 }
 function closeNotamModal() {
   document.getElementById('notamModal').classList.remove('show');
+}
+
+/* NOTAM①〜⑤を重ねた実地図（Leaflet）。タイル読み込みにネット接続が必要なため、
+   CDN・タイルサーバーに到達できない環境では地図が白いままになる（模式図は常に表示される）。 */
+let notamLeafletMap = null;
+function initNotamLeafletMap() {
+  if (notamLeafletMap || typeof L === 'undefined') return;
+  const el = document.getElementById('notamLeafletMap');
+  if (!el) return;
+  const center = [43.549722, 141.891667]; // 滝川滑空場
+
+  notamLeafletMap = L.map(el, { scrollWheelZoom: false }).setView(center, 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18,
+  }).addTo(notamLeafletMap);
+
+  L.circleMarker(center, { radius: 6, color: '#0a0e14', weight: 1, fillColor: '#e6edf3', fillOpacity: 1 })
+    .addTo(notamLeafletMap).bindPopup('滝川滑空場');
+
+  L.circle(center, { radius: 9000, color: '#8b949e', weight: 1.5, dashArray: '5 4', fill: false })
+    .addTo(notamLeafletMap).bindPopup('半径9km（航空法第92条の操縦練習飛行等許可空域）');
+
+  L.circle(center, { radius: 500, color: '#3fb950', weight: 2, fillColor: '#3fb950', fillOpacity: 0.25 })
+    .addTo(notamLeafletMap).bindPopup('① 曲技（アクロバット）飛行エリア');
+
+  const dronePoly = [
+    [43.600278,141.886111],[43.627778,141.8575],[43.628056,141.766944],
+    [43.498611,141.768611],[43.473056,141.893889],[43.525278,141.908056],[43.577778,141.878889],
+  ];
+  L.polygon(dronePoly, { color: '#a371f7', weight: 1.5, fillColor: '#a371f7', fillOpacity: 0.22 })
+    .addTo(notamLeafletMap).bindPopup('② ドローン目視外飛行エリア');
+
+  const area1 = [[43.333333,141.5],[43.2,141.5],[43.066667,142]];
+  const area2 = [[43.2,141.5],[43.066667,141.5],[43.066667,142]];
+  const area3 = [[43.333333,141.5],[43.066667,142],[43.666667,142],[43.666667,141.75]];
+  L.polygon(area3, { color: '#f85149', weight: 1, fillColor: '#f85149', fillOpacity: 0.12 })
+    .addTo(notamLeafletMap).bindPopup('③ 熱気球エリア3（上限2,000ft）');
+  L.polygon(area1, { color: '#f85149', weight: 1, fillColor: '#f85149', fillOpacity: 0.20 })
+    .addTo(notamLeafletMap).bindPopup('③ 熱気球エリア1（上限1,500ft）');
+  L.polygon(area2, { color: '#f85149', weight: 1, fillColor: '#f85149', fillOpacity: 0.32 })
+    .addTo(notamLeafletMap).bindPopup('③ 熱気球エリア2（上限1,000ft）');
+
+  const rel4 = {
+    A:[42.8925,143.369722], B:[43.238056,143.274722], C:[43.156667,143.241667],
+    D:[43.077222,142.876667], E:[42.980833,142.403889], F:[43.158889,142.496944],
+    G:[43.065278,141.985278], H:[43.493889,142.175], I:[43.621667,141.950833],
+    J:[42.334167,142.378889], K:[43.339722,141.901944], L2:[43.228611,141.903611],
+    M:[43.123333,143.588611], N:[43.129722,143.628056], O:[42.319722,143.329167],
+    P:[42.4775,143.368611],
+  };
+  for (const [key, pos] of Object.entries(rel4)) {
+    const label = key === 'L2' ? 'L' : key;
+    L.circleMarker(pos, { radius: label === 'I' ? 6 : 4, color: '#0a0e14', weight: 1, fillColor: '#d29922', fillOpacity: 1 })
+      .addTo(notamLeafletMap).bindPopup('④ 自由気球 放球地点 ' + label + (label === 'I' ? '（滝川市）' : ''));
+  }
+
+  const flt5 = [
+    [41.916667,143.25],[42.166667,142.75],[42.383333,142.25],[42.9,142.25],
+    [42.9,141.916667],[43.116667,141.916667],[43.116667,141.633333],[43.666667,141.916667],
+    [43.666667,142.316667],[43.583333,142.316667],[43.583333,142.5],[43.133333,144.066667],
+    [42.916667,144.066667],[42.923889,145.622222],[41.923611,144.376944],[41.916667,143.25],
+  ];
+  L.polygon(flt5, { color: '#3b82f6', weight: 1.5, fillColor: '#3b82f6', fillOpacity: 0.06, dashArray: '5 3' })
+    .addTo(notamLeafletMap).bindPopup('⑤ 自由気球 飛行想定エリア');
+
+  setTimeout(() => notamLeafletMap.invalidateSize(), 100);
 }
 document.addEventListener('keydown', (e) => {
   if (!document.getElementById('notamModal').classList.contains('show')) return;

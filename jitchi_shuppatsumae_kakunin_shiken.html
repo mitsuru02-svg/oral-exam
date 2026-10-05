@@ -457,29 +457,6 @@
   .notam-box table th{text-align:left; padding:6px; color:var(--cyan); border-bottom:1px solid var(--line);}
   .notam-box table td{padding:6px; border-bottom:1px solid var(--line-soft); vertical-align:top;}
 
-  /* NOTAM模式図（①〜⑤の空域を色分けした簡易地図） */
-  .notam-map-wrap{display:flex; flex-wrap:wrap; gap:14px; margin:14px 0;}
-  .notam-map-panel{flex:1 1 280px; min-width:0; background:#0a0e14; border:1px solid var(--line); border-radius:8px; padding:10px;}
-  .notam-map-panel svg{width:100%; height:auto; display:block;}
-  .notam-map-title{font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px;}
-  .notam-map-caption{font-size:10.5px; color:var(--text-faint); margin-top:6px; line-height:1.5;}
-  .notam-map-legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin:2px 0 14px; font-size:11px; color:var(--text-dim);}
-  .notam-map-legend .sw{display:inline-flex; align-items:center; gap:5px;}
-  .notam-map-legend .sw i{width:11px; height:11px; border-radius:3px; display:inline-block; flex-shrink:0;}
-  .notam-map-zoomable{cursor:zoom-in;}
-  .notam-map-zoomable:hover{border-color:var(--line-strong);}
-  .notam-map-zoom-hint{font-size:10px; font-weight:400; color:var(--text-faint); margin-left:8px;}
-  .map-zoom-overlay{
-    display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2200;
-    align-items:center; justify-content:center; padding:20px;
-  }
-  .map-zoom-overlay.show{display:flex;}
-  .map-zoom-inner{
-    position:relative; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-lg);
-    max-width:95vw; max-height:95vh; overflow:auto; padding:24px; box-shadow:0 10px 40px rgba(0,0,0,.6);
-  }
-  .map-zoom-inner svg{width:min(90vw,900px); height:auto; display:block;}
-
   /* TTS controls */
   /* かつて position:sticky; top:0 だったが、ヘッダー（sticky, z-index:999）の
      真下に潜り込んで見えなくなっていた。再生中の操作は画面下の固定ドックが
@@ -2068,91 +2045,6 @@ F)SFC G)85000FT AMSL)</pre>
       <tr><td>全方位（全域）</td><td>熱気球最大6機（R1691/26 エリア3）</td><td>地表〜2,000 ft</td><td>2,000ft以下での全周スキャン。色彩・巨大目標の早期視認。</td></tr>
       <tr><td>東北東（約9.3km・至近外縁）</td><td>自由気球放流点I（R1685/26等）</td><td>地表〜高高度</td><td>東側丘陵・山岳方面への離脱時の直進回避。放流情報への留意。</td></tr>
     </table>
-
-    <h4>②〜⑤の空域を色分けした模式図</h4>
-    <div class="notam-map-legend">
-      <span class="sw"><i style="background:#a371f7;"></i>② ドローン目視外飛行エリア</span>
-      <span class="sw"><i style="background:#f85149;"></i>③ 熱気球エリア1〜3</span>
-      <span class="sw"><i style="background:#d29922;"></i>④ 自由気球 放球点I（滝川）</span>
-      <span class="sw"><i style="background:#3b82f6;"></i>⑤ 自由気球 飛行想定エリア</span>
-      <span class="sw"><i style="background:#e6edf3;"></i>滝川滑空場</span>
-      <span class="sw"><i style="background:none; border:1px dashed #8b949e;"></i>9km円（92条許可空域）</span>
-    </div>
-    <div class="notam-map-wrap">
-      <div class="notam-map-panel">
-        <div class="notam-map-title">近接図（滝川滑空場 中心・半径約12km）</div>
-        <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="170" cy="170" r="81" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3"/>
-          <text x="170" y="86" fill="#8b949e" font-size="9" text-anchor="middle">9km</text>
-          <polygon points="166,119 145,92 79,92 81,221 172,247 182,194 161,142" fill="#a371f7" fill-opacity="0.22" stroke="#a371f7" stroke-width="1.5"/>
-          <text x="118" y="100" fill="#a371f7" font-size="10" font-weight="700" text-anchor="middle">②</text>
-          <circle cx="213" cy="98" r="4.5" fill="#d29922"/>
-          <text x="213" y="90" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">④</text>
-          <text x="221" y="112" fill="#d29922" font-size="9" text-anchor="start">放球点I</text>
-          <circle cx="170" cy="170" r="3.5" fill="#e6edf3" stroke="#0a0e14" stroke-width="1"/>
-          <text x="170" y="158" fill="#e6edf3" font-size="9.5" font-weight="700" text-anchor="middle">滝川滑空場</text>
-        </svg>
-        <div class="notam-map-caption">緯度経度から滝川滑空場中心の簡易投影で作成した模式図（概略）。①の曲技飛行は自機（滝川滑空場）自身の活動なので、ここでは表示していません。</div>
-      </div>
-      <div class="notam-map-panel notam-map-zoomable" onclick="openMapZoom('mapRegional')">
-        <div class="notam-map-title">広域図（空知地方 中心・道内広域）<span class="notam-map-zoom-hint">🔍 クリックで拡大</span></div>
-        <svg id="mapRegional" viewBox="0 0 620 420" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="286,339 236,304 185,274 185,202 152,202 152,172 123,172 152,96 192,96 192,107 210,107 368,170 368,200 525,199 400,338 286,339" fill="#3b82f6" fill-opacity="0.08" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 3"/>
-          <text x="420" y="230" fill="#3b82f6" font-size="11" font-weight="700" text-anchor="middle">⑤ 飛行想定エリア</text>
-          <polygon points="109,142 160,179 160,96 135,96" fill="#f85149" fill-opacity="0.12" stroke="#f85149" stroke-width="1"/>
-          <polygon points="109,142 109,161 160,179" fill="#f85149" fill-opacity="0.20" stroke="#f85149" stroke-width="1"/>
-          <polygon points="109,161 109,179 160,179" fill="#f85149" fill-opacity="0.32" stroke="#f85149" stroke-width="1"/>
-          <circle cx="149" cy="112" r="4" fill="#e6edf3" stroke="#0a0e14" stroke-width="1"/>
-          <circle cx="90" cy="60" r="38" fill="none" stroke="#484f58" stroke-width="1" stroke-dasharray="3 3"/>
-          <line x1="128" y1="100" x2="112" y2="78" stroke="#484f58" stroke-width="1"/>
-          <text x="90" y="52" fill="#e6edf3" font-size="10" font-weight="700" text-anchor="middle">③④滝川滑空場</text>
-          <text x="90" y="66" fill="#8b949e" font-size="8.5" text-anchor="middle">詳細は近接図参照</text>
-          <circle cx="95" cy="180" r="2.5" fill="#8b949e"/>
-          <text x="95" y="193" fill="#8b949e" font-size="9" text-anchor="middle">札幌</text>
-          <circle cx="281" cy="199" r="2.5" fill="#8b949e"/>
-          <text x="281" y="212" fill="#8b949e" font-size="9" text-anchor="middle">帯広</text>
-          <circle cx="400" cy="191" r="2.5" fill="#8b949e"/>
-          <text x="400" y="204" fill="#8b949e" font-size="9" text-anchor="middle">釧路</text>
-          <circle cx="197" cy="81" r="2.5" fill="#8b949e"/>
-          <text x="197" y="73" fill="#8b949e" font-size="9" text-anchor="middle">旭川</text>
-        </svg>
-        <div class="notam-map-caption">海岸線は省略し、主要都市（札幌・旭川・帯広・釧路）は位置の目安として表示。③④滝川滑空場は近接のため点線の円にまとめ、詳細は左の近接図を参照。④の残り15放球地点（JやOなど）は道内各地に分散し図外。③のエリア1〜3は上限高度が低いほど色を濃く表示。クリックで拡大表示できます。</div>
-      </div>
-      <div class="notam-map-panel">
-        <div class="notam-map-title">③熱気球エリア 拡大図（エリア1〜3のみ）</div>
-        <svg viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="53,228 247,370 247,50 150,50" fill="#f85149" fill-opacity="0.12" stroke="#f85149" stroke-width="1.5"/>
-          <polygon points="53,228 53,299 247,370" fill="#f85149" fill-opacity="0.20" stroke="#f85149" stroke-width="1.5"/>
-          <polygon points="53,299 53,370 247,370" fill="#f85149" fill-opacity="0.32" stroke="#f85149" stroke-width="1.5"/>
-          <text x="174" y="150" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle">エリア3</text>
-          <text x="174" y="166" fill="#f85149" font-size="10" text-anchor="middle">上限2,000ft</text>
-          <text x="105" y="280" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle">エリア1</text>
-          <text x="105" y="296" fill="#f85149" font-size="10" text-anchor="middle">上限1,500ft</text>
-          <text x="118" y="340" fill="#f85149" font-size="12" font-weight="700" text-anchor="middle">エリア2</text>
-          <text x="118" y="356" fill="#f85149" font-size="10" text-anchor="middle">上限1,000ft</text>
-          <circle cx="53" cy="228" r="2.5" fill="#8b949e"/>
-          <text x="18" y="222" fill="#8b949e" font-size="9" text-anchor="start">当別町</text>
-          <circle cx="53" cy="299" r="2.5" fill="#8b949e"/>
-          <text x="18" y="304" fill="#8b949e" font-size="9" text-anchor="start">江別市</text>
-          <circle cx="247" cy="370" r="2.5" fill="#8b949e"/>
-          <text x="252" y="382" fill="#8b949e" font-size="9" text-anchor="start">夕張市</text>
-          <circle cx="247" cy="50" r="2.5" fill="#8b949e"/>
-          <text x="252" y="44" fill="#8b949e" font-size="9" text-anchor="start">深川市</text>
-          <circle cx="150" cy="50" r="2.5" fill="#8b949e"/>
-          <text x="150" y="30" fill="#8b949e" font-size="9" text-anchor="middle">新十津川方面</text>
-          <circle cx="205" cy="112" r="4.5" fill="#e6edf3" stroke="#0a0e14" stroke-width="1"/>
-          <text x="205" y="100" fill="#e6edf3" font-size="10" font-weight="700" text-anchor="middle">滝川滑空場</text>
-        </svg>
-        <div class="notam-map-caption">③熱気球NOTAM（R1691/26）のエリア1〜3だけを拡大表示。滝川滑空場はエリア3の内側に位置します。上限高度が低いほど色を濃く表示（エリア2が最も低く最も濃い赤）。周辺の地名（当別町・江別市・夕張市・深川市・新十津川方面）はNOTAM記載の緯度経度から推定した目安の位置です。</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="mapZoomOverlay" class="map-zoom-overlay" onclick="closeMapZoom()">
-  <div class="map-zoom-inner" onclick="event.stopPropagation()">
-    <button class="notam-close" onclick="closeMapZoom()">✕</button>
-    <div id="mapZoomContent"></div>
   </div>
 </div>
 
@@ -2255,24 +2147,6 @@ function closeNotamModal() {
 document.addEventListener('keydown', (e) => {
   if (!document.getElementById('notamModal').classList.contains('show')) return;
   if (e.key === 'Escape') closeNotamModal();
-});
-
-/* NOTAM模式図（近接図・広域図）のクリック拡大表示。元のsvgを複製して
-   大きい表示用オーバーレイに差し込む。 */
-function openMapZoom(svgId) {
-  const src = document.getElementById(svgId);
-  if (!src) return;
-  const content = document.getElementById('mapZoomContent');
-  content.innerHTML = '';
-  content.appendChild(src.cloneNode(true));
-  document.getElementById('mapZoomOverlay').classList.add('show');
-}
-function closeMapZoom() {
-  document.getElementById('mapZoomOverlay').classList.remove('show');
-}
-document.addEventListener('keydown', (e) => {
-  if (!document.getElementById('mapZoomOverlay').classList.contains('show')) return;
-  if (e.key === 'Escape') closeMapZoom();
 });
 
 /* 航空情報サーキュラー（AIC）解説のポップアップ */

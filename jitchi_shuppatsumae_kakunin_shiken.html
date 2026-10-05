@@ -427,6 +427,11 @@
   .notam-warn ol{margin:0 0 8px; padding-left:20px;}
   .notam-warn p{margin:0 0 8px;}
   .notam-warn p:last-child{margin-bottom:0;}
+  .notam-info{margin:14px 0; padding:12px 14px; background:var(--cyan-dim); border:1px solid var(--cyan); border-radius:8px;}
+  .notam-info .notam-warn-title{font-weight:700; color:var(--cyan); margin-bottom:6px;}
+  .notam-info ol{margin:0 0 8px; padding-left:20px;}
+  .notam-info p{margin:0 0 8px;}
+  .notam-info p:last-child{margin-bottom:0;}
   .notam-raw{
     background:#0a0e14; border:1px solid var(--line); border-radius:6px;
     padding:10px 12px; font-family:var(--mono); font-size:10.5px; line-height:1.55;
@@ -1910,15 +1915,53 @@ THE-HIGH-SEAS)
 8.CHARACTERISTIC: DIAMETER/25M TOTAL LEN/44M (TEAR DROP TYPE)
                   WT/500KG COLOR/COLORLESS TRANSPARENT
 F)SFC G)85000FT AMSL)</pre>
+
+    <h5>【通信ヘッダー・管理番号】</h5>
     <ul>
-      <li><b>NOTAM番号：</b>R1682/26（NOTAMN：新規）</li>
-      <li><b>有効期間（日本時間）：</b>2026年9月30日 〜 10月31日</li>
-      <li><b>対象高度：</b>地表（SFC） 〜 海抜 85,000 ft（AMSL）（成層圏まで到達）</li>
-      <li><b>滝川滑空場至近の放流ポイント：</b>地点9　北緯43度37分18秒 東経141度57分03秒（滝川市江部乙町東部丘陵地）。滑空場から東北東へ約9.3km（直線距離）。④のR1685/26と同じ座標です。</li>
-      <li><b>気球の特性：</b>直径25m、全長44m、重量500kg、無色透明</li>
-      <li><b>上昇・降下挙動：</b>放流後75分で高度約59,000ftまで急上昇、141分で降下通過</li>
-      <li><b>運航上の留意点：</b>地点9から放流される気球は巨大かつ無色透明で、放流直後は低高度を垂直に近い角度で突き抜けます。東側の赤平・芦別方面へ山岳波（ウェーブ）やサーマルを求めに行く際、江部乙上空付近の低高度上昇帯を横切らないよう進路選定に注意が必要です。</li>
+      <li><code>291315 RJAAYNYX</code> — 291315：29日の13時15分（UTC）に発信されたことを示します。RJAAYNYXは発信元の航空固定通信網（AFTN）のアドレスです。</li>
+      <li><code>(R1682/26 NOTAMN</code> — R1682/26：2026年の通算1682番目のNOTAM。末尾の「N」はNew（新設）を意味し、新しい航空情報が出されたことを示します。</li>
     </ul>
+    <h5>【Qコード：概要を表す暗号形式の一文】</h5>
+    <ul>
+      <li><code>Q)RJJJ/QWLLW/IV/M/W/000/850/4304N14338E088</code></li>
+      <li>RJJJ：札幌管制区（日本全体をカバーする情報領域）。QWLLW：「QW」は空中障害物（Warning）、「LL」は気球（Light-than-air物体）、「W」は警告を意味する暗号です。</li>
+      <li>IV：IFR機、VFR機の両方に影響があることを示します。M：運用上の注意（Miscellaneous）。W：航行警告（Warning）。</li>
+      <li>000/850：影響高度がフライトレベル000（地表）からフライトレベル850（85,000ft）までであることを示します。</li>
+      <li>4304N14338E088：影響エリアの中心位置（北緯43度04分、東経143度38分）と、そこからの影響半径（88海里≒約163km）を表します。</li>
+    </ul>
+    <h5>【A〜D：有効期間と対象空域】</h5>
+    <ul>
+      <li><code>A)RJJJ</code> — 対象空域は福岡飛行情報区（日本全体の空域）内であることを示します。</li>
+      <li><code>B)2609301500 C)2610302145</code></li>
+      <li>有効期間（開始〜終了）：2026年9月30日 15:00 UTC から2026年10月30日 21:45 UTC まで。日本時間（JST）に直すと、2026年10月1日 午前0時00分から10月31日 午前6時45分までの丸1ヶ月間です。</li>
+      <li><code>D)1500/2145</code> — この期間中、毎日15:00 UTC〜21:45 UTC（日本時間：毎日午前0時00分〜午前6時45分）の時間帯に実施されることを示します。</li>
+    </ul>
+    <h5>【E：具体的な内容（本文）】</h5>
+    <ul>
+      <li><code>BALLOON:</code> — 気球（観測用などの大型気球）に関する情報です。</li>
+      <li><code>1.RELEASING POINT:</code> — 放球地点（計17箇所）。(1)〜(17)に書かれた緯度・経度のポイントから気球が放たれます。北海道の日高・十勝・上川・胆振・釧路・網走など広範囲にポイントが点在しています。</li>
+      <li><code>2.RELEASING TIME: 1500/1745</code> — 放球時間は毎日15:00〜17:45 UTC（日本時間：毎日午前0時00分〜午前2時45分）の間です。</li>
+      <li><code>3.FLOATING TIME: 4HR/EACH</code> — 各気球の浮遊時間は約4時間です。</li>
+      <li><code>4.EXP FLT AREA:</code> — 予想飛行（浮遊）空域。<code>BOUNDED BY FLW POINTS...</code>に続く緯度経度を結んだ、北海道中央部から東部、さらに太平洋に抜ける巨大な多角形の内側が飛行予測エリアです。カッコ内の地域名には、TAKIKAWA-SHI（滝川市）、ASAHIKAWA-SHI（旭川市）、BIBAI-SHI（美唄市）、SUNAGAWA-SHI（砂川市）なども含まれています。</li>
+      <li><code>5.EXP TIME OF 59058FT/ALT IN ASC : AFT RELEASING 75MIN</code> — 上昇時の通過時間。放球後75分で、高度59,058ft（約18,000m）まで上昇する予測です。</li>
+      <li><code>6.EXP TIME OF 59058FT/ALT IN DES : AFT RELEASING 141MIN</code> — 下降時の通過時間。放球後141分で、高度59,058ftまで降りてくる予測です。</li>
+      <li><code>7.NUMBER: 1/EACH DAY</code> — 1日あたり1個放球されます。</li>
+      <li><code>8.CHARACTERISTIC: DIAMETER/25M TOTAL LEN/44M (TEAR DROP TYPE)</code> — 直径25m、全長44mの涙のしずく型（ティアドロップ型）。<code>WT/500KG COLOR/COLORLESS TRANSPARENT</code> — 重さ500kg、色は無色透明。空中で非常に見づらい特徴があります。</li>
+    </ul>
+    <h5>【F・G：高度の基準】</h5>
+    <ul>
+      <li><code>F)SFC</code> — 下限高度（Floor）：SFC（Surface：地表・水面）から。</li>
+      <li><code>G)85000FT AMSL)</code> — 上限高度（Ceiling）：85,000ft AMSL（平均海面高度）まで。</li>
+    </ul>
+
+    <div class="notam-info">
+      <div class="notam-warn-title">💡 グライダー乗りとしての要警戒ポイント</div>
+      <p>このNOTAMの時間帯は日本時間の夜間から早朝（午前0時〜午前6時45分）であるため、日中に飛ぶグライダーと直接空中衝突する可能性は極めて低いです。ただし、以下の2点において注意が必要です。</p>
+      <ol>
+        <li><b>早朝フライトへの影響：</b>朝もやの中、午前6時前後に早朝フライトや機体移動を行う場合、まだ空域内に重さ500kg・無色透明の巨大な気球が、地表（SFC）から上空のどこかに浮遊しているか、あるいは地上に降下してきている可能性があります。</li>
+        <li><b>落下物のリスク：</b>毎日1個放球され、4時間浮遊した後にどこか（多くは太平洋上ですが風向きによっては陸地）に降下・着地します。フライトエリア周辺に予定外に遅れて落下してくる可能性なども頭の片隅に置いておく必要があります。</li>
+      </ol>
+    </div>
 
     <h4>滝川滑空場から「半径9km以内」の空間干渉まとめ</h4>
     <table>

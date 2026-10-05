@@ -447,6 +447,16 @@
   .notam-raw-map-link{flex:0 0 220px; display:block; text-decoration:none;}
   .notam-raw-map-img{width:100%; height:auto; border-radius:8px; border:1px solid var(--line); display:block;}
   .notam-raw-map-cap{font-size:10.5px; color:var(--cyan); margin-top:5px; text-align:center;}
+  .notam-detail-toggle{margin:0 0 16px;}
+  .notam-detail-toggle summary{
+    cursor:pointer; font-size:13px; font-weight:700; color:var(--cyan); list-style:none;
+    padding:8px 12px; background:var(--surface-3); border:1px solid var(--line); border-radius:6px;
+  }
+  .notam-detail-toggle summary::-webkit-details-marker{display:none;}
+  .notam-detail-toggle summary::before{content:"▶"; display:inline-block; font-size:9px; margin-right:7px; transition:transform .15s;}
+  .notam-detail-toggle[open] summary::before{transform:rotate(90deg);}
+  .notam-detail-toggle[open] summary{border-radius:6px 6px 0 0; border-bottom:none;}
+  .notam-detail-toggle-body{padding:14px 14px 4px; border:1px solid var(--line); border-top:none; border-radius:0 0 6px 6px;}
   .notam-close{
     position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%;
     border:1px solid rgba(255,255,255,.25); background:rgba(22,27,34,.7); color:#e6edf3;
@@ -1760,6 +1770,58 @@ RJDR 3448/26</pre>
         <div class="notam-raw-map-cap">実際の地図で見る（Google My Maps）↗</div>
       </a>
     </div>
+    <details class="notam-detail-toggle">
+      <summary>原文読み解き</summary>
+      <div class="notam-detail-toggle-body">
+        <h5>【通信ヘッダー・管理番号】</h5>
+        <ul>
+          <li><code>290629 RJAAYNYX</code> — 29日の06時29分（UTC）に発信。</li>
+          <li><code>(U3470/26 NOTAMN</code> — U3470/26：2026年の通算3470番目の新しいNOTAM（New）です。頭文字の「U」は主に国内の無人航空機（UAV）関連の情報に割り当てられます。</li>
+        </ul>
+        <h5>【Qコード：概要を表す暗号形式の一文】</h5>
+        <ul>
+          <li><code>Q)RJJJ/QWULW/IV/BO/W/000/015/4333N14150E007</code></li>
+          <li><code>000/015</code> — 影響高度が地表（000）からフライトレベル015（1,500ft）まで。低高度に限定されているのが特徴です。</li>
+          <li><code>4333N14150E007</code> — 影響エリアの中心位置（北緯43度33分、東経141度50分）と、そこからの影響半径（7海里≒約13km）。滝川滑空場のすぐ西側の隣接空域を捉えています。</li>
+        </ul>
+        <h5>【A〜D：有効期間】</h5>
+        <ul>
+          <li><code>A)RJJJ</code> — 福岡飛行情報区（日本全国の空域が対象）</li>
+          <li><code>B)2609302200 C)2610311459</code> — 有効期間（開始〜終了）：2026年9月30日 22:00 UTC から2026年10月31日 14:59 UTC まで（丸1ヶ月間）。</li>
+          <li><code>D)2200/1459</code> — 実施時間帯（毎日）：毎日22:00 UTC〜14:59 UTC。日本時間（JST）に直すと、毎日午前7時00分〜午後11時59分という、グライダーのフライト時間（日中）を完全にカバーし、深夜にまで及ぶ時間帯に設定されています。</li>
+        </ul>
+        <h5>【E：具体的な内容（本文）】</h5>
+        <ul>
+          <li><code>BEYOND VISUAL LINE OF SIGHT UNMANNED ACFT:</code> — 目視外飛行（補助者なし・遠隔自動操縦など）を行う無人航空機（ドローン）の運用情報です。</li>
+          <li><code>AREA: BOUNDED BY FLW POINTS</code> — （飛行エリア）指定された7つの緯度経度を順に結んだ多角形の内側が飛行エリアです。カッコ内の対象地域にTAKIKAWA-SHI（滝川市）、SUNAGAWA-SHI（砂川市）、KABATO-GUN（樺戸郡新十津川町など）が含まれています。</li>
+          <li><code>WT: 2.5KG</code> — ドローンの総重量は2.5kgです。産業用・空撮用の比較的小型の機体と推測されます。</li>
+          <li><code>CONTACT INFORMATION: 03-4485-1606</code> — 運航事業者の緊急連絡先電話番号です。</li>
+          <li><code>RMK: THIS AREA IS INCLUDED IN HK11-3</code> — 備考：この飛行エリアは、陸上自衛隊・滝川駐屯地などの訓練空域（区域区分：HK11-3）の内部に含まれています。</li>
+        </ul>
+        <h5>【F・G：高度の基準】</h5>
+        <ul>
+          <li><code>F)SFC</code> — （下限：地表・水面から）</li>
+          <li><code>G)1411FT AMSL)</code> — 上限高度：1,411ft AMSL（平均海面高度）まで。滝川滑空場付近の標高（約105ft）を考慮すると、地表から実質約1,300ft（約400m）高までドローンが上昇してきます。</li>
+        </ul>
+        <div class="notam-danger">
+          <div class="notam-warn-title">⚠️ グライダー乗りとしての【極めて重要な】警戒ポイント</div>
+          <p>このドローンNOTAMは、機体自体は2.5kgと小さいものの、滝川滑空場のすぐ目の前を飛行するため、実務上の危険性がきわめて高い情報です。</p>
+          <ol>
+            <li><b>場周経路（トラフィックパターン）の西側レグに完全重複：</b>このドローンエリアの東側の壁（境界線）は、滝川滑空場のすぐ目の前を流れる「石狩川の対岸（新十津川町側）の堤防」にぴったり沿って南北に走っています。滑空場から川を越えて西側へダウンウィンドを大きめに広げたり、ベースレグ・ファイナルへのターンを行うと、ドローンの活動高度（1,411ft以下）に完全に飛び込んでしまいます。</li>
+            <li><b>「目視外飛行（BVLOS）」の危険性：</b>ドローンの操縦者はモニターだけを見て遠隔操縦している（または自動飛行している）ため、ドローン側から有視界のグライダーを発見し、自発的に回避行動を取ってくれることは絶対に期待できません。</li>
+            <li><b>目視発見は事実上不可能：</b>重量2.5kgのドローンは非常に小さく、上空1,000ft付近を飛行するグライダーのコックピットからは、接近するまで絶対に目視発見できません。また、ドローンにはTCAS（衝突防止装置）等も搭載されていません。</li>
+          </ol>
+          <p><b>対策：</b>10月中に滝川滑空場でフライトする際は、「石狩川の対岸（新十津川側）の高度1,400ft以下にはドローンがいる」という制限を徹底してください。場周経路のダウンウィンド〜ベースレグは、石狩川のラインより必ず東側（滑空場・滝川市街地側）にタイトに引き締めて回るパターンを厳守してください。新十津川側の農地上空での低高度サーマルハントは原則禁止・回避とし、対岸へ行く場合は、あらかじめ1,500ft以上の安全高度を確保した状態で上空を通過する計画を立ててください。</p>
+          <p style="margin-bottom:4px;"><b>各エリアの具体的な位置関係と高度制限</b></p>
+          <ul style="margin:0 0 4px;">
+            <li><b>北東〜北端の壁：</b>北緯43°36'01"／東経141°53'10"（新十津川町日の出付近）から、北緯43°37'40"／東経141°51'27"（新十津川町総進付近）を結ぶ、滑空場の北西〜北北西約5.6〜9.2km圏内の農地・丘陵地。</li>
+            <li><b>西側の壁：</b>北緯43°37'41"／東経141°46'01"（徳富川上流山林部）から、南の北緯43°29'55"／東経141°46'07"（浦臼町・樺戸連山山麓）を結ぶ、新十津川町西部の山裾・森林地帯。</li>
+            <li><b>南端の壁：</b>北緯43°28'23"／東経141°53'38"（砂川市空知太・石狩川沿い：滑空場の南南西約8.5km）の、奈井江町境界に近い河川敷周辺。</li>
+            <li><b>東側の壁（滑空場対岸ライン）：</b>北緯43°31'31"／東経141°54'29"（砂川市北光付近：滑空場の南約3.0km）から、北緯43°34'40"／東経141°52'44"（新十津川町中央付近：滑空場の西約3.3km）を通り、再び北東の日の出付近へと戻る、石狩川西側の堤防に沿った南北のライン。</li>
+          </ul>
+        </div>
+      </div>
+    </details>
     <ul>
       <li><b>NOTAM番号：</b>U3470/26（NOTAMN：新規）</li>
       <li><b>対象空域：</b>以下の7点を結ぶ多角形内（指定空域：HK11-3に含まれるエリア）

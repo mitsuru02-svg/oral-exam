@@ -2371,6 +2371,27 @@ const TTS = (function(){
   const synth = window.speechSynthesis;
   let voices = [];
   let voiceListeners = [];
+
+  /* ============ 画面スリープ防止 ============
+     読み上げ中に画面が自動ロックすると、機種によっては読み上げが
+     途中で止まったり、ページ自体が閉じたように見えることがある。
+     Wake Lock APIで再生中だけ画面を点灯させ続ける。未対応環境では無視。 */
+  let wakeLock = null;
+  async function requestWakeLock(){
+    if(!('wakeLock' in navigator)) return;
+    try{
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', ()=>{ wakeLock = null; });
+    }catch(e){ wakeLock = null; }
+  }
+  function releaseWakeLock(){
+    if(wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock = null; }
+  }
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState === 'visible' && S.playing && !S.paused && !wakeLock){
+      requestWakeLock();
+    }
+  });
   function loadVoices(){
     voices = synth.getVoices();
     voiceListeners.forEach(fn => { try{ fn(voices); }catch(e){} });
@@ -2597,6 +2618,7 @@ const TTS = (function(){
       S.playing = false; S.paused = false; clearHL();
       setStatus('再生終了'); setPauseLabel();
       if(S.playBtn) S.playBtn.classList.remove('active');
+      releaseWakeLock();
       return;
     }
     const node = S.nodes[S.idx];
@@ -2653,6 +2675,7 @@ const TTS = (function(){
     S.playing = true; S.paused = false; S.gen++;
     if(S.playBtn) S.playBtn.classList.add('active');
     setPauseLabel();
+    requestWakeLock();
     speakCurrent();
   }
 
@@ -2662,6 +2685,7 @@ const TTS = (function(){
     S.playing = true; S.paused = false; S.gen++;
     synth.cancel();
     setPauseLabel();
+    requestWakeLock();
     speakCurrent();
   }
 
@@ -2677,6 +2701,7 @@ const TTS = (function(){
       snapToSentence();
       S.paused = false; S.gen++;
       setPauseLabel();
+      requestWakeLock();
       speakCurrent();
     }
   }
@@ -2705,6 +2730,7 @@ const TTS = (function(){
     clearHL(); setPauseLabel();
     setStatus('停止');   // ドックから停止した場合も本文側の表示を揃える
     if(S.playBtn) S.playBtn.classList.remove('active');
+    releaseWakeLock();
   }
 
   function setRate(r){

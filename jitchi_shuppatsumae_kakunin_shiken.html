@@ -502,6 +502,15 @@
   .tts-bar .tts-status{font-size:12px; color:var(--text-dim); margin-left:auto;}
   .tts-hl{background:rgba(255,176,32,0.16); border-radius:3px; box-shadow:0 0 0 2px rgba(255,176,32,0.16);}
 
+  /* 各項目見出し直下の再生ボタン：再生ボタンのみを表示し、停止・一時停止・速度・音声選択は隠す */
+  .tts-bar.mini{padding:6px 10px; margin:0 0 14px;}
+  .tts-bar.mini .tts-stop,
+  .tts-bar.mini .tts-status,
+  .tts-bar.mini .tts-pause,
+  .tts-bar.mini .tts-back,
+  .tts-bar.mini .tts-fwd,
+  .tts-bar.mini select{display:none;}
+
   /* ---------- 再生中に画面下へ固定される操作ドック ----------
      長い章を読んでいる途中でも、一時停止・停止・15秒送りに常に手が届くようにする。 */
   #tts-dock{
@@ -654,6 +663,11 @@
 
       <div class="chapter" id="ch2">
         <h3><span class="ch-num">1-01</span>当該航空機及びこれに装備すべきものの整備状況</h3>
+        <div class="tts-bar mini" id="bar-ch2">
+          <button class="tts-btn primary tts-play">▶ 読み上げ</button>
+          <button class="tts-btn stop tts-stop">■ 停止</button>
+          <span class="tts-status">待機中</span>
+        </div>
         <p data-tts data-text="1項目め、整備状況の確認です。書類があるかどうかをチェックします。必要書類は7種類です。">
           1項目め、整備状況の確認です。<strong>書類があるかどうかをチェック</strong>します。必要書類は次の7種類です。
         </p>
@@ -819,6 +833,11 @@
 
       <div class="chapter" id="ch3">
         <h3><span class="ch-num">1-02</span>離陸重量、着陸重量、重心位置及び重量分布</h3>
+        <div class="tts-bar mini" id="bar-ch3">
+          <button class="tts-btn primary tts-play">▶ 読み上げ</button>
+          <button class="tts-btn stop tts-stop">■ 停止</button>
+          <span class="tts-status">待機中</span>
+        </div>
         <div class="model-answer">
           <p data-tts data-text="離陸重量、着陸重量、重心位置及び重量分布の確認を行います。" style="margin:0 0 10px;">
             「離陸重量、着陸重量、重心位置及び重量分布の確認を行います。（重量重心位置図を見せる）」
@@ -884,6 +903,11 @@
 
       <div class="chapter" id="ch4">
         <h3><span class="ch-num">1-03</span>国土交通大臣が提供する航空情報</h3>
+        <div class="tts-bar mini" id="bar-ch4">
+          <button class="tts-btn primary tts-play">▶ 読み上げ</button>
+          <button class="tts-btn stop tts-stop">■ 停止</button>
+          <span class="tts-status">待機中</span>
+        </div>
         <p data-tts data-text="3項目め、航空法第99条第1項の規定により国土交通大臣が提供する航空情報の確認です。航空路誌、航空路誌改訂版、航空路誌補足版、ノータム、航空情報サーキュラーの5種類があり、いずれもSWIMによって提供されます。">
           3項目め、<strong>航空法第99条第1項</strong>の規定により国土交通大臣が提供する航空情報の確認です。次の5種類があり、いずれも<strong>SWIM（航空情報共有システム）</strong>によって提供されます。
         </p>
@@ -906,6 +930,11 @@
 
       <div class="chapter" id="ch4b">
         <h3><span class="ch-num">1-04</span>当該航行に必要な気象情報</h3>
+        <div class="tts-bar mini" id="bar-ch4b">
+          <button class="tts-btn primary tts-play">▶ 読み上げ</button>
+          <button class="tts-btn stop tts-stop">■ 停止</button>
+          <span class="tts-status">待機中</span>
+        </div>
         <p data-tts data-text="4項目め、当該航行に必要な気象情報の確認です。天気図、赤外画像と可視画像、下層悪天予想図、そしてメターとタフを確認します。">
           4項目め、当該航行に必要な気象情報の確認です。
         </p>
@@ -926,6 +955,11 @@
 
       <div class="chapter" id="ch5b">
         <h3><span class="ch-num">1-06</span>積載物の安全性</h3>
+        <div class="tts-bar mini" id="bar-ch5b">
+          <button class="tts-btn primary tts-play">▶ 読み上げ</button>
+          <button class="tts-btn stop tts-stop">■ 停止</button>
+          <span class="tts-status">待機中</span>
+        </div>
         <div class="model-answer">
           <p data-tts data-text="積載物の安全性を確認します。当該航空機の主な積載物として、固定バラスト、バッテリー、救急用具があります。これらの固定状況は、飛行前点検で確認いたします。出発前確認事項のうち、こちらで確認できるのは以上です。飛行前点検は滑走路で行い、機長の出発前確認を完了させます。">
             「積載物の安全性を確認します。当該航空機の主な積載物として、固定バラスト、バッテリー、救急用具があります。これらの固定状況は、飛行前点検で確認いたします。<br><br>出発前確認事項のうち、こちらで確認できるのは以上です。飛行前点検は滑走路で行い、機長の出発前確認を完了させます。」
@@ -2729,6 +2763,9 @@ function refreshVoiceSelects(voices){
 TTS.onVoicesReady(refreshVoiceSelects);
 
 ['part1','part2','part3','part4','part5','part6'].forEach(id=>{
+  initTTSBar(id, 'bar-'+id);
+});
+['ch2','ch3','ch4','ch4b','ch5b'].forEach(id=>{
   initTTSBar(id, 'bar-'+id);
 });
 /* 初期化後、既に読み込み済みの音声リストがあれば即座にドロップダウンへ反映 */

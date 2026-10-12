@@ -708,9 +708,11 @@
         </figure>
                 <div class="callout">
           <span class="cal-label" style="font-size:16px;">6書類と航空図の説明（試験官への模範解答）</span>
-          <p data-tts data-text="はじめに、航空機に備え付ける書類の確認を行います。" style="margin:0 0 14px;">
-            「はじめに、航空機に備え付ける書類の確認を行います。」
-          </p>
+          <div class="model-answer" style="margin:0 0 14px;">
+            <p data-tts data-text="はじめに、航空機に備え付ける書類の確認を行います。" style="margin:0;">
+              「はじめに、航空機に備え付ける書類の確認を行います。」
+            </p>
+          </div>
           <div class="doc-item-row">
             <div class="doc-item-main">
               <p style="margin:0 0 4px; font-weight:700; color:var(--text-dim); font-size:13px;">1．航空機登録証明書（航空法第59条）</p>
@@ -2562,8 +2564,8 @@ const TTS = (function(){
     if(S.onChange) S.onChange();
   }
 
-  function buildQueue(section){
-    S.nodes = Array.from(section.querySelectorAll('[data-tts]'));
+  function buildQueue(section, selector){
+    S.nodes = Array.from(section.querySelectorAll(selector || '[data-tts]'));
     S.texts = S.nodes.map(n => normalizeForSpeech(((n.getAttribute('data-text')||n.textContent)||'').trim()));
     S.cum = []; let acc = 0;
     for(const t of S.texts){ S.cum.push(acc); acc += t.length; }
@@ -2643,10 +2645,10 @@ const TTS = (function(){
     document.querySelectorAll('.tts-play.active').forEach(b=>{ if(b!==S.playBtn) b.classList.remove('active'); });
   }
 
-  function playSection(section, bar){
+  function playSection(section, bar, selector){
     stop();
     bind(section, bar);
-    buildQueue(section);
+    buildQueue(section, selector);
     S.idx = 0; S.offset = 0;
     S.playing = true; S.paused = false; S.gen++;
     if(S.playBtn) S.playBtn.classList.add('active');
@@ -2766,7 +2768,7 @@ TTS.onVoicesReady(refreshVoiceSelects);
   initTTSBar(id, 'bar-'+id);
 });
 ['ch2','ch3','ch4','ch4b','ch5b'].forEach(id=>{
-  initTTSBar(id, 'bar-'+id);
+  initTTSBar(id, 'bar-'+id, '.model-answer [data-tts]');
 });
 /* 初期化後、既に読み込み済みの音声リストがあれば即座にドロップダウンへ反映 */
 refreshVoiceSelects();
@@ -2828,7 +2830,7 @@ document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSidebar(
   TTS.state.onChange();
 })();
 
-function initTTSBar(sectionId, barId){
+function initTTSBar(sectionId, barId, selector){
   const bar = document.getElementById(barId);
   const section = document.getElementById(sectionId);
   if(!bar || !section) return;
@@ -2855,7 +2857,7 @@ function initTTSBar(sectionId, barId){
   allVoiceSelects.push(voiceSel);
   playBtn.after(pauseBtn, backBtn, fwdBtn, rateSel, voiceSel);
 
-  playBtn.addEventListener('click', ()=>{ TTS.playSection(section, bar); });
+  playBtn.addEventListener('click', ()=>{ TTS.playSection(section, bar, selector); });
   pauseBtn.addEventListener('click', ()=>{ TTS.togglePause(); });
   backBtn.addEventListener('click', ()=>{ TTS.skip(-15); });
   fwdBtn.addEventListener('click', ()=>{ TTS.skip(15); });

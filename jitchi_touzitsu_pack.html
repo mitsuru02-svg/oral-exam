@@ -7,7 +7,7 @@
 <style>
   :root{
     --bg:#0d1117; --panel:#161b22; --line:#30363d; --text:#e6edf3;
-    --muted:#8b949e; --key:#d29922; --accent:#58a6ff;
+    --muted:#8b949e; --key:#d29922; --accent:#58a6ff; --good:#3fb950;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);
@@ -45,6 +45,7 @@
   ol.steps{margin:0;padding-left:20px;font-size:13.5px;}
   ol.steps li{margin-bottom:5px;}
   p.note{font-size:12.5px;color:var(--muted);margin:8px 0 0;}
+  .good{color:var(--good);font-weight:700;}
 
   table.nums{width:100%;border-collapse:collapse;font-size:12.5px;}
   table.nums td{border-bottom:1px solid #21262d;padding:3px 6px;vertical-align:top;}
@@ -62,7 +63,7 @@
   .kv dd{margin:0;}
 
   @media print{
-    :root{--bg:#fff;--panel:#fff;--line:#bbb;--text:#111;--muted:#555;--key:#8a6d00;--accent:#0b4a91;}
+    :root{--bg:#fff;--panel:#fff;--line:#bbb;--text:#111;--muted:#555;--key:#8a6d00;--accent:#0b4a91;--good:#1a7f37;}
     @page{size:A4;margin:12mm 10mm;}
     body{background:#fff;color:#111;font-size:10pt;line-height:1.55;}
     .topbar{display:none;}
@@ -202,7 +203,7 @@
       <li>滑走路誤進入を防止するための基本動作及び手順等の徹底について</li>
       <li>飛行場等の周辺を有視界飛行方式により飛行する場合の安全対策について</li>
     </ul>
-    <p class="note" style="margin-top:8px;">NOTAM（参考・直近の傾向。必ず当日の最新状況を確認する）</p>
+    <p class="note" style="margin-top:8px;">NOTAM（<span class="good">影響なし</span>）</p>
     <ul class="chk">
       <li>ドローン飛行（地表〜1,411ft・機体重量2.5kg、毎日7:00〜23:59、滝川滑空場すぐ西側）運航者連絡先：03-4485-1606</li>
       <li>熱気球 最大6機（上限2,000ft、毎日6:10〜16:25、滑空場の活動エリア内）</li>

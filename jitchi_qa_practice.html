@@ -3072,7 +3072,10 @@ let stExFilter = null;
 // キーワードでの絞り込みを重ねられる（renderStatusList 側で使う）。
 // ══════════════════════════════════════════════════════════════
 function qsEsc(t) {
-  return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+  // qa.a / qa.q は <br> を改行として使う前提のHTMLなので、エスケープ後に
+  // <br> だけは実際の改行タグへ戻す（そうしないと「<br><br>」がそのまま文字として表示されてしまう）。
+  return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]))
+    .replace(/&lt;br\s*\/?&gt;/g, '<br>');
 }
 function qsMark(text, q) {
   const idx = text.toLowerCase().indexOf(q.toLowerCase());
